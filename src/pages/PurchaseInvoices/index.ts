@@ -1,0 +1,1 @@
+export { PurchaseInvoices as IndividualInvoices } from './PurchaseInvoices';

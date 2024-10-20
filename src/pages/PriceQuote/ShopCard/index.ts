@@ -1,0 +1,1 @@
+export { ShopCardPrice as ShopCard } from './ShopCard';

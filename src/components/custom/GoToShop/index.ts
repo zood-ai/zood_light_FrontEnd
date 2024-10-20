@@ -1,0 +1,1 @@
+export { GoToShop } from './GoToShop';

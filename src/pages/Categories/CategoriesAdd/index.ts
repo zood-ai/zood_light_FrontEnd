@@ -1,0 +1,1 @@
+export { CategoriesAdd as IndividualInvoicesAdd } from './CategoriesAdd';

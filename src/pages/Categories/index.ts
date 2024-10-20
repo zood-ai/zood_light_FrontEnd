@@ -1,0 +1,1 @@
+export { Categories as IndividualInvoices } from './Categories';

@@ -1,0 +1,1 @@
+export { ShopCardSummery } from './ShopCardSummery';

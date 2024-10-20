@@ -1,0 +1,15 @@
+{
+  "welcome": "Welcome to our website!",
+  "description": "This is the description in English.",
+  "search": "Search",
+  "STATUS": "Status",
+  "FILTER": "Filter",
+  "TITLE": "Title",
+  "WELCOME_BACK": "Welcome back!",
+  "WELCOME_BACK_DESC": "Here's a list of your ",
+  "TASKS": "Tasks",
+  "CREATE": "Create",
+  "EXPORT": "Export",
+  "VIEW": "View",
+  "FAST_CREATE": "Fast create"
+}

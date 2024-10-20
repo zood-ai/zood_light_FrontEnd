@@ -1,0 +1,1 @@
+export { DetailsHeadWithOutFilter } from './DetailsHeadWithOutFilter';
