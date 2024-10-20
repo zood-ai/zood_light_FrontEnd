@@ -29,8 +29,7 @@ import { LoginForm } from './components/custom/LoginForm/LoginForm.tsx';
 import { ShopCard } from './pages/IndividualInvoices/ShopCard/ShopCard.tsx';
 import { ShopCardCo } from './pages/CorporateInvoices/ShopCard/ShopCard.tsx';
 import { ShopCardPrice } from './pages/PriceQuote/ShopCard/ShopCard.tsx';
-// import SignIn from './pages/auth/sign-in';
-// import Tasks from './pages/tasks/index.tsx';
+
 const SignIn = React.lazy(() => import('./pages/auth/sign-in'));
 const AppShell = React.lazy(() => import('./components/app-shell'));
 const Tasks = React.lazy(() => import('./pages/tasks/index.tsx'));
