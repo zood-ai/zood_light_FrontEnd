@@ -59,6 +59,24 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const { data: allUserData, isLoading } = useGetAll();
   return (
     <>
+      {!isLoading ? (
+        <>
+        
+          <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
+            <DataTable
+              handleDel={handleOpenDeleteModal}
+              handleRowClick={handleOpenViewModal}
+              data={tasks}
+              columns={columns}
+              handleEdit={handleOpenEditModal}
+              actionBtn={handleCreateTask}
+              filterBtn={filterBtn}
+            />
+          </div>
+        </>
+      ) : (
+        <LoadingSkeleton />
+      )}
       <AddEditModal
         initialData={modalType == 'Add' ? {} : selectedTableRow}
         isOpen={isAddEditModalOpen}
@@ -75,30 +93,6 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
         isOpen={isDelModalOpen}
         onClose={handleCloseModal}
       />
-      {!isLoading ? (
-        <>
-          <div className="mb-2 flex items-center justify-between space-y-2">
-            <div>
-              <p className="text-muted-foreground">
-                {t('WELCOME_BACK_DESC')} {'فواتير الافراد'}
-              </p>
-            </div>
-          </div>
-          <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
-            <DataTable
-              handleDel={handleOpenDeleteModal}
-              handleRowClick={handleOpenViewModal}
-              data={tasks}
-              columns={columns}
-              handleEdit={handleOpenEditModal}
-              actionBtn={handleCreateTask}
-              filterBtn={filterBtn}
-            />
-          </div>
-        </>
-      ) : (
-        <LoadingSkeleton />
-      )}
     </>
   );
 };

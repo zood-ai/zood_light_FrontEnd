@@ -30,8 +30,13 @@ export function DataTableToolbar<TData>({
       <div
         className={`flex flex-1 flex-col-reverse items-start gap-y-2   sm:flex-row sm:items-center sm:space-x-2 `}
       >
+
+        {/* {actionBtn} */}
+
+        {/* <DataTableViewOptions table={table} /> */}
+        <div className="flex gap-x-[16px] ">
         <Button
-          className="rounded-mainSm pe-[24px] ps-[16px] py-[4px] me-4"
+          className="rounded-[4px] w-[146px] h-[39px] "
           variant={'default'}
           onClick={() => {
             navigate('add');
@@ -52,17 +57,12 @@ export function DataTableToolbar<TData>({
               stroke-linejoin="round"
             />
           </svg>
-          <span className="ms-1">{t('CREATE')}</span>
+          <span className="ms-[10px]">{'اضافة فاتورة'}</span>
         </Button>
-
-        {/* {actionBtn} */}
-
-        {/* <DataTableViewOptions table={table} /> */}
-        <div className="flex gap-x-2 ">
           <Button
             variant="outline"
             // onClick={() => table.resetColumnFilters()}
-            className="pe-[24px] ps-[16px] py-[6px]   lg:px-3"
+            className="h-[39px] w-[103px]"
           >
             <span className="me-1">
               <svg

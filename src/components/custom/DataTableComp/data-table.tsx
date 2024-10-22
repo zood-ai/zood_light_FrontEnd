@@ -28,6 +28,7 @@ import { DataTablePagination } from './data-table-pagination';
 import { DataTableToolbar } from './data-table-toolbar';
 import { Input } from '@/components/ui/input';
 import IconInput from '../InputWithIcon';
+import search from '/icons/search.svg';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -88,14 +89,15 @@ export function DataTable<TData, TValue>({
           onChange={filterBtn}
           className={`h-8 w-[150px] lg:w-[250px]  `}
         /> */}
-        <div className="h-[108px] md:h-[78px]  flex z-10 flex-wrap gap-3.5 px-5 py-3 mt-4 text-right bg-background  border border-gray-200 border-solid max-md:px-5 border-b-0 items-center">
-          <div className="my-auto text-base font-semibold text-zinc-800  ">
+        <div className="h-[68px] ps-[16px]  flex z-10 flex-wrap  py-3 mt-4 text-right bg-background  border border-mainBorder border-solid  border-b-0 items-center rounded-t-[8px]">
+          <div className="my-auto text-base font-semibold text-mainText  ">
             الفواتير الحديثة
           </div>
-          <div className="max-w-[303px]">
+          <div className="max-w-[303px] ms-[14px]">
             <IconInput
+              inputClassName="h-[35px]"
               placeholder="بحث عن فاتورة, عميل, تاريخ"
-              iconSrc="https://cdn.builder.io/api/v1/image/assets/TEMP/cccbd13d86e96c7d597403139b3bca31e0ba15a35f6c7f727bfcddcc54ff2c34?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
+              iconSrc={search}
             />
           </div>
         </div>
@@ -129,7 +131,7 @@ export function DataTable<TData, TValue>({
                 table.getRowModel().rows.map((row: any, index) => (
                   <TableRow
                     className={`h-[63px] ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-gray-100'
+                      index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'
                     } font-bold`}
                     style={{ cursor: 'pointer' }}
                     key={row.id}
