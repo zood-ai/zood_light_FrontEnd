@@ -13,7 +13,7 @@ export const useDataTableColumns = () => {
 
   const columns: ColumnDef<Task>[] = [
     {
-      accessorKey: 'id',
+      accessorKey: 'reference',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'رقم الفاتورة'} />
       ),
@@ -26,7 +26,7 @@ export const useDataTableColumns = () => {
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('id')}
+              {row.getValue('reference')}
             </span>
           </div>
         );

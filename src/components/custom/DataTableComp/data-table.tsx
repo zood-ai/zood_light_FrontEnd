@@ -37,6 +37,8 @@ interface DataTableProps<TData, TValue> {
   handleEdit: any;
   handleDel: any;
   filterBtn: any;
+  meta?: any;
+  loading?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -47,6 +49,8 @@ export function DataTable<TData, TValue>({
   handleEdit,
   handleDel,
   filterBtn,
+  meta,
+  loading,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -55,11 +59,15 @@ export function DataTable<TData, TValue>({
     []
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
-
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: 50, // Set this to the desired page size
+  });
   const table = useReactTable({
     data,
     columns,
     state: {
+      pagination,
       sorting,
       columnVisibility,
       rowSelection,
@@ -77,7 +85,7 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
-
+  const { current_page, last_page, per_page, total } = meta;
   return (
     <div className="space-y-4 bag-background">
       {actionBtn && <DataTableToolbar table={table} actionBtn={actionBtn} />}
@@ -100,7 +108,7 @@ export function DataTable<TData, TValue>({
           </div>
         </div>
 
-        <div className="rounded-md rounded-t-none border bg-background">
+        <div className="rounded-md rounded-t-none border bg-background max-h-[600px] overflow-auto">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -125,12 +133,18 @@ export function DataTable<TData, TValue>({
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row: any, index) => (
+              {loading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows.length > 0 ? (
+                table.getRowModel().rows.map((row) => (
                   <TableRow
-                    className={`h-[63px] ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-gray-100'
-                    } font-bold`}
                     style={{ cursor: 'pointer' }}
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
@@ -138,22 +152,14 @@ export function DataTable<TData, TValue>({
                       handleRowClick(row.original);
                     }}
                   >
-                    {row.getVisibleCells().map((cell: any) => (
-                      <TableCell key={cell.id} className="">
+                    {row.getVisibleCells()?.map((cell) => (
+                      <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
                         )}
                       </TableCell>
                     ))}
-
-                    {/* <TableCell key={`new-col-${row.id}`}>
-                      <DataTableRowActions
-                        row={row}
-                        handleDel={() => handleDel(row.original)}
-                        handleEdit={() => handleEdit(row.original)}
-                      />
-                    </TableCell> */}
                   </TableRow>
                 ))
               ) : (
@@ -170,7 +176,18 @@ export function DataTable<TData, TValue>({
           </Table>
         </div>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination
+        current_page={current_page}
+        per_page={per_page}
+        total={total}
+        last_page={last_page}
+        // onPageChange={(newPageIndex) => {
+        //   setPagination((prev) => ({ ...prev, pageIndex: newPageIndex }))
+        // }}
+        onPageSizeChange={(newPageSize) => {
+          setPagination({ pageIndex: 0, pageSize: newPageSize });
+        }}
+      />
     </div>
   );
 }

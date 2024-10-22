@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import axiosInstance from "../interceptors";
 import { toast } from "@/components/ui/use-toast";
+import { useSearchParams } from "react-router-dom";
 
 interface CrudService<T> {
   useGetAll: () => any;
@@ -30,22 +31,27 @@ const createCrudService = <T>(
   page = 1,
   limit = 10
 ): CrudService<T> => {
-  const queryClient: any = useQueryClient();
+  const queryClient: any = useQueryClient()
+  const [searchParams] = useSearchParams()
 
+  const queryParams: { [key: string]: string | null } = {}
+  searchParams.forEach((value, key) => {
+    queryParams[key] = value
+  })
   const useGetAll = () => {
     return useQuery<T[]>({
-      queryKey: [endpoint, filter],
+      queryKey: [endpoint, queryParams],
       queryFn: async () => {
         const response = await axiosInstance.get(endpoint, {
           params: {
+            ...queryParams,
             ...filter,
-           
           },
-        });
-        return response.data;
+        })
+        return response.data
       },
-    });
-  };
+    })
+  }
 
   const useGetById = (id: string) =>
     useQuery<T>({

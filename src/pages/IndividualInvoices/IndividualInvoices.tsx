@@ -54,9 +54,11 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allServiceUser = createCrudService<any>('manage/customers');
+  const allServiceUser = createCrudService<any>('orders');
   const { useGetAll } = allServiceUser;
   const { data: allUserData, isLoading } = useGetAll();
+  console.log(allUserData, 'allUserData');
+
   return (
     <>
       <AddEditModal
@@ -88,11 +90,12 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
             <DataTable
               handleDel={handleOpenDeleteModal}
               handleRowClick={handleOpenViewModal}
-              data={tasks}
+              data={allUserData?.data}
               columns={columns}
               handleEdit={handleOpenEditModal}
               actionBtn={handleCreateTask}
               filterBtn={filterBtn}
+              meta={allUserData}
             />
           </div>
         </>
