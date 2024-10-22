@@ -29,6 +29,7 @@ import { LoginForm } from './components/custom/LoginForm/LoginForm.tsx';
 import { ShopCard } from './pages/IndividualInvoices/ShopCard/ShopCard.tsx';
 import { ShopCardCo } from './pages/CorporateInvoices/ShopCard/ShopCard.tsx';
 import { ShopCardPrice } from './pages/PriceQuote/ShopCard/ShopCard.tsx';
+import SignIn2 from './pages/auth/sign-in-2.tsx';
 
 const SignIn = React.lazy(() => import('./pages/auth/sign-in'));
 const AppShell = React.lazy(() => import('./components/app-shell'));
@@ -54,12 +55,12 @@ const router = createBrowserRouter([
       Component: (await import('./pages/auth/sign-in')).default,
     }),
   },
-  {
-    path: '/sign-in-2',
-    lazy: async () => ({
-      Component: (await import('./pages/auth/sign-in-2')).default,
-    }),
-  },
+  // {
+  //   path: '/sign-in-2',
+  //   lazy: async () => ({
+  //     Component: (await import('./pages/auth/sign-in-2')).default,
+  //   }),
+  // },
   {
     path: '/sign-up',
     lazy: async () => ({
@@ -96,7 +97,7 @@ const router = createBrowserRouter([
     path: 'zood-login',
     element: (
       <React.Suspense fallback={<div>Loading register...</div>}>
-        <SignIn />
+        <SignIn2 />
       </React.Suspense>
     ),
   },
