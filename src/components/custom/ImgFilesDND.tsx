@@ -12,7 +12,7 @@ interface PreviewsProps {
   onFileChange?: any;
 }
 
-const Previews: React.FC<any> = ({ initialFile, onFileChange }) => {
+const Previews: React.FC<any> = ({ initialFile, onFileChange }:any) => {
   const [file, setFile] = useState<any>('');
   const [base64Image, setBase64Image] = useState<string | null>(
     initialFile || null

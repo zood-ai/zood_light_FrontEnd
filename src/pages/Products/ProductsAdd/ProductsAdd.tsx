@@ -94,7 +94,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
       );
     } else {
       await createNewUser(
-        { ...values, is_stock_product: true,costing_method:2, sku: Math.random() },
+        { ...values, is_stock_product: true,costing_method:2, barcode:'',cost:0,pricing_method:1,selling_method:1, sku: Math.random() },
         {
           onSuccess: (data) => {
             setLoading(false);
