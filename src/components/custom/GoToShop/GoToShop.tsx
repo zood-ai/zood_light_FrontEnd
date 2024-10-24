@@ -4,9 +4,12 @@ import { GoToShopProps } from './GoToShop.types';
 
 import './GoToShop.css';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-export const GoToShop: React.FC<GoToShopProps> = ({ totalShopCardCount }) => {
+export const GoToShop: React.FC<GoToShopProps> = () => {
   const navigate = useNavigate();
+  const cardItemValue = useSelector((state: any) => state.cardItems.value);
+  const totalQty = cardItemValue.reduce((sum, item) => sum + item.qty, 0);
 
   return (
     <>
@@ -15,7 +18,7 @@ export const GoToShop: React.FC<GoToShopProps> = ({ totalShopCardCount }) => {
         className="cursor-pointer flex gap-2.5 col-span-4 md:col-span-1  items-center text-sm font-semibold text-right text-main "
       >
         <div className="mb-5">
-          <div className="text-main ">{totalShopCardCount}</div>
+          <div className="text-main ">{totalQty}</div>
           <div className="">
             <svg
               width="24"

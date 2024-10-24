@@ -1,3 +1,3 @@
 export type GoToShopProps = {
-    totalShopCardCount : number
+    totalShopCardCount ?: number
 };

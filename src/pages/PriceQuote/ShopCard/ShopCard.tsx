@@ -21,7 +21,7 @@ export const ShopCardPrice: React.FC<ShopCardProps> = () => {
       <DetailsHeadWithOutFilter />
       <ShopCardTable />
       <div className="  grid grid-cols-1 md:grid-cols-3 gap-0 self-stretch mt-5">
-        <div className="md:max-h-[45vh] col-span-3 md:col-span-2 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-0   ">
+        <div className="h-[45avh] col-span-3 md:col-span-2 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-[16px]   ">
           <IconInput
             label="اسم العميل"
             iconSrc={personIcon}
@@ -46,7 +46,7 @@ export const ShopCardPrice: React.FC<ShopCardProps> = () => {
             <CheckboxWithText className={''} label="اضافة التقرير الي Zatca" />
           </div>
         </div>
-        <ShopCardSummery />
+        {/* <ShopCardSummery /> */}
       </div>
     </>
   );
