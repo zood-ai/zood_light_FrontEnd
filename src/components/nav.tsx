@@ -61,14 +61,18 @@ export default function Nav({
   };
   return (
     <div
+      dir="ltr"
       data-collapsed={isCollapsed}
       className={cn(
-        'group border-b  bg-background py-2 transition-[max-height,padding] duration-500 data-[collapsed=true]:py-2 md:border-none',
+        'group border-b  bg-background py-2 transition-[max-height,padding] duration-500 data-[collapsed=true]:py-2 md:border-none ',
         className
       )}
     >
       <TooltipProvider delayDuration={0}>
-        <nav className="grid gap-1 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
+        <nav
+          dir="rtl"
+          className="grid gap-1 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2"
+        >
           {links.map(renderLink)}
         </nav>
       </TooltipProvider>
@@ -97,16 +101,30 @@ function NavLink({
       onClick={closeNav}
       className={cn(
         buttonVariants({
-          variant: checkActiveNav(href) ? 'secondary' : 'ghost',
+          variant: checkActiveNav(href) ? 'ghost' : 'ghost',
           size: 'sm',
         }),
-        'h-12 justify-start text-wrap rounded-none px-6',
+        `h-12 justify-start text-wrap rounded-none px-6 ${
+          checkActiveNav(href)
+            ? 'bg-[#EAEBF5] rounded-[8px] mx-2 ps-[16px] hover:bg-[#EAEBF5]'
+            : ''
+        }`,
         subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
       )}
       aria-current={checkActiveNav(href) ? 'page' : undefined}
     >
-      <div className={`${isRtl ? 'ml-2' : 'mr-2'}`}>{icon}</div>
-      <span className={'text-neutral-500'}>{title}</span>
+      <div className={`${isRtl ? 'ml-2' : 'mr-2'}`}>
+        <span className={`${checkActiveNav(href) ? 'text-main' : ''}`}>
+          {icon}
+        </span>
+      </div>
+      <span
+        className={` ${
+          checkActiveNav(href) ? 'font-bold text-main' : 'text-secText'
+        }`}
+      >
+        {title}
+      </span>
       {label && (
         <div className="font-bold ml-2 rounded-lg bg-primary px-1 text-[0.625rem] text-primary-foreground">
           {label}
@@ -122,7 +140,7 @@ function NavLinkDropdown({ title, icon, label, sub, closeNav }: NavLinkProps) {
   /* Open collapsible by default
    * if one of child element is active */
   const isChildActive = !!sub?.find((s) => checkActiveNav(s.href));
-  const  isRtl  = useDirection();
+  const isRtl = useDirection();
   return (
     <Collapsible defaultOpen={isChildActive}>
       <CollapsibleTrigger
@@ -171,10 +189,16 @@ function NavLinkIcon({ title, icon, label, href }: NavLinkProps) {
               variant: checkActiveNav(href) ? 'secondary' : 'ghost',
               size: 'icon',
             }),
-            'h-12 w-12'
+            `h-12 w-12 ${
+              checkActiveNav(href)
+                ? 'bg-[#EAEBF5] rounded-[8px]  hover:bg-[#EAEBF5]'
+                : ''
+            } `
           )}
         >
-          {icon}
+          <span className={`${checkActiveNav(href) ? 'text-main' : ''}`}>
+            {icon}
+          </span>{' '}
           <span className="sr-only">{title}</span>
         </Link>
       </TooltipTrigger>

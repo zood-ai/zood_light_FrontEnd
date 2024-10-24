@@ -1,99 +1,109 @@
+import DoubleArrowLeftRTLIcon from '@/components/Icons/DoubleArrowLeftRTLIcon';
+import SingleLeftArrowRTLIcon from '@/components/Icons/SingleLeftArrowRTLIcon';
+import SingleRightArrowRTLIcon from '@/components/Icons/SingleRightArrowRTLIcon';
+import DoubleArrowRightRTLIcon from '@/components/Icons/DoubleArrowRightRTLIcon';
+import useDirection from '@/hooks/useDirection';
+import { useSearchParams } from 'react-router-dom';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   DoubleArrowLeftIcon,
   DoubleArrowRightIcon,
-} from '@radix-ui/react-icons'
-import { Table } from '@tanstack/react-table'
-import { Button } from '@/components/custom/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { useEffect, useState } from 'react'
-import useDirection from '@/hooks/useDirection'
+} from '@radix-ui/react-icons';
 
-interface DataTablePaginationProps<TData> {
-  table: Table<TData>
-}
-
-export function DataTablePagination<TData>({
-  table,
-}: DataTablePaginationProps<TData>) {
+export function DataTablePagination({
+  current_page,
+  per_page,
+  total,
+  last_page,
+  onPageSizeChange,
+}: any) {
   const isRTL = useDirection();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > last_page) return;
+    searchParams.set('page', page.toString());
+    setSearchParams(searchParams);
+  };
 
   return (
-    <div className={`flex items-center justify-between overflow-auto px-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-      <div className={`hidden flex-1 text-sm text-muted-foreground sm:block`}>
-        {table.getFilteredSelectedRowModel().rows.length} of{' '}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
-      </div>
-      <div className={`flex items-center ${isRTL ? 'sm:space-x-reverse' : 'sm:space-x-6'} lg:space-x-8`}>
-        <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-          <p className='hidden text-sm font-medium sm:block'>Rows per page</p>
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value))
-            }}
+    <div
+      className={`flex items-center justify-center overflow-auto px-2 ${
+        isRTL ? 'flex-row-reverse' : ''
+      }`}
+    >
+      <div
+        className={`flex items-center ${
+          isRTL ? 'sm:space-x-reverse' : 'sm:space-x-6'
+        } lg:space-x-8`}
+      >
+        <div
+          className={`flex items-center space-x-2 ${
+            isRTL ? 'space-x-reverse' : ''
+          }`}
+        >
+          <div
+            className="hidden h-8 w-8 p-0 lg:flex mx-1 rounded-full"
+            onClick={() => handlePageChange(1)}
           >
-            <SelectTrigger className='h-8 w-[70px]'>
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
-            </SelectTrigger>
-            <SelectContent side={isRTL ? 'bottom' : 'top'}>
-              {[10, 20, 30, 40, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-        </div>
-        <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-          <Button
-            variant='outline'
-            className='hidden h-8 w-8 p-0 lg:flex'
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
+            {isRTL ? (
+              <DoubleArrowLeftRTLIcon isActive={current_page !== 1} />
+            ) : (
+              <DoubleArrowLeftIcon />
+            )}
+          </div>
+
+          <div
+            className="h-8 w-8 p-0"
+            onClick={() => handlePageChange(current_page - 1)}
           >
-            <span className='sr-only'>Go to first page</span>
-            {isRTL ? <DoubleArrowRightIcon className='h-4 w-4' /> : <DoubleArrowLeftIcon className='h-4 w-4' />}
-          </Button>
-          <Button
-            variant='outline'
-            className='h-8 w-8 p-0'
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            {isRTL ? (
+              <SingleLeftArrowRTLIcon isActive={current_page !== 1} />
+            ) : (
+              <ChevronLeftIcon />
+            )}
+          </div>
+
+          <div
+            dir="ltr"
+            className={`flex text-sm text-muted-foreground justify-center items-center gap-md bg-black0 px-2`}
           >
-            <span className='sr-only'>Go to previous page</span>
-            {isRTL ? <ChevronRightIcon className='h-4 w-4' /> : <ChevronLeftIcon className='h-4 w-4' />}
-          </Button>
-          <Button
-            variant='outline'
-            className='h-8 w-8 p-0'
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            <div className="flex justify-center text-main items-center w-[32px] h-[32px] bg-white border border-1 rounded-sm border-mainBorder">
+              {current_page}
+            </div>
+            <div className="text-mainText">
+              {current_page}-{last_page} of {last_page}
+            </div>
+          </div>
+
+          <div
+            className="h-8 w-8 p-0 mx-1"
+            onClick={() => handlePageChange(current_page + 1)}
           >
-            <span className='sr-only'>Go to next page</span>
-            {isRTL ? <ChevronLeftIcon className='h-4 w-4' /> : <ChevronRightIcon className='h-4 w-4' />}
-          </Button>
-          <Button
-            variant='outline'
-            className='hidden h-8 w-8 p-0 lg:flex'
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
+            {isRTL ? (
+              <SingleRightArrowRTLIcon isActive={current_page !== last_page} />
+            ) : (
+              <ChevronRightIcon />
+            )}
+          </div>
+
+          <div
+            className="  h-8 w-8 p-0 flex "
+            onClick={() => handlePageChange(last_page)}
           >
-            <span className='sr-only'>Go to last page</span>
-            {isRTL ? <DoubleArrowLeftIcon className='h-4 w-4' /> : <DoubleArrowRightIcon className='h-4 w-4' />}
-          </Button>
+            {isRTL ? (
+              <div className='mx-1'>
+
+
+                <DoubleArrowRightRTLIcon isActive={current_page !== last_page} />
+              </div>
+            ) : (
+              <DoubleArrowRightIcon />
+            )}
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

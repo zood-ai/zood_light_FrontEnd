@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useDataTableColumns } from './components/useDataTableColumns';
 import useDirection from '@/hooks/useDirection';
 import { useNavigate } from 'react-router-dom';
+import createCrudService from '@/api/services/crudService';
 
 export const Products: React.FC<ProductsProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -21,6 +22,7 @@ export const Products: React.FC<ProductsProps> = () => {
   const [selectedTableRow, setSelectedRow] = useState({});
   const [modalType, setModalType] = useState('Add');
   const navigate = useNavigate();
+
   const handleCreateTask = () => {
     // setSelectedRow({});
     setModalType('Add');
@@ -51,7 +53,9 @@ export const Products: React.FC<ProductsProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-
+  const allService = createCrudService<any>('menu/products');
+  const { useGetAll } = allService;
+  const { data: allData, isLoading } = useGetAll();
   return (
     <>
       <AddEditModal
@@ -71,23 +75,18 @@ export const Products: React.FC<ProductsProps> = () => {
         onClose={handleCloseModal}
       />
 
-      <div className="mb-2 flex items-center justify-between space-y-2">
-        <div>
-          <p className="text-muted-foreground">
-            {t('WELCOME_BACK_DESC')} {t('TASKS')}
-          </p>
-        </div>
-      </div>
-
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
           handleDel={handleOpenDeleteModal}
           handleRowClick={handleOpenViewModal}
-          data={tasks}
+          data={allData?.data || []}
           columns={columns}
           handleEdit={handleOpenEditModal}
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
+          meta={allData?.meta || {}}
+          actionText={'منتج'}
+          loading={isLoading}
         />
       </div>
     </>

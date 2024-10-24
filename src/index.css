@@ -13,6 +13,8 @@
     --mainHover: #5951C8;
     --mainBg: #fcfcfc;
     --mainBorder: #ECECEC;
+    --mainSuccess: #2DAA48;
+    --mainSuccessHover: #3ED15E;
     /* CSS Variables for light theme */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -207,4 +209,13 @@ body {
   border-radius: 8px 0px 0px 0px;
   border-width: 1px 0px 0px 0px;
   border-style: solid;
+}
+[data-collapsed="true"] {
+
+  transition:all 0.5s ease;
+}
+
+[data-collapsed="false"] {
+
+  transition:all 0.5s ease;
 }

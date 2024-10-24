@@ -29,6 +29,7 @@ import { DataTableToolbar } from './data-table-toolbar';
 import { Input } from '@/components/ui/input';
 import IconInput from '../InputWithIcon';
 import search from '/icons/search.svg';
+import { LoadingSkeleton } from '../LoadingSkeleton';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -38,6 +39,9 @@ interface DataTableProps<TData, TValue> {
   handleEdit: any;
   handleDel: any;
   filterBtn: any;
+  meta?: any;
+  loading?: boolean;
+  actionText?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -48,6 +52,9 @@ export function DataTable<TData, TValue>({
   handleEdit,
   handleDel,
   filterBtn,
+  meta,
+  loading,
+  actionText,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -56,11 +63,15 @@ export function DataTable<TData, TValue>({
     []
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
-
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: 50, // Set this to the desired page size
+  });
   const table = useReactTable({
     data,
     columns,
     state: {
+      pagination,
       sorting,
       columnVisibility,
       rowSelection,
@@ -78,101 +89,126 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
+  const { current_page, last_page, per_page, total } = meta || {};
+  console.log('Screen Height:', window.innerHeight);
 
   return (
-    <div className="space-y-4 bag-background">
-      {actionBtn && <DataTableToolbar table={table} actionBtn={actionBtn} />}
-      <div className="rounded-md bordera">
-        {/* <Input
+    <>
+      {!loading ? (
+        <>
+          <div className="space-y-4 bag-background">
+            {actionBtn && (
+              <DataTableToolbar
+                actionText={actionText}
+                table={table}
+                actionBtn={actionBtn}
+              />
+            )}
+            <div className="rounded-md bordera">
+              {/* <Input
           placeholder={'FILTER'}
           value={''}
           onChange={filterBtn}
           className={`h-8 w-[150px] lg:w-[250px]  `}
         /> */}
-        <div className="h-[68px] ps-[16px]  flex z-10 flex-wrap  py-3 mt-4 text-right bg-background  border border-mainBorder border-solid  border-b-0 items-center rounded-t-[8px]">
-          <div className="my-auto text-base font-semibold text-mainText  ">
-            الفواتير الحديثة
-          </div>
-          <div className="max-w-[303px] ms-[14px]">
-            <IconInput
-              inputClassName="h-[35px]"
-              placeholder="بحث عن فاتورة, عميل, تاريخ"
-              iconSrc={search}
+              <div className="h-[68px] ps-[16px]  flex z-10 flex-wrap  py-3 mt-4 text-right bg-background  border border-mainBorder border-solid  border-b-0 items-center rounded-t-[8px]">
+                <div className="my-auto text-base font-semibold text-mainText  ">
+                  الفواتير الحديثة
+                </div>
+                <div className="max-w-[303px] ms-[14px]">
+                  <IconInput
+                    inputClassName="h-[35px]"
+                    placeholder="بحث عن فاتورة, عميل, تاريخ"
+                    iconSrc={search}
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-md rounded-t-none border bg-background ">
+                <Table>
+                  <TableHeader>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <TableRow key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => {
+                          return (
+                            <TableHead
+                              className="h-[63px]"
+                              key={header.id}
+                              colSpan={header.colSpan}
+                            >
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                  )}
+                            </TableHead>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableHeader>
+                  <TableBody>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={columns.length}
+                          className="h-24 text-center"
+                        >
+                          Loading...
+                        </TableCell>
+                      </TableRow>
+                    ) : table.getRowModel().rows.length > 0 ? (
+                      table.getRowModel().rows.map((row) => (
+                        <TableRow
+                          style={{ cursor: 'pointer' }}
+                          key={row.id}
+                          data-state={row.getIsSelected() && 'selected'}
+                          onClick={() => {
+                            handleRowClick(row.original);
+                          }}
+                        >
+                          {row.getVisibleCells()?.map((cell) => (
+                            <TableCell key={cell.id}>
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell
+                          colSpan={columns.length}
+                          className="h-24 text-center"
+                        >
+                          No results.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+            <DataTablePagination
+              current_page={current_page}
+              per_page={per_page}
+              total={total}
+              last_page={last_page}
+              // onPageChange={(newPageIndex) => {
+              //   setPagination((prev) => ({ ...prev, pageIndex: newPageIndex }))
+              // }}
+              onPageSizeChange={(newPageSize) => {
+                setPagination({ pageIndex: 0, pageSize: newPageSize });
+              }}
             />
           </div>
-        </div>
-
-        <div className="rounded-md rounded-t-none border bg-background">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead
-                        className="h-[63px]"
-                        key={header.id}
-                        colSpan={header.colSpan}
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row: any, index) => (
-                  <TableRow
-                    className={`h-[63px] ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'
-                    } font-bold`}
-                    style={{ cursor: 'pointer' }}
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                    onClick={() => {
-                      handleRowClick(row.original);
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell: any) => (
-                      <TableCell key={cell.id} className="">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-
-                    {/* <TableCell key={`new-col-${row.id}`}>
-                      <DataTableRowActions
-                        row={row}
-                        handleDel={() => handleDel(row.original)}
-                        handleEdit={() => handleEdit(row.original)}
-                      />
-                    </TableCell> */}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-      <DataTablePagination table={table} />
-    </div>
+        </>
+      ) : (
+        <LoadingSkeleton />
+      )}
+    </>
   );
 }

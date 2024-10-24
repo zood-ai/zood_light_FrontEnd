@@ -23,6 +23,8 @@ module.exports = {
         mainBg: 'var(--mainBg)',
         mainText: 'var(--mainText)',
         secText: 'var(--secText)',
+        mainSuccess: 'var(--mainSuccess)',
+        mainSuccessHover: 'var(--mainSuccessHover)',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',

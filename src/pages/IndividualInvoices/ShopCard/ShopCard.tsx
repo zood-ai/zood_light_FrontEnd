@@ -12,9 +12,11 @@ import { CheckboxWithText } from '@/components/custom/CheckboxWithText';
 import { ShopCardTable } from '@/components/custom/ShopCardTable';
 import { ShopCardSummery } from '@/components/custom/ShopCardSummery';
 import { DetailsHeadWithOutFilter } from '@/components/custom/DetailsHeadWithOutFilter';
+import { useSelector } from 'react-redux';
 
 export const ShopCard: React.FC<ShopCardProps> = () => {
   const isRtl = useDirection();
+  const cardItemValue = useSelector((state: any) => state.cardItems.value);
 
   return (
     <>

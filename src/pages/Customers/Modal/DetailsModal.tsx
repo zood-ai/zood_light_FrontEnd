@@ -1,18 +1,27 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
   DialogHeader,
-} from '@/components/ui/dialog'
-import { z } from 'zod'
-import { ViewModal } from '@/components/custom/ViewModal'
-
+} from '@/components/ui/dialog';
+import { z } from 'zod';
+import { ViewModal } from '@/components/custom/ViewModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 interface SellerDetailsModalProps {
-  isOpen: boolean
-  onClose: () => void
-  initialData?: any
+  isOpen: boolean;
+  onClose: () => void;
+  initialData?: any;
 }
 
 export const DetailsModal: React.FC<SellerDetailsModalProps> = ({
@@ -20,16 +29,26 @@ export const DetailsModal: React.FC<SellerDetailsModalProps> = ({
   onClose,
   initialData = {},
 }) => {
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-       <DialogContent className='max-w-[80vw] bg-transparent border-none border     '>
+  const [open, setopen] = useState(isOpen ? true : false)
+  useEffect(() => {
+    setopen(isOpen)
+  }, [isOpen])
   
-  <div className=''>
-    <div className=''>
-    <ViewModal/>
-    </div>
-  </div>
-</DialogContent>
-    </Dialog>
-  )
-}
+  return (
+    <AlertDialog open={open} onOpenChange={onClose}>
+      <AlertDialogContent className="max-w-[1107px] bg-transparent border-none border     ">
+        <div className="">
+          <div className="relative">
+            <ViewModal />
+            <img
+            onClick={onClose}
+              loading="lazy"
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/86098466758eefea48c424850dc7f8dc58fa0a42b1b3b43e6d08b5eb236f964e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
+              className="object-contain shrink-0 self-start mt-4 w-11 aspect-square absolute right-[-70px] top-0 cursor-pointer hover:scale-110"
+            /> 
+          </div>
+        </div>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
