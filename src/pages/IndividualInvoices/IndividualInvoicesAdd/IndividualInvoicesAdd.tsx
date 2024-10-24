@@ -42,8 +42,8 @@ export const IndividualInvoicesAdd: React.FC<
   const allServiceUser = createCrudService<any>('menu/products');
   const { useGetAll } = allServiceUser;
   const { data: allUserData, isLoading } = useGetAll();
-  console.log(allUserData, 'allUserData');
- 
+  // console.log(cardItemValue.map((item: any) => item), 'allUserData');
+
   return (
     <>
       <DeatilsHeaderWithFilter totalShopCardCount={totalShopCardCount} />

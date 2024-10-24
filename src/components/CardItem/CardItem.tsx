@@ -129,7 +129,25 @@ export const CardItem: React.FC<CardItemProps> = ({
                     onClick={() => decrementCount()}
                     className="flex flex-col justify-center items-center px-2 w-full h-10 bg-white rounded-full border border-gray-200 border-solid shadow-[0px_1px_11px_rgba(0,0,0,0.08)] cursor-pointer"
                   >
-                    {count === 1 ? <XIcons /> : <MiusIcon />}
+                    {count === 1 ? (
+                      <XIcons />
+                    ) : (
+                      <svg
+                        width="20"
+                        height="2"
+                        viewBox="0 0 20 2"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M1 1H19"
+                          stroke="#363088"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    )}
                   </div>
                 </div>
               </div>

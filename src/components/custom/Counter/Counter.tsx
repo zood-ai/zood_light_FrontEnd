@@ -6,7 +6,7 @@ import './Counter.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCardItem } from '@/store/slices/cardItems';
 
-export const Counter: React.FC<any> = ({item}:any) => {
+export const Counter: React.FC<any> = ({ item }: any) => {
   const [count, setCount] = useState(1);
   const dispatch = useDispatch();
 
@@ -27,19 +27,26 @@ export const Counter: React.FC<any> = ({item}:any) => {
 
     // If exists, update the quantity
     if (existingItemIndex >= 0) {
-      const updatedItems = cardItemValue.map(
-        (item: { id: string; qty: number; name: string }, index: number) => {
-          if (index === existingItemIndex) {
-            // Create a new object with updated quantity
-            return {
-              ...item,
-              qty: item.qty + newItem.qty, // Update the quantity
-            };
+      if (newItem.qty === 0) {
+        const updatedItems = cardItemValue.filter(
+          (item: { id: string }) => item.id !== newItem.id
+        );
+        dispatch(setCardItem(updatedItems));
+      } else {
+        const updatedItems = cardItemValue.map(
+          (item: { id: string; qty: number; name: string }, index: number) => {
+            if (index === existingItemIndex) {
+              // Create a new object with updated quantity
+              return {
+                ...item,
+                qty: item.qty + newItem.qty, // Update the quantity
+              };
+            }
+            return item; // Return the item unchanged
           }
-          return item; // Return the item unchanged
-        }
-      );
-      dispatch(setCardItem(updatedItems));
+        );
+        dispatch(setCardItem(updatedItems));
+      }
     } else {
       // If not, add a new item
       dispatch(
@@ -73,6 +80,7 @@ export const Counter: React.FC<any> = ({item}:any) => {
       });
     }
   };
+  console.log(cardItemValue, 'count');
 
   return (
     <>
@@ -88,7 +96,7 @@ export const Counter: React.FC<any> = ({item}:any) => {
 
         {/* Number Display */}
         <div className="w-1/3 h-10 text-center flex items-center justify-center text-md font-semibold">
-          {count}
+          {item.qty}
         </div>
 
         {/* Plus Button */}

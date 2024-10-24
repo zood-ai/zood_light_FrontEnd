@@ -52,7 +52,8 @@ export const PriceQuote: React.FC<PriceQuoteProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allService = createCrudService<any>('menu/categories');
+  const allService = createCrudService<any>('orders?filter[type]=2');
+    
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   return (
@@ -77,13 +78,16 @@ export const PriceQuote: React.FC<PriceQuoteProps> = () => {
     
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
-          handleDel={handleOpenDeleteModal}
-          handleRowClick={handleOpenViewModal}
-          data={tasks}
-          columns={columns}
-          handleEdit={handleOpenEditModal}
-          actionBtn={handleCreateTask}
-          filterBtn={filterBtn}
+           handleDel={handleOpenDeleteModal}
+           handleRowClick={handleOpenViewModal}
+           data={allData?.data || []}
+           columns={columns}
+           handleEdit={handleOpenEditModal}
+           actionBtn={handleCreateTask}
+           filterBtn={filterBtn}
+           meta={allData || {}}
+           actionText={'عرض سعر'}
+           loading={isLoading}
         />
       </div>
     </>
