@@ -8,11 +8,11 @@ interface FilePreview extends File {
 }
 
 interface PreviewsProps {
-  initialFile?: string; // Expect base64 string
-  onFileChange: (file: string | null) => void;
+  initialFile?: any; // Expect base64 string
+  onFileChange?: any;
 }
 
-const Previews: React.FC<PreviewsProps> = ({ initialFile, onFileChange }) => {
+const Previews: React.FC<any> = ({ initialFile, onFileChange }) => {
   const [file, setFile] = useState<any>('');
   const [base64Image, setBase64Image] = useState<string | null>(
     initialFile || null
@@ -64,7 +64,7 @@ const Previews: React.FC<PreviewsProps> = ({ initialFile, onFileChange }) => {
               src={base64Image || file?.preview || placeHolderImg} // Prioritize base64, then file, then placeholder
             />
           </h3>
-          <Button type='button' className="w-full mt-lg" variant="outlineMain">
+          <Button type="button" className="w-full mt-lg" variant="outlineMain">
             Upload Image
           </Button>
         </div>
