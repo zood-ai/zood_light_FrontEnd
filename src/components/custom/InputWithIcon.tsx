@@ -12,7 +12,7 @@ interface SearchInputProps {
   iconSrcLeft?: string
 }
 
-const IconInput: React.FC<SearchInputProps> = ({
+const IconInput: React.FC<any> = ({
   placeholder = '',
   iconSrc,
   label,
@@ -58,7 +58,7 @@ const IconInput: React.FC<SearchInputProps> = ({
               // src={iconSrcLeft}
               // alt=""
               className={`w-[18px] absolute left-3 text-secText ${
-                label ? 'top-[20%]' : 'top-[20%]'
+                label ? 'top-[14%]' : 'top-[20%]'
               } `}
             >{iconSrcLeft}</div>
           )}

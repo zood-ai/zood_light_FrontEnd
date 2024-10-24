@@ -8,6 +8,13 @@ import { CardItem } from '@/components/CardItem';
 import useDirection from '@/hooks/useDirection';
 import { useNavigate } from 'react-router-dom';
 import { DeatilsHeaderWithFilter } from '@/components/custom/DeatilsHeaderWithFilter';
+import saltImg from './salt.png';
+import PlusIcon from '@/components/Icons/PlusIcon';
+import { Button } from '@/components/custom/button';
+import createCrudService from '@/api/services/crudService';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCardItem } from '@/store/slices/cardItems';
+import { RootState } from '@/store';
 
 export const IndividualInvoicesAdd: React.FC<
   IndividualInvoicesAddProps
@@ -31,15 +38,22 @@ export const IndividualInvoicesAdd: React.FC<
     if (type === 'minus') setTotalShopCardCount((prevTotal) => prevTotal - 1);
   };
   const navigate = useNavigate();
+  const [count, setCount] = useState(0);
+  const allServiceUser = createCrudService<any>('menu/products');
+  const { useGetAll } = allServiceUser;
+  const { data: allUserData, isLoading } = useGetAll();
+  console.log(allUserData, 'allUserData');
+ 
   return (
     <>
       <DeatilsHeaderWithFilter totalShopCardCount={totalShopCardCount} />
-      <div className="grid grid-cols-1 md:grid-cols-6  mt-md gap-x-md gap-y-0">
-        {items.map((item, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-6  mt-md gap-x-md gap-y-md">
+        {allUserData?.data?.map((item, index) => (
           <CardItem
             key={item.id}
             index={index}
             setShopCardCount={handleTotalCountChange}
+            item={item}
           />
         ))}
       </div>

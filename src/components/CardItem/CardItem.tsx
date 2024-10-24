@@ -1,85 +1,142 @@
 import React, { useState } from 'react';
-
 import { CardItemProps } from './CardItem.types';
-
 import './CardItem.css';
 import PlusIcon from '../Icons/PlusIcon';
 import saltImg from './salt.png';
 import { Button } from '../custom/button';
+import MiusIcon from '../Icons/MiusIcon';
+import XIcons from '../Icons/XIcons';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCardItem } from '@/store/slices/cardItems';
+import imagePLaceHolder from '/icons/imagePLaceHolder.svg';
 
 export const CardItem: React.FC<CardItemProps> = ({
   setShopCardCount,
   index,
+  item,
 }) => {
+  const dispatch = useDispatch();
   const [count, setCount] = useState(0);
-  const incrementCount = () => {
-    setShopCardCount(count + 1, 'plus');
-    setCount((prev) => prev + 1);
-  };
-  const decrementCount = () => {
-    setShopCardCount(count - 1, 'minus');
-    setCount((prev) => (prev > 0 ? prev - 1 : 0));
-  };
-  return (
-    <>
-      <div className="flex flex-col pt-0 mb-md text-sm text-right rounded-none  max-w-[265px] ">
-        <div className="flex flex-col pb-2 w-full bg-white rounded border border-gray-200 border-solid">
-          <div className="flex flex-col px-3 w-full font-semibold bg-white rounded border border-gray-200 border-solid text-zinc-500 ">
-            <div className="flex relative z-10 flex-col px-16 pt-52 pb-0.5 mt-0 mb-0 aspect-square">
-              <img
-                loading="lazy"
-                src={saltImg}
-                className="object-cover absolute inset-0 size-full z-10"
-              />
-            </div>
-          </div>
-          <div className={'px-[8px]'}>
-            <div className="mt-2.5 font-semibold text-zinc-500 text-center ">
-              <span className=" pe-2 text-foreground">ملح</span>
-              100 gm
-            </div>
-            <div className="mt-0 font-semibold text-main text-center">
-              SR 53
-            </div>
-            {count == 0 ? (
-              <Button className="w-full mt-3 " onClick={incrementCount}>
-                اضف
-              </Button>
-            ) : (
-              <div className="flex gap-2 mt-3 w-full font-bold whitespace-nowrap max-w-[100%] text-zinc-800 justify-between">
-                <div className="object-contain shrink-0 w-10 aspect-square">
-                  <div className="flex flex-col max-w-[40px]">
-                    <div
-                      onClick={incrementCount}
-                      className="flex flex-col justify-center items-center px-2 w-full h-10 bg-white rounded-full border border-gray-200 border-solid shadow-[0px_1px_11px_rgba(0,0,0,0.08)] cursor-pointer"
-                    >
-                      <PlusIcon />
-                    </div>
-                  </div>
-                </div>
+  const cardItemValue = useSelector((state: any) => state.cardItems.value);
 
-                <div className="px-[2rem] py-2 bg-white rounded border border-gray-200 border-solid font-bold">
-                  {count}
-                </div>
-                <div className="object-contain shrink-0 w-10 aspect-square">
-                  <div className="flex flex-col max-w-[40px]">
-                    <div
-                      onClick={decrementCount}
-                      className="flex flex-col justify-center items-center px-2 w-full h-10 bg-white rounded-full border border-gray-200 border-solid shadow-[0px_1px_11px_rgba(0,0,0,0.08)] cursor-pointer"
-                    >
-                      <img
-                        loading="lazy"
-                        src="https://cdn.builder.io/api/v1/image/assets/TEMP/9f75f8b435640cf25cc736c9ca514398a5ba566bf2f87b10c5beddfe8343173d?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
-                        className="object-contain aspect-[0.92] w-[11px]"
-                      />
-                    </div>
+  const updateCardItem = (newItem: {
+    id: string;
+    qty: number;
+    name: string;
+    image: any;
+    price: number;
+  }) => {
+    // Check if the item already exists in the array
+    const existingItemIndex = cardItemValue.findIndex(
+      (i: { id: string }) => i.id === newItem.id
+    );
+    console.log(existingItemIndex);
+
+    // If exists, update the quantity
+    if (existingItemIndex >= 0) {
+      const updatedItems = cardItemValue.map(
+        (item: { id: string; qty: number; name: string }, index: number) => {
+          if (index === existingItemIndex) {
+            // Create a new object with updated quantity
+            return {
+              ...item,
+              qty: item.qty + newItem.qty, // Update the quantity
+            };
+          }
+          return item; // Return the item unchanged
+        }
+      );
+      dispatch(setCardItem(updatedItems));
+    } else {
+      // If not, add a new item
+      dispatch(
+        setCardItem([...cardItemValue, { ...newItem, qty: newItem.qty }])
+      );
+    }
+  };
+
+  const incrementCount = () => {
+    setCount((prev) => prev + 1);
+    setShopCardCount(count + 1, 'plus');
+    updateCardItem({
+      id: item.id,
+      qty: 1,
+      name: item.name,
+      image: item.images,
+      price: item.price,
+    });
+  };
+
+  const decrementCount = () => {
+    if (count > 0) {
+      setCount((prev) => prev - 1);
+      setShopCardCount(count - 1, 'minus');
+      updateCardItem({
+        id: item.id,
+        qty: -1,
+        name: item.name,
+        image: item.images,
+        price: item.price,
+      });
+    }
+  };
+
+  return (
+    <div className="flex flex-col rounded-none h-[290px] w-[194px]">
+      <div className="flex flex-col pb-2 w-full bg-white rounded border border-gray-200 border-solid">
+        <div className="flex flex-col self-stretch px-5 pt-4 w-full bg-white rounded border border-gray-200 border-solid">
+          <img
+            loading="lazy"
+            src={item?.image || imagePLaceHolder}
+            className="object-contain aspect-[1.07] w-[165px]"
+            alt={item?.name}
+          />
+        </div>
+        <div className={'px-[8px] '}>
+          <div className="mt-2.5 font-semibold text-zinc-500 text-center w-full max-w-xs">
+            <span className="pe-2 text-foreground block overflow-hidden whitespace-nowrap text-ellipsis">
+              {item?.name}
+            </span>
+          </div>
+          <div className="mt-0 font-semibold text-main text-center">
+            SR {item?.price}
+          </div>
+          {count === 0 ? (
+            <Button
+              className="w-full mt-3 flex"
+              onClick={() => incrementCount()}
+            >
+              اضف
+            </Button>
+          ) : (
+            <div className="flex gap-2 mt-3 w-full font-bold whitespace-nowrap max-w-[100%] text-zinc-800 justify-between">
+              <div className="object-contain shrink-0 w-10 aspect-square">
+                <div className="flex flex-col max-w-[40px]">
+                  <div
+                    onClick={() => incrementCount()}
+                    className="flex flex-col justify-center items-center px-2 w-full h-10 bg-white rounded-full border border-gray-200 border-solid shadow-[0px_1px_11px_rgba(0,0,0,0.08)] cursor-pointer"
+                  >
+                    <PlusIcon />
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+              <div className="h-[40px] w-[90px] flex justify-center items-center bg-white rounded border border-gray-200 border-solid font-bold">
+                {count}
+              </div>
+              <div className="object-contain shrink-0 w-10 aspect-square">
+                <div className="flex flex-col max-w-[40px]">
+                  <div
+                    onClick={() => decrementCount()}
+                    className="flex flex-col justify-center items-center px-2 w-full h-10 bg-white rounded-full border border-gray-200 border-solid shadow-[0px_1px_11px_rgba(0,0,0,0.08)] cursor-pointer"
+                  >
+                    {count === 1 ? <XIcons /> : <MiusIcon />}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-    </>
+    </div>
   );
 };

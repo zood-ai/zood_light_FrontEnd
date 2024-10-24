@@ -7,17 +7,19 @@ import { Task } from '../data/schema';
 import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-table-column-header';
 import { StatusBadge } from '@/components/custom/StatusBadge';
 import { Button } from '@/components/custom/button';
+import { format } from 'path';
+import { formatDate } from '@/utils/formatDateTime';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
 
   const columns: ColumnDef<Task>[] = [
     {
-      accessorKey: 'id',
+      accessorKey: 'get_supplier',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'اسم العميل'} />
+        <DataTableColumnHeader column={column} title={'اسم المورد'} />
       ),
-      cell: ({ row }) => {
+      cell: ({ row }:any) => {
         const label = labels.find(
           (label) => label.value === row.original.label
         );
@@ -26,34 +28,15 @@ export const useDataTableColumns = () => {
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('id')}
+              {row.getValue('get_supplier')?.name || '-'}
             </span>
           </div>
         );
       },
     },
+ 
     {
-      accessorKey: 'id',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'رقم الفاتورة'} />
-      ),
-      cell: ({ row }) => {
-        const label = labels.find(
-          (label) => label.value === row.original.label
-        );
-
-        return (
-          <div className="flex space-x-2">
-            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('id')}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: 'id',
+      accessorKey: 'purchasing_number',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'رقم المرجع'} />
       ),
@@ -66,16 +49,36 @@ export const useDataTableColumns = () => {
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('id')}
+              {row.getValue('purchasing_number') || '-'}
             </span>
           </div>
         );
       },
     },
     {
-      accessorKey: 'id',
+      accessorKey: 'get_supplier',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'رقم الهاتف'} />
+      ),
+      cell: ({ row }:any) => {
+        const label = labels.find(
+          (label) => label.value === row.original.label
+        );
+
+        return (
+          <div className="flex space-x-2 ">
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('get_supplier')?.phone || '-'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'created_at',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'التاريخ'} />
       ),
       cell: ({ row }) => {
         const label = labels.find(
@@ -86,13 +89,32 @@ export const useDataTableColumns = () => {
           <div className="flex space-x-2 ">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('id')}
+              {formatDate(row.getValue('created_at')) || '-'}
             </span>
           </div>
         );
       },
     },
+    {
+      accessorKey: 'invoice_number',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'رقم الفاتورة'} />
+      ),
+      cell: ({ row }) => {
+        const label = labels.find(
+          (label) => label.value === row.original.label
+        );
 
+        return (
+          <div className="flex space-x-2">
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('invoice_number') || '-'}
+            </span>
+          </div>
+        );
+      },
+    },
     {
       accessorKey: 'id',
       header: ({ column }) => (

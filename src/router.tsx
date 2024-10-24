@@ -193,7 +193,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'purchase-invoices/add',
+        path: 'purchase-invoices/:id/:objId?',
         element: (
           <React.Suspense fallback={<div>Loading Purchase Invoices...</div>}>
             <ProtectedRoute requiredRole={Roles.ADMIN}>
@@ -243,7 +243,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'products/add',
+        path: 'products/:id/:objId?',
         element: (
           <React.Suspense fallback={<div>Loading Products...</div>}>
             <ProtectedRoute requiredRole={Roles.ADMIN}>
@@ -263,7 +263,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'categories/add',
+        path: 'categories/:id/:objId?',
         element: (
           <React.Suspense fallback={<div>Loading Categories...</div>}>
             <ProtectedRoute requiredRole={Roles.ADMIN}>
@@ -283,7 +283,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'customers/add',
+        path: 'customers/:id/:objId?',
         element: (
           <React.Suspense fallback={<div>Loading Customers...</div>}>
             <ProtectedRoute requiredRole={Roles.ADMIN}>
@@ -303,7 +303,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'resources/add',
+        path: 'resources/:id/:objId?',
         element: (
           <React.Suspense fallback={<div>Loading Resources...</div>}>
             <ProtectedRoute requiredRole={Roles.ADMIN}>

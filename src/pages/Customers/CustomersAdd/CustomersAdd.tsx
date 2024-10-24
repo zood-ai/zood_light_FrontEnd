@@ -1,36 +1,156 @@
-import React, { useState } from 'react';
-
+import React, { useEffect, useMemo, useState } from 'react';
 import './CustomersAdd.css';
 import { useTranslation } from 'react-i18next';
-import { CardItem } from '@/components/CardItem';
-import { BackBtn } from '@/components/custom/BackBtn';
-import { QRCodeComp } from '@/components/custom/QRCodeComp';
 import IconInput from '@/components/custom/InputWithIcon';
-import { SelectComp } from '@/components/custom/SelectItem';
 import useDirection from '@/hooks/useDirection';
 import { CustomersAddProps } from './CustomersAdd.types';
-import { Input } from '@/components/ui/input';
 import personIcon from '/icons/name person.svg';
 import callIcon from '/icons/call.svg';
 import { Button } from '@/components/custom/button';
 import { DetailsHeadWithOutFilter } from '@/components/custom/DetailsHeadWithOutFilter';
+import createCrudService from '@/api/services/crudService';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form';
+import { useNavigate, useParams } from 'react-router-dom';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import axiosInstance from '@/api/interceptors';
+import { useGlobalDialog } from '@/context/GlobalDialogProvider';
+
+const formSchema = z.object({
+  name: z.string().nonempty('Name is required'),
+  phone: z.string().nonempty('Phone is required'),
+  address: z.string().nonempty('Address is required'),
+  taxNum: z.string(),
+  coTax: z.string(),
+});
+
 export const CustomersAdd: React.FC<CustomersAddProps> = () => {
-  const { i18n, t } = useTranslation();
+  const { t } = useTranslation();
   const isRtl = useDirection();
-  const items = [
-    { id: 1, name: 'Salt', price: 53, quantity: '100 gm' },
-    { id: 2, name: 'Pepper', price: 30, quantity: '50 gm' },
-    { id: 3, name: 'Sugar', price: 20, quantity: '200 gm' },
-    { id: 4, name: 'Tea', price: 15, quantity: '50 gm' },
-    { id: 4, name: 'Tea', price: 15, quantity: '50 gm' },
-    { id: 4, name: 'Tea', price: 15, quantity: '50 gm' },
-    { id: 4, name: 'Tea', price: 15, quantity: '50 gm' },
-  ];
+  const params = useParams();
+  const modalType = params.id;
+  const isEditMode = modalType !== 'add';
+  const navigate = useNavigate();
 
-  const [totalShopCardCount, setTotalShopCardCount] = useState(0);
+  // Fetch services and mutations
+  const crudService = createCrudService<any>(
+    'manage/customers?includes=address'
+  );
+  const { useGetById, useUpdate, useCreate } = crudService;
+  const crudServiceAddress = createCrudService<any>(
+    'manage/customers/addAddress'
+  );
 
-  const handleTotalCountChange = (newCount: number) => {
-    setTotalShopCardCount((prevTotal) => prevTotal + 1);
+  const { useCreateById: useCreateAddress, useUpdate: useUpdateAddress } =
+    crudServiceAddress;
+
+  const { mutate: createNewUser } = useCreate();
+  const { mutate: updateDataUserById } = useUpdate();
+  const { mutate: createNewAddress } = useCreateAddress();
+  const { mutate: updateAddress } = useUpdateAddress();
+  const { data: getDataById } = useGetById(`${params.objId ?? ''}`);
+
+  const [loading, setLoading] = useState(false);
+
+  const defaultValues = useMemo(
+    () => (isEditMode ? getDataById?.data : {}),
+    [getDataById, isEditMode]
+  );
+
+  // Initialize form with validation schema and default values
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+  });
+  const [currData, setcurrData] = useState<any>({})
+  // Reset form when data changes
+  useEffect(() => {
+    if (isEditMode && getDataById?.data) {
+      axiosInstance
+        .get(`/manage/customers/${params.objId}`)
+        .then((res) => {
+          const customerData = res?.data?.data;
+          setcurrData(customerData)
+          if (customerData) {
+            form.setValue('name', customerData.name || '');
+            form.setValue('phone', customerData.phone || '');
+            form.setValue('taxNum', customerData.taxNum || '');
+            form.setValue('coTax', customerData.coTax || '');
+
+            // Check if the addresses array exists and has at least one entry
+            const address = customerData.addresses?.[0]?.name || '';
+            form.setValue('address', address);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to fetch customer data', err);
+        });
+    } else {
+      form.reset({});
+    }
+  }, [getDataById, form, isEditMode, params.objId]);
+
+  const { openDialog } = useGlobalDialog();
+console.log(currData , 'currData');
+
+  // Handle form submission for both add and edit scenarios
+  const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
+    setLoading(true);
+
+    const onError = () => setLoading(false);
+
+    if (isEditMode) {
+      await axiosInstance
+        .put(`/manage/customers/${params.objId}`, {
+          name: values.name,
+          phone: values.phone,
+          notes: '-',
+        })
+        .then(() => {
+          axiosInstance
+            .post(`/manage/customers/updateAddress/${currData?.addresses?.[0]?.id || ''}`, {
+              name: values.address,
+            })
+            .then(() => {
+              openDialog('updated');
+              setLoading(false);
+              navigate('/zood-dashboard/customers');
+            })
+            .catch((err) => {
+              form.reset({});
+              setLoading(false);
+            });
+        });
+    } else {
+      await axiosInstance
+        .post('/manage/customers', { name: values.name, phone: values.phone })
+        .then((res) => {
+          axiosInstance.post(
+            `/manage/customers/addAddress/${res?.data?.data.id}`,
+            {
+              name: values.address,
+              description: '-',
+            }
+          );
+        })
+        .then(() => {
+          openDialog('added');
+          setLoading(false);
+          form.reset({});
+          navigate('/zood-dashboard/customers');
+        })
+        .catch((err) => {
+          form.reset({});
+          setLoading(false);
+        });
+    }
   };
 
   return (
@@ -39,47 +159,107 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
 
       <div className="min-h-[70vh]">
         <div className="grid grid-cols-1  items-start">
-          <div className=" grid grid-cols-1 md:grid-cols-2 max-w-[580px] ">
-            <div className="col-span-1 mt-md">
-              <IconInput
-                label="اسم العميل"
-                // placeholder="ادخل اسم العميل"
-                iconSrc={personIcon}
-                inputClassName="w-[278px]"
-              />
-            </div>
-            <div className="col-span-1 mt-md">
-              <IconInput
-                label="هاتف العميل"
-                // placeholder="ادخل اسم العميل"
-                iconSrc={callIcon}
-                inputClassName="w-[278px]"
-              />
-            </div>
-            <div className="md:col-span-2 mt-md">
-              <IconInput
-                label="عنوان العميل"
-                // placeholder="ادخل اسم العميل"
-                // iconSrc={callIcon}
-                inputClassName="w-[278px]"
-              />
-            </div>
-            <div className="md:col-span-1 mt-md">
-              <IconInput label="هاتف العميل" inputClassName="w-[278px]" />
-            </div>
-            <div className="md:col-span-1 mt-md">
-              <IconInput label="هاتف العميل" inputClassName="w-[278px]" />
-            </div>
-          </div>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleFormSubmit)}
+              className="px-s4 my-5"
+            >
+              <div className=" grid grid-cols-1 md:grid-cols-2 max-w-[580px] ">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="col-span-1 mt-md">
+                      <FormControl>
+                        <IconInput
+                          {...field}
+                          label="اسم العميل"
+                          iconSrc={personIcon}
+                          inputClassName="w-[278px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem className="col-span-1 mt-md">
+                      <FormControl>
+                        <IconInput
+                          {...field}
+                          label="هاتف العميل"
+                          iconSrc={callIcon}
+                          inputClassName="w-[278px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2 mt-md">
+                      <FormControl>
+                        <IconInput
+                          {...field}
+                          label="عنوان العميل"
+                          inputClassName="w-[278px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="taxNum"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-1 mt-md">
+                      <FormControl>
+                        <IconInput
+                          {...field}
+                          label="الرقم الضريبي"
+                          inputClassName="w-[278px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="coTax"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-1 mt-md">
+                      <FormControl>
+                        <IconInput
+                          {...field}
+                          label="الرقم الضريبي للشركة"
+                          inputClassName="w-[278px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-          <Button
-            className="mt-4 h-[39px] w-[163px]"
-            onClick={() => {
-              console.log('clicked');
-            }}
-          >
-            {'اضافة عميل'}
-          </Button>
+              <Button
+                dir="ltr"
+                type="submit"
+                loading={loading}
+                disabled={loading}
+                className="mt-4 h-[39px] w-[163px]"
+              >
+                {isEditMode ? 'تعديل عميل' : 'اضافة عميل'}
+              </Button>
+            </form>
+          </Form>
         </div>
       </div>
     </>

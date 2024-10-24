@@ -1,195 +1,77 @@
 import React from 'react';
-
 import { LoadingSkeletonProps } from './LoadingSkeleton.types';
-
 import './LoadingSkeleton.css';
 
 export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = () => {
   return (
-    <>
-      <>
-        <h3 className="h-3 bg-gray-300 rounded-full  w-48 mb-4" />
-        <div role="status" className="flex max-w-sm animate-pulse ">
-          <div className="flex-shrink-0 flex">
-            <span className="flex justify-center items-center bg-gray-300 rounded-sm me-4 w-28 mt-5 h-12 " />
-            <span className="flex justify-center items-center bg-gray-300 rounded-sm me-4 w-28 mt-5 h-12 " />
-          </div>
-          <div className="ml-4 mt-2 w-full">
-            <p className="h-2 bg-gray-300 rounded-full w-[320px] mb-2.5" />
-            <p className="h-2 bg-gray-300 rounded-full w-[320px] mb-2.5" />
-            <p className="h-2 bg-gray-300 rounded-full w-[320px] mb-2.5" />
-            <p className="h-2 bg-gray-300 rounded-full w-[320px] mb-2.5" />
-          </div>
-        </div>
-        {/* <div role="status" className="space-y-2.5 animate-pulse max-w-lg">
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-            </div>
-          </div> */}
-
-        <div
-          role="status"
-          className="border border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700 "
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12" />
-          </div>
-
-          <span className="sr-only">Loading...</span>
-        </div>
-        <div
-          role="status"
-          className="border border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700 "
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12" />
-          </div>
-
-          <span className="sr-only">Loading...</span>
-        </div>
-        <div
-          role="status"
-          className="border border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700 "
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12" />
-          </div>
-
-          <span className="sr-only">Loading...</span>
-        </div>
-        <div
-          role="status"
-          className="border border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700 "
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12" />
-          </div>
-
-          <span className="sr-only">Loading...</span>
-        </div>
-        <div
-          role="status"
-          className="border border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700 "
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12" />
-          </div>
-
-          <span className="sr-only">Loading...</span>
-        </div>
-        <div
-          role="status"
-          className="border border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700 "
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12" />
-          </div>
-
-          <span className="sr-only">Loading...</span>
-        </div>
-        <div
-          role="status"
-          className="border border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700 "
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12" />
-          </div>
-
-          <span className="sr-only">Loading...</span>
-        </div>
-        <div
-          role="status"
-          className="border border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700 "
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="flex items-center w-full max-w-[480px]">
-              <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24" />
-              <div className="h-2.5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full" />
-            </div>
-            <div className="h-2.5 bg-gray-300 rounded-full dark:bg-gray-700 w-12" />
-          </div>
-
-          <span className="sr-only">Loading...</span>
-        </div>
-      </>
-    </>
+    <div role="status" className="animate-pulse">
+      <div className="flex-shrink-0 flex">
+        <span className="flex justify-center items-center bg-gray-300 rounded-sm me-4 w-28 mt-5 h-12 " />
+        <span className="flex justify-center items-center bg-gray-300 rounded-sm me-4 w-28 mt-5 h-12 " />
+      </div>
+      <table className="w-full border-collapse">
+        <thead>
+          <tr>
+            {/* Add the header placeholders according to your table */}
+            <th className="p-2">
+              <div className="h-4 bg-gray-300 rounded w-24"></div>{' '}
+              {/* Action column */}
+            </th>
+            <th className="p-2">
+              <div className="h-4 bg-gray-300 rounded w-32"></div>{' '}
+              {/* Date column */}
+            </th>
+            <th className="p-2">
+              <div className="h-4 bg-gray-300 rounded w-40"></div>{' '}
+              {/* Phone column */}
+            </th>
+            <th className="p-2">
+              <div className="h-4 bg-gray-300 rounded w-48"></div>{' '}
+              {/* Client Name */}
+            </th>
+            <th className="p-2">
+              <div className="h-4 bg-gray-300 rounded w-24"></div>{' '}
+              {/* Invoice Number */}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* Repeat skeleton rows */}
+          {[...Array(10)].map((_, i) => (
+            <tr key={i}>
+              <td className="p-2">
+                <div className="h-6 bg-gray-200 rounded w-20"></div>{' '}
+                {/* Action column */}
+              </td>
+              <td className="p-2">
+                <div className="h-6 bg-gray-200 rounded w-28"></div>{' '}
+                {/* Date column */}
+              </td>
+              <td className="p-2">
+                <div className="h-6 bg-gray-200 rounded w-36"></div>{' '}
+                {/* Phone column */}
+              </td>
+              <td className="p-2">
+                <div className="h-6 bg-gray-200 rounded w-44"></div>{' '}
+                {/* Client Name */}
+              </td>
+              <td className="p-2">
+                <div className="h-6 bg-gray-200 rounded w-20"></div>{' '}
+                {/* Invoice Number */}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="mt-4 flex justify-center">
+        {/* Pagination skeleton */}
+        <div className="h-8 w-8 bg-gray-200 rounded-full mx-1"></div>
+        <div className="h-8 w-8 bg-gray-200 rounded-full mx-1"></div>
+        <div className="h-8 w-12 bg-gray-200 rounded mx-1"></div>
+        <div className="h-8 w-8 bg-gray-200 rounded-full mx-1"></div>
+        <div className="h-8 w-8 bg-gray-200 rounded-full mx-1"></div>
+      </div>
+      <span className="sr-only">Loading...</span>
+    </div>
   );
 };

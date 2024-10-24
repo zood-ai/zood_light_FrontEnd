@@ -50,13 +50,14 @@ export const SelectComp: React.FC<SelectCompProps> = ({
         {...props}
         onValueChange={handleValueChange}
         dir={isRtl ? 'rtl' : 'ltr'}
+        // style={{ width: '100%' }}
       >
         <SelectTrigger>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent dir={isRtl ? 'rtl' : 'ltr'}>
           <SelectItem value="clear">{placeholder}</SelectItem>
-          {options.map((option) => (
+          {options?.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
             </SelectItem>

@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useDataTableColumns } from './components/useDataTableColumns';
 import useDirection from '@/hooks/useDirection';
 import { useNavigate } from 'react-router-dom';
+import createCrudService from '@/api/services/crudService';
 
 export const Categories: React.FC<CategoriesProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -51,7 +52,9 @@ export const Categories: React.FC<CategoriesProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-
+  const allService = createCrudService<any>('menu/categories');
+  const { useGetAll } = allService;
+  const { data: allData, isLoading } = useGetAll();
   return (
     <>
       <AddEditModal
@@ -71,23 +74,19 @@ export const Categories: React.FC<CategoriesProps> = () => {
         onClose={handleCloseModal}
       />
 
-      <div className="mb-2 flex items-center justify-between space-y-2">
-        <div>
-          <p className="text-muted-foreground">
-            {t('WELCOME_BACK_DESC')} {t('TASKS')}
-          </p>
-        </div>
-      </div>
-
+ 
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
-          handleDel={handleOpenDeleteModal}
-          handleRowClick={handleOpenViewModal}
-          data={tasks}
-          columns={columns}
-          handleEdit={handleOpenEditModal}
-          actionBtn={handleCreateTask}
-          filterBtn={filterBtn}
+            handleDel={handleOpenDeleteModal}
+            handleRowClick={handleOpenViewModal}
+            data={allData?.data || []}
+            columns={columns}
+            handleEdit={handleOpenEditModal}
+            actionBtn={handleCreateTask}
+            filterBtn={filterBtn}
+            meta={allData?.meta || {}}
+            actionText={'فئة '}
+            loading={isLoading}
         />
       </div>
     </>

@@ -15,11 +15,13 @@ import { useNavigate } from 'react-router-dom';
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   actionBtn: any;
+  actionText?: string
 }
 
 export function DataTableToolbar<TData>({
   table,
   actionBtn,
+  actionText
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
   const { t } = useTranslation();
@@ -57,7 +59,7 @@ export function DataTableToolbar<TData>({
               stroke-linejoin="round"
             />
           </svg>
-          <span className="ms-[10px]">{'اضافة فاتورة'}</span>
+          <span className="ms-[10px]">{`اضافة ${actionText}`}</span>
         </Button>
           <Button
             variant="outline"

@@ -8,6 +8,7 @@ import {
 import axiosInstance from "../interceptors";
 import { toast } from "@/components/ui/use-toast";
 import { useSearchParams } from "react-router-dom";
+import { useGlobalDialog } from "@/context/GlobalDialogProvider";
 
 interface CrudService<T> {
   useGetAll: () => any;
@@ -15,6 +16,7 @@ interface CrudService<T> {
   useCreate: () => any;
   useUpdate: () => any;
   useRemove: () => any;
+  useCreateById: () => any;
 }
 const showToast = (title: string, description?: string) => {
   toast({
@@ -33,6 +35,7 @@ const createCrudService = <T>(
 ): CrudService<T> => {
   const queryClient: any = useQueryClient()
   const [searchParams] = useSearchParams()
+  const { openDialog } = useGlobalDialog();
 
   const queryParams: { [key: string]: string | null } = {}
   searchParams.forEach((value, key) => {
@@ -70,8 +73,21 @@ const createCrudService = <T>(
       },
 
       onSuccess: () => {
-        showToast("item created successfully");
+        // showToast("item created successfully");
+        openDialog('added')
+        queryClient.invalidateQueries([endpoint]);
+      },
+    });
+  const useCreateById = () =>
+    useMutation<T, unknown, T>({
+      mutationFn: async ({data, id}:any) => {
+        const response = await axiosInstance.post<T>(endpoint+`/${id}`, data);
+        return response.data;
+      },
 
+      onSuccess: () => {
+        // showToast("item created successfully");
+        openDialog('added')
         queryClient.invalidateQueries([endpoint]);
       },
     });
@@ -87,7 +103,8 @@ const createCrudService = <T>(
       },
 
       onSuccess: () => {
-        showToast("item updated successfully");
+        // showToast("item updated successfully");
+        openDialog('updated')
 
         queryClient.invalidateQueries([endpoint]);
       },
@@ -96,15 +113,16 @@ const createCrudService = <T>(
   const useRemove = () =>
     useMutation<void, unknown, string>({
       mutationFn: async ({ id }: any) => {
-        await axiosInstance.delete(`${endpoint}?id=${id}`);
+        await axiosInstance.delete(`${endpoint}/${id}`);
       },
       onSuccess: () => {
-        showToast("item deleted successfully");
+        // showToast("item deleted successfully");
+        openDialog('deleted')
 
         queryClient.invalidateQueries([endpoint]);
       },
     });
-  return { useGetAll, useGetById, useCreate, useUpdate, useRemove };
+  return { useGetAll, useGetById, useCreate, useUpdate, useRemove , useCreateById };
 };
 
 export default createCrudService;
