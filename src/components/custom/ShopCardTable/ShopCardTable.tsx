@@ -6,10 +6,12 @@ import imagePLaceHolder from '/icons/imagePLaceHolder.svg';
 import './ShopCardTable.css';
 import { Counter } from '../Counter';
 import TrashIcon from '@/components/Icons/TrashIcon';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCardItem } from '@/store/slices/cardItems';
 
 export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
+  const dispatch = useDispatch();
 
   return (
     <>
@@ -17,7 +19,7 @@ export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
         {/* Header */}
         <thead className="bg-[#EAEBF5] border border-gray-200 border-solid">
           <tr className="gap-10">
-            <th className="py-3.5 pr-10  ">المنتج</th>
+            <th className="py-3.5 pr-10">المنتج</th>
             <th className="py-3.5 ">الكمية</th>
             <th className="py-3.5 ">السعر</th>
             <th className="py-3.5  r"></th>
@@ -52,9 +54,19 @@ export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
                 <td className="py-7 ">
                   <Counter item={item} />
                 </td>
-                <td className="py-7 ">SR {item.price}</td>
+                <td className="py-7 ">
+                  SR {Number(item.price) * Number(item.qty)}
+                </td>
 
-                <td className="py-7  rounded-br-lg">
+                <td
+                  onClick={() => {
+                    const updatedItems = cardItemValue.filter(
+                      (i: { id: string }) => i.id !== item.id
+                    );
+                    dispatch(setCardItem(updatedItems));
+                  }}
+                  className="py-7  rounded-br-lg cursor-pointer hover:scale-105 "
+                >
                   <TrashIcon />
                 </td>
                 <td className="py-7 w-[6%] "></td>

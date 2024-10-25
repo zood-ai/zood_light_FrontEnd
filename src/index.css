@@ -15,6 +15,8 @@
     --mainBorder: #ECECEC;
     --mainSuccess: #2DAA48;
     --mainSuccessHover: #3ED15E;
+    --mainAlert: #FC3030;
+    --mainAlertHover: #FF5659;
     /* CSS Variables for light theme */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;

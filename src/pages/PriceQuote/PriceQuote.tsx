@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { PriceQuoteProps } from './PriceQuote.types';
 
@@ -14,6 +14,9 @@ import { useDataTableColumns } from './components/useDataTableColumns';
 import useDirection from '@/hooks/useDirection';
 import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
+import { useDispatch } from 'react-redux';
+import { resetCard } from '@/store/slices/cardItems';
+import { resetOrder } from '@/store/slices/orderSchema';
 
 export const PriceQuote: React.FC<PriceQuoteProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -52,10 +55,18 @@ export const PriceQuote: React.FC<PriceQuoteProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allService = createCrudService<any>('orders?filter[type]=2');
-    
+
+  const allService = createCrudService<any>('orders?filter[type]=3');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
+  console.log(allData, 'allUserData');
+
+  const dispatch = useDispatch();
+useEffect(() => {
+
+  dispatch(resetCard());
+  dispatch(resetOrder());
+}, [dispatch])
   return (
     <>
       <AddEditModal

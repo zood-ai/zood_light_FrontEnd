@@ -1,3 +1,3 @@
 export type DeatilsHeaderWithFilterProps = {
-    totalShopCardCount : number
+    bkAction?: any;
 };

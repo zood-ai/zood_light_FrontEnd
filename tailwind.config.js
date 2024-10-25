@@ -20,6 +20,8 @@ module.exports = {
         border: 'hsl(var(--border))',
         mainHover: 'var(--mainHover)',
         main: 'var(--main)',
+        mainAlert: 'var(--mainAlert)',
+        mainAlertHover: 'var(--mainAlertHover)',
         mainBg: 'var(--mainBg)',
         mainText: 'var(--mainText)',
         secText: 'var(--secText)',
@@ -74,6 +76,9 @@ module.exports = {
         main: '1rem',
         mainSm: '0.5rem',
       },
+      animation: {
+        shake: 'shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97)',
+      },
       keyframes: {
         'accordion-down': {
           from: { height: '0' },
@@ -83,10 +88,25 @@ module.exports = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
+        shake: {
+          '10%, 90%': {
+            transform: 'translate3d(-1px, 0, 0)',
+          },
+          '20%, 80%': {
+            transform: 'translate3d(2px, 0, 0)',
+          },
+          '30%, 50%, 70%': {
+            transform: 'translate3d(-4px, 0, 0)',
+          },
+          '40%, 60%': {
+            transform: 'translate3d(4px, 0, 0)',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        shake: 'shake 0.5s ease-in-out',
       },
     },
   },

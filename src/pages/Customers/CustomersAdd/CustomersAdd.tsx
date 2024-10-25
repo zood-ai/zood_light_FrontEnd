@@ -69,7 +69,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
     resolver: zodResolver(formSchema),
     defaultValues,
   });
-  const [currData, setcurrData] = useState<any>({})
+  const [currData, setcurrData] = useState<any>({});
   // Reset form when data changes
   useEffect(() => {
     if (isEditMode && getDataById?.data) {
@@ -77,12 +77,12 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
         .get(`/manage/customers/${params.objId}`)
         .then((res) => {
           const customerData = res?.data?.data;
-          setcurrData(customerData)
+          setcurrData(customerData);
           if (customerData) {
             form.setValue('name', customerData.name || '');
             form.setValue('phone', customerData.phone || '');
-            form.setValue('taxNum', customerData.taxNum || '');
-            form.setValue('coTax', customerData.coTax || '');
+            form.setValue('taxNum', customerData.tax_registration_number || '');
+            form.setValue('coTax', customerData.vat_registration_number || '');
 
             // Check if the addresses array exists and has at least one entry
             const address = customerData.addresses?.[0]?.name || '';
@@ -98,7 +98,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
   }, [getDataById, form, isEditMode, params.objId]);
 
   const { openDialog } = useGlobalDialog();
-console.log(currData , 'currData');
+  console.log(currData, 'currData');
 
   // Handle form submission for both add and edit scenarios
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -112,12 +112,19 @@ console.log(currData , 'currData');
           name: values.name,
           phone: values.phone,
           notes: '-',
+          tax_registration_number: values.taxNum,
+          vat_registration_number: values.coTax,
         })
         .then(() => {
           axiosInstance
-            .post(`/manage/customers/updateAddress/${currData?.addresses?.[0]?.id || ''}`, {
-              name: values.address,
-            })
+            .post(
+              `/manage/customers/updateAddress/${
+                currData?.addresses?.[0]?.id || ''
+              }`,
+              {
+                name: values.address,
+              }
+            )
             .then(() => {
               openDialog('updated');
               setLoading(false);
@@ -130,7 +137,13 @@ console.log(currData , 'currData');
         });
     } else {
       await axiosInstance
-        .post('/manage/customers', { name: values.name, phone: values.phone })
+        .post('/manage/customers', {
+          name: values.name,
+          phone: values.phone,
+          notes: '-',
+          tax_registration_number: values.taxNum,
+          vat_registration_number: values.coTax,
+        })
         .then((res) => {
           axiosInstance.post(
             `/manage/customers/addAddress/${res?.data?.data.id}`,

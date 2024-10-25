@@ -1,1 +1,3 @@
-export type DetailsHeadWithOutFilterProps = {};
+export type DetailsHeadWithOutFilterProps = {
+    bkAction?: any;
+};

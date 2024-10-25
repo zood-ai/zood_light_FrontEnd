@@ -1,23 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { CardItemProps } from './CardItem.types';
 import './CardItem.css';
 import PlusIcon from '../Icons/PlusIcon';
-import saltImg from './salt.png';
 import { Button } from '../custom/button';
-import MiusIcon from '../Icons/MiusIcon';
+import NegativeIcon from '../Icons/NegativeIcon';
 import XIcons from '../Icons/XIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCardItem } from '@/store/slices/cardItems';
 import imagePLaceHolder from '/icons/imagePLaceHolder.svg';
 
 export const CardItem: React.FC<CardItemProps> = ({
-  setShopCardCount,
   index,
   item,
 }) => {
   const dispatch = useDispatch();
-  const [count, setCount] = useState(0);
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
+
+  const cardItem = useSelector((state: any) =>
+    state.cardItems.value.find((i: { id: string }) => i.id === item.id)
+  );
+
+  const qty = cardItem ? cardItem.qty : 0;
 
   const updateCardItem = (newItem: {
     id: string;
@@ -26,29 +29,24 @@ export const CardItem: React.FC<CardItemProps> = ({
     image: any;
     price: number;
   }) => {
-    // Check if the item already exists in the array
     const existingItemIndex = cardItemValue.findIndex(
       (i: { id: string }) => i.id === newItem.id
     );
-    console.log(existingItemIndex);
 
-    // If exists, update the quantity
     if (existingItemIndex >= 0) {
       const updatedItems = cardItemValue.map(
         (item: { id: string; qty: number; name: string }, index: number) => {
           if (index === existingItemIndex) {
-            // Create a new object with updated quantity
             return {
               ...item,
-              qty: item.qty + newItem.qty, // Update the quantity
+              qty: item.qty + newItem.qty,
             };
           }
-          return item; // Return the item unchanged
+          return item;
         }
       );
       dispatch(setCardItem(updatedItems));
     } else {
-      // If not, add a new item
       dispatch(
         setCardItem([...cardItemValue, { ...newItem, qty: newItem.qty }])
       );
@@ -56,8 +54,7 @@ export const CardItem: React.FC<CardItemProps> = ({
   };
 
   const incrementCount = () => {
-    setCount((prev) => prev + 1);
-    setShopCardCount(count + 1, 'plus');
+    // setShopCardCount(qty + 1, 'plus');
     updateCardItem({
       id: item.id,
       qty: 1,
@@ -68,9 +65,14 @@ export const CardItem: React.FC<CardItemProps> = ({
   };
 
   const decrementCount = () => {
-    if (count > 0) {
-      setCount((prev) => prev - 1);
-      setShopCardCount(count - 1, 'minus');
+    if (qty === 1) {
+      const updatedItems = cardItemValue.filter(
+        (item) => item.id !== cardItem.id
+      );
+      dispatch(setCardItem(updatedItems));
+      // setShopCardCount(qty - 1, 'minus');
+    } else if (qty > 1) {
+      // setShopCardCount(qty - 1, 'minus');
       updateCardItem({
         id: item.id,
         qty: -1,
@@ -101,7 +103,7 @@ export const CardItem: React.FC<CardItemProps> = ({
           <div className="mt-0 font-semibold text-main text-center">
             SR {item?.price}
           </div>
-          {count === 0 ? (
+          {qty === 0 ? (
             <Button
               className="w-full mt-3 flex"
               onClick={() => incrementCount()}
@@ -109,7 +111,7 @@ export const CardItem: React.FC<CardItemProps> = ({
               اضف
             </Button>
           ) : (
-            <div className="flex gap-2 mt-3 w-full font-bold whitespace-nowrap max-w-[100%] text-zinc-800 justify-between">
+            <div className="flex gap-2 mt-3 w-full font-bold whitespace-nowrap max-w-[100%] text-mainText justify-between">
               <div className="object-contain shrink-0 w-10 aspect-square">
                 <div className="flex flex-col max-w-[40px]">
                   <div
@@ -121,7 +123,7 @@ export const CardItem: React.FC<CardItemProps> = ({
                 </div>
               </div>
               <div className="h-[40px] w-[90px] flex justify-center items-center bg-white rounded border border-gray-200 border-solid font-bold">
-                {count}
+                {qty}
               </div>
               <div className="object-contain shrink-0 w-10 aspect-square">
                 <div className="flex flex-col max-w-[40px]">
@@ -129,24 +131,12 @@ export const CardItem: React.FC<CardItemProps> = ({
                     onClick={() => decrementCount()}
                     className="flex flex-col justify-center items-center px-2 w-full h-10 bg-white rounded-full border border-gray-200 border-solid shadow-[0px_1px_11px_rgba(0,0,0,0.08)] cursor-pointer"
                   >
-                    {count === 1 ? (
+                    {qty === 1 ? (
                       <XIcons />
                     ) : (
-                      <svg
-                        width="20"
-                        height="2"
-                        viewBox="0 0 20 2"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M1 1H19"
-                          stroke="#363088"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
+                      <>
+                        <NegativeIcon />
+                      </>
                     )}
                   </div>
                 </div>

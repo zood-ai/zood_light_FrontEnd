@@ -15,9 +15,12 @@ export const cardItemsSlice :any = createSlice({
     setCardItem: (state, action: PayloadAction<any>) => {
       state.value = action.payload;
     },
+    resetCard: (state) => {
+      return initialState;
+    },
   },
 });
 
-export const { setCardItem } = cardItemsSlice.actions;
+export const { setCardItem , resetCard} = cardItemsSlice.actions;
 
 export default cardItemsSlice.reducer;

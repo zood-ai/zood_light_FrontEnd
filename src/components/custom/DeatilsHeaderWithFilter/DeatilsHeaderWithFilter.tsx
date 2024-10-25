@@ -14,14 +14,14 @@ import search from '/icons/search.svg';
 
 export const DeatilsHeaderWithFilter: React.FC<
   DeatilsHeaderWithFilterProps
-> = () => {
+> = ({bkAction}) => {
   const navigate = useNavigate();
   const isRtl = useDirection();
 
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-6 gap-10 md:translate-y-[-16px]">
-        <BackBtn />
+        <BackBtn bkAction={bkAction ? bkAction : () => {}} />
         <div className="col-span-4 md:col-span-3 flex flex-col md:flex-row md:items-center gap-md">
           <IconInput
             placeholder="بحث عن فاتورة, عميل, تاريخ"
