@@ -19,6 +19,8 @@ const buttonVariants = cva(
           'text-main border font-semibold rounded-[4px] border-main bg-background shadow-sm hover:mainHover   ',
         success:
           'bg-mainSuccess text-white shadow-sm hover:bg-mainSuccessHover',
+        fail:
+          'bg-mainAlert text-white shadow-sm hover:bg-mainAlertHover',
         secondary:
           'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',

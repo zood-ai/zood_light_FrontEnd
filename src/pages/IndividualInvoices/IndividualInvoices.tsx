@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { IndividualInvoicesProps } from './IndividualInvoices.types';
 
@@ -15,6 +15,9 @@ import useDirection from '@/hooks/useDirection';
 import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
 import { LoadingSkeleton } from '@/components/custom/LoadingSkeleton';
+import { useDispatch } from 'react-redux';
+import { resetOrder } from '@/store/slices/orderSchema';
+import { resetCard } from '@/store/slices/cardItems';
 
 export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -54,11 +57,17 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allService = createCrudService<any>('orders');
+  const allService = createCrudService<any>('orders?filter[type]=1');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   console.log(allData, 'allUserData');
 
+  const dispatch = useDispatch();
+useEffect(() => {
+
+  dispatch(resetCard());
+  dispatch(resetOrder());
+}, [dispatch])
   return (
     <>
       <AddEditModal

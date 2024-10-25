@@ -1,1 +1,3 @@
-export type BackBtnProps = {};
+export type BackBtnProps = {
+    bkAction?: any
+};

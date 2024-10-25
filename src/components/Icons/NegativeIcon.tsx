@@ -1,16 +1,16 @@
-import React from "react";
-const MiusIcon = () => {
+import React from 'react';
+const NegativeIcon = () => {
   return (
     <>
       <svg
-        width="17"
-        height="17"
-        viewBox="0 0 17 17"
+        width="20"
+        height="2"
+        viewBox="0 0 20 2"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M8.5 1V16M1 8.5H16"
+          d="M1 1H19"
           stroke="#363088"
           stroke-width="2"
           stroke-linecap="round"
@@ -21,4 +21,4 @@ const MiusIcon = () => {
   );
 };
 
-export default MiusIcon;
+export default NegativeIcon;

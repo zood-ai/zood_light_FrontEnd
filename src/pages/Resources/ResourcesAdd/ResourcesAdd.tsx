@@ -71,7 +71,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
   // Handle form submission for both add and edit scenarios
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
- 
+
     const onError = () => setLoading(false);
 
     if (isEditMode) {
@@ -86,14 +86,17 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
         }
       );
     } else {
-      await createNewUser(values, {
-        onSuccess: (data) => {
-          setLoading(false);
-          form.reset({});
-          navigate('/zood-dashboard/resources');
-        },
-        onError,
-      });
+      await createNewUser(
+        { ...values, code: `SUP-${Math.floor(Math.random() * 100000)}` },
+        {
+          onSuccess: (data) => {
+            setLoading(false);
+            form.reset({});
+            navigate('/zood-dashboard/resources');
+          },
+          onError,
+        }
+      );
     }
   };
 

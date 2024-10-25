@@ -5,11 +5,15 @@ import { DetailsHeadWithOutFilterProps } from './DetailsHeadWithOutFilter.types'
 import './DetailsHeadWithOutFilter.css';
 import { BackBtn } from '../BackBtn';
 
-export const DetailsHeadWithOutFilter: React.FC<DetailsHeadWithOutFilterProps> = () => {
-    return (<>
-    
-    <div className="grid grid-cols-1  ">
-        <BackBtn />
+export const DetailsHeadWithOutFilter: React.FC<
+  DetailsHeadWithOutFilterProps
+> = ({ bkAction }) => {
+  return (
+    <>
+      <div className="grid grid-cols-1  ">
+        <div onClick={bkAction ? bkAction : () => {}}>
+          <BackBtn bkAction={bkAction} />
+        </div>
         <div className="flex flex-col items-start rounded-none max-w-[580px] my-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-full text-right text-zinc-800 w-[284px] ">
             <div className="grow shrink text-2xl col-span-1 font-semibold w-[102px]">
@@ -24,5 +28,6 @@ export const DetailsHeadWithOutFilter: React.FC<DetailsHeadWithOutFilterProps> =
           </div>
         </div>
       </div>
-    </>)
+    </>
+  );
 };

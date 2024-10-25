@@ -147,7 +147,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
             <div className="flex justify-start items-center">
               <IconInput
-              name="invoice_number"
+                name="invoice_number"
                 value={invoice.invoice_number}
                 onChange={handleInputChange}
                 label="ادخل الرقم المرجعي للفاتورة أو رقم الفاتورة"
@@ -177,7 +177,8 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 setInvoice({
                   ...invoice,
                   purchaseDescription: e.target.value,
-                })              }
+                })
+              }
               className="w-[499px]"
               label="وصف المشتريات"
             />
@@ -215,11 +216,14 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   />
                   {items.length > 1 && (
                     <>
-                      <div onClick={() => {
-                        const newItems = [...items];
-                        newItems.splice(index, 1);
-                        setItems(newItems);
-                      }} className="translate-y-[34px] cursor-pointer hover:scale-105">
+                      <div
+                        onClick={() => {
+                          const newItems = [...items];
+                          newItems.splice(index, 1);
+                          setItems(newItems);
+                        }}
+                        className="translate-y-[34px] cursor-pointer hover:scale-105"
+                      >
                         <svg
                           width="24"
                           height="24"

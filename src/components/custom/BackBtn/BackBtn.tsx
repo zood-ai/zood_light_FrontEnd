@@ -1,32 +1,101 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { BackBtnProps } from './BackBtn.types';
 
 import './BackBtn.css';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { resetOrder } from '@/store/slices/orderSchema';
 
-export const BackBtn: React.FC<BackBtnProps> = () => {
+export const BackBtn: React.FC<BackBtnProps> = ({ bkAction }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleBack = () => {
     navigate(-1);
   };
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div
-      onClick={handleBack}
+      onClick={bkAction ? bkAction : handleBack}
       className="mb-2 flex items-center justify-between space-y-2 cursor-pointer"
     >
       <div>
         <p className="text-muted-foreground">
-          <div className="flex gap-1.5 text-base text-right text-black whitespace-nowrap items-center cursor-pointer">
-            <img
-              loading="lazy"
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/194d7b7e5ae3c591091d38a23f5ac39ac72e51ba1a02d111e0defffc4a86b681?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
-              alt="Back Icon"
-              className="object-contain shrink-0 self-start mt-1 w-7 aspect-square"
-            />
+          <div className="flex   gap-1.5 text-base text-right text-black whitespace-nowrap items-center cursor-pointer">
+            <div
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
+              {!isHovered ? (
+                <>
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 28 28"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M14.0002 25.6666C20.4435 25.6666 25.6668 20.4432 25.6668 13.9999C25.6668 7.5566 20.4435 2.33325 14.0002 2.33325C7.55684 2.33325 2.3335 7.5566 2.3335 13.9999C2.3335 20.4432 7.55684 25.6666 14.0002 25.6666Z"
+                      stroke="#363088"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M14 18.6666L18.6667 13.9999L14 9.33325"
+                      stroke="#363088"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M9.3335 14H18.6668"
+                      stroke="#363088"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </>
+              ) : (
+                <>
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 28 28"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M14.0002 25.6666C20.4435 25.6666 25.6668 20.4432 25.6668 13.9999C25.6668 7.5566 20.4435 2.33325 14.0002 2.33325C7.55684 2.33325 2.3335 7.5566 2.3335 13.9999C2.3335 20.4432 7.55684 25.6666 14.0002 25.6666Z"
+                      fill="#363088"
+                      stroke="#363088"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M14 18.6666L18.6667 13.9999L14 9.33325"
+                      stroke="white"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M9.3335 14H18.6668"
+                      stroke="white"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </>
+              )}
+            </div>
+
             <div className="grow">رجوع</div>
           </div>
         </p>

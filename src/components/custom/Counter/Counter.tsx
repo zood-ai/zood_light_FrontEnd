@@ -5,13 +5,18 @@ import { CounterProps } from './Counter.types';
 import './Counter.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCardItem } from '@/store/slices/cardItems';
+import { TrashIcon } from '@radix-ui/react-icons';
 
 export const Counter: React.FC<any> = ({ item }: any) => {
-  const [count, setCount] = useState(1);
   const dispatch = useDispatch();
 
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
+  const cardItem = useSelector((state: any) =>
+    state.cardItems.value.find((i: { id: string }) => i.id === item.id)
+  );
 
+  // Get the item's qty from the store, defaulting to 0 if not found
+  const qty = cardItem ? cardItem.qty : 0;
   const updateCardItem = (newItem: {
     id: string;
     qty: number;
@@ -27,26 +32,19 @@ export const Counter: React.FC<any> = ({ item }: any) => {
 
     // If exists, update the quantity
     if (existingItemIndex >= 0) {
-      if (newItem.qty === 0) {
-        const updatedItems = cardItemValue.filter(
-          (item: { id: string }) => item.id !== newItem.id
-        );
-        dispatch(setCardItem(updatedItems));
-      } else {
-        const updatedItems = cardItemValue.map(
-          (item: { id: string; qty: number; name: string }, index: number) => {
-            if (index === existingItemIndex) {
-              // Create a new object with updated quantity
-              return {
-                ...item,
-                qty: item.qty + newItem.qty, // Update the quantity
-              };
-            }
-            return item; // Return the item unchanged
+      const updatedItems = cardItemValue.map(
+        (item: { id: string; qty: number; name: string }, index: number) => {
+          if (index === existingItemIndex) {
+            // Create a new object with updated quantity
+            return {
+              ...item,
+              qty: item.qty + newItem.qty, // Update the quantity
+            };
           }
-        );
-        dispatch(setCardItem(updatedItems));
-      }
+          return item; // Return the item unchanged
+        }
+      );
+      dispatch(setCardItem(updatedItems));
     } else {
       // If not, add a new item
       dispatch(
@@ -56,8 +54,6 @@ export const Counter: React.FC<any> = ({ item }: any) => {
   };
 
   const incrementCount = () => {
-    setCount((prev) => prev + 1);
-    // setShopCardCount(count + 1, 'plus');
     updateCardItem({
       id: item.id,
       qty: 1,
@@ -68,9 +64,7 @@ export const Counter: React.FC<any> = ({ item }: any) => {
   };
 
   const decrementCount = () => {
-    if (count > 0) {
-      setCount((prev) => prev - 1);
-      // setShopCardCount(count - 1, 'minus');
+    if (qty > 0) {
       updateCardItem({
         id: item.id,
         qty: -1,
@@ -80,32 +74,42 @@ export const Counter: React.FC<any> = ({ item }: any) => {
       });
     }
   };
-  console.log(cardItemValue, 'count');
+  const removeItem = () => {
+    const updatedItems = cardItemValue.filter(
+      (i: { id: string }) => i.id !== item.id
+    );
+    dispatch(setCardItem(updatedItems));
+  };
 
   return (
     <>
-      {' '}
       <div className="flex items-center border border-gray-300 rounded-lg w-[120px]">
-        {/* Minus Button */}
         <button
           onClick={() => incrementCount()}
           className="w-1/3 h-10 text-lg flex items-center justify-center border-l border-gray-300"
         >
-          {/* <PlusIcon /> */}+
+          +
         </button>
 
         {/* Number Display */}
         <div className="w-1/3 h-10 text-center flex items-center justify-center text-md font-semibold">
-          {item.qty}
+          {qty}
         </div>
-
-        {/* Plus Button */}
+        {qty > 1 ? (
         <button
           onClick={() => decrementCount()}
           className="w-1/3 h-10 text-lg flex items-center justify-center border-r border-gray-300"
         >
-          -{/* <MinusIcon /> */}
+          -
         </button>
+      ) : (
+        <button
+          onClick={() => removeItem()}
+          className="w-1/3 h-10 text-lg flex items-center justify-center border-r border-gray-300"
+        >
+          <TrashIcon />
+        </button>
+      )}
       </div>
     </>
   );
