@@ -8,11 +8,12 @@ import { Counter } from '../Counter';
 import TrashIcon from '@/components/Icons/TrashIcon';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCardItem } from '@/store/slices/cardItems';
+import { useParams } from 'react-router-dom';
 
 export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const dispatch = useDispatch();
-
+  let params = useParams();
   return (
     <>
       <table className="table-auto text-base font-medium text-right text-black w-full">
@@ -58,17 +59,21 @@ export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
                   SR {Number(item.price) * Number(item.qty)}
                 </td>
 
+                {/* {!params.id && ( */}
                 <td
                   onClick={() => {
-                    const updatedItems = cardItemValue.filter(
-                      (i: { id: string }) => i.id !== item.id
-                    );
-                    dispatch(setCardItem(updatedItems));
+                    if (!params.id) {
+                      const updatedItems = cardItemValue.filter(
+                        (i: { id: string }) => i.id !== item.id
+                      );
+                      dispatch(setCardItem(updatedItems));
+                    }
                   }}
                   className="py-7  rounded-br-lg cursor-pointer hover:scale-105 "
                 >
                   <TrashIcon />
                 </td>
+                {/* )} */}
                 <td className="py-7 w-[6%] "></td>
                 <td className="py-7 w-[6%]"></td>
               </tr>

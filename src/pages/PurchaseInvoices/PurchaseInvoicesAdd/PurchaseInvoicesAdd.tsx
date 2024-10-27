@@ -120,10 +120,13 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           items: items.map((item) => item.item),
           invoice_number: Math.floor(Math.random() * 100000),
         });
+        const res =  await axiosInstance.get(
+          `inventory/purchasing/${data.id}`
+        )
         await axiosInstance.post(
           'inventory/purchasing/update_qtys_costs',
           items.map((item) => ({
-            id: data.id,
+            id: res?.data.id,
             quantity: item.qty,
             total_cost: Number(item.total) * Number(item.qty),
           }))

@@ -79,8 +79,10 @@ export const ShopCardEdit: React.FC<ShopCardProps> = () => {
     if (getOrdersById?.data?.data) {
       const { data } = getOrdersById.data;
       dispatch(updateField({ field: 'customer_id', value: data.customer?.id }));
-      dispatch(updateField({ field: 'customer_notes', value:  data.customer_notes }));
-
+      dispatch(
+        updateField({ field: 'customer_notes', value: data.customer_notes })
+      );
+      dispatch(addPayment(data.payments || []));
     }
   }, [getOrdersById?.data?.data]);
 
