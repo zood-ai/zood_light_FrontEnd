@@ -61,3 +61,17 @@ export const selectOptions: Option[] = [
   { value: 'passport', label: 'Passport' },
   { value: 'driverLicense', label: 'Driver License' },
 ]
+export const paymentmethod :any = [
+  {
+    value: "1",
+    label: "Cash",
+  },
+  {
+    value: "2",
+    label: "Card",
+  },
+  {
+    value: "3",
+    label: "Other",
+  },
+];

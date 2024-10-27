@@ -41,6 +41,21 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
           </div>
         </div>
       )}
+      
+      {status === 'active' && (
+        <div className="flex flex-col justify-center py-xs text-sm font-semibold text-teal-500 whitespace-nowrap max-w-[81px]">
+          <div className="gap-2.5 capitalize self-stretch px-2 h-6 pt-[2px] bg-[#D2F9F4] rounded border border-[#1BDAC0] border-solid">
+            {text}
+          </div>
+        </div>
+      )}
+      {status === 'Inactive' && (
+        <div className="flex gap-2 text-sm font-medium text-[#195EAD] rounded-none max-w-[181px]">
+          <div className="gap-2.5 self-stretch px-2 h-6 rounded border pt-[2px] border-[#1B74DA] border-solid bg-[#E1EBFA66] bg-opacity-40 shadow-[0px_1px_6px_rgba(0,0,0,0.08)] capitalize">
+            {text}
+          </div>
+        </div>
+      )}
     </>
   );
 };

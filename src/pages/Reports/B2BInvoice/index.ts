@@ -1,1 +1,1 @@
-export { Products as IndividualInvoices } from './B2BInvoice';
+export {  B2BInvoice } from './B2BInvoice';

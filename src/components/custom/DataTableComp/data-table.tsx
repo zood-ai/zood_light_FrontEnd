@@ -30,6 +30,7 @@ import { Input } from '@/components/ui/input';
 import IconInput from '../InputWithIcon';
 import search from '/icons/search.svg';
 import { LoadingSkeleton } from '../LoadingSkeleton';
+import { useNavigate } from 'react-router-dom';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -91,7 +92,7 @@ export function DataTable<TData, TValue>({
   });
   const { current_page, last_page, per_page, total } = meta || {};
   console.log('Screen Height:', window.innerHeight);
-
+  let navigate = useNavigate();
   return (
     <>
       {!loading ? (
@@ -159,13 +160,14 @@ export function DataTable<TData, TValue>({
                         </TableCell>
                       </TableRow>
                     ) : table.getRowModel().rows.length > 0 ? (
-                      table.getRowModel().rows.map((row) => (
+                      table.getRowModel().rows.map((row: any) => (
                         <TableRow
                           style={{ cursor: 'pointer' }}
                           key={row.id}
                           data-state={row.getIsSelected() && 'selected'}
                           onClick={() => {
-                            handleRowClick(row.original);
+                            navigate(`edit/${row.original.id}`);
+                            // handleRowClick(row.original);
                           }}
                         >
                           {row.getVisibleCells()?.map((cell) => (
@@ -193,10 +195,10 @@ export function DataTable<TData, TValue>({
               </div>
             </div>
             <DataTablePagination
-              current_page={current_page}
-              per_page={per_page}
-              total={total}
-              last_page={last_page}
+              current_page={current_page || 1}
+              per_page={per_page || 1}
+              total={total || 1}
+              last_page={last_page || 1}
               // onPageChange={(newPageIndex) => {
               //   setPagination((prev) => ({ ...prev, pageIndex: newPageIndex }))
               // }}

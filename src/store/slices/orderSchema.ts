@@ -23,6 +23,7 @@ interface OrderSchemaState {
   total_price: number;
   is_sales_order: number;
   tendered: any;
+  invoice_number:any;
 }
 
 const initialState: OrderSchemaState = {
@@ -48,6 +49,7 @@ const initialState: OrderSchemaState = {
   subtotal_price: 0,
   total_price: 0,
   is_sales_order: 0,
+  invoice_number: Math.floor(Math.random() * 999999999),
 };
 
 const orderSchemaSlice: any = createSlice({

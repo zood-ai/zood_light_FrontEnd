@@ -1,0 +1,1 @@
+export { CorporateInvoices as FastInvoice } from './CorporateInvoices';

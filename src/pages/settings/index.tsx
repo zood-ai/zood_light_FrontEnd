@@ -1,83 +1,154 @@
-import { Outlet } from 'react-router-dom'
-import {
-  IconBrowserCheck,
-  IconExclamationCircle,
-  IconNotification,
-  IconPalette,
-  IconTool,
-  IconUser,
-} from '@tabler/icons-react'
-import { Layout } from '@/components/custom/layout'
-import { Search } from '@/components/search'
-import { Separator } from '@/components/ui/separator'
-import ThemeSwitch from '@/components/theme-switch'
-import { UserNav } from '@/components/user-nav'
-import SidebarNav from './components/sidebar-nav'
+import { Button } from '@/components/custom/button';
+import { SelectComp } from '@/components/custom/SelectItem';
+import { Input } from '@/components/ui/input';
 
 export default function Settings() {
   return (
-    <Layout fixed>
-      {/* ===== Top Heading ===== */}
-      <Layout.Header>
-        <Search />
-        <div className='ml-auto flex items-center space-x-4'>
-          <ThemeSwitch />
-          <UserNav />
+    <>
+      <div className="flex flex-col rounded-none max-w-[805px]">
+        <div className="self-start text-2xl font-semibold text-left text-zinc-800 max-md:mr-2.5">
+          الاعدادات
         </div>
-      </Layout.Header>
 
-      <Layout.Body className='flex flex-col'>
-        <div className='space-y-0.5'>
-          <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
-            Settings
-          </h1>
-          <p className='text-muted-foreground'>
-            Manage your account settings and set e-mail preferences.
-          </p>
+        <div className="flex flex-col items-start py-4 pr-4 pl-16 mt-4 w-full bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
+          <div className="text-s font-semibold text-zinc-800">
+            البيانات الاساسية
+          </div>
+          <div className="self-stretch max-md:max-w-full">
+            <div className="grid grid-cols-2">
+              <div className="flex flex-col w-6/12 max-md:ml-0 max-md:w-full">
+                <div className="flex flex-col grow mt-10 text-sm text-left max-md:mt-10">
+                  <div className="self-start font-medium text-zinc-500">
+                    عنوان المتجر
+                  </div>
+                  <Input className="w-[327px]" />
+                </div>
+              </div>
+              <div className="flex flex-col w-6/12 max-md:ml-0 max-md:w-full">
+                <div className="flex flex-col grow mt-10 text-sm text-left max-md:mt-10">
+                  <div className="self-start font-medium text-zinc-500">
+                    اسم المتجر
+                  </div>
+                  <Input className="w-[327px]" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4 mt-4 max-w-full text-sm text-left ">
+            <div className="flex flex-col flex-1">
+              <div className="self-start font-medium text-zinc-500">
+                الرقم الاضافي
+              </div>
+              <Input className="w-[117px] " />
+            </div>
+            <div className="flex flex-col flex-1">
+              <div className="self-start font-medium text-zinc-500">
+                الرمز البريدي
+              </div>
+              <Input className="w-[117px] " />
+            </div>
+            <div className="flex flex-col flex-1">
+              <div className="self-start font-medium text-zinc-500">
+                رقم المبني
+              </div>
+              <Input className="w-[117px] " />
+            </div>
+          </div>
+          <Button className="flex flex-col justify-center items-center px-6 py-1.5 mt-6 text-sm font-semibold text-left text-white whitespace-nowrap bg-indigo-900 rounded border border-indigo-900 border-solid min-h-[39px] max-md:px-5">
+            <div className="gap-3 self-stretch">حفظ</div>
+          </Button>
         </div>
-        <Separator className='my-4 lg:my-6' />
-        <div className='flex flex-1 flex-col space-y-8 md:space-y-2 md:overflow-hidden lg:flex-row lg:space-x-12 lg:space-y-0'>
-          <aside className='top-0 lg:sticky lg:w-1/5'>
-            <SidebarNav items={sidebarNavItems} />
-          </aside>
-          <div className='flex w-full p-1 pr-4 md:overflow-y-hidden'>
-            <Outlet />
+        <div className="flex flex-col py-4 mt-6 w-full text-left bg-white rounded border border-gray-200 border-solid max-md:max-w-full">
+          <div className="flex flex-col self-start max-md:mr-2.5">
+            <div className="text-base font-semibold text-zinc-800">
+              العنوان والهاتف
+            </div>
+            <div className="self-start mt-2 text-sm font-medium text-zinc-500 max-md:mr-2">
+              الدولة
+            </div>
+          </div>
+          <div className="flex flex-col items-start pr-4 pl-20 w-full text-sm max-md:pl-5 max-md:max-w-full">
+            <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full">
+              <Input className=" " />
+
+              <Input className=" " />
+            </div>
+            <div className="mt-4 font-medium text-zinc-500">الحي</div>
+            <Input className=" " />
+
+            <div className="mt-4 font-medium text-zinc-500">رقم الهاتف</div>
+            <Input className=" " />
+
+            <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 font-semibold text-white whitespace-nowrap bg-indigo-900 rounded min-h-[39px] max-md:px-5">
+              <div className="gap-3 self-stretch">حفظ</div>
+            </div>
           </div>
         </div>
-      </Layout.Body>
-    </Layout>
-  )
-}
+        <div className="flex flex-col items-start py-4 pr-2.5 pl-20 mt-7 w-full text-sm font-semibold text-left bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
+          <div className="text-base text-zinc-800 max-md:mr-2">الضريبة</div>
+          <div className="mt-2 font-medium text-zinc-500 max-md:mr-2">
+            نسبة الضريبة
+          </div>
+          <Input className=" " />
 
-const sidebarNavItems = [
-  {
-    title: 'Profile',
-    icon: <IconUser size={18} />,
-    href: '/settings',
-  },
-  {
-    title: 'Account',
-    icon: <IconTool size={18} />,
-    href: '/settings/account',
-  },
-  {
-    title: 'Appearance',
-    icon: <IconPalette size={18} />,
-    href: '/settings/appearance',
-  },
-  {
-    title: 'Notifications',
-    icon: <IconNotification size={18} />,
-    href: '/settings/notifications',
-  },
-  {
-    title: 'Display',
-    icon: <IconBrowserCheck size={18} />,
-    href: '/settings/display',
-  },
-  {
-    title: 'Error Example',
-    icon: <IconExclamationCircle size={18} />,
-    href: '/settings/error-example',
-  },
-]
+          <div className="mt-4 font-medium text-zinc-500 max-md:mr-2">
+            طريقة حساب الضريبة
+          </div>
+          <div className="flex gap-5 items-center mt-2 max-w-full text-zinc-800 w-[1c 48px] max-md:mr-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="taxOption"
+                value="inclusive"
+                className=" "
+              />
+
+              <span className="text-zinc-800">السعر شامل الضريبة</span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="taxOption"
+                value="exclusive"
+                className=" "
+              />
+
+              <span className="text-zinc-800">السعر غير شامل الضريبة</span>
+            </label>
+          </div>
+
+          <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-indigo-900 rounded min-h-[39px] max-md:px-5">
+            <div className="gap-3 self-stretch">حفظ</div>
+          </div>
+        </div>
+        <div className="flex flex-col items-start self-start mt-4 max-w-full text-sm text-left w-[223px]">
+          <div className="font-medium text-zinc-500 ">Upload logo</div>
+          <div className="flex gap-2 items-center">
+            <label className="flex flex-1 justify-center items-center  font-semibold bg-gray-200 rounded border border-solid border-zinc-300 w-[117px]  h-[39px] text-mainText cursor-pointer  ">
+              <span className="text-[14px]">اختر الملف</span>
+              <input
+                type="file"
+                className="hidden"
+                onChange={(e) => {
+                  const fileName =
+                    e.target.files?.[0]?.name || 'No file chosen';
+                }}
+              />
+            </label>
+            <div className="   bg font-medium text-zinc-500" id="file-name">
+              No file chosen
+            </div>
+          </div>
+
+          <Button
+            variant={'outlineDel'}
+            className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 font-semibold text-red-500 bg-white rounded border border-red-500 border-solid min-h-[39px] max-md:px-5"
+          >
+            <div className="gap-3 self-stretch">حذف الحساب</div>
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}

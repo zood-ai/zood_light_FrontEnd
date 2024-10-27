@@ -104,7 +104,7 @@ function NavLink({
           variant: checkActiveNav(href) ? 'ghost' : 'ghost',
           size: 'sm',
         }),
-        `h-12 justify-start text-wrap rounded-none px-6 ${
+        `h-12 justify-start text-wrap rounded-none px-6  ${
           checkActiveNav(href)
             ? 'bg-[#EAEBF5] rounded-[8px] mx-2 ps-[16px] hover:bg-[#EAEBF5]'
             : ''
@@ -114,8 +114,8 @@ function NavLink({
       aria-current={checkActiveNav(href) ? 'page' : undefined}
     >
       <div className={`${isRtl ? 'ml-2' : 'mr-2'}`}>
-        <span className={`${checkActiveNav(href) ? 'text-main' : ''}`}>
-          {icon}
+        <span className={`${checkActiveNav(href) ? 'text-main ' : 'text-secText'}`}>
+          <i>{icon}</i>
         </span>
       </div>
       <span
@@ -146,7 +146,7 @@ function NavLinkDropdown({ title, icon, label, sub, closeNav }: NavLinkProps) {
       <CollapsibleTrigger
         className={cn(
           buttonVariants({ variant: 'ghost', size: 'sm' }),
-          'group h-12 w-full justify-start rounded-none px-6'
+          'text-secText group h-12 w-full justify-start rounded-none px-6'
         )}
       >
         <div className={`${isRtl ? 'ml-2' : 'mr-2'}`}>{icon}</div>
@@ -196,7 +196,7 @@ function NavLinkIcon({ title, icon, label, href }: NavLinkProps) {
             } `
           )}
         >
-          <span className={`${checkActiveNav(href) ? 'text-main' : ''}`}>
+          <span className={`${checkActiveNav(href) ? 'text-main' : 'text-secText'}`}>
             {icon}
           </span>{' '}
           <span className="sr-only">{title}</span>
@@ -227,7 +227,7 @@ function NavLinkIconDropdown({ title, icon, label, sub }: NavLinkProps) {
             <Button
               variant={isChildActive ? 'secondary' : 'ghost'}
               size="icon"
-              className="h-12 w-12"
+              className="h-12 w-12 text-secText"
             >
               {icon}
             </Button>

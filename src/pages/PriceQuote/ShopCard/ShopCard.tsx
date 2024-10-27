@@ -116,7 +116,41 @@ export const ShopCardPrice: React.FC<ShopCardProps> = () => {
     );
   }, []);
   const isRtl = useDirection();
+  const { data: branchData } =
+  createCrudService<any>('manage/branches').useGetAll();
 
+  const totalCost = cardItemValue.reduce(
+    (acc, item) => acc + item.price * item.qty,
+    0
+  );
+  useEffect(() => {
+    // dispatch(addPayment(paymentMethod));
+    dispatch(
+      updateField({
+        field: 'subtotal_price',
+        value: totalCost,
+      })
+    );
+    dispatch(
+      updateField({
+        field: 'total_price',
+        value: totalCost ,
+      })
+    );
+   
+    dispatch(
+      updateField({
+        field: 'branch_id',
+        value: branchData?.data?.[0]?.id,
+      })
+    );
+    // dispatch(
+    //   updateField({
+    //     field: 'discount_amount',
+    //     value: taxAmount,
+    //   })
+    // );
+  }, [cardItemValue]);
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
@@ -136,7 +170,7 @@ export const ShopCardPrice: React.FC<ShopCardProps> = () => {
             className="col-span-10 md:col-span-4 w-[327px]"
           />
           <IconInput
-            // disabled
+            disabled
             name="name"
             className="col-span-10 md:col-span-4"
             label="رقم العميل"
@@ -145,7 +179,7 @@ export const ShopCardPrice: React.FC<ShopCardProps> = () => {
             onChange={null}
           />
           <IconInput
-            // disabled
+            disabled
             name={formState.name}
             className="col-span-10 md:col-span-10"
             label="اسم الشارع"
@@ -153,14 +187,14 @@ export const ShopCardPrice: React.FC<ShopCardProps> = () => {
             onChange={null}
           />
           <IconInput
-            // disabled
+            disabled
             className="col-span-10 md:col-span-4"
             label="رقم تسجيل ضريبة القيمة المضافة"
             value={formState.tax_registration_number}
             onChange={null}
           />
           <IconInput
-            // disabled
+            disabled
             className="col-span-10 md:col-span-6"
             label="معرف اخر"
             value={formState.vat_registration_number}

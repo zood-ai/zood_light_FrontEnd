@@ -14,9 +14,10 @@ import { useDataTableColumns } from './components/useDataTableColumns';
 import useDirection from '@/hooks/useDirection';
 import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { resetCard } from '@/store/slices/cardItems';
 import { resetOrder } from '@/store/slices/orderSchema';
+import { toggleActionView } from '@/store/slices/toggleAction';
 
 export const PriceQuote: React.FC<PriceQuoteProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -48,6 +49,9 @@ export const PriceQuote: React.FC<PriceQuoteProps> = () => {
     setIsAddEditOpen(false);
     setIsViewModalOpen(false);
     setIsDelModalOpen(false);
+
+    dispatch(toggleActionView(false));
+
   };
   const filterBtn = () => {
     console.log('filterBtn');
@@ -67,6 +71,8 @@ useEffect(() => {
   dispatch(resetCard());
   dispatch(resetOrder());
 }, [dispatch])
+const toggleActionData = useSelector((state: any) => state?.toggleAction);
+
   return (
     <>
       <AddEditModal
@@ -77,7 +83,7 @@ useEffect(() => {
       />
       <DetailsModal
         initialData={selectedTableRow}
-        isOpen={isViewModalOpen}
+        isOpen={toggleActionData.value}
         onClose={handleCloseModal}
       />
       <ConfirmDelModal

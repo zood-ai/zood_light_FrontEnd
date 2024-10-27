@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from './sidebar';
 import useIsCollapsed from '@/hooks/use-is-collapsed';
 import SkipToMain from './skip-to-main';
@@ -14,6 +14,11 @@ import LanguageDropdown from '@/i18n/LanguageDropdown';
 import { Button } from './custom/button';
 import { PlusIcon } from '@radix-ui/react-icons';
 import { UserNav } from './user-nav';
+import { useDispatch, useSelector } from 'react-redux';
+import { useGlobalDialog } from '@/context/GlobalDialogProvider';
+import { toggleUserNavigate } from '@/store/slices/usrNavSlice';
+import FastAddActions from './FastAddActions';
+import DialogSidebar from './DialogSidebar';
 interface WelcomeMessageProps {
   name: string;
 }
@@ -28,9 +33,27 @@ export const WelcomeMessage: React.FC<WelcomeMessageProps> = ({ name }) => {
 const AppShell = () => {
   const [isCollapsed, setIsCollapsed] = useIsCollapsed();
   const { isLoading } = useLoading();
-
+  let navigate = useNavigate();
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
+  const userNav = useSelector((state: any) => state.usrNavSlice.active);
+  const { openDialog, delRoute } = useGlobalDialog();
+  let dispatch = useDispatch();
+  useEffect(() => {
+    if (userNav === true) {
+      navigate(-1);
+      openDialog('deleted');
+      const timer = setTimeout(() => {
+        dispatch(toggleUserNavigate(false));
+      }, 3000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [userNav]);
+const [fastActionBtn , setFastActionBtn] = useState(false)
+const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
@@ -86,6 +109,7 @@ const AppShell = () => {
                 </div>
               </h2>
               <div
+              onClick={() => setFastActionBtn(true)}
                 className={`${
                   isRtl ? 'mr-auto' : 'ml-auto'
                 } flex items-center space-x-4`}
@@ -111,6 +135,8 @@ const AppShell = () => {
           <BottomNavBar />
         </div>
       </div>
+      <FastAddActions isOpen={fastActionBtn} onClose={() => setFastActionBtn(false)}  />
+  
     </>
   );
 };

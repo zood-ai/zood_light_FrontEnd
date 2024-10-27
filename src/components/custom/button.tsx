@@ -14,13 +14,14 @@ const buttonVariants = cva(
         destructive:
           'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
         outline:
-          'text-main border rounded-[4px] border-mainBorder bg-background shadow-sm hover:bg-accent hover:text-accent-foreground ',
+          'text-main border rounded-[4px] border-[mainBorder] bg-background shadow-sm hover:bg-accent hover:text-accent-foreground ',
+        outlineDel:
+          'text-[#FC3030] border rounded-[4px] border-[#FC3030] bg-background shadow-sm hover:bg-[#FC3030] hover:text-white ',
         outlineMain:
-          'text-main border font-semibold rounded-[4px] border-main bg-background shadow-sm hover:mainHover   ',
+          'text-main border font-semibold rounded-[4px] border-main bg-background shadow-sm hover:mainHover  hover:bg-mainHover hover:text-white  ',
         success:
           'bg-mainSuccess text-white shadow-sm hover:bg-mainSuccessHover',
-        fail:
-          'bg-mainAlert text-white shadow-sm hover:bg-mainAlertHover',
+        fail: 'bg-mainAlert text-white shadow-sm hover:bg-mainAlertHover',
         secondary:
           'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
@@ -80,6 +81,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <button
+        dir="ltr"
         className={cn(buttonVariants({ variant, size, className }), ' ')}
         disabled={loading || disabled}
         ref={ref}
