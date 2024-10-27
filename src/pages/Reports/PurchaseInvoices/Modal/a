@@ -1,0 +1,119 @@
+// import React, { useEffect } from 'react'
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogTitle,
+//   DialogDescription,
+//   DialogHeader,
+//   DialogFooter,
+// } from '@/components/ui/dialog'
+// import { useForm } from 'react-hook-form'
+// import { z, ZodSchema } from 'zod'
+// import { zodResolver } from '@hookform/resolvers/zod'
+// import {
+//   Form,
+//   FormControl,
+//   FormField,
+//   FormItem,
+//   FormLabel,
+//   FormMessage,
+// } from '@/components/ui/form'
+// import { Input } from '@/components/ui/input'
+// import { Button } from '@/components/custom/button'
+
+// const fieldConfigurations = [
+//   { name: 'sellerName', label: 'Name', type: 'text', validation: z.string() },
+//   { name: 'sellerEmail', label: 'Email', type: 'email', validation: z.string().email().min(2).max(50) },
+//   { name: 'country', label: 'Country', type: 'text', validation: z.string() },
+//   { name: 'dateOfBirth', label: 'Date of Birth', type: 'date', validation: z.string() },
+//   { name: 'phoneNumber', label: 'Phone', type: 'tel', validation: z.string() },
+//   { name: 'nationalId', label: 'National ID', type: 'text', validation: z.string() },
+//   { name: 'uploadId', label: 'Upload ID', type: 'file', validation: z.any() },
+//   { name: 'password', label: 'Password', type: 'password', validation: z.string().min(8) },
+// ]
+
+// const createFormSchema = () => {
+//   const schemaFields = fieldConfigurations.reduce((acc, field) => {
+//     acc[field.name] = field.validation
+//     return acc
+//   }, {} as Record<string, ZodSchema>)
+//   return z.object(schemaFields)
+// }
+
+// const formSchema = createFormSchema()
+
+// interface DynamicFormModalProps {
+//   isOpen: boolean
+//   onClose: () => void
+//   initialData?: any
+// }
+
+// export const AddEditModal: React.FC<DynamicFormModalProps> = ({
+//   isOpen,
+//   onClose,
+//   initialData = {},
+// }) => {
+//   const form = useForm<z.infer<typeof formSchema>>({
+//     resolver: zodResolver(formSchema),
+//     defaultValues: initialData,
+//   })
+
+//   useEffect(() => {
+//     if (initialData) {
+//       form.reset(initialData)
+//     }
+//   }, [initialData, form])
+
+//   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
+//     console.log(values)
+//   }
+
+//   const renderFormField = (field: typeof fieldConfigurations[number]) => {
+//     return (
+//       <FormField
+//         key={field.name}
+//         control={form.control}
+//         name={field.name}
+//         render={({ field: inputProps }) => (
+//           <FormItem>
+//             <FormLabel>{field.label}</FormLabel>
+//             <FormControl>
+//               <Input
+//                 type={field.type}
+//                 placeholder={field.label}
+//                 {...inputProps}
+//               />
+//             </FormControl>
+//             <FormMessage />
+//           </FormItem>
+//         )}
+//       />
+//     )
+//   }
+
+//   return (
+//     <Dialog open={isOpen} onOpenChange={onClose}>
+//       <DialogContent className='max-w-2xl'>
+//         <DialogHeader>
+//           <DialogTitle>Create New Seller</DialogTitle>
+//           <DialogDescription>Fill in the details below.</DialogDescription>
+//         </DialogHeader>
+//         <Form {...form}>
+//           <form
+//             onSubmit={form.handleSubmit(handleFormSubmit)}
+//             className='my-5'
+//           >
+//             <div className='grid grid-cols-1 gap-4 h-[400px] overflow-y-scroll px-4 md:grid-cols-2 md:px-0'>
+//               {fieldConfigurations.map(renderFormField)}
+//             </div>
+//             <div className='col-span-full'>
+//               <Button size='lg' variant='default' type='submit'>
+//                 Submit
+//               </Button>
+//             </div>
+//           </form>
+//         </Form>
+//       </DialogContent>
+//     </Dialog>
+//   )
+// }

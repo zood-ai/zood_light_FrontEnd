@@ -39,6 +39,9 @@ function Tasks() {
     setIsAddEditOpen(false);
     setIsViewModalOpen(false);
     setIsDelModalOpen(false);
+
+    // dispatch(toggleActionView(false));
+
   };
   const filterBtn = () => {
     console.log('filterBtn');

@@ -22,13 +22,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/api/interceptors';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
+import ConfirmBk from '@/components/custom/ConfimBk';
+import DelConfirm from '@/components/custom/DelConfim';
 
 const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
   phone: z.string().nonempty('Phone is required'),
   address: z.string().nonempty('Address is required'),
-  taxNum: z.string(),
-  coTax: z.string(),
+  taxNum: z.string().min(15, { message: 'Tax number is must be 15 number' }),
+  coTax: z.string().min(15, { message: 'Tax number is must be 15 number' }),
 });
 
 export const CustomersAdd: React.FC<CustomersAddProps> = () => {
@@ -165,11 +167,21 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
         });
     }
   };
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      <DetailsHeadWithOutFilter />
+      <DetailsHeadWithOutFilter   bkAction={() => {
 
+setIsOpen(true);
+}}
+ />
+    <ConfirmBk
+        isOpen={isOpen}
+        setIsOpen={undefined}
+        closeDialog={() => setIsOpen(false)}
+        getStatusMessage={undefined}
+      />
       <div className="min-h-[70vh]">
         <div className="grid grid-cols-1  items-start">
           <Form {...form}>
@@ -271,6 +283,8 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
               >
                 {isEditMode ? 'تعديل عميل' : 'اضافة عميل'}
               </Button>
+              <DelConfirm  route={'manage/customers'} />
+
             </form>
           </Form>
         </div>

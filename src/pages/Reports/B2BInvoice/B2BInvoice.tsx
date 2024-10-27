@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { ProductsProps } from './B2BInvoice.types';
+import { B2BInvoiceProps } from './B2BInvoice.types';
 
-import './Products.css';
+import './B2BInvoice.css';
 import { tasks } from './data/tasks';
 import { useState } from 'react';
 import { DetailsModal } from './Modal/DetailsModal';
@@ -13,8 +13,14 @@ import { useTranslation } from 'react-i18next';
 import { useDataTableColumns } from './components/useDataTableColumns';
 import useDirection from '@/hooks/useDirection';
 import { useNavigate } from 'react-router-dom';
+import { LoadingSkeleton } from '@/components/custom/LoadingSkeleton';
+import createCrudService from '@/api/services/crudService';
+import { useDispatch, useSelector } from 'react-redux';
+import { resetCard } from '@/store/slices/cardItems';
+import { resetOrder } from '@/store/slices/orderSchema';
+import { toggleActionView } from '@/store/slices/toggleAction';
 
-export const Products: React.FC<ProductsProps> = () => {
+export const B2BInvoice: React.FC<B2BInvoiceProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
@@ -40,10 +46,14 @@ export const Products: React.FC<ProductsProps> = () => {
     setSelectedRow(row);
     setIsAddEditOpen(true);
   };
+
   const handleCloseModal = () => {
     setIsAddEditOpen(false);
     setIsViewModalOpen(false);
     setIsDelModalOpen(false);
+
+    dispatch(toggleActionView(false));
+
   };
   const filterBtn = () => {
     console.log('filterBtn');
@@ -51,6 +61,19 @@ export const Products: React.FC<ProductsProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
+  const allService = createCrudService<any>('orders?filter[type]=2');
+  const { useGetAll } = allService;
+  const { data: allData, isLoading } = useGetAll();
+  console.log(allData, 'allUserData');
+
+  const dispatch = useDispatch();
+useEffect(() => {
+
+  dispatch(resetCard());
+  dispatch(resetOrder());
+}, [dispatch])
+const toggleActionData = useSelector((state: any) => state?.toggleAction);
+
 
   return (
     <>
@@ -62,7 +85,7 @@ export const Products: React.FC<ProductsProps> = () => {
       />
       <DetailsModal
         initialData={selectedTableRow}
-        isOpen={isViewModalOpen}
+        isOpen={toggleActionData.value}
         onClose={handleCloseModal}
       />
       <ConfirmDelModal
@@ -71,23 +94,18 @@ export const Products: React.FC<ProductsProps> = () => {
         onClose={handleCloseModal}
       />
 
-      <div className="mb-2 flex items-center justify-between space-y-2">
-        <div>
-          <p className="text-muted-foreground">
-            {t('WELCOME_BACK_DESC')} {t('TASKS')}
-          </p>
-        </div>
-      </div>
-
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
           handleDel={handleOpenDeleteModal}
           handleRowClick={handleOpenViewModal}
-          data={tasks}
+          data={allData?.data || []}
           columns={columns}
           handleEdit={handleOpenEditModal}
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
+          meta={allData || {}}
+          actionText={'فاتورة '}
+          loading={isLoading}
         />
       </div>
     </>

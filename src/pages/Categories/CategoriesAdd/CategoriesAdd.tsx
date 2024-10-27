@@ -23,6 +23,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/api/interceptors';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
+import ConfirmBk from '@/components/custom/ConfimBk';
+import { DeatilsHeaderWithFilter } from '@/components/custom/DeatilsHeaderWithFilter';
+import DelConfirm from '@/components/custom/DelConfim';
+import InvoiceSkeleton from '@/components/custom/InvoiceSkeleton ';
 
 const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
@@ -61,6 +65,7 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
           setcurrData(customerData);
           if (customerData) {
             form.setValue('name', customerData.name || '');
+            setfile(customerData.image || '');
           }
         })
         .catch((err) => {
@@ -78,42 +83,57 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
 
-    const onError = () => setLoading(false);
+    const resetFormAndNavigate = () => {
+      form.reset({});
+      navigate('/zood-dashboard/categories');
+      setLoading(false);
+    };
 
-    if (isEditMode) {
-      await axiosInstance
-        .put(`menu/categories/${params.objId}`, {
-          name: values.name,
-        })
-        .then(() => {
-          openDialog('added');
-          setLoading(false);
-          form.reset({});
-          navigate('/zood-dashboard/categories');
-        })
-        .catch((err) => {
-          form.reset({});
-          setLoading(false);
-        });
-    } else {
-      await axiosInstance
-        .post('menu/categories', { name: values.name })
+    const handleError = () => {
+      setLoading(false);
+      // form.reset({});
+    };
 
-        .then(() => {
-          openDialog('added');
-          setLoading(false);
-          form.reset({});
-          navigate('/zood-dashboard/categories');
-        })
-        .catch((err) => {
-          form.reset({});
-          setLoading(false);
-        });
+    try {
+      const apiUrl = isEditMode
+        ? `menu/categories/${params.objId}`
+        : 'menu/categories';
+
+      const requestMethod = isEditMode ? 'put' : 'post';
+
+      await axiosInstance[requestMethod](apiUrl, {
+        name: values.name,
+        image: file,
+      });
+
+      openDialog('added');
+      resetFormAndNavigate();
+    } catch (error) {
+      handleError();
     }
   };
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <>
-      <DetailsHeadWithOutFilter />
+    {/* {
+      isEditMode ? (
+        <InvoiceSkeleton
+        />
+      ) : ( */}
+        
+    <>
+      <DetailsHeadWithOutFilter
+        bkAction={() => {
+          setIsOpen(true);
+        }}
+      />
+      <ConfirmBk
+        isOpen={isOpen}
+        setIsOpen={undefined}
+        closeDialog={() => setIsOpen(false)}
+        getStatusMessage={undefined}
+      />
       <div className="min-h-[70vh]">
         <div className="flex flex-col items-start rounded-none max-w-[70vw] ">
           <div className="grid grid-cols-2 gap-6 self-stretch bg ">
@@ -141,9 +161,10 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
                     )}
                   />
 
-                  <Button className="mt-4 h-[39px] w-[163px]" type="submit">
+                  <Button loading={loading} disabled={loading} className="mt-4 h-[39px] w-[163px]" type="submit">
                     {'اضافة الفئه'}
                   </Button>
+                  <DelConfirm route={'menu/categories'} />
                 </form>
               </Form>
             </div>
@@ -160,6 +181,10 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
           </div>
         </div>
       </div>
+    </>
+      {/* )
+    } */}
+    
     </>
   );
 };

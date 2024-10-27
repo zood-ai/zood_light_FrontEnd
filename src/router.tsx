@@ -1,35 +1,143 @@
 import { createBrowserRouter } from 'react-router-dom';
 import GeneralError from './pages/errors/general-error';
 import NotFoundError from './pages/errors/not-found-error';
-import MaintenanceError from './pages/errors/maintenance-error';
-import UnauthorisedError from './pages/errors/unauthorised-error.tsx';
-import React from 'react';
+
+import React, { lazy } from 'react';
 import ProtectedRoute from './config/ProtectedRoute.tsx';
 import { Roles } from './config/roles.ts';
 import DashCards from './components/DashCards.tsx';
-import { DashBoard } from './pages/DashBoard/DashBoard.tsx';
-import { IndividualInvoices } from './pages/IndividualInvoices/IndividualInvoices.tsx';
-import { IndividualInvoicesAdd } from './pages/IndividualInvoices/IndividualInvoicesAdd/IndividualInvoicesAdd.tsx';
-import { CorporateInvoices } from './pages/CorporateInvoices/CorporateInvoices.tsx';
-import { CorporateInvoicesAdd } from './pages/CorporateInvoices/CorporateInvoicesAdd/CorporateInvoicesAdd.tsx';
-import { PurchaseInvoices } from './pages/PurchaseInvoices/PurchaseInvoices.tsx';
-import { PurchaseInvoicesAdd } from './pages/PurchaseInvoices/PurchaseInvoicesAdd/PurchaseInvoicesAdd.tsx';
-import { PriceQuoteAdd } from './pages/PriceQuote/PriceQuoteAdd/PriceQuoteAdd.tsx';
-import { PriceQuote } from './pages/PriceQuote/PriceQuote.tsx';
-import { Products } from './pages/Products/Products.tsx';
-import { Categories } from './pages/Categories/Categories.tsx';
-import { Customers } from './pages/Customers/Customers.tsx';
-import { Resources } from './pages/Resources/Resources.tsx';
-import { ResourcesAdd } from './pages/Resources/ResourcesAdd/ResourcesAdd.tsx';
-import { CustomersAdd } from './pages/Customers/CustomersAdd/CustomersAdd.tsx';
-import { CategoriesAdd } from './pages/Categories/CategoriesAdd/CategoriesAdd.tsx';
-import { ProductsAdd } from './pages/Products/ProductsAdd/ProductsAdd.tsx';
-import { RegisterForm } from './components/custom/RegisterForm/RegisterForm.tsx';
-import { LoginForm } from './components/custom/LoginForm/LoginForm.tsx';
-import { ShopCard } from './pages/IndividualInvoices/ShopCard/ShopCard.tsx';
-import { ShopCardCo } from './pages/CorporateInvoices/ShopCard/ShopCard.tsx';
-import { ShopCardPrice } from './pages/PriceQuote/ShopCard/ShopCard.tsx';
-import SignIn2 from './pages/auth/sign-in-2.tsx';
+import { IndividualInvoicesReport } from './pages/Reports/PurchaseInvoices/index.ts';
+import { PaymentMethods } from './pages/PaymentMethods/index.ts';
+import { PaymentMethodsAdd } from './pages/PaymentMethods/ResourcesAdd/index.ts';
+import { FastInvoiceAdd } from './pages/FastInvoice/ShopCard/index.ts';
+import { FastInvoice } from './pages/FastInvoice/index.ts';
+import Plans from './pages/Plans/Plans.tsx';
+import UserProfile from './pages/UserProfile/UserProfile.tsx';
+const MaintenanceError = lazy(() => import('./pages/errors/maintenance-error'));
+const UnauthorisedError = lazy(
+  () => import('./pages/errors/unauthorised-error.tsx')
+);
+const SignIn2 = lazy(() => import('./pages/auth/sign-in-2.tsx'));
+const DashBoard = lazy(() =>
+  import('./pages/DashBoard/DashBoard.tsx').then((module) => ({
+    default: module.DashBoard,
+  }))
+);
+const B2BInvoice = lazy(() =>
+  import('./pages/Reports/B2BInvoice/B2BInvoice.tsx').then((module) => ({
+    default: module.B2BInvoice,
+  }))
+);
+const IndividualInvoices = lazy(() =>
+  import('./pages/IndividualInvoices/IndividualInvoices.tsx').then(
+    (module) => ({ default: module.IndividualInvoices })
+  )
+);
+const IndividualInvoicesAdd = lazy(() =>
+  import(
+    './pages/IndividualInvoices/IndividualInvoicesAdd/IndividualInvoicesAdd.tsx'
+  ).then((module) => ({ default: module.IndividualInvoicesAdd }))
+);
+const CorporateInvoices = lazy(() =>
+  import('./pages/CorporateInvoices/CorporateInvoices.tsx').then((module) => ({
+    default: module.CorporateInvoices,
+  }))
+);
+const CorporateInvoicesAdd = lazy(() =>
+  import(
+    './pages/CorporateInvoices/CorporateInvoicesAdd/CorporateInvoicesAdd.tsx'
+  ).then((module) => ({ default: module.CorporateInvoicesAdd }))
+);
+const PurchaseInvoices = lazy(() =>
+  import('./pages/PurchaseInvoices/PurchaseInvoices.tsx').then((module) => ({
+    default: module.PurchaseInvoices,
+  }))
+);
+const PurchaseInvoicesAdd = lazy(() =>
+  import(
+    './pages/PurchaseInvoices/PurchaseInvoicesAdd/PurchaseInvoicesAdd.tsx'
+  ).then((module) => ({ default: module.PurchaseInvoicesAdd }))
+);
+const PriceQuoteAdd = lazy(() =>
+  import('./pages/PriceQuote/PriceQuoteAdd/PriceQuoteAdd.tsx').then(
+    (module) => ({ default: module.PriceQuoteAdd })
+  )
+);
+const PriceQuote = lazy(() =>
+  import('./pages/PriceQuote/PriceQuote.tsx').then((module) => ({
+    default: module.PriceQuote,
+  }))
+);
+const Products = lazy(() =>
+  import('./pages/Products/Products.tsx').then((module) => ({
+    default: module.Products,
+  }))
+);
+const Categories = lazy(() =>
+  import('./pages/Categories/Categories.tsx').then((module) => ({
+    default: module.Categories,
+  }))
+);
+const Customers = lazy(() =>
+  import('./pages/Customers/Customers.tsx').then((module) => ({
+    default: module.Customers,
+  }))
+);
+const Resources = lazy(() =>
+  import('./pages/Resources/Resources.tsx').then((module) => ({
+    default: module.Resources,
+  }))
+);
+const ResourcesAdd = lazy(() =>
+  import('./pages/Resources/ResourcesAdd/ResourcesAdd.tsx').then((module) => ({
+    default: module.ResourcesAdd,
+  }))
+);
+const CustomersAdd = lazy(() =>
+  import('./pages/Customers/CustomersAdd/CustomersAdd.tsx').then((module) => ({
+    default: module.CustomersAdd,
+  }))
+);
+const CategoriesAdd = lazy(() =>
+  import('./pages/Categories/CategoriesAdd/CategoriesAdd.tsx').then(
+    (module) => ({ default: module.CategoriesAdd })
+  )
+);
+const ProductsAdd = lazy(() =>
+  import('./pages/Products/ProductsAdd/ProductsAdd.tsx').then((module) => ({
+    default: module.ProductsAdd,
+  }))
+);
+const RegisterForm = lazy(() =>
+  import('./components/custom/RegisterForm/RegisterForm.tsx').then(
+    (module) => ({ default: module.RegisterForm })
+  )
+);
+const LoginForm = lazy(() =>
+  import('./components/custom/LoginForm/LoginForm.tsx').then((module) => ({
+    default: module.LoginForm,
+  }))
+);
+const ShopCard = lazy(() =>
+  import('./pages/IndividualInvoices/ShopCard/ShopCard.tsx').then((module) => ({
+    default: module.ShopCard,
+  }))
+);
+const ShopCardCo = lazy(() =>
+  import('./pages/CorporateInvoices/ShopCard/ShopCard.tsx').then((module) => ({
+    default: module.ShopCardCo,
+  }))
+);
+const ShopCardPrice = lazy(() =>
+  import('./pages/PriceQuote/ShopCard/ShopCard.tsx').then((module) => ({
+    default: module.ShopCardPrice,
+  }))
+);
+const NormalVoiceReport = lazy(() =>
+  import('./pages/NormalVoice/NormalVoice.tsx').then((module) => ({
+    default: module.NormalVoiceReport,
+  }))
+);
 
 const SignIn = React.lazy(() => import('./pages/auth/sign-in'));
 const AppShell = React.lazy(() => import('./components/app-shell'));
@@ -125,7 +233,13 @@ const router = createBrowserRouter([
       {
         path: 'individual-invoices',
         element: (
-          <React.Suspense fallback={<div>Loading Individual Invoices...</div>}>
+          <React.Suspense
+            fallback={
+              <div className="invoice-loader">
+                <div className="loaderFallBk"></div>
+              </div>
+            }
+          >
             <ProtectedRoute requiredRole={Roles.ADMIN}>
               <IndividualInvoices />
             </ProtectedRoute>
@@ -168,6 +282,46 @@ const router = createBrowserRouter([
           <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
             <ProtectedRoute requiredRole={Roles.ADMIN}>
               <CorporateInvoicesAdd />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'fast-Invoices',
+        element: (
+          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <FastInvoice />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'fast-Invoices/add',
+        element: (
+          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <FastInvoiceAdd />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'my-plan',
+        element: (
+          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <Plans />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'profile',
+        element: (
+          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <UserProfile />
             </ProtectedRoute>
           </React.Suspense>
         ),
@@ -312,48 +466,38 @@ const router = createBrowserRouter([
           </React.Suspense>
         ),
       },
+
       {
-        path: 'reports',
+        path: 'normal-report',
         element: (
-          <React.Suspense fallback={<div>Loading Reports...</div>}>
+          <React.Suspense fallback={<div>Loading My Plan...</div>}>
             <ProtectedRoute requiredRole={Roles.ADMIN}>
-              <ComingSoon />
+              <NormalVoiceReport />
             </ProtectedRoute>
           </React.Suspense>
         ),
-        children: [
-          {
-            path: 'normal-invoice',
-            element: (
-              <React.Suspense fallback={<div>Loading My Plan...</div>}>
-                <ProtectedRoute requiredRole={Roles.ADMIN}>
-                  <ComingSoon />
-                </ProtectedRoute>
-              </React.Suspense>
-            ),
-          },
-          {
-            path: 'b2b-invoices',
-            element: (
-              <React.Suspense fallback={<div>Loading My Plan...</div>}>
-                <ProtectedRoute requiredRole={Roles.ADMIN}>
-                  <ComingSoon />
-                </ProtectedRoute>
-              </React.Suspense>
-            ),
-          },
-          {
-            path: 'purchase-invoices',
-            element: (
-              <React.Suspense fallback={<div>Loading My Plan...</div>}>
-                <ProtectedRoute requiredRole={Roles.ADMIN}>
-                  <ComingSoon />
-                </ProtectedRoute>
-              </React.Suspense>
-            ),
-          },
-        ],
       },
+      {
+        path: 'b2b-report',
+        element: (
+          <React.Suspense fallback={<div>Loading My Plan...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <B2BInvoice />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'purchase-report',
+        element: (
+          <React.Suspense fallback={<div>Loading My Plan...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <IndividualInvoicesReport />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+
       {
         path: 'my-plan',
         element: (
@@ -369,7 +513,17 @@ const router = createBrowserRouter([
         element: (
           <React.Suspense fallback={<div>Loading Payment Methods...</div>}>
             <ProtectedRoute requiredRole={Roles.ADMIN}>
-              <ComingSoon />
+              <PaymentMethods />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'payment-methods/:id/:objId?',
+        element: (
+          <React.Suspense fallback={<div>Loading Payment Methods...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <PaymentMethodsAdd />
             </ProtectedRoute>
           </React.Suspense>
         ),

@@ -22,6 +22,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import axiosInstance from '@/api/interceptors';
+import ConfirmBk from '@/components/custom/ConfimBk';
+import DelConfirm from '@/components/custom/DelConfim';
 
 const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
@@ -41,10 +44,14 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
   const navigate = useNavigate();
   // Fetch services and mutations
   const crudService = createCrudService<any>('menu/products');
+  const { mutate: createInventoryCount } = createCrudService<any>(
+    'inventory/inventory-count'
+  ).useCreateNoDialog();
   const { useGetById, useUpdate, useCreate } = crudService;
   const { mutate: createNewUser } = useCreate();
   const { mutate: updateDataUserById } = useUpdate();
   const { data: getDataById } = useGetById(`${params.objId ?? ''}`);
+  const [file, setfile] = useState<any>();
 
   const [loading, setLoading] = useState(false);
 
@@ -66,11 +73,15 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
       form.reset({
         ...getDataById?.data,
         category_id: getDataById?.data?.category?.id,
+        quantity:
+          getDataById?.data?.ingredients?.[0]?.pivot?.quantity?.toString(),
       });
     } else {
       form.reset({});
     }
   }, [getDataById, form, isEditMode]);
+  const { data: branchData } =
+    createCrudService<any>('manage/branches').useGetAll();
 
   // Handle form submission for both add and edit scenarios
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -82,46 +93,142 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
       await updateDataUserById(
         {
           id: params.objId,
-          data: { ...values, sku: `PRO-${Math.floor(Math.random() * 100000)}` },
+          data: { ...values, image: file },
         },
         {
-          onSuccess: (data) => {
+          onSuccess: async (proData) => {
             setLoading(false);
-            form.reset(values);
+            // form.reset(values);
+            try {
+              setLoading(false);
+              console.log(proData);
+
+              const inventoryPayload = {
+                branch: branchData?.data?.[0]?.id,
+                items: [{ id: proData.data?.ingredients?.[0]?.pivot?.item_id }],
+              };
+
+              await createInventoryCount(inventoryPayload, {
+                onSuccess: async (invData) => {
+                  try {
+                    const inventoryId = invData.data.id;
+                    const response = await axiosInstance.get(
+                      `inventory/inventory-count/${inventoryId}`
+                    );
+
+                    const itemPivotId = response.data?.data?.items?.[0]?.id;
+
+                    await axiosInstance.post(
+                      `inventory/inventory-count/update_item/${inventoryId}`,
+                      {
+                        items: [
+                          {
+                            id: itemPivotId,
+                            quantity: Number(values.quantity),
+                          },
+                        ],
+                      }
+                    );
+                  } catch (error) {
+                    console.error('Error updating inventory item:', error);
+                  }
+                },
+              });
+            } catch (error) {
+              console.error('Error in onSuccess for createNewUser:', error);
+            }
           },
           onError,
         }
       );
     } else {
-      await createNewUser(
-        {
+      try {
+        const userPayload = {
           ...values,
           is_stock_product: true,
+          image: file,
           costing_method: 2,
           barcode: '',
           cost: 0,
           pricing_method: 1,
           selling_method: 1,
-          sku: Math.random(),
-        },
-        {
-          onSuccess: (data) => {
-            setLoading(false);
-            form.reset({});
-            navigate('/zood-dashboard/products');
+          sku: `PRO-${Math.floor(Math.random() * 100000)}`,
+        };
+
+        await createNewUser(userPayload, {
+          onSuccess: async (proData) => {
+            try {
+              setLoading(false);
+              console.log(proData);
+
+              const inventoryPayload = {
+                branch: branchData?.data?.[0]?.id,
+                items: [{ id: proData.data?.ingredients?.[0]?.pivot?.item_id }],
+              };
+              const invData = await axiosInstance.post(
+                'inventory/inventory-count',
+                inventoryPayload
+              );
+
+              await createInventoryCount(inventoryPayload, {
+                onSuccess: async (invData) => {
+                  try {
+                    const inventoryId = invData.data.id;
+                    const response = await axiosInstance.get(
+                      `inventory/inventory-count/${inventoryId}`
+                    );
+
+                    const itemPivotId = response.data?.data?.items?.[0]?.id;
+
+                    await axiosInstance.post(
+                      `inventory/inventory-count/update_item/${inventoryId}`,
+                      {
+                        items: [
+                          {
+                            id: itemPivotId,
+                            quantity: Number(values.quantity),
+                          },
+                        ],
+                      }
+                    );
+                    navigate('/zood-dashboard/products');
+                  } catch (error) {
+                    console.error('Error updating inventory item:', error);
+                  }
+                },
+              });
+            } catch (error) {
+              console.error('Error in onSuccess for createNewUser:', error);
+            }
           },
-          onError,
-        }
-      );
+          onError: (error) => {
+            console.error('Error creating new user:', error);
+            onError();
+          },
+        });
+      } catch (error) {
+        console.error('Error in createNewUser or inventory process:', error);
+      }
     }
   };
-  const [file, setfile] = useState<any>();
   const allService = createCrudService<any>('menu/categories');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <>
-      <DetailsHeadWithOutFilter />
+      <DetailsHeadWithOutFilter
+        bkAction={() => {
+          setIsOpen(true);
+        }}
+      />
+      <ConfirmBk
+        isOpen={isOpen}
+        setIsOpen={undefined}
+        closeDialog={() => setIsOpen(false)}
+        getStatusMessage={undefined}
+      />{' '}
       <div className="flex flex-col items-start  mt-[19px]">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleFormSubmit)} className="">
@@ -278,6 +385,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
             >
               {'اضافة منتج'}
             </Button>
+            <DelConfirm route={'menu/products'} />
           </form>
         </Form>
       </div>

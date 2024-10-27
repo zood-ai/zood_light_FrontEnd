@@ -78,8 +78,8 @@ export default function Sidebar({
               width={isCollapsed ? 24 : 32}
               className={`${
                 isCollapsed
-                  ? 'absolute top-[79px] right-[16px] z-[999999] transition-all ease-out duration-500'
-                  : 'absolute top-[32px] right-[20px] z-[999999] transition-all ease-out duration-500'
+                  ? 'absolute top-[79px] right-[17px] z-[999999] transition-all ease-out duration-500'
+                  : 'absolute top-[30px] right-[25px] z-[999999] transition-all ease-out duration-500'
               }`}
             />
             <div
@@ -125,7 +125,7 @@ export default function Sidebar({
           // size="icon"
           // variant="outline"
           className={`absolute cursor-pointer hover:scale-105
-             ${isRtl ? 'left-[14px]' : '-right-5'} 
+             ${isRtl ? 'left-[13px]' : '-right-5'} 
           top-[40px] z-50 hidden rounded-ful bg-white border-0 l md:inline-flex`}
           // top-1/2 z-50 hidden rounded-full md:inline-flex`}
         >

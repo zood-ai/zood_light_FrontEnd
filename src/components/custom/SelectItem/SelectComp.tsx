@@ -18,7 +18,7 @@ interface SelectCompProps {
   label?: string; // Optional label for the select component
 }
 
-export const SelectComp: React.FC<SelectCompProps> = ({
+export const SelectComp: React.FC<SelectCompProps | any> = ({
   options,
   placeholder = 'Select an option',
   onValueChange,

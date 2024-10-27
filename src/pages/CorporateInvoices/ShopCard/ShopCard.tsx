@@ -138,7 +138,7 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
             className="col-span-10 md:col-span-4 w-[327px]"
           />
           <IconInput
-            // disabled
+            disabled
             name="name"
             className="col-span-10 md:col-span-4"
             label="رقم العميل"
@@ -147,7 +147,7 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
             onChange={null}
           />
           <IconInput
-            // disabled
+            disabled
             name={formState.name}
             className="col-span-10 md:col-span-10"
             label="اسم الشارع"
@@ -155,14 +155,14 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
             onChange={null}
           />
           <IconInput
-            // disabled
+            disabled
             className="col-span-10 md:col-span-4"
             label="رقم تسجيل ضريبة القيمة المضافة"
             value={formState.tax_registration_number}
             onChange={null}
           />
           <IconInput
-            // disabled
+            disabled
             className="col-span-10 md:col-span-6"
             label="معرف اخر"
             value={formState.vat_registration_number}

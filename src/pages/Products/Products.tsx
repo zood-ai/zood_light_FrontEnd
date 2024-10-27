@@ -14,6 +14,8 @@ import { useDataTableColumns } from './components/useDataTableColumns';
 import useDirection from '@/hooks/useDirection';
 import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
+import { toggleActionView } from '@/store/slices/toggleAction';
+import { useDispatch, useSelector } from 'react-redux';
 
 export const Products: React.FC<ProductsProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -22,7 +24,7 @@ export const Products: React.FC<ProductsProps> = () => {
   const [selectedTableRow, setSelectedRow] = useState({});
   const [modalType, setModalType] = useState('Add');
   const navigate = useNavigate();
-
+  let dispatch = useDispatch();
   const handleCreateTask = () => {
     // setSelectedRow({});
     setModalType('Add');
@@ -46,6 +48,9 @@ export const Products: React.FC<ProductsProps> = () => {
     setIsAddEditOpen(false);
     setIsViewModalOpen(false);
     setIsDelModalOpen(false);
+
+    dispatch(toggleActionView(false));
+
   };
   const filterBtn = () => {
     console.log('filterBtn');
@@ -56,6 +61,8 @@ export const Products: React.FC<ProductsProps> = () => {
   const allService = createCrudService<any>('menu/products');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
+  const toggleActionData = useSelector((state: any) => state?.toggleAction);
+
   return (
     <>
       <AddEditModal
@@ -66,7 +73,7 @@ export const Products: React.FC<ProductsProps> = () => {
       />
       <DetailsModal
         initialData={selectedTableRow}
-        isOpen={isViewModalOpen}
+        isOpen={toggleActionData.value}
         onClose={handleCloseModal}
       />
       <ConfirmDelModal

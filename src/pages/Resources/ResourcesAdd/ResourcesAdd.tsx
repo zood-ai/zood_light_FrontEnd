@@ -24,6 +24,8 @@ import {
 } from '@/components/ui/form';
 
 import { ResourcesAddProps } from './ResourcesAdd.types';
+import ConfirmBk from '@/components/custom/ConfimBk';
+import DelConfirm from '@/components/custom/DelConfim';
 
 // Validation schema using Zod
 const formSchema = z.object({
@@ -99,10 +101,15 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
       );
     }
   };
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      <DetailsHeadWithOutFilter />
+      <DetailsHeadWithOutFilter
+        bkAction={() => {
+          setIsOpen(true);
+        }}
+      />
       <div className="min-h-[70vh]">
         <div className="flex flex-col items-start max-w-[580px]">
           <Form {...form}>
@@ -156,11 +163,18 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                 >
                   {isEditMode ? t('تعديل المورد') : t('اضافة المورد')}
                 </Button>
+              <DelConfirm  route={'inventory/suppliers'} />
               </div>
             </form>
           </Form>
         </div>
       </div>
+      <ConfirmBk
+        isOpen={isOpen}
+        setIsOpen={undefined}
+        closeDialog={() => setIsOpen(false)}
+        getStatusMessage={undefined}
+      />
     </>
   );
 };

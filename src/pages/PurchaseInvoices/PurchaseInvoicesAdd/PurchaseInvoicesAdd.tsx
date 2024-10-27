@@ -17,6 +17,9 @@ import axiosInstance from '@/api/interceptors';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 import IconInput from '@/components/custom/InputWithIcon';
 import { getToken } from '@/utils/auth';
+import ConfirmBk from '@/components/custom/ConfimBk';
+import DelConfirm from '@/components/custom/DelConfim';
+import FastAddActionsCustomer from '@/components/FastAddActionsCustomer';
 
 export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const { t } = useTranslation();
@@ -49,6 +52,29 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const { data: allData } = createCrudService<any>(
     'inventory/suppliers'
   ).useGetAll();
+  const { data: allDataId } = createCrudService<any>(
+    `inventory/purchasing/${params.objId ?? ''}`
+  ).useGetAll();
+
+  useEffect(() => {
+    if (isEditMode) {
+      setInvoice({
+        supplier_id: allDataId?.data.supplier.id,
+        invoice_number: allDataId?.data?.invoice_number,
+        purchaseDescription: allDataId?.data?.notes,
+      });
+
+      setItems(
+        allDataId?.data?.items?.map((item) => ({
+          qty: item.pivot.quantity,
+          total: item.pivot.total_cost,
+          item: item.pivot.item_id,
+          itemDescription: item.product.description,
+        }))
+      );
+    }
+  }, [allDataId]);
+
   const { openDialog } = useGlobalDialog();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,6 +86,8 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     updatedItems[index][field] = value;
     setItems(updatedItems);
   };
+  const { data: branchData } =
+    createCrudService<any>('manage/branches').useGetAll();
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,9 +96,10 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
         const { data } = await axiosInstance.put(
           `inventory/purchasing/${params.objId}`,
           {
-            branch_id: 1,
+            branch_id: branchData?.data?.[0]?.id,
             supplier_id: invoice.supplier_id,
             type: 'items',
+            notes: invoice.purchaseDescription,
             items: items.map((item) => item.item),
           }
         );
@@ -84,10 +113,12 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
         );
       } else {
         const { data } = await axiosInstance.post('inventory/purchasing', {
-          branch_id: 1,
+          branch_id: branchData?.data?.[0]?.id,
           supplier_id: invoice.supplier_id,
           type: 'items',
+          notes: invoice.purchaseDescription,
           items: items.map((item) => item.item),
+          invoice_number: Math.floor(Math.random() * 100000),
         });
         await axiosInstance.post(
           'inventory/purchasing/update_qtys_costs',
@@ -104,10 +135,22 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       console.error(error);
     }
   };
+  const [isOpen, setIsOpen] = useState(false);
 
+  const handleBkAction = () => {
+    setIsOpen(true);
+  };
+  <DetailsHeadWithOutFilter bkAction={handleBkAction} />;
+  const [fastActionBtn, setFastActionBtn] = useState(false);
+const setSuppId = (value: string) => {
+  console.log(value, 'value');
+  
+  setInvoice({ ...invoice, supplier_id: value });
+}
   return (
     <>
-      <DetailsHeadWithOutFilter />
+      <DetailsHeadWithOutFilter bkAction={handleBkAction} />
+
       <form onSubmit={handleFormSubmit}>
         <div className="flex flex-col items-start">
           <div className="grid grid-cols-1 gap-y-[16px]">
@@ -122,6 +165,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   onValueChange={(value) =>
                     setInvoice({ ...invoice, supplier_id: value })
                   }
+                  value={invoice.supplier_id}
                   label={'اختر المورد'}
                   className="w-[327px]"
                 />
@@ -130,7 +174,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
               <div className="translate-y-[32px]">
                 <Button
                   onClick={() => {
-                    navigate('/zood-dashboard/resources/add');
+                    setFastActionBtn(true);
                   }}
                   type="button"
                   variant={'link'}
@@ -266,7 +310,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 });
               }}
               type="button"
-              className=" justify-start"
+              className=" justify-end   "
               variant={'link'}
             >
               <div className="flex gap-2">
@@ -282,9 +326,21 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             >
               {isEditMode ? 'تحديث الفاتورة' : 'اضافة الفاتورة'}
             </Button>
+            <DelConfirm route={'inventory/purchasing'} />
           </div>
         </div>
       </form>
+      <ConfirmBk
+        isOpen={isOpen}
+        setIsOpen={undefined}
+        closeDialog={() => setIsOpen(false)}
+        getStatusMessage={undefined}
+        />
+      <FastAddActionsCustomer
+        setInvoice={setSuppId}
+        isOpen={fastActionBtn}
+        onClose={() => setFastActionBtn(false)}
+      />
     </>
   );
 };

@@ -15,9 +15,10 @@ import useDirection from '@/hooks/useDirection';
 import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
 import { LoadingSkeleton } from '@/components/custom/LoadingSkeleton';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { resetOrder } from '@/store/slices/orderSchema';
 import { resetCard } from '@/store/slices/cardItems';
+import { toggleActionView } from '@/store/slices/toggleAction';
 
 export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -26,6 +27,8 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const [selectedTableRow, setSelectedRow] = useState({});
   const [modalType, setModalType] = useState('Add');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const handleCreateTask = () => {
     // setSelectedRow({});
     setModalType('Add');
@@ -49,6 +52,8 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
     setIsAddEditOpen(false);
     setIsViewModalOpen(false);
     setIsDelModalOpen(false);
+
+    dispatch(toggleActionView(false));
   };
 
   const filterBtn = () => {
@@ -62,12 +67,12 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const { data: allData, isLoading } = useGetAll();
   console.log(allData, 'allUserData');
 
-  const dispatch = useDispatch();
-useEffect(() => {
+  useEffect(() => {
+    dispatch(resetCard());
+    dispatch(resetOrder());
+  }, [dispatch]);
+  const toggleActionData = useSelector((state: any) => state?.toggleAction);
 
-  dispatch(resetCard());
-  dispatch(resetOrder());
-}, [dispatch])
   return (
     <>
       <AddEditModal
@@ -78,7 +83,7 @@ useEffect(() => {
       />
       <DetailsModal
         initialData={selectedTableRow}
-        isOpen={isViewModalOpen}
+        isOpen={toggleActionData.value}
         onClose={handleCloseModal}
       />
       <ConfirmDelModal

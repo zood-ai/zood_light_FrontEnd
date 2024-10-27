@@ -1,1 +1,1 @@
-export type ProductsProps = {};
+export type B2BInvoiceProps = {};

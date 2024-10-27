@@ -17,19 +17,19 @@ const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <GlobalDialogProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <Provider store={store}>
+    <Provider store={store}>
+      <GlobalDialogProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
             <AuthProvider>
               <LoadingProvider>
                 <RouterProvider router={router} />
               </LoadingProvider>
             </AuthProvider>
-          </Provider>
-          <Toaster />
-        </ThemeProvider>
-      </QueryClientProvider>
-    </GlobalDialogProvider>
+            <Toaster />
+          </ThemeProvider>
+        </QueryClientProvider>
+      </GlobalDialogProvider>
+    </Provider>
   </StrictMode>
 );

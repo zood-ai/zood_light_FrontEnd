@@ -1,0 +1,1 @@
+export { NormalVoiceReport } from './NormalVoice';

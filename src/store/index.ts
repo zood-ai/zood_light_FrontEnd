@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 
 // Example slice (you can create multiple slices for different features)
 import usrNavSlice from './slices/usrNavSlice';
+import toggleAction from './slices/toggleAction';
 import cardItemsSlice from './slices/cardItems';
 import orderSchemaSlice from './slices/orderSchema';
 
 const store = configureStore({
   reducer: {
     usrNavSlice: usrNavSlice,
+    toggleAction: toggleAction,
     cardItems: cardItemsSlice,
     orderSchema: orderSchemaSlice,
   },

@@ -1,0 +1,1 @@
+export { ShopCardCo as FastInvoiceAdd } from './ShopCard';

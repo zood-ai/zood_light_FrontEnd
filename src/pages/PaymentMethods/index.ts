@@ -1,0 +1,1 @@
+export { Categories as PaymentMethods } from './Categories';
