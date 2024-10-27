@@ -5,11 +5,19 @@ interface Product {
   quantity: number;
   unit_price: number;
   total_price: number;
+  id?: any;
+  image?:any;
+  discount_amount: any;
 }
 
 interface Payment {
-  amount: number;
-  payment_method_id: string;
+  tendered: 180;
+  amount: 0;
+  tips: 0;
+  meta: {
+    external_additional_payment_info: 'some info';
+  };
+  payment_method_id: '';
 }
 
 interface OrderSchemaState {
@@ -22,8 +30,9 @@ interface OrderSchemaState {
   subtotal_price: number;
   total_price: number;
   is_sales_order: number;
-  tendered: any;
-  invoice_number:any;
+  tendered?: any;
+  invoice_number: any;
+  discount_type: number;
 }
 
 const initialState: OrderSchemaState = {
@@ -31,19 +40,26 @@ const initialState: OrderSchemaState = {
   branch_id: '',
   discount_amount: 0,
   customer_id: '',
-  tendered: 180,
+  discount_type: 2,
+
   products: [
     {
       product_id: '',
       quantity: 0,
       unit_price: 0,
       total_price: 0,
+      discount_amount: 0
     },
   ],
   payments: [
     {
+      tendered: 180,
       amount: 0,
       payment_method_id: '',
+      tips: 0,
+      meta: {
+        external_additional_payment_info: 'some info',
+      },
     },
   ],
   subtotal_price: 0,
@@ -82,7 +98,12 @@ const orderSchemaSlice: any = createSlice({
   },
 });
 
-export const { updatePayment,resetOrder, updateField, addProduct, addPayment } =
-  orderSchemaSlice.actions;
+export const {
+  updatePayment,
+  resetOrder,
+  updateField,
+  addProduct,
+  addPayment,
+} = orderSchemaSlice.actions;
 
 export default orderSchemaSlice.reducer;

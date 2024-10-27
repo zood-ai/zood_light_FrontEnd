@@ -89,6 +89,9 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
         quantity: item.qty || 0,
         unit_price: item.price || 0,
         total_price: item.price * item.qty || 0,
+        discount_amount: 0,
+        discount_id:"0aaa23cb-2156-4778-b6dd-a69ba6642552",
+        discount_type:2
       }));
 
       dispatch(addProduct(products));
@@ -115,7 +118,7 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
     dispatch(
       updateField({
         field: 'type',
-        value: 1,
+        value: 2,
       })
     );
   }, []);

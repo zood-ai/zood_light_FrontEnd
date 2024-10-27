@@ -104,7 +104,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
               console.log(proData);
 
               const inventoryPayload = {
-                branch: branchData?.data?.[0]?.id,
+                branch: "051caaaa-f1c9-437f-bcd1-04a06ce569c5",
                 items: [{ id: proData.data?.ingredients?.[0]?.pivot?.item_id }],
               };
 
@@ -162,8 +162,8 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
               console.log(proData);
 
               const inventoryPayload = {
-                branch: branchData?.data?.[0]?.id,
-                items: [{ id: proData.data?.ingredients?.[0]?.pivot?.item_id }],
+                branch: "051caaaa-f1c9-437f-bcd1-04a06ce569c5",
+                items: [{ id: proData.data?.id }],
               };
               const invData = await axiosInstance.post(
                 'inventory/inventory-count',

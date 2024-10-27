@@ -233,8 +233,9 @@ const setSuppId = (value: string) => {
                     className="w-[220px] "
                     placeholder="اسم الصنف"
                     options={getAllPro?.data?.map((item) => ({
-                      value: item.id,
+                      value: item.item_id,
                       label: item.name,
+                      // item_id: item.item_id,
                     }))}
                     onValueChange={(value) =>
                       handleItemChange(index, 'item', value)

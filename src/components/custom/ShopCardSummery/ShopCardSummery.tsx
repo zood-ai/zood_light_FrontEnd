@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { ShopCardSummeryProps } from './ShopCardSummery.types';
 
@@ -9,18 +9,32 @@ import PlusIcon from '@/components/Icons/PlusIcon';
 import { useDispatch, useSelector } from 'react-redux';
 import createCrudService from '@/api/services/crudService';
 import { addPayment, updateField } from '@/store/slices/orderSchema';
+import { useParams } from 'react-router-dom';
+import { SelectComp } from '../SelectItem';
 
 export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   const [totalShopCardCount, setTotalShopCardCount] = useState(0);
+
+  const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const [paymentMethod, setPaymentMethod] = useState<any>([
     {
+      tendered: 180,
       amount: 0,
+      tips: 0,
+      meta: {
+        external_additional_payment_info: 'some info',
+      },
       payment_method_id: '',
     },
   ]); // State to track the active option
-
-  const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const orderSchema = useSelector((state: any) => state.orderSchema);
+  let params = useParams();
+  useEffect(() => {
+    if (params.id !== 'add') {
+      setPaymentMethod(orderSchema?.payments || []);
+    }
+  }, [orderSchema]);
+
   const handleOptionClick = (option) => {
     setPaymentMethod(option); // Set the clicked option as active
   };
@@ -29,15 +43,15 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     (acc, item) => acc + item.price * item.qty,
     0
   );
-  const allService = createCrudService<any>('manage/taxes');
-  const { data: branchData } =
-    createCrudService<any>('manage/branches').useGetAll();
-  const { useGetAll } = allService;
-  const { data: allData, isLoading } = useGetAll();
-  const taxAmount = allData?.data?.[0]?.rate;
+
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
+  const taxAmount = (totalCost * 15) / 100;
   const { data: paymentMethods } = createCrudService<any>(
     'manage/payment_methods'
   ).useGetAll();
+  const [discountAmount, setdiscountAmount] = useState(0);
+
   const handleItemChange = (index: number, field: string, value: string) => {
     setPaymentMethod((prevItems) => {
       const updatedItems = [...prevItems];
@@ -61,11 +75,11 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
         value: totalCost - taxAmount,
       })
     );
-   
+
     dispatch(
       updateField({
         field: 'branch_id',
-        value: branchData?.data?.[0]?.id,
+        value: '051caaaa-f1c9-437f-bcd1-04a06ce569c5',
       })
     );
     dispatch(
@@ -74,11 +88,42 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
         value: taxAmount,
       })
     );
+    dispatch(
+      updateField({
+        field: 'customer_notes',
+        value: discountAmount,
+      })
+    );
   }, [paymentMethod]);
   console.log(orderSchema);
-  const totalAmount = paymentMethod.reduce((accumulator, current) => {
+  const totalAmount = paymentMethod?.reduce((accumulator, current) => {
     return accumulator + parseFloat(current.amount);
   }, 0);
+  const [subTotal, setSubTotal] = useState(0);
+
+  const [totalAmountIncludeAndExclude, setTotalAmountIncludeAndExclude] =
+    useState(0);
+
+  const handleIncludeAndExclude = useCallback(() => {
+    if (settings?.data?.tax_inclusive_pricing === true) {
+      const totalCostWithTax = totalCost - taxAmount;
+      const finalDiscount =
+        discountAmount === 0 ? taxAmount : taxAmount - discountAmount;
+      setTotalAmountIncludeAndExclude(totalCostWithTax + finalDiscount);
+    } else {
+      setTotalAmountIncludeAndExclude(totalCost + (taxAmount - discountAmount));
+    }
+  }, [cardItemValue , discountAmount]);
+  useEffect(() => {
+    handleIncludeAndExclude();
+    if (settings?.data?.tax_inclusive_pricing === true) {
+      setSubTotal(totalCost - taxAmount);
+    } else {
+      setSubTotal(totalCost);
+    }
+  }, [discountAmount, orderSchema]);
+console.log(params.id);
+
   return (
     <>
       <div className="flex  flex-col rounded-none  md:w-[502px] md:translate-x-[100px]">
@@ -98,13 +143,23 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                 <div className="flex flex-col w-[45%] max-md:ml-0 max-md:w-full">
                   <div className="flex flex-col w-full text-sm font-medium text-right whitespace-nowrap max-md:mt-10">
                     <div className="flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
-                      <div className="text-zinc-800">{totalCost}</div>
+                      <div className="text-zinc-800">{subTotal}</div>
                       <div className="self-start text-zinc-500">SR</div>
                     </div>
-                    <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
-                      <div className="text-zinc-800">0.00</div>
-                      <div className="text-zinc-500">SR</div>
-                    </div>
+                    <IconInput
+                      className="mt-4"
+                      // <IconInput
+                      placeholder="0.00"
+                      onChange={(value) =>
+                        setdiscountAmount(value.target.value)
+                      }
+                      inputClassName={'w-[214px]'}
+                      // label="ضريبة القيمة المضافة"
+                      iconSrcLeft={'SR'}
+                      value={orderSchema?.customer_notes || discountAmount}
+                      disabled={params.id}
+                    />
+                    {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">{taxAmount}</div>
                       <div className="text-zinc-500">SR</div>
@@ -126,35 +181,30 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
 
             <div className=" flex gap-5 justify-between self-stretch mt-3 ml-4 w-full text-sm text-right max-w-[458px] text-zinc-800 max-md:mr-2.5 max-md:max-w-full">
               <div className="font-medium">المبلغ الإجمالي</div>
-              <div className="font-bold">SR {totalCost - taxAmount}</div>
+              <div className="font-bold">SR {totalAmountIncludeAndExclude}</div>
             </div>
-            {paymentMethod?.map((option, index) => (
+            {(paymentMethod || [])?.map((option, index) => (
               <>
                 <>
                   <div className="mt-6 text-sm font-bold text-right text-black max-md:mr-2.5">
                     طريقة الدفع
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5 mt-3 text-sm text-right text-zinc-500 max-md:mr-2.5">
-                    {paymentMethods?.data?.map((option, i) => (
-                      <div
-                        key={i}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleItemChange(
-                            index,
-                            'payment_method_id',
-                            option.id
-                          );
-                        }}
-                        className={`h-[40px] w-[93px] flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointer ${
-                          paymentMethod[index].payment_method_id == option.id
-                            ? 'bg-main text-white font-extrabold'
-                            : 'bg-white'
-                        }`}
-                      >
-                        {option.name}
-                      </div>
-                    ))}
+                    <SelectComp
+                      options={paymentMethods?.data?.map((item) => ({
+                        value: item.id,
+                        label: item.name,
+                      }))}
+                      placeholder="Select payment method"
+                      onValueChange={(value) => {
+                        // e.stopPropagation();
+                        handleItemChange(index, 'payment_method_id', value);
+                      }}
+                      // label="اسم العميل"
+                      className="col-span-10 md:col-span-4 w-[227px]"
+                      value={orderSchema?.payment_method_id}
+                      disabled={params.id}
+                    />
                   </div>
                   <div className="flex mb-xl  items-center pt-lg">
                     <IconInput
@@ -175,6 +225,11 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                             {
                               amount: 0,
                               payment_method_id: '',
+                              tendered: 180,
+                              tips: 0,
+                              meta: {
+                                external_additional_payment_info: 'some info',
+                              },
                             },
                           ];
                         });

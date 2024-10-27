@@ -13,6 +13,7 @@ import { FastInvoiceAdd } from './pages/FastInvoice/ShopCard/index.ts';
 import { FastInvoice } from './pages/FastInvoice/index.ts';
 import Plans from './pages/Plans/Plans.tsx';
 import UserProfile from './pages/UserProfile/UserProfile.tsx';
+import { ShopCardEdit } from './pages/IndividualInvoices/ShopCard/ShopCardEdit.tsx';
 const MaintenanceError = lazy(() => import('./pages/errors/maintenance-error'));
 const UnauthorisedError = lazy(
   () => import('./pages/errors/unauthorised-error.tsx')
@@ -262,6 +263,16 @@ const router = createBrowserRouter([
           <React.Suspense fallback={<div>Loading Individual Invoices...</div>}>
             <ProtectedRoute requiredRole={Roles.ADMIN}>
               <ShopCard />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'individual-invoices/edit/:id',
+        element: (
+          <React.Suspense fallback={<div>Loading Individual Invoices...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <ShopCardEdit />
             </ProtectedRoute>
           </React.Suspense>
         ),
