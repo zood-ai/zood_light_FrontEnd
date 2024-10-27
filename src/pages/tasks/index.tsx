@@ -40,7 +40,7 @@ function Tasks() {
     setIsViewModalOpen(false);
     setIsDelModalOpen(false);
 
-    dispatch(toggleActionView(false));
+    // dispatch(toggleActionView(false));
 
   };
   const filterBtn = () => {
