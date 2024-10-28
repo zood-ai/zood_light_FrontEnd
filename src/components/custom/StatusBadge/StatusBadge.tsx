@@ -56,6 +56,13 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
           </div>
         </div>
       )}
+      {status === 'error' && (
+        <div className="flex gap-2 text-sm font-medium text-background rounded-none max-w-[181px]">
+          <div className="gap-2.5 self-stretch px-2 h-6 rounded border py-[2px] border-mainAlert border-solid bg-mainAlertHover   capitalize">
+            {text}
+          </div>
+        </div>
+      )}
     </>
   );
 };
