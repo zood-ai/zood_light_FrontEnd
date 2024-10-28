@@ -6,6 +6,7 @@ import './Counter.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCardItem } from '@/store/slices/cardItems';
 import { TrashIcon } from '@radix-ui/react-icons';
+import { useParams } from 'react-router-dom';
 
 export const Counter: React.FC<any> = ({ item }: any) => {
   const dispatch = useDispatch();
@@ -80,12 +81,12 @@ export const Counter: React.FC<any> = ({ item }: any) => {
     );
     dispatch(setCardItem(updatedItems));
   };
-
+let params = useParams();
   return (
     <>
       <div className="flex items-center border border-gray-300 rounded-lg w-[120px]">
         <button
-          onClick={() => incrementCount()}
+          onClick={() => !params.id && incrementCount()}
           className="w-1/3 h-10 text-lg flex items-center justify-center border-l border-gray-300"
         >
           +
@@ -97,14 +98,14 @@ export const Counter: React.FC<any> = ({ item }: any) => {
         </div>
         {qty > 1 ? (
         <button
-          onClick={() => decrementCount()}
+          onClick={() =>!params.id && decrementCount()}
           className="w-1/3 h-10 text-lg flex items-center justify-center border-r border-gray-300"
         >
           -
         </button>
       ) : (
         <button
-          onClick={() => removeItem()}
+          onClick={() =>!params.id && removeItem()}
           className="w-1/3 h-10 text-lg flex items-center justify-center border-r border-gray-300"
         >
           <TrashIcon />

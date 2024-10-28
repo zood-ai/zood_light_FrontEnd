@@ -40,6 +40,7 @@ import {
   IconUserFilled,
   IconUserDown,
   IconUserEdit,
+  IconCreditCardFilled,
 } from '@tabler/icons-react';
 
 export interface NavLink {
@@ -150,7 +151,7 @@ export const sidelinks: SideLink[] = [
     title: 'طرق الدفع', // Payment Methods
     label: '',
     href: '/zood-dashboard/payment-methods',
-    icon: <IconCreditCard size={18} />,
+    icon: <IconCreditCardFilled size={18} />,
   },
   {
     title: 'الاعدادات', // Settings

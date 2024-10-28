@@ -24,6 +24,7 @@ export const SelectComp: React.FC<SelectCompProps | any> = ({
   onValueChange,
   className,
   label, // Destructure the label
+  item_id,
   ...props
 }) => {
   const handleValueChange = (value: string) => {
@@ -31,7 +32,11 @@ export const SelectComp: React.FC<SelectCompProps | any> = ({
     if (value === 'clear') {
       onValueChange(''); // Or any other indicator for no selection
     } else {
-      onValueChange(value);
+      if (item_id) {
+        onValueChange(item_id);
+      } else {
+        onValueChange(value);
+      }
     }
   };
 

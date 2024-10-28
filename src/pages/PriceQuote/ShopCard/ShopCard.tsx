@@ -84,6 +84,9 @@ export const ShopCardPrice: React.FC<ShopCardProps> = () => {
         quantity: item.qty || 0,
         unit_price: item.price || 0,
         total_price: item.price * item.qty || 0,
+        discount_amount: 0,
+        discount_id:"0aaa23cb-2156-4778-b6dd-a69ba6642552",
+        discount_type:2
       }));
 
       dispatch(addProduct(products));
@@ -111,7 +114,7 @@ export const ShopCardPrice: React.FC<ShopCardProps> = () => {
     dispatch(
       updateField({
         field: 'type',
-        value: 1,
+        value: 3,
       })
     );
   }, []);
@@ -141,7 +144,7 @@ export const ShopCardPrice: React.FC<ShopCardProps> = () => {
     dispatch(
       updateField({
         field: 'branch_id',
-        value: branchData?.data?.[0]?.id,
+        value: "051caaaa-f1c9-437f-bcd1-04a06ce569c5",
       })
     );
     // dispatch(
