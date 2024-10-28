@@ -11,16 +11,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addProduct, updateField } from '@/store/slices/orderSchema';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { on } from 'events';
 
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
-  const allServiceOrderPay = createCrudService<any>('order-payments').useCreate();
+  const allServiceOrderPay =
+    createCrudService<any>('order-payments').useCreate();
   const orderSchema = useSelector((state: any) => state.orderSchema);
   let navigate = useNavigate();
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
-  const { mutate: mutateOrderPay } = allServiceOrderPay
+  const { mutate: mutateOrderPay } = allServiceOrderPay;
 
   const { useGetAll } = allService;
   const [loading, setLoading] = useState(false);
@@ -94,26 +96,31 @@ const CustomerForm = () => {
       setLoading(true);
       if (params.id) {
         console.log(1, '1');
-        
+
         try {
           const res = await axiosInstance.get(`/orders/${params.id}`);
           const orderData = res?.data?.data;
           console.log(orderData, 'orderData');
-          
+
           if (orderData?.payments?.length < orderSchema?.payments?.length) {
             console.log(2, '2');
-            const newData = orderSchema?.payments.slice(orderData?.payments.length  );
-            const newPayments = newData.map((item: any) => ({
+            const newData = orderSchema?.payments.slice(
+              orderData?.payments.length
+            );
+            const newPayments = {
               order_id: params.id,
-              payment_method_id: item.payment_method_id,
-              amount: item.amount,
-              tendered: 2,
-              tips: 20,
-              business_date: new Date(),
-              meta: 'well done',
-              added_at: new Date(),
-            }));
-      
+              payment_data: newData.map((item: any) => ({
+                order_id: params.id,
+                payment_method_id: item.payment_method_id,
+                amount: item.amount,
+                tendered: 2,
+                tips: 20,
+                business_date: new Date(),
+                meta: 'well done',
+                added_at: new Date(),
+              })),
+            };
+
             await mutateOrderPay(newPayments, {
               onSuccess: (data) => {
                 setLoading(false);
@@ -123,20 +130,23 @@ const CustomerForm = () => {
             });
           }
         } catch (error) {
-          console.error("Error fetching or processing order:", error);
+          console.error('Error fetching or processing order:', error);
           setLoading(false);
         }
-      } if(!params.id) {
+      }
+      if (!params.id) {
         await mutate(orderSchema, {
           onSuccess: (data) => {
             setLoading(false);
             navigate(`/zood-dashboard/individual-invoices`);
             console.log(data, 'data');
           },
+          onError: (error) => {
+            setLoading(false);
+          },
         });
       }
       // const res = await axiosInstance.post('orders', orderSchema);
-      setLoading(false);
       // console.log(res, 'res');
     } catch (error) {
       setLoading(false);
