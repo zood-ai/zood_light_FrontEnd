@@ -19,6 +19,8 @@ import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 import { toggleUserNavigate } from '@/store/slices/usrNavSlice';
 import FastAddActions from './FastAddActions';
 import DialogSidebar from './DialogSidebar';
+import { updateField } from '@/store/slices/orderSchema';
+import createCrudService from '@/api/services/crudService';
 interface WelcomeMessageProps {
   name: string;
 }
@@ -52,9 +54,19 @@ const AppShell = () => {
       };
     }
   }, [userNav]);
-const [fastActionBtn , setFastActionBtn] = useState(false)
-const [isOpen, setIsOpen] = useState(false);
+  const [fastActionBtn, setFastActionBtn] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const { data: branchData } =
+    createCrudService<any>('manage/branches').useGetAll();
 
+  useEffect(() => {
+    dispatch(
+      updateField({
+        field: 'branch_id',
+        value: branchData?.data?.[0]?.id,
+      })
+    );
+  }, [branchData]);
   return (
     <>
       <TopLoadingBar isLoading={isLoading} />
@@ -109,7 +121,7 @@ const [isOpen, setIsOpen] = useState(false);
                 </div>
               </h2>
               <div
-              onClick={() => setFastActionBtn(true)}
+                onClick={() => setFastActionBtn(true)}
                 className={`${
                   isRtl ? 'mr-auto' : 'ml-auto'
                 } flex items-center space-x-4`}
@@ -135,8 +147,10 @@ const [isOpen, setIsOpen] = useState(false);
           <BottomNavBar />
         </div>
       </div>
-      <FastAddActions isOpen={fastActionBtn} onClose={() => setFastActionBtn(false)}  />
-  
+      <FastAddActions
+        isOpen={fastActionBtn}
+        onClose={() => setFastActionBtn(false)}
+      />
     </>
   );
 };

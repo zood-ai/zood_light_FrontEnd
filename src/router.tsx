@@ -14,6 +14,14 @@ import { FastInvoice } from './pages/FastInvoice/index.ts';
 import Plans from './pages/Plans/Plans.tsx';
 import UserProfile from './pages/UserProfile/UserProfile.tsx';
 import { ShopCardEdit } from './pages/IndividualInvoices/ShopCard/ShopCardEdit.tsx';
+import { CorporateInvoices } from './pages/CorporateInvoices/index.ts';
+import { ShopCardCo } from './pages/CorporateInvoices/ShopCard/index.ts';
+import { ShopCardEditCo } from './pages/CorporateInvoices/ShopCard/ShopCardEdit.tsx';
+import { CorporateInvoicesAdd } from './pages/FastInvoice/CorporateInvoicesAdd/CorporateInvoicesAdd.tsx';
+import { PriceQuote } from './pages/PriceQuote/index.ts';
+import { PriceQuoteAdd } from './pages/PriceQuote/IndividualInvoicesAdd/index.ts';
+import { ShopCardPQ } from './pages/PriceQuote/ShopCard/ShopCard.tsx';
+import { ShopCardEditPQ } from './pages/PriceQuote/ShopCard/ShopCardEdit.tsx';
 const MaintenanceError = lazy(() => import('./pages/errors/maintenance-error'));
 const UnauthorisedError = lazy(
   () => import('./pages/errors/unauthorised-error.tsx')
@@ -39,16 +47,7 @@ const IndividualInvoicesAdd = lazy(() =>
     './pages/IndividualInvoices/IndividualInvoicesAdd/IndividualInvoicesAdd.tsx'
   ).then((module) => ({ default: module.IndividualInvoicesAdd }))
 );
-const CorporateInvoices = lazy(() =>
-  import('./pages/CorporateInvoices/CorporateInvoices.tsx').then((module) => ({
-    default: module.CorporateInvoices,
-  }))
-);
-const CorporateInvoicesAdd = lazy(() =>
-  import(
-    './pages/CorporateInvoices/CorporateInvoicesAdd/CorporateInvoicesAdd.tsx'
-  ).then((module) => ({ default: module.CorporateInvoicesAdd }))
-);
+
 const PurchaseInvoices = lazy(() =>
   import('./pages/PurchaseInvoices/PurchaseInvoices.tsx').then((module) => ({
     default: module.PurchaseInvoices,
@@ -59,16 +58,7 @@ const PurchaseInvoicesAdd = lazy(() =>
     './pages/PurchaseInvoices/PurchaseInvoicesAdd/PurchaseInvoicesAdd.tsx'
   ).then((module) => ({ default: module.PurchaseInvoicesAdd }))
 );
-const PriceQuoteAdd = lazy(() =>
-  import('./pages/PriceQuote/PriceQuoteAdd/PriceQuoteAdd.tsx').then(
-    (module) => ({ default: module.PriceQuoteAdd })
-  )
-);
-const PriceQuote = lazy(() =>
-  import('./pages/PriceQuote/PriceQuote.tsx').then((module) => ({
-    default: module.PriceQuote,
-  }))
-);
+
 const Products = lazy(() =>
   import('./pages/Products/Products.tsx').then((module) => ({
     default: module.Products,
@@ -124,16 +114,7 @@ const ShopCard = lazy(() =>
     default: module.ShopCard,
   }))
 );
-const ShopCardCo = lazy(() =>
-  import('./pages/CorporateInvoices/ShopCard/ShopCard.tsx').then((module) => ({
-    default: module.ShopCardCo,
-  }))
-);
-const ShopCardPrice = lazy(() =>
-  import('./pages/PriceQuote/ShopCard/ShopCard.tsx').then((module) => ({
-    default: module.ShopCardPrice,
-  }))
-);
+
 const NormalVoiceReport = lazy(() =>
   import('./pages/NormalVoice/NormalVoice.tsx').then((module) => ({
     default: module.NormalVoiceReport,
@@ -298,6 +279,26 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: 'corporate-invoices/add/shop-card',
+        element: (
+          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <ShopCardCo />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'corporate-invoices/edit/:id',
+        element: (
+          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <ShopCardEditCo />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
         path: 'fast-Invoices',
         element: (
           <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
@@ -337,16 +338,7 @@ const router = createBrowserRouter([
           </React.Suspense>
         ),
       },
-      {
-        path: 'corporate-invoices/add/shop-card',
-        element: (
-          <React.Suspense fallback={<div>Loading Individual Invoices...</div>}>
-            <ProtectedRoute requiredRole={Roles.ADMIN}>
-              <ShopCardCo />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
+
       {
         path: 'purchase-invoices',
         element: (
@@ -392,7 +384,18 @@ const router = createBrowserRouter([
         element: (
           <React.Suspense fallback={<div>Loading Price Quote...</div>}>
             <ProtectedRoute requiredRole={Roles.ADMIN}>
-              <ShopCardPrice />
+              <ShopCardPQ />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+
+      {
+        path: 'price-quote/edit/:id',
+        element: (
+          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <ShopCardEditPQ />
             </ProtectedRoute>
           </React.Suspense>
         ),

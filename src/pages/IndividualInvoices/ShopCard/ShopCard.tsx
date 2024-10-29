@@ -100,6 +100,8 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
       dispatch(updateField({ field: 'customer_id', value: data.customer?.id }));
     }
   }, [params.objId, getOrdersById?.data?.data]);
+  const { data: branchData } =
+    createCrudService<any>('manage/branches').useGetAll();
 
   // Map payments data and update subtotal
   // useEffect(() => {
@@ -127,7 +129,7 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
       dispatch(
         updateField({
           field: 'branch_id',
-          value: '051caaaa-f1c9-437f-bcd1-04a06ce569c5',
+          value: branchData && branchData?.data?.[0]?.id,
         })
       );
       dispatch(updateField({ field: 'discount_amount', value: taxAmount }));

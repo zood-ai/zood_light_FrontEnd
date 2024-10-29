@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '@/api/interceptors';
 import { useDispatch } from 'react-redux';
 import { toggleUserNavigate, userNavigate } from '@/store/slices/usrNavSlice';
+import { useToast } from '@/components/custom/useToastComp';
 
 interface GlobalDialogContextType {
   openDialog: (status: 'deleted' | 'updated' | 'added' | 'del') => void;
@@ -33,19 +34,7 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
   const [status, setStatus] = useState<
     'deleted' | 'updated' | 'added' | 'del' | null
   >(null);
-
-  const openDialog = (status: 'deleted' | 'updated' | 'added' | 'del') => {
-    setStatus(status);
-    setIsOpen(true);
-  };
-  const closeDialog = () => {
-    setStatus(null);
-    setIsOpen(false);
-  };
-  const delRoute = (route) => {
-    setdelRoutedelRoute(route);
-  };
-
+  const { showToast } = useToast();
   const getStatusMessage = () => {
     switch (status) {
       case 'deleted':
@@ -58,6 +47,29 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
         return '';
     }
   };
+  const openDialog = (status: 'deleted' | 'updated' | 'added' | 'del') => {
+    setStatus(status);
+    // setIsOpen(true);
+    if (status === 'del') {
+      setStatus(null);
+      setIsOpen(false);
+    } else {
+      showToast({
+        title: 'Notification Title',
+        description: getStatusMessage(),
+        duration: 4000,
+        variant: 'default',
+      });
+    }
+  };
+  const closeDialog = () => {
+    setStatus(null);
+    setIsOpen(false);
+  };
+  const delRoute = (route) => {
+    setdelRoutedelRoute(route);
+  };
+
   const url = window.location.href;
 
   // Split the URL by '/' to get an array of path segments

@@ -114,7 +114,7 @@ export const useDataTableColumns = () => {
           <div className="flex space-x-2 w-[180px] md:w-auto">
             {row.getValue('zatca_report_status') === 'pending' ||
               (row.getValue('zatca_report_status') === null && (
-                <StatusBadge status="pending" text={'click to clearance'} />
+                <StatusBadge status="pending" text={'click to reported'} />
               ))}
             {row.getValue('zatca_report_status') === 'PASS' && (
               <StatusBadge status="reported" text={'reported'} />

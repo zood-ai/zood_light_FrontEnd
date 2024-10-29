@@ -65,6 +65,8 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     'manage/payment_methods'
   ).useGetAll();
   const [discountAmount, setdiscountAmount] = useState(0);
+  const { data: branchData } =
+    createCrudService<any>('manage/branches').useGetAll();
 
   const handleItemChange = (index: number, field: string, value: string) => {
     setPaymentMethod((prevItems) => {
@@ -93,7 +95,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     dispatch(
       updateField({
         field: 'branch_id',
-        value: '051caaaa-f1c9-437f-bcd1-04a06ce569c5',
+        value: branchData?.data?.[0]?.id,
       })
     );
     dispatch(

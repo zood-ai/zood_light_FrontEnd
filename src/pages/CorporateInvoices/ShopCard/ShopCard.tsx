@@ -1,200 +1,156 @@
-import React, { useEffect, useState } from 'react';
-
+import React, { useEffect, useMemo, useState } from 'react';
 import { ShopCardProps } from './ShopCard.types';
-import personIcon from '/icons/name person.svg';
-
-import callIcon from '/icons/call.svg';
-
 import './ShopCard.css';
-import { BackBtn } from '@/components/custom/BackBtn';
-import IconInput from '@/components/custom/InputWithIcon';
-import { SelectComp } from '@/components/custom/SelectItem';
-import { QRCodeComp } from '@/components/custom/QRCodeComp';
 import useDirection from '@/hooks/useDirection';
-import { Textarea } from '@/components/ui/textarea';
-import { CheckboxWithText } from '@/components/custom/CheckboxWithText';
-import { DetailsHeadWithOutFilter } from '@/components/custom/DetailsHeadWithOutFilter';
 import { ShopCardTable } from '@/components/custom/ShopCardTable';
-import { ShopCardSummery } from '@/components/custom/ShopCardSummery';
-import ConfirmBk from '@/components/custom/ConfimBk';
-import { addProduct, updateField } from '@/store/slices/orderSchema';
-import axiosInstance from '@/api/interceptors';
+import { DetailsHeadWithOutFilter } from '@/components/custom/DetailsHeadWithOutFilter';
 import { useDispatch, useSelector } from 'react-redux';
 import createCrudService from '@/api/services/crudService';
-import { Button } from '@/components/custom/button';
+import {
+  addPayment,
+  addProduct,
+  updateField,
+} from '@/store/slices/orderSchema';
+import ConfirmBk from '@/components/custom/ConfimBk';
+import { useNavigate, useParams } from 'react-router-dom';
+import { setCardItem } from '@/store/slices/cardItems';
+import CustomerForm from './CustomerForm';
 
-export const ShopCardCo: React.FC<ShopCardProps> = () => {
+export const ShopCard: React.FC<ShopCardProps> = () => {
   const isRtl = useDirection();
-
+  const dispatch = useDispatch();
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
-  const orderSchema = useSelector((state: any) => state.orderSchema);
-  const allService = createCrudService<any>('manage/customers');
-  const { useGetAll } = allService;
-  const { data: allData, isLoading } = useGetAll();
+  const [isOpen, setIsOpen] = useState(false);
+  const params = useParams();
 
-  const initialValue = {
-    name: '',
-    phone: '',
-    notes: '-',
-    tax_registration_number: '',
-    vat_registration_number: '',
-    address: '',
-    addToZatca: true,
-  };
-  // Initialize form state
-  const [formState, setFormState] = useState(initialValue);
-  const handleInputChange = (field: string, value: any) => {
-    setFormState((prevState) => ({ ...prevState, [field]: value }));
-  };
-  let dispatch = useDispatch();
-  const handleInputChangex = async (field: string, value: any) => {
-    setFormState((prevState) => ({ ...prevState, [field]: value }));
-    dispatch(
-      updateField({
-        field: 'customer_id',
-        value: value,
-      })
-    );
-    const res = await axiosInstance
-      .get(`/manage/customers/${value}`)
-      .then((res) => {
-        const customerData = res?.data?.data;
-        // setFormState(customerData)
-        if (customerData) {
-          handleInputChange('name', customerData.id || '');
-          handleInputChange('phone', customerData.phone || '');
-          handleInputChange(
-            'tax_registration_number',
-            customerData.tax_registration_number || ''
-          );
-          handleInputChange(
-            'vat_registration_number',
-            customerData.vat_registration_number || ''
-          );
+  const totalCost = useMemo(
+    () => cardItemValue?.reduce((acc, item) => acc + item.price * item.qty, 0),
+    [cardItemValue]
+  );
+  console.log(cardItemValue, 'cardItemValue');
 
-          // Check if the addresses array exists and has at least one entry
-          const address = customerData.addresses?.[0]?.name || '';
-          handleInputChange('address', address);
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to fetch customer data', err);
-      });
-  };
-
+  const taxAmount = useMemo(() => (totalCost * 15) / 100, [totalCost]);
   useEffect(() => {
     if (cardItemValue && cardItemValue.length > 0) {
       const products = cardItemValue.map((item: any) => ({
         product_id: item.id || '',
         quantity: item.qty || 0,
         unit_price: item.price || 0,
-        total_price: item.price * item.qty || 0,
         discount_amount: 0,
-        discount_id:"0aaa23cb-2156-4778-b6dd-a69ba6642552",
-        discount_type:2
+        discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
+        discount_type: 2,
+        total_price: item.price * item.qty || 0,
       }));
 
       dispatch(addProduct(products));
     }
   }, [cardItemValue, dispatch]);
-  const [loading, setLoading] = useState(false);
-  const submitOrder = async () => {
-    try {
-      setLoading(true);
-      const res = await axiosInstance.post('orders', orderSchema);
-      setLoading(false);
-      console.log(res, 'res');
-    } catch (error) {
-      setLoading(false);
-      console.log(error, 'error');
-    }
-  };
-  const [isOpen, setIsOpen] = useState(false);
+  // Load products to Redux on mount or cardItemValue update
+  // useEffect(() => {
+  //   if (params.id !== 'add' && cardItemValue.length > 0) {
+  //     const products = cardItemValue.map((item: any) => ({
+  //       product_id: item.id || '',
+  //       quantity: item.qty || 0,
+  //       unit_price: item.price || 0,
+  //       total_price: item.price * item.qty || 0,
+  //       discount_amount: 0,
+  //       discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
+  //       discount_type: 2,
+  //     }));
+  //     dispatch(addProduct(products));
+  //   }
+  // }, [cardItemValue, dispatch]);
 
-  const handleBkAction = () => {
-    setIsOpen(true);
-  };
+  // Set default type on mount
+  useEffect(() => {
+    dispatch(updateField({ field: 'type', value: 2 }));
+  }, []);
+
+  // Fetch order details by ID and update Redux store
+  const getOrdersById = createCrudService<any>('orders').useGetById(
+    params.id !== 'add' ? params.objId ?? '' : ''
+  );
+
+  // Trigger fetching products based on params and fetched order data
+  // useEffect(() => {
+  //   if (params.id !== 'add' && getOrdersById?.data?.data) {
+  //     const { data } = getOrdersById.data;
+
+  //     // Map products data
+  //     const products = data.products?.map((item: any) => ({
+  //       id: item.id || '',
+  //       image: item.image || '',
+  //       qty: item.pivot?.quantity || 0,
+  //       price: item.pivot?.unit_price || 0,
+  //       total_price: item.pivot?.total_price || 0,
+  //       name: item.name || '',
+  //       discount_amount: item.pivot?.discount_amount,
+  //       discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
+  //       discount_type: item.pivot?.discount_type || 2,
+  //     }));
+
+  //     dispatch(setCardItem(products));
+  //   }
+  // }, [params.objId, getOrdersById?.data?.data]);
+
+  // Handle customer ID update
+  useEffect(() => {
+    if (params.objId && getOrdersById?.data?.data) {
+      const { data } = getOrdersById.data;
+      dispatch(updateField({ field: 'customer_id', value: data.customer?.id }));
+    }
+  }, [params.objId, getOrdersById?.data?.data]);
+  const { data: branchData } =
+    createCrudService<any>('manage/branches').useGetAll();
+
+  // Map payments data and update subtotal
+  // useEffect(() => {
+  //   if (params.objId && getOrdersById?.data?.data) {
+  //     const { data } = getOrdersById.data;
+
+  //     const payments = data.payments?.map((item: any) => ({
+  //       tendered: 180,
+  //       amount: item.amount || 0,
+  //       payment_method_id: item.payment_method_id || '',
+  //       tips: 0,
+  //       meta: { external_additional_payment_info: 'some info' },
+  //     }));
+
+  //     dispatch(addPayment(payments));
+
+  //     // Update subtotal price
+  //     dispatch(updateField({ field: 'subtotal_price', value: data.payments?.total_price }));
+  //   }
+  // }, [params.objId, getOrdersById?.data?.data]);
+
+  // Set remaining fields
+  useEffect(() => {
+    if (params.objId) {
+      dispatch(
+        updateField({
+          field: 'branch_id',
+          value: branchData && branchData?.data?.[0]?.id,
+        })
+      );
+      dispatch(updateField({ field: 'discount_amount', value: taxAmount }));
+      dispatch(updateField({ field: 'type', value: 2 }));
+    }
+  }, [params.objId, taxAmount]);
+
+  // Calculate and update total price based on external dependencies
   useEffect(() => {
     dispatch(
-      updateField({
-        field: 'type',
-        value: 2,
-      })
+      updateField({ field: 'total_price', value: totalCost - taxAmount })
     );
-  }, []);
+  }, [totalCost, taxAmount]);
+
+  const handleBkAction = () => setIsOpen(true);
+
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
       <ShopCardTable />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 self-stretch mt-5">
-        <div className="md:max-h-[45vh] col-span-3 md:col-span-2 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-0">
-          <SelectComp
-            options={allData?.data?.map((item: any) => ({
-              value: item.id,
-              label: item.name,
-            }))}
-            placeholder="Select Customer"
-            onValueChange={(value) =>
-              handleInputChangex('customerCategory', value)
-            }
-            label="اسم العميل"
-            className="col-span-10 md:col-span-4 w-[327px]"
-          />
-          <IconInput
-            disabled
-            name="name"
-            className="col-span-10 md:col-span-4"
-            label="رقم العميل"
-            iconSrc={callIcon}
-            value={formState.phone}
-            onChange={null}
-          />
-          <IconInput
-            disabled
-            name={formState.name}
-            className="col-span-10 md:col-span-10"
-            label="اسم الشارع"
-            value={formState.address}
-            onChange={null}
-          />
-          <IconInput
-            disabled
-            className="col-span-10 md:col-span-4"
-            label="رقم تسجيل ضريبة القيمة المضافة"
-            value={formState.tax_registration_number}
-            onChange={null}
-          />
-          <IconInput
-            disabled
-            className="col-span-10 md:col-span-6"
-            label="معرف اخر"
-            value={formState.vat_registration_number}
-            onChange={null}
-          />
-          <div className="col-span-10">
-            <CheckboxWithText
-              className=""
-              label="اضافة التقرير الي Zatca"
-              checked={formState.addToZatca}
-              onChange={(e) =>
-                handleInputChange('addToZatca', e.target.checked)
-              }
-            />
-          </div>
-          <div className="col-span-10 ">
-            <Button
-              dir="ltr"
-              loading={loading}
-              disabled={loading}
-              onClick={submitOrder}
-              className="w-[144px]"
-            >
-              حفظ
-            </Button>
-          </div>
-        </div>
-        <ShopCardSummery />
-      </div>
+      <CustomerForm />
       <ConfirmBk
         isOpen={isOpen}
         setIsOpen={undefined}

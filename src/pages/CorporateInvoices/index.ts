@@ -1,1 +1,1 @@
-export { CorporateInvoices as IndividualInvoices } from './CorporateInvoices';
+export { IndividualInvoices as  CorporateInvoices} from './IndividualInvoices';

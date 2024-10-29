@@ -7,108 +7,119 @@ import { Task } from '../data/schema';
 import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-table-column-header';
 import { StatusBadge } from '@/components/custom/StatusBadge';
 import { Button } from '@/components/custom/button';
-import createCrudService from '@/api/services/crudService';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { toggleActionView } from '@/store/slices/toggleAction';
+import dayjs from 'dayjs';
+import { formatDate } from '@/utils/formatDateTime';
 import { useDispatch } from 'react-redux';
+import { toggleActionView } from '@/store/slices/toggleAction';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
-  const crudService = createCrudService<any>('menu/categories');
-  const { useRemove } = crudService;
-  const { mutate: remove } = useRemove();
-  let navigate = useNavigate();
-  const [loading, setLoading] = useState(false)
   let dispatch = useDispatch();
 
   const columns: ColumnDef<Task>[] = [
     {
-      accessorKey: 'id',
+      accessorKey: 'reference',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'رقم الفاتورة'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('id')}
+              {row.getValue('reference') || '-'}
             </span>
           </div>
         );
       },
     },
     {
-      accessorKey: 'id',
+      accessorKey: 'customer',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'رقم العرض'} />
+        <DataTableColumnHeader column={column} title={'اسم العميل'} />
       ),
-      cell: ({ row }) => {
-         
-
+      cell: ({ row }: any) => {
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('id')}
+              {row.getValue('customer')?.name || '-'}
             </span>
           </div>
         );
       },
     },
     {
-      accessorKey: 'id',
+      accessorKey: 'customer',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'رقم الهاتف'} />
       ),
-      cell: ({ row }) => {
-         
-
+      cell: ({ row }: any) => {
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('id')}
+              {row.getValue('customer')?.phone || '-'}
             </span>
           </div>
         );
       },
     },
+    // {
+    //   accessorKey: 'payment_status',
+    //   header: ({ column }) => (
+    //     <DataTableColumnHeader column={column} title={'حالة الدفع'} />
+    //   ),
+    //   cell: ({ row }: any) => {
+    //     return (
+    //       <div className="flex space-x-2">
+    //         {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+    //         <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+    //           {row.getValue('payment_status') == 'partial' ? (
+    //             <StatusBadge status="Inactive" text={'مدفوع جزئي'} />
+    //           ) : row.getValue('payment_status') == 'unpaid' ? (
+    //             <StatusBadge status="error" text={'غير مدفوع'} />
+    //           ) : (
+    //             <StatusBadge status="completed" text={'مدفوع'} />
+    //           )}
+    //         </span>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
-      accessorKey: 'id',
+      accessorKey: 'created_at',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'التاريخ'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
-          <div className="flex space-x-2 ">
+          <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('id')}
+              {/* {dayjs(row.getValue('created_at')).format('MMMM D, YYYY h:mm A')} */}
+              {formatDate(row.getValue('created_at'))}
             </span>
           </div>
         );
       },
     },
     {
-      accessorKey: 'id',
+      accessorKey: 'zatca_report_status',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'اسم العميل'} />
+        <DataTableColumnHeader column={column} title={'Zatca Reporting'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
-          <div className="flex space-x-2 ">
+          <div className="flex space-x-2 w-[180px] md:w-auto">
+            {row.getValue('zatca_report_status') === 'pending' ||
+              (row.getValue('zatca_report_status') === null && (
+                <StatusBadge status="pending" text={'click to clearance'} />
+              ))}
+            {row.getValue('zatca_report_status') === 'PASS' && (
+              <StatusBadge status="reported" text={'reported'} />
+            )}
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('id')}
-            </span>
           </div>
         );
       },
@@ -119,8 +130,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'تنفيذ'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2 w-[180px] md:w-auto">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -137,7 +146,6 @@ export const useDataTableColumns = () => {
               >
                 رؤية الفاتورة
               </Button>
-          
             </div>
           </div>
         );

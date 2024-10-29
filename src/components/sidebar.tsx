@@ -76,11 +76,14 @@ export default function Sidebar({
               src={logo || ''}
               alt=""
               width={isCollapsed ? 24 : 32}
-              className={`${
-                isCollapsed
-                  ? 'absolute top-[79px] right-[17px] z-[999999] transition-all ease-out duration-500'
-                  : 'absolute top-[30px] right-[25px] z-[999999] transition-all ease-out duration-500'
-              }`}
+              // className={`${
+              //   isCollapsed
+              //     ? 'absolute top-[79px] right-[17px] z-[999999] transition-all ease-out duration-500'
+              //     : 'absolute top-[30px] right-[25px] z-[999999] transition-all ease-out duration-500'
+              // }`}
+              className={`absolute cursor-pointer hover:scale-105
+             ${isRtl ? 'left-[13px]' : '-right-5'} 
+          top-[40px] z-50 hidden rounded-ful bg-white border-0 l md:inline-flex`}
             />
             <div
               className={`flex flex-col justify-end truncate ${
@@ -124,9 +127,16 @@ export default function Sidebar({
           onClick={() => setIsCollapsed((prev) => !prev)}
           // size="icon"
           // variant="outline"
-          className={`absolute cursor-pointer hover:scale-105
-             ${isRtl ? 'left-[13px]' : '-right-5'} 
-          top-[40px] z-50 hidden rounded-ful bg-white border-0 l md:inline-flex`}
+          // className={`absolute cursor-pointer hover:scale-105
+          //    ${isRtl ? 'left-[13px]' : '-right-5'}
+          // top-[40px] z-50 hidden rounded-ful bg-white border-0 l md:inline-flex`}
+
+          className={`cursor-pointer hover:scale-105 ${
+            isCollapsed
+              ? 'absolute top-[79px] right-[17px] z-[999999] transition-all ease-out duration-500'
+              : 'absolute top-[7%] right-[25px] z-[999999] transition-all ease-out duration-500'
+          }`}
+
           // top-1/2 z-50 hidden rounded-full md:inline-flex`}
         >
           <svg

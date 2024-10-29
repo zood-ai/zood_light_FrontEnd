@@ -99,36 +99,36 @@ export const useDataTableColumns = () => {
       },
     },
 
-    {
-      accessorKey: 'id',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'تنفيذ'} />
-      ),
-      cell: ({ row }) => {
+    // {
+    //   accessorKey: 'id',
+    //   header: ({ column }) => (
+    //     <DataTableColumnHeader column={column} title={'تنفيذ'} />
+    //   ),
+    //   cell: ({ row }) => {
          
 
-        return (
-          <div className="flex space-x-2 w-[180px] md:w-auto">
-            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <div className="flex gap-4 text-sm font-bold text-right ">
-              {' '}
-              <Button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  dispatch(toggleActionView(true));
-                }}
-                className="ps-0"
-                variant={'linkHover'}
-              >
-                رؤية الفاتورة
-              </Button>
+    //     return (
+    //       <div className="flex space-x-2 w-[180px] md:w-auto">
+    //         {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+    //         <div className="flex gap-4 text-sm font-bold text-right ">
+    //           {' '}
+    //           <Button
+    //             type="button"
+    //             onClick={(e) => {
+    //               e.stopPropagation();
+    //               dispatch(toggleActionView(true));
+    //             }}
+    //             className="ps-0"
+    //             variant={'linkHover'}
+    //           >
+    //             رؤية الفاتورة
+    //           </Button>
           
-            </div>
-          </div>
-        );
-      },
-    },
+    //         </div>
+    //       </div>
+    //     );
+    //   },
+    // },
   ];
 
   return { columns };

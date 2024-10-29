@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 
-import { CorporateInvoicesProps } from './CorporateInvoices.types';
+import { IndividualInvoicesProps } from './IndividualInvoices.types';
 
-import './CorporateInvoices.css';
+import './IndividualInvoices.css';
 import { tasks } from './data/tasks';
 import { useState } from 'react';
 import { DetailsModal } from './Modal/DetailsModal';
@@ -13,20 +13,22 @@ import { useTranslation } from 'react-i18next';
 import { useDataTableColumns } from './components/useDataTableColumns';
 import useDirection from '@/hooks/useDirection';
 import { useNavigate } from 'react-router-dom';
-import { LoadingSkeleton } from '@/components/custom/LoadingSkeleton';
 import createCrudService from '@/api/services/crudService';
+import { LoadingSkeleton } from '@/components/custom/LoadingSkeleton';
 import { useDispatch, useSelector } from 'react-redux';
-import { resetCard } from '@/store/slices/cardItems';
 import { resetOrder } from '@/store/slices/orderSchema';
+import { resetCard } from '@/store/slices/cardItems';
 import { toggleActionView } from '@/store/slices/toggleAction';
 
-export const CorporateInvoices: React.FC<CorporateInvoicesProps> = () => {
+export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [selectedTableRow, setSelectedRow] = useState({});
   const [modalType, setModalType] = useState('Add');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const handleCreateTask = () => {
     // setSelectedRow({});
     setModalType('Add');
@@ -46,34 +48,30 @@ export const CorporateInvoices: React.FC<CorporateInvoicesProps> = () => {
     setSelectedRow(row);
     setIsAddEditOpen(true);
   };
-
   const handleCloseModal = () => {
     setIsAddEditOpen(false);
     setIsViewModalOpen(false);
     setIsDelModalOpen(false);
 
     dispatch(toggleActionView(false));
-
   };
+
   const filterBtn = () => {
     console.log('filterBtn');
   };
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allService = createCrudService<any>('orders?filter[type]=2');
+  const allService = createCrudService<any>('orders?filter[type]=1');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   console.log(allData, 'allUserData');
 
-  const dispatch = useDispatch();
-useEffect(() => {
-
-  dispatch(resetCard());
-  dispatch(resetOrder());
-}, [dispatch])
-const toggleActionData = useSelector((state: any) => state?.toggleAction);
-
+  useEffect(() => {
+    dispatch(resetCard());
+    dispatch(resetOrder());
+  }, [dispatch]);
+  const toggleActionData = useSelector((state: any) => state?.toggleAction);
 
   return (
     <>
