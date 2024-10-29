@@ -1,8 +1,12 @@
 import { IconLoader } from '@tabler/icons-react';
 import { AlertDialog, AlertDialogContent } from './ui/alert-dialog';
 import { Button } from './custom/button';
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 export default function FastAddActions({ isOpen, onClose }) {
+  let navigate = useNavigate();
+
   return (
     <div className=" ">
       <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -32,7 +36,13 @@ export default function FastAddActions({ isOpen, onClose }) {
                               />
                             </svg>
                           </div>
-                          <Button className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 w-full  rounded min-h-[39px] max-md:px-5 max-md:mt-10">
+                          <Button
+                            onClick={() => {
+                              onClose();
+                              navigate('/zood-dashboard/products/add');
+                            }}
+                            className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 w-full  rounded min-h-[39px] max-md:px-5 max-md:mt-10"
+                          >
                             <div className="gap-3 self-stretch">اضافة منتج</div>
                           </Button>
                         </div>
@@ -53,7 +63,14 @@ export default function FastAddActions({ isOpen, onClose }) {
                               />
                             </svg>
                           </div>
-                          <Button className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 w-full  rounded min-h-[39px] max-md:px-5 max-md:mt-10">
+                          <Button
+                            onClick={() => {
+                              onClose();
+
+                              navigate('/zood-dashboard/customers/add');
+                            }}
+                            className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 w-full  rounded min-h-[39px] max-md:px-5 max-md:mt-10"
+                          >
                             <div className="gap-3 self-stretch">اضافة عميل</div>
                           </Button>
                         </div>
@@ -88,7 +105,16 @@ export default function FastAddActions({ isOpen, onClose }) {
                               />
                             </svg>
                           </div>
-                          <Button className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 w-full  rounded min-h-[39px] max-md:px-5 max-md:mt-10">
+                          <Button
+                            onClick={() => {
+                              onClose();
+
+                              navigate(
+                                '/zood-dashboard/individual-invoices/add'
+                              );
+                            }}
+                            className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 w-full  rounded min-h-[39px] max-md:px-5 max-md:mt-10"
+                          >
                             <div className="gap-3 self-stretch">
                               اضافة فاتورة
                             </div>{' '}

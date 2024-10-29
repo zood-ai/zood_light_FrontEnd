@@ -66,10 +66,10 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
       setItems(
         allDataId?.data?.items?.map((item) => ({
-          qty: item.pivot.quantity,
-          total: item.pivot.total_cost,
-          item: item.pivot.item_id,
-          itemDescription: item.product.description,
+          qty: item?.pivot?.quantity,
+          total: item?.pivot?.total_cost,
+          item: item?.pivot?.item_id,
+          itemDescription: item?.product?.description,
         }))
       );
     }
@@ -93,20 +93,30 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     e.preventDefault();
     try {
       if (isEditMode) {
-        const { data } = await axiosInstance.put(
-          `inventory/purchasing/${params.objId}`,
+        // const { data } = await axiosInstance.put(
+        //   `inventory/purchasing/${params.objId}`,
+        //   {
+        //     // branch_id: branchData?.data?.[0]?.id,
+        //     // supplier_id: invoice.supplier_id,
+        //     type: 'items',
+        //     notes: invoice.purchaseDescription,
+        //     items: items.map((item) => item.item),
+
+        //   }
+        // );
+        await axiosInstance.post(
+          `inventory/purchasing/create_purchasing_item/${params.objId}`,
           {
-            branch_id: branchData?.data?.[0]?.id,
-            supplier_id: invoice.supplier_id,
             type: 'items',
-            notes: invoice.purchaseDescription,
             items: items.map((item) => item.item),
           }
         );
         await axiosInstance.post(
-          'inventory/purchasing/update_qtys_costs',
+          `inventory/purchasing/update_purchasing_item/${params.objId}`,
           items.map((item) => ({
-            id: data.id,
+            // branch_id: branchData?.data?.[0]?.id,
+
+            id: item.item,
             quantity: item.qty,
             total_cost: Number(item.total) * Number(item.qty),
           }))
@@ -120,20 +130,20 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           items: items.map((item) => item.item),
           invoice_number: Math.floor(Math.random() * 100000),
         });
-        const res =  await axiosInstance.get(
-          `inventory/purchasing/${data.id}`
-        )
+        // const res =  await axiosInstance.get(
+        //   `inventory/purchasing/${data?.data?.id}`
+        // )
         await axiosInstance.post(
-          'inventory/purchasing/update_qtys_costs',
+          `inventory/purchasing/update_purchasing_item/${data?.data?.id}`,
           items.map((item) => ({
-            id: res?.data.id,
+            id: item.item,
             quantity: item.qty,
             total_cost: Number(item.total) * Number(item.qty),
           }))
         );
       }
       openDialog(isEditMode ? 'updated' : 'added');
-      navigate('/zood-dashboard/customers');
+      navigate('/zood-dashboard/purchase-invoices');
     } catch (error) {
       console.error(error);
     }
@@ -145,11 +155,11 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   };
   <DetailsHeadWithOutFilter bkAction={handleBkAction} />;
   const [fastActionBtn, setFastActionBtn] = useState(false);
-const setSuppId = (value: string) => {
-  console.log(value, 'value');
-  
-  setInvoice({ ...invoice, supplier_id: value });
-}
+  const setSuppId = (value: string) => {
+    console.log(value, 'value');
+
+    setInvoice({ ...invoice, supplier_id: value });
+  };
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
@@ -244,6 +254,7 @@ const setSuppId = (value: string) => {
                       handleItemChange(index, 'item', value)
                     }
                     label="اسم الصنف"
+                    value={items[index]?.item}
                   />
                   <IconInput
                     value={items[index].qty}
@@ -324,13 +335,16 @@ const setSuppId = (value: string) => {
                 <span className="font-semibold">اضافة صنف جديد</span>
               </div>
             </Button>
+            <div className='flex'>
+
             <Button
               type="submit"
-              className="px-6 py-1.5 mt-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
+              className="px-6 py-1.5 mta-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
             >
               {isEditMode ? 'تحديث الفاتورة' : 'اضافة الفاتورة'}
             </Button>
             <DelConfirm route={'inventory/purchasing'} />
+            </div>
           </div>
         </div>
       </form>
@@ -339,7 +353,7 @@ const setSuppId = (value: string) => {
         setIsOpen={undefined}
         closeDialog={() => setIsOpen(false)}
         getStatusMessage={undefined}
-        />
+      />
       <FastAddActionsCustomer
         setInvoice={setSuppId}
         isOpen={fastActionBtn}

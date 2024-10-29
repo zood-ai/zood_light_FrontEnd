@@ -16,7 +16,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { setCardItem } from '@/store/slices/cardItems';
 import CustomerForm from './CustomerForm';
 
-export const ShopCardEdit: React.FC<ShopCardProps> = () => {
+export const ShopCardEditPQ: React.FC<ShopCardProps> = () => {
   const isRtl = useDirection();
   const dispatch = useDispatch();
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
@@ -34,7 +34,7 @@ export const ShopCardEdit: React.FC<ShopCardProps> = () => {
   const taxAmount = useMemo(() => (totalCost * 15) / 100, [totalCost]);
 
   useEffect(() => {
-    dispatch(updateField({ field: 'type', value: 1 }));
+    dispatch(updateField({ field: 'type', value: 3 }));
   }, []);
 
   // Fetch order details by ID and update Redux store
@@ -86,7 +86,7 @@ export const ShopCardEdit: React.FC<ShopCardProps> = () => {
     }
   }, [getOrdersById?.data?.data]);
   const { data: branchData } =
-  createCrudService<any>('manage/branches').useGetAll();
+    createCrudService<any>('manage/branches').useGetAll();
 
   // Set remaining fields
   useEffect(() => {
@@ -94,7 +94,7 @@ export const ShopCardEdit: React.FC<ShopCardProps> = () => {
       dispatch(
         updateField({
           field: 'branch_id',
-          value: branchData && branchData?.data?.[0]?.id,
+          value: branchData?.data?.[0]?.id,
         })
       );
       dispatch(updateField({ field: 'discount_amount', value: taxAmount }));

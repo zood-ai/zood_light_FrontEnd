@@ -29,15 +29,13 @@ export const useDataTableColumns = () => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'اسم المنتج'} />
       ),
-      cell: ({ row }) => {
-         
-
+      cell: ({ row }: any) => {
         return (
           <div className="  flex justify-start items-center py-[11.5px] w-[500px]  ">
             <div className="flex justify-start items-center max-w-[79px]">
               <img
                 loading="lazy"
-                src={placeHolderImg}
+                src={row.original.image || placeHolderImg}
                 className="object-cover"
                 alt="placeholder"
               />
@@ -53,8 +51,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'السعر'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2 ">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -71,8 +67,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'كمية'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -89,8 +83,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'الباركود'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2 ">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -102,36 +94,33 @@ export const useDataTableColumns = () => {
       },
     },
 
-    {
-      accessorKey: 'id',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'تنفيذ'} />
-      ),
-      cell: ({ row }) => {
-         
-
-        return (
-          <div className="flex space-x-2 w-[180px] md:w-auto">
-            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <div className="flex gap-4 text-sm font-bold text-right ">
-              {' '}
-              <Button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  dispatch(toggleActionView(true));
-                }}
-                className="ps-0"
-                variant={'linkHover'}
-              >
-                رؤية الفاتورة
-              </Button>
-          
-            </div>
-          </div>
-        );
-      },
-    },
+    // {
+    //   accessorKey: 'id',
+    //   header: ({ column }) => (
+    //     <DataTableColumnHeader column={column} title={'تنفيذ'} />
+    //   ),
+    //   cell: ({ row }) => {
+    //     return (
+    //       <div className="flex space-x-2 w-[180px] md:w-auto">
+    //         {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+    //         <div className="flex gap-4 text-sm font-bold text-right ">
+    //           {' '}
+    //           <Button
+    //             type="button"
+    //             onClick={(e) => {
+    //               e.stopPropagation();
+    //               dispatch(toggleActionView(true));
+    //             }}
+    //             className="ps-0"
+    //             variant={'linkHover'}
+    //           >
+    //             رؤية الفاتورة
+    //           </Button>
+    //         </div>
+    //       </div>
+    //     );
+    //   },
+    // },
   ];
 
   return { columns };

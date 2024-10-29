@@ -1,1 +1,1 @@
-export { ShopCardPrice as ShopCard } from './ShopCard';
+export { ShopCardPQ } from './ShopCard';

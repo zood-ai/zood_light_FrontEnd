@@ -32,7 +32,11 @@ const formSchema = z.object({
   name: z.string(),
   phone: z.string(),
 });
-export default function FastAddActionsCustomer({ isOpen, onClose,setInvoice }) {
+export default function FastAddActionsCustomer({
+  isOpen,
+  onClose,
+  setInvoice,
+}) {
   const { t } = useTranslation();
   const isRtl = useDirection();
   const params = useParams();
@@ -44,15 +48,12 @@ export default function FastAddActionsCustomer({ isOpen, onClose,setInvoice }) {
   const { useGetById, useUpdate, useCreate } = crudService;
   const { mutate: createNewUser } = useCreate();
   const { mutate: updateDataUserById } = useUpdate();
-  const { data: getDataById } = useGetById(`${params.objId ?? ''}`);
+  // const { data: getDataById } = useGetById(`${params.objId ?? ''}`);
 
   const [loading, setLoading] = useState(false);
 
   // Set default form values based on add/edit mode
-  const defaultValues = useMemo(
-    () => (isEditMode ? getDataById?.data : {}),
-    [getDataById, isEditMode]
-  );
+  const defaultValues = useMemo(() => (isEditMode ? {} : {}), [isEditMode]);
 
   // Initialize form with validation schema and default values
   const form = useForm<z.infer<typeof formSchema>>({
@@ -63,12 +64,12 @@ export default function FastAddActionsCustomer({ isOpen, onClose,setInvoice }) {
   // Reset form when data changes
   useEffect(() => {
     if (isEditMode) {
-      form.reset(getDataById?.data);
+      form.reset({});
     } else {
       form.reset({});
     }
-  }, [getDataById, form, isEditMode]);
-  const queryClient: any = useQueryClient()
+  }, [form, isEditMode]);
+  const queryClient: any = useQueryClient();
 
   // Handle form submission for both add and edit scenarios
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -93,11 +94,11 @@ export default function FastAddActionsCustomer({ isOpen, onClose,setInvoice }) {
         {
           onSuccess: (data) => {
             console.log(data, 'data');
-            
-            setInvoice(data.data.id )
+
+            setInvoice(data.data.id);
             setLoading(false);
             form.reset({});
-            onClose()
+            onClose();
             queryClient.invalidateQueries(['inventory/suppliers']);
           },
           onError,
@@ -111,64 +112,64 @@ export default function FastAddActionsCustomer({ isOpen, onClose,setInvoice }) {
         <AlertDialogContentComp className="    ">
           <div className="bg-mainBg h-[100vh] w-[422px]     relative ps-[24px]">
             <>
-            <div className="grow shrink text-2xl col-span-1 font-semibold w-[102px]  mt-[35px]">
-              فاتورة
-            </div>
-            <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleFormSubmit)}
-              className="my-md"
-            >
-              <div className="grid grid-cols-1  gap-y-md">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('اسم المورد')}
-                          iconSrc={personIcon}
-                          inputClassName="w-[105%]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('هاتف المورد')}
-                          iconSrc={callIcon}
-                          inputClassName="w-[105%]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <div className="grow shrink text-2xl col-span-1 font-semibold w-[102px]  mt-[35px]">
+                فاتورة
               </div>
-              <div className="  ">
-                <Button
-                  dir="ltr"
-                  type="submit"
-                  loading={loading}
-                  disabled={loading}
-                  className="mt-4 h-[39px] w-[163px]"
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(handleFormSubmit)}
+                  className="my-md"
                 >
-                  {isEditMode ? t('تعديل المورد') : t('اضافة المورد')}
-                </Button>
-              <DelConfirm  route={'inventory/suppliers'} />
-              </div>
-            </form>
-          </Form>
+                  <div className="grid grid-cols-1  gap-y-md">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <IconInput
+                              {...field}
+                              label={t('اسم المورد')}
+                              iconSrc={personIcon}
+                              inputClassName="w-[105%]"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <IconInput
+                              {...field}
+                              label={t('هاتف المورد')}
+                              iconSrc={callIcon}
+                              inputClassName="w-[105%]"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="  ">
+                    <Button
+                      dir="ltr"
+                      type="submit"
+                      loading={loading}
+                      disabled={loading}
+                      className="mt-4 h-[39px] w-[163px]"
+                    >
+                      {isEditMode ? t('تعديل المورد') : t('اضافة المورد')}
+                    </Button>
+                    <DelConfirm route={'inventory/suppliers'} />
+                  </div>
+                </form>
+              </Form>
             </>
             <img
               onClick={onClose}

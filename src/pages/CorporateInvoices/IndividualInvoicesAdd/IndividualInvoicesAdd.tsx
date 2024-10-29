@@ -1,29 +1,25 @@
 import React, { useEffect, useState } from 'react';
 
-import { CorporateInvoicesProps } from './CorporateInvoicesAdd.types';
+import { IndividualInvoicesAddProps } from './IndividualInvoicesAdd.types';
 
-import './CorporateInvoicesAdd.css';
+import './IndividualInvoicesAdd.css';
 import { useTranslation } from 'react-i18next';
 import { CardItem } from '@/components/CardItem';
-import { BackBtn } from '@/components/custom/BackBtn';
-import { QRCodeComp } from '@/components/custom/QRCodeComp';
-import IconInput from '@/components/custom/InputWithIcon';
-import { SelectComp } from '@/components/custom/SelectItem';
-import useDirection from '@/hooks/useDirection';
-import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { DeatilsHeaderWithFilter } from '@/components/custom/DeatilsHeaderWithFilter';
 import createCrudService from '@/api/services/crudService';
 import { useDispatch } from 'react-redux';
-import { resetOrder } from '@/store/slices/orderSchema';
 import ConfirmBk from '@/components/custom/ConfimBk';
+import { resetOrder } from '@/store/slices/orderSchema';
 
-export const CorporateInvoicesAdd: React.FC<CorporateInvoicesProps> = () => {
+export const IndividualInvoicesAdd: React.FC<
+  IndividualInvoicesAddProps
+> = () => {
   const { i18n, t } = useTranslation();
-  const isRtl = useDirection();
+
   const allServiceUser = createCrudService<any>('menu/products');
   const { useGetAll } = allServiceUser;
   const { data: allUserData } = useGetAll();
-  // console.log(cardItemValue.map((item: any) => item), 'allUserData');
   const [isOpen, setIsOpen] = useState(false);
 
   const dispatch = useDispatch();
@@ -34,19 +30,14 @@ export const CorporateInvoicesAdd: React.FC<CorporateInvoicesProps> = () => {
 
   return (
     <>
-   <DeatilsHeaderWithFilter
+      <DeatilsHeaderWithFilter
         bkAction={() => {
-
           setIsOpen(true);
         }}
       />
       <div className="grid grid-cols-1 md:grid-cols-6  mt-md gap-x-md gap-y-md">
         {allUserData?.data?.map((item, index) => (
-          <CardItem
-            key={item.id}
-            index={index}
-            item={item}
-          />
+          <CardItem key={item.id} index={index} item={item} />
         ))}
       </div>
       <ConfirmBk

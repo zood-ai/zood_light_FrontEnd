@@ -43,7 +43,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       )}
       
       {status === 'active' && (
-        <div className="flex flex-col justify-center py-xs text-sm font-semibold text-teal-500 whitespace-nowrap max-w-[81px]">
+        <div className="flex flex-col justify-center py-xs pb-1 text-sm font-semibold text-teal-500 whitespace-nowrap max-w-[81px]">
           <div className="gap-2.5 capitalize self-stretch px-2 h-6 pt-[2px] bg-[#D2F9F4] rounded border border-[#1BDAC0] border-solid">
             {text}
           </div>

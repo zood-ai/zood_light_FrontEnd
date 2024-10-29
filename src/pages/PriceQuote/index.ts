@@ -1,1 +1,1 @@
-export { PriceQuote as IndividualInvoices } from './PriceQuote';
+export { IndividualInvoices as PriceQuote } from './IndividualInvoices';

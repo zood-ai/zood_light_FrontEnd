@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 
-import { PriceQuoteProps } from './PriceQuote.types';
+import { IndividualInvoicesProps } from './IndividualInvoices.types';
 
-import './PriceQuote.css';
+import './IndividualInvoices.css';
 import { tasks } from './data/tasks';
 import { useState } from 'react';
 import { DetailsModal } from './Modal/DetailsModal';
@@ -14,18 +14,21 @@ import { useDataTableColumns } from './components/useDataTableColumns';
 import useDirection from '@/hooks/useDirection';
 import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
+import { LoadingSkeleton } from '@/components/custom/LoadingSkeleton';
 import { useDispatch, useSelector } from 'react-redux';
-import { resetCard } from '@/store/slices/cardItems';
 import { resetOrder } from '@/store/slices/orderSchema';
+import { resetCard } from '@/store/slices/cardItems';
 import { toggleActionView } from '@/store/slices/toggleAction';
 
-export const PriceQuote: React.FC<PriceQuoteProps> = () => {
+export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [selectedTableRow, setSelectedRow] = useState({});
   const [modalType, setModalType] = useState('Add');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const handleCreateTask = () => {
     // setSelectedRow({});
     setModalType('Add');
@@ -51,27 +54,24 @@ export const PriceQuote: React.FC<PriceQuoteProps> = () => {
     setIsDelModalOpen(false);
 
     dispatch(toggleActionView(false));
-
   };
+
   const filterBtn = () => {
     console.log('filterBtn');
   };
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-
-  const allService = createCrudService<any>('orders?filter[type]=3');
+  const allService = createCrudService<any>('orders?filter[type]=2');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   console.log(allData, 'allUserData');
 
-  const dispatch = useDispatch();
-useEffect(() => {
-
-  dispatch(resetCard());
-  dispatch(resetOrder());
-}, [dispatch])
-const toggleActionData = useSelector((state: any) => state?.toggleAction);
+  useEffect(() => {
+    dispatch(resetCard());
+    dispatch(resetOrder());
+  }, [dispatch]);
+  const toggleActionData = useSelector((state: any) => state?.toggleAction);
 
   return (
     <>
@@ -92,19 +92,18 @@ const toggleActionData = useSelector((state: any) => state?.toggleAction);
         onClose={handleCloseModal}
       />
 
-    
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
-           handleDel={handleOpenDeleteModal}
-           handleRowClick={handleOpenViewModal}
-           data={allData?.data || []}
-           columns={columns}
-           handleEdit={handleOpenEditModal}
-           actionBtn={handleCreateTask}
-           filterBtn={filterBtn}
-           meta={allData || {}}
-           actionText={'عرض سعر'}
-           loading={isLoading}
+          handleDel={handleOpenDeleteModal}
+          handleRowClick={handleOpenViewModal}
+          data={allData?.data || []}
+          columns={columns}
+          handleEdit={handleOpenEditModal}
+          actionBtn={handleCreateTask}
+          filterBtn={filterBtn}
+          meta={allData || {}}
+          actionText={'فاتورة '}
+          loading={isLoading}
         />
       </div>
     </>
