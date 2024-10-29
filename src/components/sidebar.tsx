@@ -134,11 +134,10 @@ export default function Sidebar({
           className={`cursor-pointer hover:scale-105 ${
             isCollapsed
               ? 'absolute top-[79px] right-[17px] z-[999999] transition-all ease-out duration-500'
-              : 'absolute top-[7%] right-[25px] z-[999999] transition-all ease-out duration-500'
+              : 'absolute top-[7%] right-[30px] z-[999999] transition-all ease-out duration-500'
           }`}
 
-          // top-1/2 z-50 hidden rounded-full md:inline-flex`}
-        >
+          >
           <svg
             width="24"
             height="18"
