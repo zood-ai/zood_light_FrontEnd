@@ -157,7 +157,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
 
   return (
     <>
-      <div className="flex  flex-col rounded-none  md:w-[502px] md:translate-x-[100px]">
+      <div className="flex  flex-col rounded-none  md:w-[502px]  ">
         <div className="flex flex-col pt-6 pb-12 w-full bg-white rounded border border-solid border-zinc-300 max-md:max-w-full">
           <div className="flex flex-col items-start px-3 w-full max-md:max-w-full">
             <div className="self-stretch max-md:mr-2.5 max-md:max-w-full">
@@ -184,7 +184,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       onChange={(value) =>
                         setdiscountAmount(value.target.value)
                       }
-                      inputClassName={'w-[214px]'}
+                      inputClassName={'w-full max-w-[214px]  '}
                       // label="ضريبة القيمة المضافة"
                       iconSrcLeft={'SR'}
                       value={
