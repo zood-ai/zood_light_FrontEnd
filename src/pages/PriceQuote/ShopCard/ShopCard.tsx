@@ -127,13 +127,7 @@ export const ShopCardPQ: React.FC<ShopCardProps> = () => {
 
   // Set remaining fields
   useEffect(() => {
-    // if (params.objId) {
-      dispatch(
-        updateField({
-          field: 'branch_id',
-          value: branchData?.data?.[0]?.id,
-        })
-      );
+    if (params.objId) {
       dispatch(updateField({ field: 'discount_amount', value: taxAmount }));
       dispatch(updateField({ field: 'type', value: 3 }));
     }
