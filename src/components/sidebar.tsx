@@ -137,8 +137,7 @@ export default function Sidebar({
               : 'absolute top-[7%] right-[30px] z-[999999] transition-all ease-out duration-500'
           }`}
 
-          // top-1/2 z-50 hidden rounded-full md:inline-flex`}
-        >
+          >
           <svg
             width="24"
             height="18"
