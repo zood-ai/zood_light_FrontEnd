@@ -247,7 +247,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       }
                       value={Number(paymentMethod[index].amount)}
                       placeholder="0.00"
-                      label="الكمية"
+                      label="المبلغ"
                       width="150px"
                       disabled={params.id && paymentMethodinit[index]  }
                     />

@@ -61,7 +61,7 @@ const Previews: React.FC<any> = ({ initialFile, onFileChange }:any) => {
           <h3 className="mt-2 text-sm font-medium text-gray-900">
             <img
               className="mx-auto h-[323px] w-[377px]"
-              src={base64Image || file?.preview || placeHolderImg} // Prioritize base64, then file, then placeholder
+              src={initialFile || base64Image || file?.preview || placeHolderImg} // Prioritize base64, then file, then placeholder
             />
           </h3>
           <Button type="button" className="w-full mt-lg" variant="outlineMain">

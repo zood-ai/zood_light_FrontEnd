@@ -17,7 +17,7 @@ import { toggleActionView } from '@/store/slices/toggleAction';
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
   let navigate = useNavigate();
-  const crudService = createCrudService<any>('menu/products');
+  const crudService = createCrudService<any>('menu/products?not_default=1');
   const { useRemove } = crudService;
   const { mutate: remove } = useRemove();
   let dispatch = useDispatch();
