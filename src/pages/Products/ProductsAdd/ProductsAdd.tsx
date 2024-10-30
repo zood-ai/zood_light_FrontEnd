@@ -45,7 +45,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
   const isEditMode = modalType !== 'add';
   const navigate = useNavigate();
   // Fetch services and mutations
-  const crudService = createCrudService<any>('menu/products?not_default=1');
+  const crudService = createCrudService<any>('menu/products');
   const { mutate: createInventoryCount } = createCrudService<any>(
     'inventory/inventory-count'
   ).useCreateNoDialog();
@@ -77,7 +77,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
         ...getDataById?.data,
         category_id: getDataById?.data?.category?.id,
         quantity: String(getDataById?.data?.quantity),
-        price: String(getDataById?.data?.quantity),
+        price: String(getDataById?.data?.price),
       });
       setfile(getDataById?.data?.image);
     }
@@ -237,6 +237,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter
+        mainTittle={isEditMode ? form.getValues('name') : 'اضافة منتج'}
         bkAction={() => {
           setIsOpen(true);
         }}
@@ -401,9 +402,9 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
               className="mt-[32px] h-[39px] w-[163px]"
               type="submit"
             >
-              {'اضافة منتج'}
+              { isEditMode ? 'تعديل المنتج' : 'اضافة المنتج'}
             </Button>
-            <DelConfirm route={'menu/products?not_default=1'} />
+            <DelConfirm route={'menu/products'} />
           </form>
         </Form>
       </div>
