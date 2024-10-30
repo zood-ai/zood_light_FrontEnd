@@ -20,7 +20,7 @@ import ConfirmBk from '@/components/custom/ConfimBk';
 export const CorporateInvoicesAdd: React.FC<CorporateInvoicesProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
-  const allServiceUser = createCrudService<any>('menu/products');
+  const allServiceUser = createCrudService<any>('menu/products?not_default=1');
   const { useGetAll } = allServiceUser;
   const { data: allUserData } = useGetAll();
   // console.log(cardItemValue.map((item: any) => item), 'allUserData');

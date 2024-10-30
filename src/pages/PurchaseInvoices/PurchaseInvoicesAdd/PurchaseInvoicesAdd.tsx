@@ -47,7 +47,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   console.log(whoIam?.data, 'whoIam');
 
   const { useGetById, useUpdate, useCreate } = crudService;
-  const { useGetAll: useGetAllPro } = createCrudService<any>('menu/products');
+  const { useGetAll: useGetAllPro } = createCrudService<any>('menu/products?not_default=1');
   const { data: getAllPro } = useGetAllPro();
   const { data: allData } = createCrudService<any>(
     'inventory/suppliers'

@@ -29,6 +29,7 @@ const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
   phone: z.string().nonempty('Phone is required'),
   address: z.string().nonempty('Address is required'),
+  email: z.string().email({ message: 'Invalid email address' }),
   taxNum: z.string().min(15, { message: 'Tax number is must be 15 number' }),
   coTax: z.string().min(15, { message: 'Tax number is must be 15 number' }),
 });
@@ -85,7 +86,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
             form.setValue('phone', customerData.phone || '');
             form.setValue('taxNum', customerData.vat_registration_number || '');
             form.setValue('coTax', customerData.tax_registration_number || '');
-
+            form.setValue('email', customerData.email || '');
             // Check if the addresses array exists and has at least one entry
             const address = customerData.addresses?.[0]?.name || '';
             form.setValue('address', address);
@@ -111,8 +112,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
     if (isEditMode) {
       await axiosInstance
         .put(`/manage/customers/${params.objId}`, {
-          name: values.name,
-          phone: values.phone,
+          ...values,
           notes: '-',
           tax_registration_number: values.taxNum,
           vat_registration_number: values.coTax,
@@ -140,8 +140,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
     } else {
       await axiosInstance
         .post('/manage/customers', {
-          name: values.name,
-          phone: values.phone,
+          ...values,
           notes: '-',
           tax_registration_number: values.taxNum,
           vat_registration_number: values.coTax,
@@ -229,11 +228,27 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
                   control={form.control}
                   name="address"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-2 mt-md">
+                    <FormItem className="md:col-span-1 mt-md">
                       <FormControl>
                         <IconInput
                           {...field}
                           label="عنوان العميل"
+                          inputClassName="w-[278px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-1 mt-md">
+                      <FormControl>
+                        <IconInput
+                          {...field}
+                          label="الايميل"
                           inputClassName="w-[278px]"
                         />
                       </FormControl>

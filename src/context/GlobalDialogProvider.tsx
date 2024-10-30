@@ -51,8 +51,8 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
     setStatus(status);
     // setIsOpen(true);
     if (status === 'del') {
-      setStatus(null);
-      setIsOpen(false);
+      setStatus(status);
+      setIsOpen(true);
     } else {
       showToast({
         title: 'Notification Title',

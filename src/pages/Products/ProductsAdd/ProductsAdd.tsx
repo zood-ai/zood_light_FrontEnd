@@ -45,7 +45,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
   const isEditMode = modalType !== 'add';
   const navigate = useNavigate();
   // Fetch services and mutations
-  const crudService = createCrudService<any>('menu/products');
+  const crudService = createCrudService<any>('menu/products?not_default=1');
   const { mutate: createInventoryCount } = createCrudService<any>(
     'inventory/inventory-count'
   ).useCreateNoDialog();
@@ -403,7 +403,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
             >
               {'اضافة منتج'}
             </Button>
-            <DelConfirm route={'menu/products'} />
+            <DelConfirm route={'menu/products?not_default=1'} />
           </form>
         </Form>
       </div>
