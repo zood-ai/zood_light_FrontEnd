@@ -21,6 +21,7 @@ import FastAddActions from './FastAddActions';
 import DialogSidebar from './DialogSidebar';
 import { updateField } from '@/store/slices/orderSchema';
 import createCrudService from '@/api/services/crudService';
+import Cookies from 'js-cookie';
 interface WelcomeMessageProps {
   name: string;
 }
@@ -66,6 +67,7 @@ const AppShell = () => {
         value: branchData?.data?.[0]?.id,
       })
     );
+    Cookies.set('branch_id', branchData?.data?.[0]?.id);
   }, [branchData]);
   return (
     <>

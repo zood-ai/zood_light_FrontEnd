@@ -30,7 +30,16 @@ import DelConfirm from '@/components/custom/DelConfim';
 // Validation schema using Zod
 const formSchema = z.object({
   name: z.string(),
+  contact_name: z.string(),
   phone: z.string(),
+  vat_registration_number: z
+    .string()
+    .min(15, { message: 'Tax number is must be 15 number' }),
+  tax_registration_number: z
+    .string()
+    .min(15, { message: 'Tax number is must be 15 number' }),
+  primary_email: z.string().email({ message: 'Invalid email address' }),
+  code: z.string(),
 });
 
 export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
@@ -82,14 +91,15 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
         {
           onSuccess: (data) => {
             setLoading(false);
-            form.reset(values);
+            form.reset({});
+            navigate('/zood-dashboard/resources');
           },
           onError,
         }
       );
     } else {
       await createNewUser(
-        { ...values, code: `SUP-${Math.floor(Math.random() * 100000)}` },
+        { ...values },
         {
           onSuccess: (data) => {
             setLoading(false);
@@ -106,6 +116,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter
+        mainTittle={isEditMode ? form.getValues('name') : 'اضافة مورد'}
         bkAction={() => {
           setIsOpen(true);
         }}
@@ -117,17 +128,51 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
               onSubmit={form.handleSubmit(handleFormSubmit)}
               className="px-s4 my-5"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-md">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="md:col-span-2 mt-md">
                       <FormControl>
                         <IconInput
                           {...field}
                           label={t('اسم المورد')}
                           iconSrc={personIcon}
+                          inputClassName="w-[100%] md:col-span-2"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="contact_name"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2 mt-md">
+                      <FormControl>
+                        <IconInput
+                          {...field}
+                          label={t('اسم للتواصل')}
+                          iconSrc={personIcon}
+                          inputClassName="w-[100%] md:col-span-2"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2 mt-md">
+                      <FormControl>
+                        <IconInput
+                          {...field}
+                          label={t('كود المورد')}
+                          // iconSrc={callIcon}
                           inputClassName="w-[100%]"
                         />
                       </FormControl>
@@ -139,13 +184,61 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                   control={form.control}
                   name="phone"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="md:col-span-2 mt-md">
                       <FormControl>
                         <IconInput
                           {...field}
                           label={t('هاتف المورد')}
                           iconSrc={callIcon}
                           inputClassName="w-[100%]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="primary_email"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-4 mt-md">
+                      <FormControl>
+                        <IconInput
+                          {...field}
+                          label="البريد الإلكتروني"
+                          inputClassName="w-[278px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="vat_registration_number"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2 mt-md">
+                      <FormControl>
+                        <IconInput
+                          {...field}
+                          label="رقم تسجيل ضريبة القيمة المضافة"
+                          inputClassName="w-[278px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tax_registration_number"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-1 mt-md">
+                      <FormControl>
+                        <IconInput
+                          {...field}
+                          label="رقم السجل التجاري"
+                          inputClassName="w-[278px]"
                         />
                       </FormControl>
                       <FormMessage />
@@ -163,7 +256,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                 >
                   {isEditMode ? t('تعديل المورد') : t('اضافة المورد')}
                 </Button>
-              <DelConfirm  route={'inventory/suppliers'} />
+                <DelConfirm route={'inventory/suppliers'} />
               </div>
             </form>
           </Form>

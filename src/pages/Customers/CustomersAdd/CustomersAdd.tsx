@@ -83,8 +83,8 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
           if (customerData) {
             form.setValue('name', customerData.name || '');
             form.setValue('phone', customerData.phone || '');
-            form.setValue('taxNum', customerData.tax_registration_number || '');
-            form.setValue('coTax', customerData.vat_registration_number || '');
+            form.setValue('taxNum', customerData.vat_registration_number || '');
+            form.setValue('coTax', customerData.tax_registration_number || '');
 
             // Check if the addresses array exists and has at least one entry
             const address = customerData.addresses?.[0]?.name || '';
@@ -171,11 +171,12 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
 
   return (
     <>
-      <DetailsHeadWithOutFilter   bkAction={() => {
-
-setIsOpen(true);
-}}
- />
+  <DetailsHeadWithOutFilter
+        mainTittle={isEditMode ? form.getValues('name') : 'اضافة عميل'}
+        bkAction={() => {
+          setIsOpen(true);
+        }}
+      />
     <ConfirmBk
         isOpen={isOpen}
         setIsOpen={undefined}
@@ -248,7 +249,7 @@ setIsOpen(true);
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="الرقم الضريبي"
+                          label="رقم تسجيل ضريبة القيمة المضافة"
                           inputClassName="w-[278px]"
                         />
                       </FormControl>
@@ -264,7 +265,7 @@ setIsOpen(true);
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="الرقم الضريبي للشركة"
+                          label="رقم السجل التجاري"
                           inputClassName="w-[278px]"
                         />
                       </FormControl>

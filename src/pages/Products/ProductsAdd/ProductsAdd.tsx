@@ -19,21 +19,23 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { z } from 'zod';
+import { set, z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import axiosInstance from '@/api/interceptors';
 import ConfirmBk from '@/components/custom/ConfimBk';
 import DelConfirm from '@/components/custom/DelConfim';
+import Cookies from 'js-cookie';
+import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 
 const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
-  name_localized: z.string().nonempty('Phone is required'),
-  description: z.string().nonempty('Address is required'),
-  price: z.string().nonempty('Email is required'),
-  barcode: z.string().nonempty('Email is required'),
-  quantity: z.string().nonempty('Email is required'),
-  category_id: z.string().nonempty('Email is required'),
+  name_localized: z.string().nonempty('Name is required'),
+  description: z.string().nonempty('description is required'),
+  price: z.string().nonempty('price is required'),
+  sku: z.string().nonempty('barcode is required'),
+  quantity: z.string().nonempty('quantity is required'),
+  category_id: z.string().nonempty('category is required'),
 });
 export const ProductsAdd: React.FC<ProductsAddProps> = () => {
   const { t } = useTranslation();
@@ -47,11 +49,12 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
   const { mutate: createInventoryCount } = createCrudService<any>(
     'inventory/inventory-count'
   ).useCreateNoDialog();
-  const { useGetById, useUpdate, useCreate } = crudService;
-  const { mutate: createNewUser } = useCreate();
+  const { useGetById, useUpdate, useCreateNoDialog } = crudService;
+  const { mutate: createNewProduct } = useCreateNoDialog();
   const { mutate: updateDataUserById } = useUpdate();
   const { data: getDataById } = useGetById(`${params.objId ?? ''}`);
   const [file, setfile] = useState<any>();
+  const { openDialog } = useGlobalDialog();
 
   const [loading, setLoading] = useState(false);
 
@@ -73,11 +76,20 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
       form.reset({
         ...getDataById?.data,
         category_id: getDataById?.data?.category?.id,
-        quantity:
-          getDataById?.data?.ingredients?.[0]?.pivot?.quantity?.toString(),
+        quantity: String(getDataById?.data?.quantity),
+        price: String(getDataById?.data?.quantity),
       });
-    } else {
+      setfile(getDataById?.data?.image);
+    }
+    if (!isEditMode) {
       form.reset({});
+
+      async () => {
+        const skuData = await axiosInstance.post('manage/generate_sku', {
+          model: 'products',
+        });
+        form.setValue('sku', `sk-${skuData?.data?.data}`);
+      };
     }
   }, [getDataById, form, isEditMode]);
   const { data: branchData } =
@@ -104,7 +116,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
               console.log(proData);
 
               const inventoryPayload = {
-                branch: "051caaaa-f1c9-437f-bcd1-04a06ce569c5",
+                branch: Cookies.get('branch_id'),
                 items: [{ id: proData.data?.ingredients?.[0]?.pivot?.item_id }],
               };
 
@@ -143,42 +155,39 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
       );
     } else {
       try {
-        const userPayload = {
+        const skuData = await axiosInstance.post('manage/generate_sku', {
+          model: 'products',
+        });
+        console.log(skuData);
+
+        const productPayload = {
           ...values,
           is_stock_product: true,
           image: file,
           costing_method: 2,
-          barcode: '',
           cost: 0,
           pricing_method: 1,
           selling_method: 1,
-          sku: `PRO-${Math.floor(Math.random() * 100000)}`,
         };
-
-        await createNewUser(userPayload, {
+        await createNewProduct(productPayload, {
           onSuccess: async (proData) => {
             try {
-              setLoading(false);
               console.log(proData);
+              const itemPivotId = proData?.data.ingredients[0]?.pivot?.item_id;
 
               const inventoryPayload = {
-                branch: "051caaaa-f1c9-437f-bcd1-04a06ce569c5",
-                items: [{ id: proData.data?.id }],
+                branch: Cookies.get('branch_id'),
+                items: [{ id: itemPivotId }],
               };
-              const invData = await axiosInstance.post(
-                'inventory/inventory-count',
-                inventoryPayload
-              );
+              // const invData = await axiosInstance.post(
+              //   'inventory/inventory-count',
+              //   inventoryPayload
+              // );
 
               await createInventoryCount(inventoryPayload, {
                 onSuccess: async (invData) => {
                   try {
                     const inventoryId = invData.data.id;
-                    const response = await axiosInstance.get(
-                      `inventory/inventory-count/${inventoryId}`
-                    );
-
-                    const itemPivotId = response.data?.data?.items?.[0]?.id;
 
                     await axiosInstance.post(
                       `inventory/inventory-count/update_item/${inventoryId}`,
@@ -191,6 +200,15 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                         ],
                       }
                     );
+                    await axiosInstance.put(
+                      `inventory/inventory-count/${inventoryId}`,
+                      {
+                        status: 2,
+                        branch: Cookies.get('branch_id'),
+                      }
+                    );
+                    openDialog('added');
+                    setLoading(false);
                     navigate('/zood-dashboard/products');
                   } catch (error) {
                     console.error('Error updating inventory item:', error);
@@ -312,7 +330,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="barcode"
+                  name="sku"
                   render={({ field }) => (
                     <FormItem className="col-span-1 md:col-span-2">
                       <FormControl>
@@ -368,7 +386,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
               <div className="flex justify-center -translate-y-10">
                 <div className="w-[75%] h-[50%]  ">
                   <Previews
-                    initialFile={''}
+                    initialFile={file}
                     onFileChange={(files) => {
                       setfile(files);
                     }}
