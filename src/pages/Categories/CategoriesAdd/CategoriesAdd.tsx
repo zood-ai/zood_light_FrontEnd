@@ -103,10 +103,15 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
 
       const requestMethod = isEditMode ? 'put' : 'post';
 
-      await axiosInstance[requestMethod](apiUrl, {
+      let payLoad: any = {
         name: values.name,
-        image: file,
-      });
+      };
+    
+      if (!file.startsWith('http')) {
+        payLoad.image = file;
+      }
+
+      await axiosInstance[requestMethod](apiUrl, payLoad);
 
       openDialog('added');
       resetFormAndNavigate();
