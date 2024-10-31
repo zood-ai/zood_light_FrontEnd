@@ -112,19 +112,12 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
     setLoading(true);
 
     const onError = () => setLoading(false);
-    let payLoad: any = {
-      name: values.name,
-    };
-
-    if (!file.startsWith('http')) {
-      payLoad.image = file;
-    }
+    
     const requestData = {
       id: params.objId,
       data: {
         ...values,
-        ...(file.startsWith('http') ? {} : { image: file }),
-      },
+        image: file,},
     };
 
     if (isEditMode) {

@@ -7,6 +7,7 @@ import axiosInstance from '@/api/interceptors';
 import { useDispatch } from 'react-redux';
 import { toggleUserNavigate, userNavigate } from '@/store/slices/usrNavSlice';
 import { useToast } from '@/components/custom/useToastComp';
+import { titleMapping } from '@/constant/constant';
 
 interface GlobalDialogContextType {
   openDialog: (status: 'deleted' | 'updated' | 'added' | 'del') => void;
@@ -83,6 +84,13 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
 
   let dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  let pagePath = window.location.pathname; // Get the current path
+  pagePath = pagePath.replace(/\/edit\/[^/]+$/, '/edit');
+
+  console.log(pagePath, 'pagePath');
+
+  const title = titleMapping[pagePath]; // Get the title object based on the path
+  const isArabic = true;
   return (
     <GlobalDialogContext.Provider value={{ openDialog, delRoute, closeDialog }}>
       {children}
@@ -158,11 +166,13 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
 
                   <div className="flex flex-col mt-5 w-full ">
                     <div className="  text-mainText">
-                      هل أنت متأكد أنك تريد حذف المنتج؟{' '}
+                      هل أنت متأكد أنك تريد حذف{' '}
+                      <span className="mx-1">{title.ar}</span>
                     </div>
                     <div className="text-sm text-secText">
-                      لديك تغييرات غير محفوظة. إذا حذفت المنتج الآن، فسوف تفقد
-                      تغييراتك{' '}
+                      لديك تغييرات غير محفوظة. إذا حذفت{' '}
+                      <span className="mx-1">{title.ar} {' '}</span>
+                      الآن، فسوف تفقد تغييراتك{' '}
                     </div>
                     <div className="flex flex-col mt-6 w-full text-sm font-semibold text-right text-white whitespace-nowrap rounded">
                       <Button

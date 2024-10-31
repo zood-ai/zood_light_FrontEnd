@@ -31,6 +31,7 @@ import IconInput from '../InputWithIcon';
 import search from '/icons/search.svg';
 import { LoadingSkeleton } from '../LoadingSkeleton';
 import { useNavigate } from 'react-router-dom';
+import { titleMapping } from '@/constant/constant';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -93,6 +94,8 @@ export function DataTable<TData, TValue>({
   const { current_page, last_page, per_page, total } = meta || {};
   console.log('Screen Height:', window.innerHeight);
   let navigate = useNavigate();
+  const pagePath = window.location.pathname; // Get the current path
+  const title = titleMapping[pagePath];
   return (
     <>
       {!loading ? (
@@ -114,7 +117,7 @@ export function DataTable<TData, TValue>({
         /> */}
               <div className="h-[68px] ps-[16px]  flex z-10 flex-wrap  py-3 mt-4 text-right bg-background  border border-mainBorder border-solid  border-b-0 items-center rounded-t-[8px]">
                 <div className="my-auto text-base font-semibold text-mainText  ">
-                  الفواتير الحديثة
+                   {title.ar}
                 </div>
                 <div className="max-w-[303px] ms-[14px]">
                   <IconInput
