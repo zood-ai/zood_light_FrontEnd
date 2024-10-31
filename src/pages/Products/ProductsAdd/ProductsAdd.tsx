@@ -33,7 +33,7 @@ const formSchema = z.object({
   name_localized: z.string().nonempty('Name is required'),
   description: z.string().nonempty('description is required'),
   price: z.string().nonempty('price is required'),
-  sku: z.string().nonempty('barcode is required'),
+  sku: z.any(),
   quantity: z.string().nonempty('quantity is required'),
   category_id: z.string().nonempty('category is required'),
 });
@@ -49,9 +49,9 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
   const { mutate: createInventoryCount } = createCrudService<any>(
     'inventory/inventory-count'
   ).useCreateNoDialog();
-  const { useGetById, useUpdate, useCreateNoDialog } = crudService;
+  const { useGetById, useUpdateNoDialog, useCreateNoDialog } = crudService;
   const { mutate: createNewProduct } = useCreateNoDialog();
-  const { mutate: updateDataUserById } = useUpdate();
+  const { mutate: updateProductById } = useUpdateNoDialog();
   const { data: getDataById } = useGetById(`${params.objId ?? ''}`);
   const [file, setfile] = useState<any>();
   const { openDialog } = useGlobalDialog();
@@ -73,25 +73,37 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
   // Reset form when data changes
   useEffect(() => {
     if (isEditMode) {
+      console.log(getDataById?.data?.category?.id);
+
       form.reset({
         ...getDataById?.data,
         category_id: getDataById?.data?.category?.id,
         quantity: String(getDataById?.data?.quantity),
         price: String(getDataById?.data?.price),
       });
+     const timer = setTimeout(() => {
+        
+        form.setValue('category_id', getDataById?.data?.category?.id);
+      }, 500);
       setfile(getDataById?.data?.image);
+      // return () => clearTimeout(timer);
     }
     if (!isEditMode) {
       form.reset({});
 
-      async () => {
-        const skuData = await axiosInstance.post('manage/generate_sku', {
-          model: 'products',
-        });
-        form.setValue('sku', `sk-${skuData?.data?.data}`);
-      };
+      (async () => {
+        try {
+          const skuData = await axiosInstance.post('manage/generate_sku', {
+            model: 'products',
+          });
+          form.setValue('sku', `sk-${skuData?.data?.data}`);
+        } catch (error) {
+          console.error('Error generating SKU:', error);
+        }
+      })();
     }
   }, [getDataById, form, isEditMode]);
+ 
   const { data: branchData } =
     createCrudService<any>('manage/branches').useGetAll();
 
@@ -100,65 +112,75 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
     setLoading(true);
 
     const onError = () => setLoading(false);
+    
+    const requestData = {
+      id: params.objId,
+      data: {
+        ...values,
+        image: file,},
+    };
 
     if (isEditMode) {
-      await updateDataUserById(
-        {
-          id: params.objId,
-          data: { ...values, image: file },
+      await updateProductById(requestData, {
+        onSuccess: async (proData) => {
+          // setLoading(false);
+          // form.reset(values);
+          const itemPivotId = proData?.data.ingredients[0]?.pivot?.item_id;
+          try {
+            // setLoading(false);
+            console.log(proData);
+
+            const inventoryPayload = {
+              branch: Cookies.get('branch_id'),
+              items: [{ id: itemPivotId }],
+            };
+
+            await createInventoryCount(inventoryPayload, {
+              onSuccess: async (invData) => {
+                try {
+                  const inventoryId = invData.data.id;
+                  await axiosInstance.post(
+                    `inventory/inventory-count/update_item/${inventoryId}`,
+                    {
+                      items: [
+                        {
+                          id: itemPivotId,
+                          quantity: Number(values.quantity),
+                        },
+                      ],
+                    }
+                  );
+
+                  await axiosInstance.put(
+                    `inventory/inventory-count/${inventoryId}`,
+                    {
+                      status: 2,
+                      branch: Cookies.get('branch_id'),
+                    }
+                  );
+                  openDialog('updated');
+                  setLoading(false);
+                  navigate('/zood-dashboard/products');
+                } catch (error) {
+                  console.error('Error updating inventory item:', error);
+                  // openDialog('added');
+                  setLoading(false);
+                  // navigate('/zood-dashboard/products');
+                }
+              },
+            });
+          } catch (error) {
+            console.error('Error in onSuccess for createNewUser:', error);
+          }
         },
-        {
-          onSuccess: async (proData) => {
-            setLoading(false);
-            // form.reset(values);
-            try {
-              setLoading(false);
-              console.log(proData);
-
-              const inventoryPayload = {
-                branch: Cookies.get('branch_id'),
-                items: [{ id: proData.data?.ingredients?.[0]?.pivot?.item_id }],
-              };
-
-              await createInventoryCount(inventoryPayload, {
-                onSuccess: async (invData) => {
-                  try {
-                    const inventoryId = invData.data.id;
-                    const response = await axiosInstance.get(
-                      `inventory/inventory-count/${inventoryId}`
-                    );
-
-                    const itemPivotId = response.data?.data?.items?.[0]?.id;
-
-                    await axiosInstance.post(
-                      `inventory/inventory-count/update_item/${inventoryId}`,
-                      {
-                        items: [
-                          {
-                            id: itemPivotId,
-                            quantity: Number(values.quantity),
-                          },
-                        ],
-                      }
-                    );
-                  } catch (error) {
-                    console.error('Error updating inventory item:', error);
-                  }
-                },
-              });
-            } catch (error) {
-              console.error('Error in onSuccess for createNewUser:', error);
-            }
-          },
-          onError,
-        }
-      );
+        onError,
+      });
     } else {
       try {
-        const skuData = await axiosInstance.post('manage/generate_sku', {
-          model: 'products',
-        });
-        console.log(skuData);
+        // const skuData = await axiosInstance.post('manage/generate_sku', {
+        //   model: 'products',
+        // });
+        // console.log(skuData);
 
         const productPayload = {
           ...values,
@@ -339,6 +361,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                           {...field}
                           inputClassName=" w-[253px]"
                           label="رقم الباركود"
+                          disabled
                           // placeholder="ادخل اسم المورد"
                           // iconSrc={personIcon}
                         />
@@ -402,7 +425,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
               className="mt-[32px] h-[39px] w-[163px]"
               type="submit"
             >
-              { isEditMode ? 'تعديل المنتج' : 'اضافة المنتج'}
+              {isEditMode ? 'تعديل المنتج' : 'اضافة المنتج'}
             </Button>
             <DelConfirm route={'menu/products'} />
           </form>

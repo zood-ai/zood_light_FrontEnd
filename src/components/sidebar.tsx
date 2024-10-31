@@ -37,9 +37,9 @@ export default function Sidebar({
   return (
     <aside
       className={cn(
-        `fixed w-[227px] z-[10000]  ${
+        `fixed   z-[10000]  ${
           isRtl ? 'right-0' : 'left-0'
-        } top-0 z-50 w-[227px] border-r-2 border-r-muted transition-[width] md:bottom-0 md:h-svh ${
+        } top-0 z-50   border-r-2 border-r-muted transition-[width] md:bottom-0 md:h-svh ${
           isCollapsed ? 'md:w-14' : 'md:w-64'
         } ${isRtl ? 'border-l-2 border-r-0' : ''}`, // Adjust for RTL
         className
@@ -58,14 +58,14 @@ export default function Sidebar({
         fixed
         className={
           navOpened
-            ? 'h-svh  transition-all ease-out duration-500'
-            : 'transition-all ease-out duration-500'
+            ? 'h-svh  w-[100vw] md:w-[227px] transition-all ease-out duration-500'
+            : 'transition-all ease-out w-[100vw] md:w-full duration-500 '
         }
       >
         {/* Header */}
         <Layout.Header
           sticky
-          className="z-50  flex justify-between px-4 py-3 shadow-0 md:px-4 bg-background  transition-all ease-out duration-500 "
+          className="z-50   flex justify-between px-4 py-3 shadow-0 md:px-4 bg-background  transition-all ease-out duration-500 "
         >
           <div
             className={`flex  items-center mt-[40px]  transition-all ease-out duration-500 ${
@@ -82,8 +82,8 @@ export default function Sidebar({
               //     : 'absolute top-[30px] right-[25px] z-[999999] transition-all ease-out duration-500'
               // }`}
               className={`absolute cursor-pointer hover:scale-105
-             ${isRtl ? 'left-[13px]' : '-right-5'} 
-          top-[40px] z-50 hidden rounded-ful bg-white border-0 l md:inline-flex`}
+             ${isRtl ? 'md:left-[13px]' : 'md:-right-5'} 
+            top-[25%] md:top-[40px] z-50   rounded-ful bg-white border-0 l md:inline-flex`}
             />
             <div
               className={`flex flex-col justify-end truncate ${
@@ -114,7 +114,7 @@ export default function Sidebar({
         {/* Navigation links */}
         <Nav
           id="sidebar-menu"
-          className={`z-40 h-full flex-1 overflow-x-hidden mt-[42px] transition-all ease-out duration-500 ${
+          className={`z-40 h-full flex-1 overflow-x-hidden md:mt-[42px] transition-all ease-out duration-500 ${
             navOpened ? 'max-h-screen' : 'max-h-0 py-0 md:max-h-screen md:py-2'
           }`}
           closeNav={() => setNavOpened(false)}
@@ -131,13 +131,12 @@ export default function Sidebar({
           //    ${isRtl ? 'left-[13px]' : '-right-5'}
           // top-[40px] z-50 hidden rounded-ful bg-white border-0 l md:inline-flex`}
 
-          className={`cursor-pointer hover:scale-105 ${
+          className={`hidden md:flex cursor-pointer hover:scale-105 ${
             isCollapsed
               ? 'absolute top-[79px] right-[17px] z-[999999] transition-all ease-out duration-500'
               : 'absolute top-[7%] right-[30px] z-[999999] transition-all ease-out duration-500'
           }`}
-
-          >
+        >
           <svg
             width="24"
             height="18"

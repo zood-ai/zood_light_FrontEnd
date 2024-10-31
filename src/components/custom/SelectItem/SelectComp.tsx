@@ -46,12 +46,13 @@ export const SelectComp: React.FC<SelectCompProps | any> = ({
     <div className={className}>
       {/* Render label if provided */}
       {label && (
-        <label className="mb-2 block text-sm font-medium text-secText">
+        <label className="mb- 2 block text-sm font-medium text-secText">
           {label}
         </label>
       )}
 
       <Select
+      
         {...props}
         onValueChange={handleValueChange}
         dir={isRtl ? 'rtl' : 'ltr'}

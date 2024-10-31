@@ -43,12 +43,21 @@ export function DataTablePagination({
             isRTL ? 'space-x-reverse' : ''
           }`}
         >
+
+
+
+          
           <div
             className="hidden h-8 w-8 p-0 lg:flex mx-1 rounded-full"
-            onClick={() => handlePageChange(1)}
+            // onClick={() => handlePageChange(1)}
+            onClick={() =>  handlePageChange(last_page)}
+
           >
             {isRTL ? (
-              <DoubleArrowLeftRTLIcon isActive={current_page !== 1} />
+              <DoubleArrowLeftRTLIcon  
+              // isActive={current_page !== 1}
+              isActive={current_page !== last_page}
+               />
             ) : (
               <DoubleArrowLeftIcon />
             )}
@@ -56,10 +65,14 @@ export function DataTablePagination({
 
           <div
             className="h-8 w-8 p-0"
-            onClick={() => handlePageChange(current_page - 1)}
+            onClick={() => handlePageChange(current_page + 1)}
+
           >
             {isRTL ? (
-              <SingleLeftArrowRTLIcon isActive={current_page !== 1} />
+              <SingleLeftArrowRTLIcon 
+              // isActive={current_page !== 1} 
+              isActive={current_page !== last_page} 
+              />
             ) : (
               <ChevronLeftIcon />
             )}
@@ -79,10 +92,10 @@ export function DataTablePagination({
 
           <div
             className="h-8 w-8 p-0 mx-1"
-            onClick={() => handlePageChange(current_page + 1)}
+            onClick={() => handlePageChange(current_page - 1)}
           >
             {isRTL ? (
-              <SingleRightArrowRTLIcon isActive={current_page !== last_page} />
+              <SingleRightArrowRTLIcon isActive={current_page !== 1} />
             ) : (
               <ChevronRightIcon />
             )}
@@ -90,18 +103,19 @@ export function DataTablePagination({
 
           <div
             className="  h-8 w-8 p-0 flex "
-            onClick={() => handlePageChange(last_page)}
-          >
+            onClick={() => handlePageChange(1)}
+            >
             {isRTL ? (
               <div className='mx-1'>
 
 
-                <DoubleArrowRightRTLIcon isActive={current_page !== last_page} />
+                <DoubleArrowRightRTLIcon isActive={current_page !== 1} />
               </div>
             ) : (
               <DoubleArrowRightIcon />
             )}
           </div>
+
         </div>
       </div>
     </div>

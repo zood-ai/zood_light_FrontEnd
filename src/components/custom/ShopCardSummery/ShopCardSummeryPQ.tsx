@@ -14,7 +14,7 @@ import { SelectComp } from '../SelectItem';
 import axios from 'axios';
 import axiosInstance from '@/api/interceptors';
 
-export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
+   const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
   const [totalShopCardCount, setTotalShopCardCount] = useState(0);
 
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
@@ -216,7 +216,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
               <div className="font-medium">المبلغ الإجمالي</div>
               <div className="font-bold">SR {totalAmountIncludeAndExclude}</div>
             </div>
-            {(paymentMethod || [])?.map((option, index) => (
+            {/* {(paymentMethod || [])?.map((option, index) => (
               <>
                 <>
                   <div className="mt-6 text-sm font-bold text-right text-black max-md:mr-2.5">
@@ -332,7 +332,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                   </Button>
                 </>
               )}
-            </div>
+            </div> */}
           </div>
           <hr
             style={{
@@ -340,7 +340,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
               textAlign: 'center',
               marginLeft: 0,
               borderColor: '#D2D2D2',
-              margin: '0 auto',
+              margin: '16px auto',
             }}
           />
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
@@ -354,3 +354,5 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     </>
   );
 };
+
+export default ShopCardSummeryPQ;

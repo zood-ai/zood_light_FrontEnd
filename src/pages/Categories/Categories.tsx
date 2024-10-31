@@ -59,7 +59,7 @@ export const Categories: React.FC<CategoriesProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allService = createCrudService<any>('menu/categories');
+  const allService = createCrudService<any>('menu/categories?not_default=1');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);

@@ -30,6 +30,7 @@ import InvoiceSkeleton from '@/components/custom/InvoiceSkeleton ';
 
 const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
+  name_localized: z.string().nonempty('Name localized is required'),
 });
 export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
   const { i18n, t } = useTranslation();
@@ -67,6 +68,7 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
             console.log(customerData.image, 'customerData');
 
             form.setValue('name', customerData.name || '');
+            form.setValue('name_localized', customerData.name_localized || '');
             setfile(customerData.image || '');
           }
         })
@@ -103,10 +105,8 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
 
       const requestMethod = isEditMode ? 'put' : 'post';
 
-      await axiosInstance[requestMethod](apiUrl, {
-        name: values.name,
-        image: file,
-      });
+ 
+      await axiosInstance[requestMethod](apiUrl, {...values, image: file});
 
       openDialog('added');
       resetFormAndNavigate();
@@ -149,6 +149,23 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
                     <FormField
                       control={form.control}
                       name="name"
+                      render={({ field }) => (
+                        <FormItem className="col-span-1 mt-md">
+                          <FormControl>
+                            <IconInput
+                              {...field}
+                              label="اسم الفئه"
+                              // placeholder="ادخل اسم المورد"
+                              // iconSrc={personIcon}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="name_localized"
                       render={({ field }) => (
                         <FormItem className="col-span-1 mt-md">
                           <FormControl>

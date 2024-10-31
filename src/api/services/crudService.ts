@@ -18,6 +18,7 @@ interface CrudService<T> {
   useRemove: () => any;
   useCreateById: () => any;
   useCreateNoDialog: () => any;
+  useUpdateNoDialog: () => any;
 }
 const showToast = (title: string, description?: string) => {
   toast({
@@ -123,6 +124,23 @@ const createCrudService = <T>(
         queryClient.invalidateQueries([endpoint]);
       },
     });
+  const useUpdateNoDialog = () =>
+    useMutation<T, unknown, { id: string; data: T }>({
+      mutationFn: async ({ id, data }) => {
+        const response = await axiosInstance.put<T>(
+          `${endpoint}/${id}`,
+          data
+        );
+        return response.data;
+      },
+
+      onSuccess: () => {
+        // showToast("item updated successfully");
+        // openDialog('updated')
+
+        queryClient.invalidateQueries([endpoint]);
+      },
+    });
 
   const useRemove = () =>
     useMutation<void, unknown, string>({
@@ -136,7 +154,7 @@ const createCrudService = <T>(
         queryClient.invalidateQueries([endpoint]);
       },
     });
-  return { useGetAll, useGetById, useCreate, useUpdate, useRemove , useCreateById ,useCreateNoDialog};
+  return { useGetAll,useUpdateNoDialog, useGetById, useCreate, useUpdate, useRemove , useCreateById ,useCreateNoDialog};
 };
 
 export default createCrudService;

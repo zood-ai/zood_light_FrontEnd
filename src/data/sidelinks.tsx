@@ -1,44 +1,17 @@
-import { DashIcon } from '@radix-ui/react-icons';
 import {
-  IconApps,
-  IconBarrierBlock,
   IconBoxSeam,
   IconChartHistogram,
-  IconChecklist,
-  IconComponents,
-  IconError404,
-  IconExclamationCircle,
-  IconHexagonNumber1,
-  IconHexagonNumber2,
-  IconHexagonNumber3,
-  IconHexagonNumber4,
-  IconHexagonNumber5,
-  IconLayoutDashboard,
-  IconMessages,
-  IconRouteAltLeft,
-  IconServerOff,
   IconSettings,
   IconTruck,
-  IconUserShield,
-  IconUsers,
   IconLock,
   IconBrandWhatsapp,
-  IconDashboard,
-  IconInvoice,
-  IconFileInvoice,
-  IconLayoutGrid,
-  IconBuildingFactory2,
   IconBuildingSkyscraper,
-  IconFileDollar,
   IconReceipt,
-  IconLayoutGridAdd,
   IconTargetArrow,
-  IconCreditCard,
   IconLayoutGridFilled,
   IconReceiptFilled,
   IconLayout2Filled,
   IconUserFilled,
-  IconUserDown,
   IconUserEdit,
   IconCreditCardFilled,
 } from '@tabler/icons-react';
@@ -62,7 +35,7 @@ export const sidelinks: SideLink[] = [
     icon: <IconLayoutGridFilled size={18} />,
   },
   {
-    title: 'فواتير افراد', // Individual Invoices
+    title: 'نقطة البيع', // Individual Invoices
     label: '',
     href: '/zood-dashboard/individual-invoices',
     icon: <IconReceiptFilled size={18} />,
@@ -73,12 +46,12 @@ export const sidelinks: SideLink[] = [
     href: '/zood-dashboard/corporate-invoices',
     icon: <IconBuildingSkyscraper size={18} />,
   },
-  {
-    title: 'فاتورة سريعة', // Corporate Invoice
-    label: '',
-    href: '/zood-dashboard/fast-invoices',
-    icon: <IconReceiptFilled size={18} />,
-  },
+  // {
+  //   title: 'فاتورة سريعة', // Corporate Invoice
+  //   label: '',
+  //   href: '/zood-dashboard/fast-invoices',
+  //   icon: <IconReceiptFilled size={18} />,
+  // },
   {
     title: 'فاتورة الشراء', // Purchase Invoice
     label: '',
@@ -110,7 +83,7 @@ export const sidelinks: SideLink[] = [
     icon: <IconUserFilled size={18} />,
   },
   {
-    title: 'الموارد', // Resources
+    title: 'الموردين', // Resources
     label: '',
     href: '/zood-dashboard/resources',
     icon: <IconTruck size={18} />,
