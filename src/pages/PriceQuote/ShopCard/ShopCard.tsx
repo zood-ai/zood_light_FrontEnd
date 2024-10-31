@@ -145,7 +145,8 @@ export const ShopCardPQ: React.FC<ShopCardProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
-      <ShopCardTable />
+      {/* <ShopCardTable /> */}
+
       <CustomerForm />
       <ConfirmBk
         isOpen={isOpen}

@@ -12,6 +12,11 @@ import { addProduct, updateField } from '@/store/slices/orderSchema';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { on } from 'events';
+import { Textarea } from '@/components/ui/textarea';
+import PlusIcon from '@/components/Icons/PlusIcon';
+import TrashIcon from '@/components/Icons/TrashIcon';
+import ShopCardSummeryPQ from '@/components/custom/ShopCardSummery/ShopCardSummeryPQ';
+import { setCardItem } from '@/store/slices/cardItems';
 
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
@@ -156,10 +161,105 @@ const CustomerForm = () => {
   useEffect(() => {
     handleInputChangex('customer_id', orderSchema?.customer_id);
   }, [orderSchema?.customer_id]);
+  const [items, setItems] = useState([
+    {
+      qty: '',
+      price: '',
+      id: '',
+      itemDescription: '',
+    },
+  ]);
+  const { useGetAll: useGetAllPro } = createCrudService<any>(
+    'menu/products?not_default=1'
+  );
+  const { data: getAllPro } = useGetAllPro();
+  const processProducts = ({ updatedItems = [] }: any) => {
+    const products = updatedItems.map((item) => ({
+      product_id: item.id || '',
+      quantity: item.qty || 0,
+      unit_price: item.price || 0,
+      discount_amount: 0,
+      discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
+      discount_type: 2,
+      total_price: Number(item.price) * Number(item.qty) || 0,
+    }));
 
+    dispatch(setCardItem(updatedItems));
+  };
+  const updateCardItem = (newItem: {
+    id?: string;
+    qty: number;
+    name?: string;
+    price?: number;
+    index: number;
+  }) => {
+    const updatedItems = cardItemValue.map((item, index) => {
+      if (index === newItem.index) {
+        return {
+          ...item,
+          qty: item.qty,
+          name: newItem.name,
+          price: newItem.price,
+        };
+      }
+      return item;
+    });
+
+    // If newItem.index is out of bounds, it means we should add it as a new item
+    if (newItem.index >= cardItemValue.length) {
+      dispatch(setCardItem([...updatedItems, newItem]));
+    } else {
+      dispatch(setCardItem(updatedItems));
+    }
+  };
+
+  const handleItemChange = async (
+    index: number,
+    field: string,
+    value: string
+  ) => {
+    let indexPrice = 0;
+    let indexName = '0';
+    if (field === 'id') {
+      const res = await axiosInstance
+        .get(`/menu/products/${value}`)
+        .then((res) => {
+          const customerData = res?.data?.data;
+          console.log(customerData, 'customerData');
+
+          const updatedItems = [...items];
+          updatedItems[index]['price'] = customerData.price;
+          updatedItems[index]['id'] = value;
+          updatedItems[index]['qty'] = '1';
+          indexPrice = customerData.price;
+          indexName = customerData.name;
+          updateCardItem({
+            index,
+            id: value,
+            qty: 1,
+            name: customerData.name,
+            price: customerData.price,
+          });
+          setItems(updatedItems);
+        });
+    }
+    if (field === 'qty') {
+      const updatedItems = items[index];
+       updateCardItem({
+         index,
+         id: updatedItems.id,
+         name: indexName,
+         price: indexPrice,
+         qty: Number(value)
+      });
+      const newItems = [...items];
+      newItems[index][field] = value;
+      setItems(newItems);
+    }
+  };
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-0 self-stretch mt-5">
-      <div className="md:max-h-[45vh] col-span-3 md:col-span-2 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-0">
+    <div className="  grid-cols-1 md:grid-cols-3 gap-0 self-stretch mt-5 flex justify-between">
+      <div className="  col-span-3 md:col-span-2 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-0">
         <SelectComp
           options={allData?.data?.map((item) => ({
             value: item.id,
@@ -174,7 +274,7 @@ const CustomerForm = () => {
             }
           }}
           label="اسم العميل"
-          className="col-span-10 md:col-span-4 w-[327px]"
+          className="col-span-10 md:col-span-4 md:w-[21vw]"
           value={orderSchema?.customer_id}
           disabled={params.id}
         />
@@ -197,7 +297,7 @@ const CustomerForm = () => {
         />
         <IconInput
           disabled
-          className="col-span-10 md:col-span-4"
+          className="col-span-10 md:col-span-4 md:w-[21vw]"
           label="رقم تسجيل ضريبة القيمة المضافة"
           value={formState.tax_registration_number}
           onChange={null}
@@ -209,6 +309,96 @@ const CustomerForm = () => {
           value={formState.vat_registration_number}
           onChange={null}
         />
+
+        <div className="col-span-10 my-2">
+          {items?.map((item, index) => (
+            <>
+              <div className="grid grid-cols-1 md:flex gap-md  ">
+                <SelectComp
+                  className=" w-[220px] min-w-[120px] max-w-[220px] "
+                  placeholder="اسم الصنف"
+                  options={getAllPro?.data?.map((item) => ({
+                    value: item.id,
+                    label: item.name,
+                    // item_id: item.item_id,
+                  }))}
+                  onValueChange={(value) =>
+                    handleItemChange(index, 'id', value)
+                  }
+                  label="اسم الصنف"
+                  value={items[index]?.id}
+                />
+                <IconInput
+                  value={items[index].qty}
+                  onChange={(e) =>
+                    handleItemChange(index, 'qty', e.target.value)
+                  }
+                  label="الكمية"
+                  inputClassName="w-[117px] max-w-[117px] min-w-[80px]   "
+                />
+                <IconInput
+                  onChange={(e) =>
+                    handleItemChange(index, 'total', e.target.value)
+                  }
+                  label="السعر"
+                  inputClassName="w-[138px] max-w-[138px] min-w-[80px]   "
+                  iconSrcLeft={'SR'}
+                  value={items[index].price}
+                  disabled
+                />
+                {items.length > 1 && (
+                  <>
+                    <div
+                      onClick={() => {
+                        const newItems = [...items];
+                        newItems.splice(index, 1);
+                        setItems(newItems);
+                      }}
+                      className="translate-y-[34px] cursor-pointer hover:scale-105"
+                    >
+                      <TrashIcon />
+                    </div>
+                  </>
+                )}
+              </div>
+              <Textarea
+                name="itemDescription"
+                value={items[index].itemDescription}
+                onChange={(e) =>
+                  handleItemChange(index, 'itemDescription', e.target.value)
+                }
+                className="w-[499px] my-2"
+                label=" وصف الصنف"
+              />
+            </>
+          ))}
+          <Button
+            onClick={() => {
+              setItems(() => {
+                return [
+                  ...items,
+                  {
+                    id: '',
+                    qty: '',
+                    price: '',
+                    itemDescription: '',
+                  },
+                ];
+              });
+            }}
+            type="button"
+            className=" justify-end   "
+            variant={'link'}
+          >
+            <div className="flex gap-2">
+              <span>
+                <PlusIcon />
+              </span>
+              <span className="font-semibold">اضافة صنف جديد</span>
+            </div>
+          </Button>
+        </div>
+        {/* <div className='flex'> */}
         <div className="col-span-10">
           <CheckboxWithText
             label="اضافة التقرير الي Zatca"
@@ -228,7 +418,10 @@ const CustomerForm = () => {
           </Button>
         </div>
       </div>
-      {/* <ShopCardSummery /> */}
+      {/* <div className='col-span-1 max-w-[502px] place-self-end self-baseline bg-red-200 '> */}
+
+      <ShopCardSummeryPQ />
+      {/* </div> */}
     </div>
   );
 };

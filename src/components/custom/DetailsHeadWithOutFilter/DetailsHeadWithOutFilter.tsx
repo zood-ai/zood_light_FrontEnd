@@ -46,6 +46,10 @@ const titleMapping = {
     en: 'Price Quote',
     ar: 'عرض السعر',
   },
+  '/zood-dashboard/price-quote/add': {
+    en: 'Price Quote',
+    ar: 'عرض السعر',
+  },
   '/zood-dashboard/price-quote/add/shop-card': {
     en: 'Price Quote',
     ar: 'عرض السعر',

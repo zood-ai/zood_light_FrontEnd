@@ -374,7 +374,7 @@ const router = createBrowserRouter([
         element: (
           <React.Suspense fallback={<div>Loading Price Quote...</div>}>
             <ProtectedRoute requiredRole={Roles.ADMIN}>
-              <PriceQuoteAdd />
+              <ShopCardPQ />
             </ProtectedRoute>
           </React.Suspense>
         ),

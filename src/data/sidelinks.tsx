@@ -62,7 +62,7 @@ export const sidelinks: SideLink[] = [
     icon: <IconLayoutGridFilled size={18} />,
   },
   {
-    title: 'فواتير افراد', // Individual Invoices
+    title: 'نقطة البيع', // Individual Invoices
     label: '',
     href: '/zood-dashboard/individual-invoices',
     icon: <IconReceiptFilled size={18} />,
@@ -73,12 +73,12 @@ export const sidelinks: SideLink[] = [
     href: '/zood-dashboard/corporate-invoices',
     icon: <IconBuildingSkyscraper size={18} />,
   },
-  {
-    title: 'فاتورة سريعة', // Corporate Invoice
-    label: '',
-    href: '/zood-dashboard/fast-invoices',
-    icon: <IconReceiptFilled size={18} />,
-  },
+  // {
+  //   title: 'فاتورة سريعة', // Corporate Invoice
+  //   label: '',
+  //   href: '/zood-dashboard/fast-invoices',
+  //   icon: <IconReceiptFilled size={18} />,
+  // },
   {
     title: 'فاتورة الشراء', // Purchase Invoice
     label: '',
