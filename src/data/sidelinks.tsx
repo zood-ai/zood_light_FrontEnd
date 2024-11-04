@@ -147,7 +147,7 @@ export const sidelinks: SideLink[] = [
   {
     title: 'تسجيل الخروج', // Logout
     label: '',
-    href: '/logout',
+    href: '/',
     icon: <IconLock size={18} />,
   },
 ];

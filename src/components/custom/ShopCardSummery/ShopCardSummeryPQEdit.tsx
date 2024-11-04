@@ -11,7 +11,7 @@ import { useParams } from 'react-router-dom';
 import axiosInstance from '@/api/interceptors';
 import Cookies from 'js-cookie';
 
-const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
+const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
   const dispatch = useDispatch();
   const { id: orderId } = useParams();
   const orderSchema = useSelector((state: any) => state.orderSchema);
@@ -54,10 +54,9 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
       });
     }
   }, [orderId]);
-  console.log(settings , 'settings');
 
   const handleIncludeAndExclude = useCallback(() => {
-    const isTaxInclusive = settings?.data?.tax_inclusive_pricing !== 0;
+    const isTaxInclusive = settings?.data?.tax_inclusive_pricing === 0;
     const finalDiscount = discountAmount || taxAmount;
     const calculatedAmount = isTaxInclusive
       ? totalCost - finalDiscount
@@ -154,4 +153,4 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
   );
 };
 
-export default ShopCardSummeryPQ;
+export default ShopCardSummeryPQEdit;

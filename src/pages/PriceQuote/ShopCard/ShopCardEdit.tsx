@@ -2,107 +2,48 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ShopCardProps } from './ShopCard.types';
 import './ShopCard.css';
 import useDirection from '@/hooks/useDirection';
-import { ShopCardTable } from '@/components/custom/ShopCardTable';
 import { DetailsHeadWithOutFilter } from '@/components/custom/DetailsHeadWithOutFilter';
 import { useDispatch, useSelector } from 'react-redux';
 import createCrudService from '@/api/services/crudService';
-import {
-  addPayment,
-  addProduct,
-  updateField,
-} from '@/store/slices/orderSchema';
+import { addProduct, addTax, updateField } from '@/store/slices/orderSchema';
 import ConfirmBk from '@/components/custom/ConfimBk';
-import { useNavigate, useParams } from 'react-router-dom';
-import { setCardItem } from '@/store/slices/cardItems';
+import { useParams } from 'react-router-dom';
 import CustomerForm from './CustomerForm';
+import Cookies from 'js-cookie';
+import CustomerFormEdit from './CustomerFormEdit';
 
 export const ShopCardEditPQ: React.FC<ShopCardProps> = () => {
   const isRtl = useDirection();
   const dispatch = useDispatch();
-  const cardItemValue = useSelector((state: any) => state.cardItems.value);
+  const orderSchema = useSelector((state: any) => state.orderSchema);
   const [isOpen, setIsOpen] = useState(false);
   const params = useParams();
-  const getOrdersById = createCrudService<any>('orders').useGetById(
-    params.id || ''
-  );
 
   const totalCost = useMemo(
-    () => cardItemValue?.reduce((acc, item) => acc + item.price * item.qty, 0),
-    [cardItemValue]
+    () =>
+      orderSchema?.products.reduce(
+        (acc, item) => acc + item.unit_price * item.quantity,
+        0
+      ),
+    [orderSchema]
   );
+  const { data: getTaxes } = createCrudService<any>('manage/taxes').useGetAll();
+  console.log(getTaxes, 'getTaxes');
 
-  const taxAmount = useMemo(() => (totalCost * 15) / 100, [totalCost]);
+  const taxAmount = useMemo(
+    () => (totalCost * getTaxes?.data?.[0]?.rate) / 100,
+    [totalCost, getTaxes]
+  );
+ 
 
   useEffect(() => {
-    dispatch(updateField({ field: 'type', value: 3 }));
+    dispatch(updateField({ field: 'type', value: 2 }));
   }, []);
 
-  // Fetch order details by ID and update Redux store
-
-  // Trigger fetching products based on params and fetched order data
-  useEffect(() => {
-    if (getOrdersById?.data?.data) {
-      const { data } = getOrdersById?.data;
-
-      // Map products data
-      const products = data.products?.map((item: any) => ({
-        id: item.id || '',
-        image: item.image || '',
-        qty: item.pivot?.quantity || 0,
-        price: item.pivot?.unit_price || 0,
-        total_price: item.pivot?.total_price || 0,
-        name: item.name || '',
-        discount_amount: item.pivot?.discount_amount,
-        discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
-        discount_type: item.pivot?.discount_type || 2,
-      }));
-
-      dispatch(setCardItem(products));
-    }
-  }, [getOrdersById?.data?.data]);
-  useEffect(() => {
-    const products1 = cardItemValue.map((item: any) => ({
-      product_id: item.id || '',
-      quantity: item.qty || 0,
-      unit_price: item.price || 0,
-      discount_amount: 0,
-      discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
-      discount_type: 2,
-      total_price: item.price * item.qty || 0,
-    }));
-
-    dispatch(addProduct(products1));
-  }, [cardItemValue]);
-
-  // Handle customer ID update
-  useEffect(() => {
-    if (getOrdersById?.data?.data) {
-      const { data } = getOrdersById.data;
-      dispatch(updateField({ field: 'customer_id', value: data.customer?.id }));
-      dispatch(
-        updateField({ field: 'customer_notes', value: data.customer_notes })
-      );
-      dispatch(addPayment(data.payments || []));
-    }
-  }, [getOrdersById?.data?.data]);
-  const { data: branchData } =
-    createCrudService<any>('manage/branches').useGetAll();
-
-  // Set remaining fields
-  useEffect(() => {
-    if (params.objId) {
-      dispatch(
-        updateField({
-          field: 'branch_id',
-          value: branchData?.data?.[0]?.id,
-        })
-      );
-      dispatch(updateField({ field: 'discount_amount', value: taxAmount }));
-      dispatch(updateField({ field: 'type', value: 1 }));
-    }
-  }, [params.objId, taxAmount]);
-
-  // Calculate and update total price based on external dependencies
+  
+  const { data : getOrdersById} = createCrudService<any>('orders').useGetById(
+    `${params.id || ''}`
+  );
   useEffect(() => {
     dispatch(
       updateField({ field: 'total_price', value: totalCost - taxAmount })
@@ -110,13 +51,45 @@ export const ShopCardEditPQ: React.FC<ShopCardProps> = () => {
   }, [totalCost, taxAmount]);
 
   const handleBkAction = () => setIsOpen(true);
+  console.log(getOrdersById, 'getOrdersById');
+  
+  useEffect(() => {
+    if (params.id && getOrdersById) {
+      console.log(getOrdersById, 'getOrdersById');
+      
+      dispatch(updateField({ field: 'discount_amount', value: getOrdersById.data.discount_amount}));
+      updateField({ field: 'total_price', value: getOrdersById.data.total_price});
+      dispatch(updateField({ field: 'type', value: 2 }));
+      dispatch(updateField({ field: 'customer_id', value: getOrdersById.data.customer?.id }));
+      dispatch(
+        updateField({
+          field: 'branch_id',
+          value: Cookies.get('branch_id') || '',
+        })
+      );
+ 
+      const products = getOrdersById?.data?.products?.map((item: any) => ({
+        product_id: item.id || '',
+        quantity: item.quantity || 0,
+        unit_price: item.price || 0,
+        discount_amount: 0,
+        discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
+        discount_type: 2,
+        total_price: item.price * item.quantity || 0,
+      }));
+      console.log(orderSchema, 'products');
+      
+      dispatch(addProduct(products));
+            // dispatch(addTax(products));
 
+    }
+  }, [getOrdersById]);
+  console.log(getOrdersById, 'getOrdersById');
+  
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
-      <ShopCardTable />
-
-      <CustomerForm />
+      <CustomerFormEdit />
       <ConfirmBk
         isOpen={isOpen}
         setIsOpen={undefined}

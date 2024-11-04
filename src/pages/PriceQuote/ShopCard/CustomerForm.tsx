@@ -1,215 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import callIcon from '/icons/call.svg';
+import { useState } from 'react';
 import { SelectComp } from '@/components/custom/SelectItem';
 import IconInput from '@/components/custom/InputWithIcon';
-import { CheckboxWithText } from '@/components/custom/CheckboxWithText';
 import { Button } from '@/components/custom/button';
-import { ShopCardSummery } from '@/components/custom/ShopCardSummery';
 import createCrudService from '@/api/services/crudService';
 import axiosInstance from '@/api/interceptors';
 import { useDispatch, useSelector } from 'react-redux';
 import { addProduct, updateField } from '@/store/slices/orderSchema';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
-import { on } from 'events';
-import { Textarea } from '@/components/ui/textarea';
 import PlusIcon from '@/components/Icons/PlusIcon';
 import TrashIcon from '@/components/Icons/TrashIcon';
 import ShopCardSummeryPQ from '@/components/custom/ShopCardSummery/ShopCardSummeryPQ';
-import { setCardItem } from '@/store/slices/cardItems';
+import CustomerForms from './CustomerForms';
+import { Textarea } from '@/components/ui/textarea';
+import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
 
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
-  const allServiceOrderPay =
-    createCrudService<any>('order-payments').useCreate();
-  const orderSchema = useSelector((state: any) => state.orderSchema);
-  let navigate = useNavigate();
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
-  const { mutate: mutateOrderPay } = allServiceOrderPay;
-
-  const { useGetAll } = allService;
-  const [loading, setLoading] = useState(false);
-
-  const { data: allData, isLoading } = useGetAll();
-  const initialValue = {
-    name: '',
-    phone: '',
-    notes: '-',
-    tax_registration_number: '',
-    vat_registration_number: '',
-    address: '',
-    addToZatca: true,
-  };
-  const [formState, setFormState] = useState(initialValue);
-  let dispatch = useDispatch();
-  let params = useParams();
-  const handleInputChange = (field: string, value: any) => {
-    setFormState((prevState) => ({ ...prevState, [field]: value }));
-  };
-  const handleInputChangex = async (field: string, value: any) => {
-    setFormState((prevState) => ({ ...prevState, [field]: value }));
-    dispatch(
-      updateField({
-        field: 'customer_id',
-        value: value,
-      })
-    );
-    const res = await axiosInstance
-      .get(`/manage/customers/${value}`)
-      .then((res) => {
-        const customerData = res?.data?.data;
-        // setFormState(customerData)
-        if (customerData) {
-          handleInputChange('name', customerData.id || '');
-          handleInputChange('phone', customerData.phone || '');
-          handleInputChange(
-            'tax_registration_number',
-            customerData.tax_registration_number || ''
-          );
-          handleInputChange(
-            'vat_registration_number',
-            customerData.vat_registration_number || ''
-          );
-
-          // Check if the addresses array exists and has at least one entry
-          const address = customerData.addresses?.[0]?.name || '';
-          handleInputChange('address', address);
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to fetch customer data', err);
-      });
-  };
-  const cardItemValue = useSelector((state: any) => state.cardItems.value);
-
-  const submitOrder = async () => {
-    // const products = cardItemValue.map((item: any) => ({
-    //   product_id: item.id || '',
-    //   quantity: item.qty || 0,
-    //   unit_price: item.price || 0,
-    //   total_price: item.price * item.qty || 0,
-    //   discount_amount: 0,
-    //   discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
-    //   discount_type: 2,
-    // }));
-    // dispatch(addProduct(products));
-    console.log(orderSchema, 'orderSchema');
-
-    try {
-      setLoading(true);
-      if (params.id) {
-        console.log(1, '1');
-
-        try {
-          const res = await axiosInstance.get(`/orders/${params.id}`);
-          const orderData = res?.data?.data;
-          console.log(orderData, 'orderData');
-
-          if (orderData?.payments?.length < orderSchema?.payments?.length) {
-            console.log(2, '2');
-            const newData = orderSchema?.payments.slice(
-              orderData?.payments.length
-            );
-            const newPayments = {
-              order_id: params.id,
-              payment_data: newData.map((item: any) => ({
-                order_id: params.id,
-                payment_method_id: item.payment_method_id,
-                amount: item.amount,
-                tendered: 2,
-                tips: 20,
-                business_date: new Date(),
-                meta: 'well done',
-                added_at: new Date(),
-              })),
-            };
-
-            await mutateOrderPay(newPayments, {
-              onSuccess: (data) => {
-                setLoading(false);
-                navigate(`/zood-dashboard/price-quote`);
-                console.log(data, 'data');
-              },
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching or processing order:', error);
-          setLoading(false);
-        }
-      }
-      if (!params.id) {
-        await mutate(orderSchema, {
-          onSuccess: (data) => {
-            setLoading(false);
-            navigate(`/zood-dashboard/price-quote`);
-            console.log(data, 'data');
-          },
-          onError: (error) => {
-            setLoading(false);
-          },
-        });
-      }
-      // const res = await axiosInstance.post('orders', orderSchema);
-      // console.log(res, 'res');
-    } catch (error) {
-      setLoading(false);
-      console.log(error, 'error');
-    }
-  };
-  useEffect(() => {
-    handleInputChangex('customer_id', orderSchema?.customer_id);
-  }, [orderSchema?.customer_id]);
-  const [items, setItems] = useState([
-    {
-      qty: '',
-      price: '',
-      id: '',
-      itemDescription: '',
-    },
-  ]);
-  const { useGetAll: useGetAllPro } = createCrudService<any>(
+  const { useGetAll: fetchAllCustomers } = allService;
+  const { useGetAll: fetchAllProducts } = createCrudService<any>(
     'menu/products?not_default=1'
   );
-  const { data: getAllPro } = useGetAllPro();
-  const processProducts = ({ updatedItems = [] }: any) => {
-    const products = updatedItems.map((item) => ({
-      product_id: item.id || '',
-      quantity: item.qty || 0,
-      unit_price: item.price || 0,
-      discount_amount: 0,
-      discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
-      discount_type: 2,
-      total_price: Number(item.price) * Number(item.qty) || 0,
-    }));
 
-    dispatch(setCardItem(updatedItems));
+  const orderSchema = useSelector((state: any) => state.orderSchema);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const params = useParams();
+
+  const [loading, setLoading] = useState(false);
+  const { data: allData, isLoading } = fetchAllCustomers();
+  const { data: getAllPro } = fetchAllProducts();
+
+  dispatch(updateField({ field: 'is_sales_order', value: 1 }));
+  const handleSubmitOrder = async () => {
+    setLoading(true);
+
+    try {
+      if (!params.id) {
+        await mutate(orderSchema, {
+          onSuccess: () => {
+            setLoading(false);
+            navigate('/zood-dashboard/price-quote');
+          },
+          onError: () => setLoading(false),
+        });
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Failed to submit order', error);
+    }
   };
+
   const updateCardItem = (newItem: {
-    id?: string;
-    qty: number;
+    product_id?: string;
+    quantity: number;
     name?: string;
-    price?: number;
+    unit_price?: number;
     index: number;
   }) => {
-    const updatedItems = cardItemValue.map((item, index) => {
-      if (index === newItem.index) {
-        return {
-          ...item,
-          qty: item.qty,
-          name: newItem.name,
-          price: newItem.price,
-        };
-      }
-      return item;
-    });
-
-    // If newItem.index is out of bounds, it means we should add it as a new item
-    if (newItem.index >= cardItemValue.length) {
-      dispatch(setCardItem([...updatedItems, newItem]));
+    const updatedItems = orderSchema.products.map((item, index) =>
+      index === newItem.index ? { ...item, ...newItem } : item
+    );
+    if (newItem.index >= orderSchema.products.length) {
+      dispatch(addProduct([...updatedItems, newItem]));
     } else {
-      dispatch(setCardItem(updatedItems));
+      dispatch(addProduct(updatedItems));
     }
   };
 
@@ -218,210 +75,168 @@ const CustomerForm = () => {
     field: string,
     value: string
   ) => {
-    let indexPrice = 0;
-    let indexName = '0';
-    if (field === 'id') {
-      const res = await axiosInstance
-        .get(`/menu/products/${value}`)
-        .then((res) => {
-          const customerData = res?.data?.data;
-          console.log(customerData, 'customerData');
+    if (field === 'product_id') {
+      try {
+        const { data } = await axiosInstance.get(`/menu/products/${value}`);
+        const productData = data?.data;
 
-          const updatedItems = [...items];
-          updatedItems[index]['price'] = customerData.price;
-          updatedItems[index]['id'] = value;
-          updatedItems[index]['qty'] = '1';
-          indexPrice = customerData.price;
-          indexName = customerData.name;
-          updateCardItem({
-            index,
-            id: value,
-            qty: 1,
-            name: customerData.name,
-            price: customerData.price,
-          });
-          setItems(updatedItems);
+        updateCardItem({
+          index,
+          product_id: value,
+          quantity: 1,
+          name: productData.name,
+          unit_price: productData.price,
         });
-    }
-    if (field === 'qty') {
-      const updatedItems = items[index];
-       updateCardItem({
-         index,
-         id: updatedItems.id,
-         name: indexName,
-         price: indexPrice,
-         qty: Number(value)
-      });
-      const newItems = [...items];
-      newItems[index][field] = value;
-      setItems(newItems);
+      } catch (error) {
+        console.error('Failed to fetch product data', error);
+      }
+    } else if (field === 'quantity') {
+      const updatedProducts = orderSchema.products.map((item, i) =>
+        i === index ? { ...item, quantity: parseInt(value) || 1 } : item
+      );
+      dispatch(addProduct(updatedProducts));
     }
   };
-  return (
-    <div className="  grid-cols-1 md:grid-cols-3 gap-0 self-stretch mt-5 flex justify-between">
-      <div className="  col-span-3 md:col-span-2 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-0">
-        <SelectComp
-          options={allData?.data?.map((item) => ({
-            value: item.id,
-            label: item.name,
-          }))}
-          placeholder="Select Customer"
-          onValueChange={(value) => {
-            if (params.id) {
-              return;
-            } else {
-              handleInputChangex('customer_id', value);
-            }
-          }}
-          label="اسم العميل"
-          className="col-span-10 md:col-span-4 md:w-[21vw]"
-          value={orderSchema?.customer_id}
-          disabled={params.id}
-        />
-        <IconInput
-          disabled
-          name="name"
-          className="col-span-10 md:col-span-4"
-          label="رقم العميل"
-          iconSrc={callIcon}
-          value={formState.phone}
-          onChange={null}
-        />
-        <IconInput
-          disabled
-          name={formState.name}
-          className="col-span-10 md:col-span-10"
-          label="اسم الشارع"
-          value={formState.address}
-          onChange={null}
-        />
-        <IconInput
-          disabled
-          className="col-span-10 md:col-span-4 md:w-[21vw]"
-          label="رقم تسجيل ضريبة القيمة المضافة"
-          value={formState.tax_registration_number}
-          onChange={null}
-        />
-        <IconInput
-          disabled
-          className="col-span-10 md:col-span-6"
-          label="معرف اخر"
-          value={formState.vat_registration_number}
-          onChange={null}
-        />
 
-        <div className="col-span-10 my-2">
-          {items?.map((item, index) => (
-            <>
-              <div className="grid grid-cols-1 md:flex gap-md  ">
-                <SelectComp
-                  className=" w-[220px] min-w-[120px] max-w-[220px] "
-                  placeholder="اسم الصنف"
-                  options={getAllPro?.data?.map((item) => ({
-                    value: item.id,
-                    label: item.name,
-                    // item_id: item.item_id,
-                  }))}
-                  onValueChange={(value) =>
-                    handleItemChange(index, 'id', value)
-                  }
-                  label="اسم الصنف"
-                  value={items[index]?.id}
-                />
-                <IconInput
-                  value={items[index].qty}
-                  onChange={(e) =>
-                    handleItemChange(index, 'qty', e.target.value)
-                  }
-                  label="الكمية"
-                  inputClassName="w-[117px] max-w-[117px] min-w-[80px]   "
-                />
-                <IconInput
-                  onChange={(e) =>
-                    handleItemChange(index, 'total', e.target.value)
-                  }
-                  label="السعر"
-                  inputClassName="w-[138px] max-w-[138px] min-w-[80px]   "
-                  iconSrcLeft={'SR'}
-                  value={items[index].price}
-                  disabled
-                />
-                {items.length > 1 && (
-                  <>
-                    <div
-                      onClick={() => {
-                        const newItems = [...items];
-                        newItems.splice(index, 1);
-                        setItems(newItems);
-                      }}
-                      className="translate-y-[34px] cursor-pointer hover:scale-105"
-                    >
-                      <TrashIcon />
-                    </div>
-                  </>
-                )}
-              </div>
-              <Textarea
-                name="itemDescription"
-                value={items[index].itemDescription}
-                onChange={(e) =>
-                  handleItemChange(index, 'itemDescription', e.target.value)
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-0 mt-5 md:flex justify-between">
+      <div className="col-span-3 md:col-span-1 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-md">
+ 
+ 
+        <div className="col-span-10 my-2 gap-y-md  ">
+          <CustomerForms />
+          {orderSchema.products.map((item, index) => (
+            <div key={index} className="grid grid-cols-1   gap-md">
+              <SelectCompInput
+              
+                className="md:w-[327px]  "
+                placeholder="اسم المنتج"
+                options={getAllPro?.data?.map((product) => ({
+                  value: product.id,
+                  label: product.name,
+                }))}
+                label="اسم المنتج"
+                onValueChange={(value) =>
+                  handleItemChange(index, 'product_id', value)
                 }
-                className="w-[499px] my-2"
-                label=" وصف الصنف"
+                value={item.product_id}
               />
-            </>
+              <div className='flex gap-x-md '>
+
+              <IconInput
+                value={item.quantity}
+                onChange={(e) =>
+                  handleItemChange(index, 'quantity', e.target.value)
+                }
+                label="الكمية"
+                inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
+              />
+              <IconInput
+                onChange={(e) =>
+                  handleItemChange(index, 'total', e.target.value)
+                }
+                label="السعر"
+                inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
+                iconSrcLeft="SR"
+                value={item.unit_price}
+                disabled
+              />
+              <IconInput
+                onChange={(e) =>
+                  handleItemChange(index, 'total', e.target.value)
+                }
+                label="المجموع"
+                inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
+                iconSrcLeft="SR"
+                value={item.unit_price}
+                disabled
+              />
+              {orderSchema.products.length > 1 && (
+                <TrashIcon
+                  onClick={() => {
+                    const updatedItems = orderSchema.products.filter(
+                      (_, i) => i !== index
+                    );
+                    dispatch(addProduct(updatedItems));
+                  }}
+                  className="translate-y-[34px] cursor-pointer hover:scale-105"
+                />
+              )}
+              </div>
+            </div>
           ))}
           <Button
-            onClick={() => {
-              setItems(() => {
-                return [
-                  ...items,
+            onClick={() =>
+              dispatch(
+                addProduct([
+                  ...orderSchema.products,
                   {
-                    id: '',
-                    qty: '',
-                    price: '',
-                    itemDescription: '',
+                    product_id: '',
+                    quantity: '1',
+                    unit_price: '0',
+                    discount_amount: 0,
+                    discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
+                    discount_type: 2,
+                    total_price: 0,
                   },
-                ];
-              });
-            }}
+                ])
+              )
+            }
             type="button"
-            className=" justify-end   "
-            variant={'link'}
+            className="justify-end  mb-sm"
+            variant="link"
           >
             <div className="flex gap-2">
-              <span>
-                <PlusIcon />
-              </span>
-              <span className="font-semibold">اضافة صنف جديد</span>
+              <span className="font-semibold">اضافة منتج</span>
+              <PlusIcon />
             </div>
           </Button>
-        </div>
-        {/* <div className='flex'> */}
-        <div className="col-span-10">
-          <CheckboxWithText
-            label="اضافة التقرير الي Zatca"
-            checked={formState.addToZatca}
-            onChange={(e) => handleInputChange('addToZatca', e.target.checked)}
+          <div className="flex gap-x-md">
+            <IconInput
+              // disabled
+              // name={formState.name}
+              // className="col-span-10 "
+              label="نوع السيارة"
+              inputClassName="w-[240px] min-w-[120px]"
+              // value={formState.address}
+              onChange={null}
+              // inputClassName="md:col-span-5"
+            />
+            <IconInput
+              // disabled
+              // name={formState.name}
+              inputClassName="w-[240px] min-w-[120px] mb-sm "
+              label="رقم اللوحة"
+              // value={formState.address}
+              onChange={null}
+            />
+          </div>
+          <Textarea
+            name="purchaseDescription"
+            // value={invoice.purchaseDescription}
+            // onChange={(e) =>
+            //   setInvoice({
+            //     ...invoice,
+            //     purchaseDescription: e.target.value,
+            //   })
+            // }
+            className="w-[499px] my-sm"
+            label="ملاحظات"
           />
         </div>
         <div className="col-span-10">
           <Button
-            dir="ltr"
             loading={loading}
             disabled={loading}
-            onClick={submitOrder}
+            onClick={handleSubmitOrder}
             className="w-[144px] mt-md"
           >
             حفظ
           </Button>
         </div>
       </div>
-      {/* <div className='col-span-1 max-w-[502px] place-self-end self-baseline bg-red-200 '> */}
 
       <ShopCardSummeryPQ />
-      {/* </div> */}
     </div>
   );
 };

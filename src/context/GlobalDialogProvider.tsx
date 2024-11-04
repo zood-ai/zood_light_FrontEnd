@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/custom/button';
 import { use } from 'i18next';
@@ -36,8 +36,8 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
     'deleted' | 'updated' | 'added' | 'del' | null
   >(null);
   const { showToast } = useToast();
-  const getStatusMessage = () => {
-    switch (status) {
+  const getStatusMessage = (status1: any) => {
+    switch (status1) {
       case 'deleted':
         return 'تم حذف العنصر بنجاح';
       case 'updated':
@@ -50,14 +50,14 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
   };
   const openDialog = (status: 'deleted' | 'updated' | 'added' | 'del') => {
     setStatus(status);
+    const message = getStatusMessage(status);
     // setIsOpen(true);
     if (status === 'del') {
       setStatus(status);
       setIsOpen(true);
     } else {
       showToast({
-        title: 'Notification Title',
-        description: getStatusMessage(),
+        description: message,
         duration: 4000,
         variant: 'default',
       });
@@ -91,6 +91,10 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
 
   const title = titleMapping[pagePath]; // Get the title object based on the path
   const isArabic = true;
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
   return (
     <GlobalDialogContext.Provider value={{ openDialog, delRoute, closeDialog }}>
       {children}
@@ -117,7 +121,7 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
 
                   <div className="flex flex-col mt-5 w-full">
                     <div className="text-base font-medium text-center text-mainText">
-                      {getStatusMessage()}
+                      {getStatusMessage(status)}
                     </div>
                     <div className="flex flex-col mt-6 w-full text-sm font-semibold text-right text-white whitespace-nowrap rounded">
                       <Button
@@ -171,7 +175,7 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
                     </div>
                     <div className="text-sm text-secText">
                       لديك تغييرات غير محفوظة. إذا حذفت{' '}
-                      <span className="mx-1">{title.ar} {' '}</span>
+                      <span className="mx-1">{title.ar} </span>
                       الآن، فسوف تفقد تغييراتك{' '}
                     </div>
                     <div className="flex flex-col mt-6 w-full text-sm font-semibold text-right text-white whitespace-nowrap rounded">
@@ -188,6 +192,8 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
                           setLoading(false);
                           setIsOpen(false);
                           if (res.status !== 200) {
+                            setLoading(false);
+                            setIsOpen(false);
                             return;
                           }
                           if (res.status === 200) {

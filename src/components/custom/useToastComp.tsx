@@ -1,7 +1,7 @@
 import { toast } from "@/components/ui/use-toast";
 
 type ToastOptions = {
-  title: string;
+  title?: string;
   description?: string;
   duration?: number;
   variant?: "default" | "destructive" ; // add more variants if needed

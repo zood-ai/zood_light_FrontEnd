@@ -18,13 +18,17 @@ export const BackBtn: React.FC<BackBtnProps> = ({ bkAction }) => {
 
   return (
     <div
-      onClick={bkAction ? bkAction : handleBack}
-      className="mb-2 flex items-center justify-between space-y-2 cursor-pointer"
+      className="mb-2 flex items-center justify-between space-y-2 cursor-pointer w-max"
     >
       <div>
         <p className="text-muted-foreground">
-          <div className="flex   gap-1.5 text-base text-right text-black whitespace-nowrap items-center cursor-pointer">
+          <div  onClick={(e) => {
+                    e.stopPropagation();
+                    bkAction ? bkAction() : handleBack();
+                  }} className="flex   gap-1.5 text-base text-right text-black whitespace-nowrap items-center cursor-pointer">
             <div
+                 
+              // className="bg-black p-1.5 rounded-full"
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
             >

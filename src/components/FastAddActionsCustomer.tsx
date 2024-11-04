@@ -1,12 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useDirection from '@/hooks/useDirection';
 import personIcon from '/icons/name person.svg';
 
 import callIcon from '/icons/call.svg';
 
-import { IconLoader } from '@tabler/icons-react';
-import { AlertDialog, AlertDialogContent } from './ui/alert-dialog';
 import { Button } from './custom/button';
 import { AlertDialogContentComp, AlertDialogComp } from './ui/alert-dialog2';
 import createCrudService from '@/api/services/crudService';
@@ -21,9 +19,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import axiosInstance from '@/api/interceptors';
-import { useGlobalDialog } from '@/context/GlobalDialogProvider';
-import ConfirmBk from '@/components/custom/ConfimBk';
 import DelConfirm from '@/components/custom/DelConfim';
 import IconInput from './custom/InputWithIcon';
 import { useQueryClient } from '@tanstack/react-query';
@@ -35,7 +30,7 @@ const formSchema = z.object({
 export default function FastAddActionsCustomer({
   isOpen,
   onClose,
-  setInvoice,
+  setInvoice ,
 }) {
   const { t } = useTranslation();
   const isRtl = useDirection();
