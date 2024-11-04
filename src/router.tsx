@@ -379,16 +379,16 @@ const router = createBrowserRouter([
           </React.Suspense>
         ),
       },
-      {
-        path: 'price-quote/add/shop-card',
-        element: (
-          <React.Suspense fallback={<div>Loading Price Quote...</div>}>
-            <ProtectedRoute requiredRole={Roles.ADMIN}>
-              <ShopCardPQ />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
+      // {
+      //   path: 'price-quote/add/shop-card',
+      //   element: (
+      //     <React.Suspense fallback={<div>Loading Price Quote...</div>}>
+      //       <ProtectedRoute requiredRole={Roles.ADMIN}>
+      //         <ShopCardPQ />
+      //       </ProtectedRoute>
+      //     </React.Suspense>
+      //   ),
+      // },
 
       {
         path: 'price-quote/edit/:id',

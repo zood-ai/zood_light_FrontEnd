@@ -149,8 +149,15 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
-      <ShopCardTable />
-      <CustomerForm />
+      {/* <div className="grid grid-cols-2"> */}
+        <div>
+          <ShopCardTable />
+        </div>
+        <div>
+           <CustomerForm />
+        </div>
+      {/* </div> */}
+
       <ConfirmBk
         isOpen={isOpen}
         setIsOpen={undefined}

@@ -1,8 +1,19 @@
+import createCrudService from '@/api/services/crudService';
 import { Button } from '@/components/custom/button';
 import { SelectComp } from '@/components/custom/SelectItem';
 import { Input } from '@/components/ui/input';
 
 export default function Settings() {
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
+  const { data: branches } =
+    createCrudService<any>('manage/branches').useGetAll();
+  const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const settingsData = settings?.data;
+  const taxesData = taxes?.data?.[0];
+  const branchesData = branches?.data?.[0];
+
+  console.log(settingsData, taxesData, branchesData, 'settingsData');
   return (
     <>
       <div className="flex flex-col rounded-none max-w-[805px]">
@@ -19,17 +30,20 @@ export default function Settings() {
               <div className="flex flex-col w-6/12 max-md:ml-0 max-md:w-full">
                 <div className="flex flex-col grow mt-10 text-sm text-left max-md:mt-10">
                   <div className="self-start font-medium text-zinc-500">
-                    عنوان المتجر
+                    اسم المتجر
                   </div>
-                  <Input className="w-[327px]" />
+                  <Input
+                    value={settingsData?.business_name}
+                    className="w-[327px]"
+                  />
                 </div>
               </div>
               <div className="flex flex-col w-6/12 max-md:ml-0 max-md:w-full">
                 <div className="flex flex-col grow mt-10 text-sm text-left max-md:mt-10">
                   <div className="self-start font-medium text-zinc-500">
-                    اسم المتجر
+                    عنوان المتجر
                   </div>
-                  <Input className="w-[327px]" />
+                  <Input value={branchesData?.name} className="w-[327px]" />
                 </div>
               </div>
             </div>
@@ -45,7 +59,7 @@ export default function Settings() {
               <div className="self-start font-medium text-zinc-500">
                 الرمز البريدي
               </div>
-              <Input className="w-[117px] " />
+              <Input value={branchesData?.postal_code} className="w-[117px] " />
             </div>
             <div className="flex flex-col flex-1">
               <div className="self-start font-medium text-zinc-500">
@@ -89,7 +103,7 @@ export default function Settings() {
           <div className="mt-2 font-medium text-zinc-500 max-md:mr-2">
             نسبة الضريبة
           </div>
-          <Input className=" " />
+          <Input value={taxesData?.rate + '% '} className=" " />
 
           <div className="mt-4 font-medium text-zinc-500 max-md:mr-2">
             طريقة حساب الضريبة
@@ -101,6 +115,7 @@ export default function Settings() {
                 name="taxOption"
                 value="inclusive"
                 className=" "
+                defaultChecked={settingsData?.tax_inclusive_pricing}
               />
 
               <span className="text-zinc-800">السعر شامل الضريبة</span>
@@ -112,6 +127,9 @@ export default function Settings() {
                 name="taxOption"
                 value="exclusive"
                 className=" "
+                defaultChecked={
+                  settingsData?.tax_inclusive_pricing ? false : true
+                }
               />
 
               <span className="text-zinc-800">السعر غير شامل الضريبة</span>

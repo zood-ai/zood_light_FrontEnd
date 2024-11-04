@@ -28,7 +28,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
       },
       payment_method_id: '',
     },
-  ]); 
+  ]);
   const [paymentMethod1, setPaymentMethod1] = useState<any>([
     {
       tendered: 180,
@@ -39,7 +39,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
       },
       payment_method_id: '',
     },
-  ]); 
+  ]);
   const orderSchema = useSelector((state: any) => state.orderSchema);
   let params = useParams();
   useEffect(() => {
@@ -121,8 +121,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
         setdiscountAmount(res?.data?.data?.customer_notes || 0);
       });
       // setdiscountAmount(orderSchema?.customer_notes || 0);
-      console.log(orderSchema, 'orderSchema');
-      
     }
   }, []);
 
@@ -222,24 +220,39 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                   <div className="mt-6 text-sm font-bold text-right text-black max-md:mr-2.5">
                     طريقة الدفع
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5 mt-3 text-sm text-right text-zinc-500 max-md:mr-2.5">
-                    <SelectComp
-                      options={paymentMethods?.data?.map((item) => ({
-                        value: item.id,
-                        label: item.name,
-                      }))}
-                      placeholder="Select payment method"
-                      onValueChange={(value) => {
-                        // e.stopPropagation();
-                        handleItemChange(index, 'payment_method_id', value);
-                      }}
-                      // label="اسم العميل"
-                      className="col-span-10 md:col-span-4 w-[227px]"
-                      value={orderSchema?.payments[index]?.payment_method_id}
-                      disabled={params.id && paymentMethodinit[index]  }
-                    />
+                  <div className="flex gap-1.5 mt-3 text-sm text-right text-zinc-500 max-md:mr-2.5">
+                    {paymentMethods?.data?.map((option, index) => (
+                      <div
+                        key={index}
+                        onClick={() => {
+                          handleItemChange(index, 'payment_method_id', option.id);
+
+                          setPaymentMethod([
+                            {
+                              id: option.id,
+                              name: option.name,
+                              amount: option.amount,
+                              tendered: option.amount,
+                              tips: 0,
+                              meta: {
+                                external_additional_payment_info: 'some info',
+                              },
+                              payment_method_id: option.id,
+                            },
+                          ]);
+                        }}
+                        className={`h-[40px] w-[93px] whitespace-nowrap min-w-fit  px-md  flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointer ${
+                          paymentMethod?.[0].payment_method_id === option.id
+                            ? 'bg-main text-white font-extrabold'
+                            : 'bg-white'
+                        }`}
+                      >
+                        {option.name}
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex   items-center  gap-x-2  ">
+                 
+                  <div className="flex  my-md items-center  gap-x-2  ">
                     <IconInput
                       type="number"
                       onChange={(e) =>
@@ -249,9 +262,9 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       placeholder="0.00"
                       label="المبلغ"
                       width="150px"
-                      disabled={params.id && paymentMethodinit[index]  }
+                      disabled={params.id && paymentMethodinit[index]}
                     />
-                    {paymentMethod.length > 1 && !params.id  && (
+                    {paymentMethod.length > 1 && !params.id && (
                       <>
                         <div
                           onClick={() => {
@@ -276,36 +289,38 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                         </div>
                       </>
                     )}
-                    {paymentMethod.length > 1 && params.id && !paymentMethodinit[index] &&(
-                      <>
-                        <div
-                          onClick={() => {
-                            const newItems = [...paymentMethod];
-                            newItems.splice(index, 1);
-                            setPaymentMethod(newItems);
-                          }}
-                          className="translate-y-[18px]  mb-2 cursor-pointer hover:scale-105"
-                        >
-                          <svg
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                    {paymentMethod.length > 1 &&
+                      params.id &&
+                      !paymentMethodinit[index] && (
+                        <>
+                          <div
+                            onClick={() => {
+                              const newItems = [...paymentMethod];
+                              newItems.splice(index, 1);
+                              setPaymentMethod(newItems);
+                            }}
+                            className="translate-y-[18px]  mb-2 cursor-pointer hover:scale-105"
                           >
-                            <path
-                              d="M14.2792 2C15.1401 2 15.9044 2.55086 16.1766 3.36754L16.7208 5H20C20.5523 5 21 5.44772 21 6C21 6.55227 20.5523 6.99998 20 7L19.9975 7.07125L19.1301 19.2137C19.018 20.7837 17.7117 22 16.1378 22H7.86224C6.28832 22 4.982 20.7837 4.86986 19.2137L4.00254 7.07125C4.00083 7.04735 3.99998 7.02359 3.99996 7C3.44769 6.99998 3 6.55227 3 6C3 5.44772 3.44772 5 4 5H7.27924L7.82339 3.36754C8.09562 2.55086 8.8599 2 9.72076 2H14.2792ZM17.9975 7H6.00255L6.86478 19.0712C6.90216 19.5946 7.3376 20 7.86224 20H16.1378C16.6624 20 17.0978 19.5946 17.1352 19.0712L17.9975 7ZM10 10C10.5128 10 10.9355 10.386 10.9933 10.8834L11 11V16C11 16.5523 10.5523 17 10 17C9.48716 17 9.06449 16.614 9.00673 16.1166L9 16V11C9 10.4477 9.44771 10 10 10ZM14 10C14.5523 10 15 10.4477 15 11V16C15 16.5523 14.5523 17 14 17C13.4477 17 13 16.5523 13 16V11C13 10.4477 13.4477 10 14 10ZM14.2792 4H9.72076L9.38743 5H14.6126L14.2792 4Z"
-                              fill="#FC3030"
-                            />
-                          </svg>
-                        </div>
-                      </>
-                    )}
+                            <svg
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M14.2792 2C15.1401 2 15.9044 2.55086 16.1766 3.36754L16.7208 5H20C20.5523 5 21 5.44772 21 6C21 6.55227 20.5523 6.99998 20 7L19.9975 7.07125L19.1301 19.2137C19.018 20.7837 17.7117 22 16.1378 22H7.86224C6.28832 22 4.982 20.7837 4.86986 19.2137L4.00254 7.07125C4.00083 7.04735 3.99998 7.02359 3.99996 7C3.44769 6.99998 3 6.55227 3 6C3 5.44772 3.44772 5 4 5H7.27924L7.82339 3.36754C8.09562 2.55086 8.8599 2 9.72076 2H14.2792ZM17.9975 7H6.00255L6.86478 19.0712C6.90216 19.5946 7.3376 20 7.86224 20H16.1378C16.6624 20 17.0978 19.5946 17.1352 19.0712L17.9975 7ZM10 10C10.5128 10 10.9355 10.386 10.9933 10.8834L11 11V16C11 16.5523 10.5523 17 10 17C9.48716 17 9.06449 16.614 9.00673 16.1166L9 16V11C9 10.4477 9.44771 10 10 10ZM14 10C14.5523 10 15 10.4477 15 11V16C15 16.5523 14.5523 17 14 17C13.4477 17 13 16.5523 13 16V11C13 10.4477 13.4477 10 14 10ZM14.2792 4H9.72076L9.38743 5H14.6126L14.2792 4Z"
+                                fill="#FC3030"
+                              />
+                            </svg>
+                          </div>
+                        </>
+                      )}
                   </div>
                 </>
               </>
             ))}
-            <div className="flex">
+            {/* <div className="flex">
               {paymentMethod.length >= 1 && (
                 <>
                   <Button
@@ -332,7 +347,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                   </Button>
                 </>
               )}
-            </div>
+            </div> */}
           </div>
           <hr
             style={{

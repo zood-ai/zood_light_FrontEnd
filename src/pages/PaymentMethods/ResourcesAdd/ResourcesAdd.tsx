@@ -186,7 +186,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                 >
                   {isEditMode ? t('تعديل الدفع') : t('اضافة الدفع')}
                 </Button>
-                <DelConfirm route={'inventory/suppliers'} />
+                <DelConfirm route={'manage/payment_methods'} />
               </div>
             </form>
           </Form>

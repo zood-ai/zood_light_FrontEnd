@@ -20,6 +20,7 @@ import { getToken } from '@/utils/auth';
 import ConfirmBk from '@/components/custom/ConfimBk';
 import DelConfirm from '@/components/custom/DelConfim';
 import FastAddActionsCustomer from '@/components/FastAddActionsCustomer';
+import FileUpload from './uploadicon/FileUpload';
 
 export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const { t } = useTranslation();
@@ -47,7 +48,9 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   console.log(whoIam?.data, 'whoIam');
 
   const { useGetById, useUpdate, useCreate } = crudService;
-  const { useGetAll: useGetAllPro } = createCrudService<any>('menu/products?not_default=1');
+  const { useGetAll: useGetAllPro } = createCrudService<any>(
+    'menu/products?not_default=1'
+  );
   const { data: getAllPro } = useGetAllPro();
   const { data: allData } = createCrudService<any>(
     'inventory/suppliers'
@@ -210,7 +213,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 label="ادخل الرقم المرجعي للفاتورة أو رقم الفاتورة"
                 inputClassName="w-[274px]"
               />
-              <Button
+              {/* <Button
                 className="translate-y-[8px]"
                 variant={'linkHover'}
                 type="button"
@@ -224,7 +227,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 <div className="flex gap-2">
                   <span className="font-semibold">انشاء رقم</span>
                 </div>
-              </Button>
+              </Button> */}
             </div>
 
             <Textarea
@@ -300,6 +303,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   )}
                 </div>
                 <Textarea
+                  rows={2}
                   name="itemDescription"
                   value={items[index].itemDescription}
                   onChange={(e) =>
@@ -335,15 +339,19 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 <span className="font-semibold">اضافة صنف جديد</span>
               </div>
             </Button>
-            <div className='flex'>
-
-            <Button
-              type="submit"
-              className="px-6 py-1.5 mta-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
-            >
-              {isEditMode ? 'تحديث الفاتورة' : 'اضافة الفاتورة'}
-            </Button>
-            <DelConfirm route={'inventory/purchasing'} />
+            <FileUpload
+              onFileSelect={function (file: File): void {
+                throw new Error('Function not implemented.');
+              }}
+            />
+            <div className="flex">
+              <Button
+                type="submit"
+                className="px-6 py-1.5 mta-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
+              >
+                {isEditMode ? 'تحديث الفاتورة' : 'اضافة الفاتورة'}
+              </Button>
+              <DelConfirm route={'inventory/purchasing'} />
             </div>
           </div>
         </div>

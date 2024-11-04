@@ -1,7 +1,7 @@
 import React from 'react';
-const TrashIcon = () => {
+const TrashIcon = ({...props}) => {
   return (
-    <>
+    <div {...props}>
       <svg
         width="24"
         height="24"
@@ -14,7 +14,7 @@ const TrashIcon = () => {
           fill="#FC3030"
         />
       </svg>
-    </>
+    </div>
   );
 };
 

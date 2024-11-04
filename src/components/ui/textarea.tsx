@@ -6,7 +6,7 @@ export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, any>(
-  ({ className, label, ...props }, ref) => {
+  ({ className,rows=4, label, ...props }, ref) => {
     return (
       <div>
         {label && (
@@ -21,7 +21,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, any>(
           )}
           ref={ref}
           {...props}
-          rows={4}
+          rows={rows}
         />
       </div>
     );
