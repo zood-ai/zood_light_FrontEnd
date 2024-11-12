@@ -7,98 +7,150 @@ import { Task } from '../data/schema';
 import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-table-column-header';
 import { StatusBadge } from '@/components/custom/StatusBadge';
 import { Button } from '@/components/custom/button';
-import createCrudService from '@/api/services/crudService';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import dayjs from 'dayjs';
+import { formatDate } from '@/utils/formatDateTime';
 import { useDispatch } from 'react-redux';
 import { toggleActionView } from '@/store/slices/toggleAction';
-import placeHolderImg from '/images/image.png';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
-  const crudService = createCrudService<any>('menu/categories');
-  const { useRemove } = crudService;
-  const { mutate: remove } = useRemove();
-  let navigate = useNavigate();
-  const [loading, setLoading] = useState(false)
   let dispatch = useDispatch();
 
   const columns: ColumnDef<Task>[] = [
     {
-      accessorKey: 'name',
+      accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'اسم المنتج'} />
-      ),
-      cell: ({ row }:any) => {
-         
-
-        return (
-          <div className="  flex justify-start items-center py-[11.5px] w-[500px]  ">
-            <div className="flex justify-start items-center max-w-[79px]">
-              <img
-                loading="lazy"
-                src={row.original.image ||placeHolderImg}
-                className="object-cover"
-                alt="placeholder"
-              />
-            </div>
-            <div className="ms-[20px]">{row.getValue('name')}</div>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: 'products',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'مجموع الاصناف'} />
+        <DataTableColumnHeader column={column} title={'رقم الفاتورة'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('products') || '0'}
+              {row.getValue('reference') || '-'}
             </span>
           </div>
         );
       },
     },
-   
-    
-
-   
-    // {
-    //   accessorKey: 'id',
-    //   header: ({ column }) => (
-    //     <DataTableColumnHeader column={column} title={'تنفيذ'} />
-    //   ),
-    //   cell: ({ row }) => {
-         
-
-    //     return (
-    //       <div className="flex space-x-2 w-[180px] md:w-auto">
-    //         {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-    //         <div className="flex gap-4 text-sm font-bold text-right ">
-    //           {' '}
-    //           <Button
-    //             type="button"
-    //             onClick={(e) => {
-    //               e.stopPropagation();
-    //               dispatch(toggleActionView(true));
-    //             }}
-    //             className="ps-0"
-    //             variant={'linkHover'}
-    //           >
-    //             رؤية الفاتورة
-    //           </Button>
-          
-    //         </div>
-    //       </div>
-    //     );
-    //   },
-    // },
+    {
+      accessorKey: 'customer',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'اسم العميل'} />
+      ),
+      cell: ({ row }: any) => {
+        return (
+          <div className="flex space-x-2">
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('customer')?.name || '-'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'customer',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'رقم الهاتف'} />
+      ),
+      cell: ({ row }: any) => {
+        return (
+          <div className="flex space-x-2">
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('customer')?.phone || '-'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'payment_status',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'حالة الدفع'} />
+      ),
+      cell: ({ row }: any) => {
+        return (
+          <div className="flex space-x-2">
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('payment_status') == 'partial' ? (
+                <StatusBadge status="Inactive" text={'مدفوع جزئي'} />
+              ) : row.getValue('payment_status') == 'unpaid' ? (
+                <StatusBadge status="error" text={'غير مدفوع'} />
+              ) : (
+                <StatusBadge status="active" text={'مدفوع'} />
+              )}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'created_at',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'التاريخ'} />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2">
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {/* {dayjs(row.getValue('created_at')).format('MMMM D, YYYY h:mm A')} */}
+              {formatDate(row.getValue('created_at'))}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'zatca_report_status',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'Zatca Reporting'} />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2 w-[180px] md:w-auto">
+            {row.getValue('zatca_report_status') === 'pending' ||
+              (row.getValue('zatca_report_status') === null && (
+                <StatusBadge status="pending" text={'click to reported'} />
+              ))}
+            {row.getValue('zatca_report_status') === 'PASS' && (
+              <StatusBadge status="reported" text={'reported'} />
+            )}
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'id',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'تنفيذ'} />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2 w-[180px] md:w-auto">
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+            <div className="flex gap-4 text-sm font-bold text-right ">
+              {' '}
+              <Button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  dispatch(toggleActionView(true));
+                }}
+                className="ps-0"
+                variant={'linkHover'}
+              >
+                رؤية الفاتورة
+              </Button>
+            </div>
+          </div>
+        );
+      },
+    },
   ];
 
   return { columns };

@@ -29,7 +29,7 @@ const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
 
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
-    const { data: getTaxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const { data: getTaxes } = createCrudService<any>('manage/taxes').useGetAll();
 
   useEffect(() => {
     dispatch(updateField({ field: 'subtotal_price', value: totalCost }));
@@ -37,7 +37,15 @@ const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
       updateField({ field: 'total_price', value: totalCost - taxAmount })
     );
     dispatch(updateField({ field: 'discount_amount', value: discountAmount }));
-    dispatch(addTax([{ id:getTaxes ?.data?.[0]?.id, name: getTaxes?.data?.[0]?.name, amount: taxAmount }]));
+    dispatch(
+      addTax([
+        {
+          id: getTaxes?.data?.[0]?.id,
+          name: getTaxes?.data?.[0]?.name,
+          amount: taxAmount,
+        },
+      ])
+    );
     dispatch(
       updateField({
         field: 'branch_id',
@@ -145,7 +153,7 @@ const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
             المبلغ المتبقي
           </div>
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            {totalCost - taxAmount}
+            {totalCost + taxAmount - taxAmount}
           </div>
         </div>
       </div>

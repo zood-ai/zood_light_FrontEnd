@@ -28,6 +28,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     supplier_id: '',
     invoice_number: '',
     purchaseDescription: '',
+    attached_file: '',
   });
   const [items, setItems] = useState([
     {
@@ -37,6 +38,8 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       itemDescription: '',
     },
   ]);
+  const [fileBase64, setFileBase64] = useState<any>('');
+  const [fileName, setFileName] = useState<string>('');
   const isRtl = useDirection();
   const params = useParams();
   const modalType = params.id;
@@ -65,6 +68,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
         supplier_id: allDataId?.data.supplier.id,
         invoice_number: allDataId?.data?.invoice_number,
         purchaseDescription: allDataId?.data?.notes,
+        attached_file: allDataId?.data?.attached_file,
       });
 
       setItems(
@@ -77,12 +81,13 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       );
     }
   }, [allDataId]);
-
   const { openDialog } = useGlobalDialog();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInvoice({ ...invoice, [e.target.name]: e.target.value });
   };
+
+  console.log(invoice);
 
   const handleItemChange = (index: number, field: string, value: string) => {
     const updatedItems = [...items];
@@ -130,9 +135,11 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           supplier_id: invoice.supplier_id,
           type: 'items',
           notes: invoice.purchaseDescription,
+          attached_file: fileBase64,
           items: items.map((item) => item.item),
           invoice_number: Math.floor(Math.random() * 100000),
         });
+        console.log({ data }, fileBase64);
         // const res =  await axiosInstance.get(
         //   `inventory/purchasing/${data?.data?.id}`
         // )
@@ -156,17 +163,18 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const handleBkAction = () => {
     setIsOpen(true);
   };
-  <DetailsHeadWithOutFilter bkAction={handleBkAction} />;
+
   const [fastActionBtn, setFastActionBtn] = useState(false);
   const setSuppId = (value: string) => {
     console.log(value, 'value');
 
     setInvoice({ ...invoice, supplier_id: value });
   };
+
+  // Ensure DetailsHeadWithOutFilter is rendered correctly
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
-
       <form onSubmit={handleFormSubmit}>
         <div className="flex flex-col items-start">
           <div className="grid grid-cols-1 gap-y-[16px]">
@@ -186,10 +194,10 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   className="w-[327px]"
                 />
               </div>
-
               <div className="translate-y-[32px]">
                 <Button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
                     setFastActionBtn(true);
                   }}
                   type="button"
@@ -204,7 +212,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 </Button>
               </div>
             </div>
-
             <div className="flex justify-start items-center">
               <IconInput
                 name="invoice_number"
@@ -213,23 +220,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 label="ادخل الرقم المرجعي للفاتورة أو رقم الفاتورة"
                 inputClassName="w-[274px]"
               />
-              {/* <Button
-                className="translate-y-[8px]"
-                variant={'linkHover'}
-                type="button"
-                onClick={() =>
-                  setInvoice({
-                    ...invoice,
-                    invoice_number: String(Math.floor(Math.random() * 10000)),
-                  })
-                }
-              >
-                <div className="flex gap-2">
-                  <span className="font-semibold">انشاء رقم</span>
-                </div>
-              </Button> */}
             </div>
-
             <Textarea
               name="purchaseDescription"
               value={invoice.purchaseDescription}
@@ -251,7 +242,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     options={getAllPro?.data?.map((item) => ({
                       value: item.item_id,
                       label: item.name,
-                      // item_id: item.item_id,
                     }))}
                     onValueChange={(value) =>
                       handleItemChange(index, 'item', value)
@@ -277,29 +267,27 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     iconSrcLeft={'SR'}
                   />
                   {items.length > 1 && (
-                    <>
-                      <div
-                        onClick={() => {
-                          const newItems = [...items];
-                          newItems.splice(index, 1);
-                          setItems(newItems);
-                        }}
-                        className="translate-y-[34px] cursor-pointer hover:scale-105"
+                    <div
+                      onClick={() => {
+                        const newItems = [...items];
+                        newItems.splice(index, 1);
+                        setItems(newItems);
+                      }}
+                      className="translate-y-[34px] cursor-pointer hover:scale-105"
+                    >
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M14.2792 2C15.1401 2 15.9044 2.55086 16.1766 3.36754L16.7208 5H20C20.5523 5 21 5.44772 21 6C21 6.55227 20.5523 6.99998 20 7L19.9975 7.07125L19.1301 19.2137C19.018 20.7837 17.7117 22 16.1378 22H7.86224C6.28832 22 4.982 20.7837 4.86986 19.2137L4.00254 7.07125C4.00083 7.04735 3.99998 7.02359 3.99996 7C3.44769 6.99998 3 6.55227 3 6C3 5.44772 3.44772 5 4 5H7.27924L7.82339 3.36754C8.09562 2.55086 8.8599 2 9.72076 2H14.2792ZM17.9975 7H6.00255L6.86478 19.0712C6.90216 19.5946 7.3376 20 7.86224 20H16.1378C16.6624 20 17.0978 19.5946 17.1352 19.0712L17.9975 7ZM10 10C10.5128 10 10.9355 10.386 10.9933 10.8834L11 11V16C11 16.5523 10.5523 17 10 17C9.48716 17 9.06449 16.614 9.00673 16.1166L9 16V11C9 10.4477 9.44771 10 10 10ZM14 10C14.5523 10 15 10.4477 15 11V16C15 16.5523 14.5523 17 14 17C13.4477 17 13 16.5523 13 16V11C13 10.4477 13.4477 10 14 10ZM14.2792 4H9.72076L9.38743 5H14.6126L14.2792 4Z"
-                            fill="#FC3030"
-                          />
-                        </svg>
-                      </div>
-                    </>
+                        <path
+                          d="M14.2792 2C15.1401 2 15.9044 2.55086 16.1766 3.36754L16.7208 5H20C20.5523 5 21 5.44772 21 6C21 6.55227 20.5523 6.99998 20 7L19.9975 7.07125L19.1301 19.2137C19.018 20.7837 17.7117 22 16.1378 22H7.86224C6.28832 22 4.982 20.7837 4.86986 19.2137L4.00254 7.07125C4.00083 7.04735 3.99998 7.02359 3.99996 7C3.44769 6.99998 3 6.55227 3 6C3 5.44772 3.44772 5 4 5H7.27924L7.82339 3.36754C8.09562 2.55086 8.8599 2 9.72076 2H14.2792ZM17.9975 7H6.00255L6.86478 19.0712C6.90216 19.5946 7.3376 20 7.86224 20H16.1378C16.6624 20 17.0978 19.5946 17.1352 19.0712L17.9975 7ZM10 10C10.5128 10 10.9355 10.386 10.9933 10.8834L11 11V16C11 16.5523 10.5523 17 10 17C9.48716 17 9.06449 16.614 9.00673 16.1166L9 16V11C9 10.4477 9.44771 10 10 10ZM14 10C14.5523 10 15 10.4477 15 11V16C15 16.5523 14.5523 17 14 17C13.4477 17 13 16.5523 13 16V11C13 10.4477 13.4477 10 14 10ZM14.2792 4H9.72076L9.38743 5H14.6126L14.2792 4Z"
+                          fill="#FC3030"
+                        />
+                      </svg>
+                    </div>
                   )}
                 </div>
                 <Textarea
@@ -341,9 +329,27 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             </Button>
             <FileUpload
               onFileSelect={function (file: File): void {
-                throw new Error('Function not implemented.');
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  const base64 = reader.result?.toString().split(',')[1];
+                  setFileBase64(`data:image/png;base64,${base64}`);
+                  setFileName(file.name); // Set the file name
+                };
+                reader.readAsDataURL(file);
               }}
             />
+            {fileName && (
+              <div className="mt-2 text-sm text-gray-600">
+                {`Selected file: ${fileName}`}
+              </div>
+            )}
+            {invoice?.attached_file && (
+              <div className="mt-2 text-sm text-gray-600">
+                <a href={invoice?.attached_file} target="_blank">
+                  Click To see Selected File
+                </a>
+              </div>
+            )}
             <div className="flex">
               <Button
                 type="submit"

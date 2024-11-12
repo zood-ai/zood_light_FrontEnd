@@ -43,14 +43,13 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
     setSelectedRow(row);
     setIsAddEditOpen(true);
   };
-  let dispatch = useDispatch();
+  const dispatch = useDispatch();
   const handleCloseModal = () => {
     setIsAddEditOpen(false);
     setIsViewModalOpen(false);
     setIsDelModalOpen(false);
 
     dispatch(toggleActionView(false));
-
   };
   const filterBtn = () => {
     console.log('filterBtn');
@@ -61,13 +60,13 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
   const allService = createCrudService<any>('inventory/purchasing');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
-    const toggleActionData = useSelector((state: any) => state?.toggleAction);
-    useEffect(() => {
-      console.log(toggleActionData, 'toggleActionData');
+  const toggleActionData = useSelector((state: any) => state?.toggleAction);
+  useEffect(() => {
+    console.log(toggleActionData, 'toggleActionData');
+  }, [toggleActionData]);
 
-    }, [toggleActionData])
-    
-    
+  const Data = isLoading ? 'loading' : allData?.data;
+  console.log(Data);
   return (
     <>
       <AddEditModal

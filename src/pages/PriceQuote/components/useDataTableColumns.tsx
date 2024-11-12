@@ -80,7 +80,7 @@ export const useDataTableColumns = () => {
     //           ) : row.getValue('payment_status') == 'unpaid' ? (
     //             <StatusBadge status="error" text={'غير مدفوع'} />
     //           ) : (
-    //             <StatusBadge status="completed" text={'مدفوع'} />
+    //             <StatusBadge status="active" text={'مدفوع'} />
     //           )}
     //         </span>
     //       </div>

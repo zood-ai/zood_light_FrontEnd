@@ -1,6 +1,6 @@
 import React from 'react';
 import UploadIcon from './UploadIcon';
- 
+
 interface UploadAreaProps {
   onFileSelect: (file: File) => void;
 }
@@ -15,6 +15,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFileSelect }) => {
     const files = e.dataTransfer.files;
     if (files.length) {
       onFileSelect(files[0]);
+      console.log(files[0]);
     }
   };
 
@@ -22,6 +23,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFileSelect }) => {
     const files = e.target.files;
     if (files && files.length) {
       onFileSelect(files[0]);
+      console.log(files[0]);
     }
   };
 
@@ -40,7 +42,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFileSelect }) => {
         <input
           id="fileInput"
           type="file"
-          className="sr-only"
+          className="sr-only hidden"
           onChange={handleFileInput}
           aria-label="اختر ملف للتحميل"
         />
