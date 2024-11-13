@@ -23,6 +23,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
       tendered: 180,
       amount: 0,
       tips: 0,
+      notadd: true,
       meta: {
         external_additional_payment_info: 'some info',
       },
@@ -125,10 +126,22 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     }
   }, []);
 
-  console.log(orderSchema);
-  const totalAmount = paymentMethod?.reduce((accumulator, current) => {
-    return accumulator + parseFloat(current.amount || 0);
-  }, 0);
+  console.log({ paymentMethod });
+
+  const [totalAmount, setTotalAmount] = useState(
+    paymentMethod?.reduce((accumulator, current, i) => {
+      if (current?.notadd) return 0;
+      return accumulator + parseFloat(current.amount || 0);
+    }, 0)
+  );
+
+  useEffect(() => {
+    setTotalAmount(
+      paymentMethod?.reduce((accumulator, current, i) => {
+        return accumulator + parseFloat(current.amount || 0);
+      }, 0)
+    );
+  }, [paymentMethod.length]);
 
   // const [SubTotalAfterDiscount, setSubTotalAfterDiscount] = useState(0);
 
@@ -174,7 +187,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
 
   return (
     <>
-      <div className="flex  flex-col   rounded-none w-[502px] min-w-[302px] max-w-[502px]  ">
+      <div className="flex mt-5 flex-col   rounded-none min-w-[302px]  ">
         <div className="flex flex-col pt-6 pb-12 w-full bg-white rounded border border-solid border-zinc-300 max-md:max-w-full">
           <div className="flex flex-col items-start px-3 w-full max-md:max-w-full">
             <div className="self-stretch max-md:mr-2.5 max-md:max-w-full">
@@ -199,7 +212,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       <div className="self-start text-zinc-500">SR</div>
                     </div>
                     <IconInput
-                      className="mt-4"
+                      className="flex-grow mt-4"
                       // <IconInput
                       placeholder="0.00"
                       onChange={(value) =>
@@ -207,7 +220,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                           Math.min(value.target.value, totalCost)
                         )
                       }
-                      inputClassName={'w-full max-w-[214px]  '}
+                      inputClassName={'w-full flex-grow '}
                       // label="ضريبة القيمة المضافة"
                       iconSrcLeft={'SR'}
                       value={Number(
@@ -237,13 +250,13 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
               }}
             />
 
-            <div className=" flex gap-5 justify-between self-stretch mt-3 ml-4 w-full text-sm text-right max-w-[458px] text-zinc-800 max-md:mr-2.5 max-md:max-w-full">
+            <div className=" flex gap-5 justify-between self-stretch mt-3 px-2 w-full text-sm text-right max-w-[458px] text-zinc-800 max-md:max-w-full">
               <div className="font-medium">المبلغ الإجمالي</div>
               <div className="font-bold">
                 SR {Math.floor(totalAmountIncludeAndExclude * 100) / 100}
               </div>
             </div>
-            <div className="mt-6 text-sm font-bold text-right text-black max-md:mr-2.5">
+            {/* <div className="mt-6 text-sm font-bold text-right text-black max-md:mr-2.5">
               طريقة الدفع
             </div>
             <div className="flex flex-wrap gap-1.5 mt-3 text-sm text-right text-zinc-500 max-md:mr-2.5">
@@ -291,69 +304,89 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                   {option.name}
                 </button>
               ))}
-            </div>
-            {(paymentMethod || [])?.map((option1, index1) => (
-              <>
-                <div className="mt-6 text-sm font-bold text-right text-black max-md:mr-2.5">
-                  طريقة الدفع
-                </div>
-                <div className="flex flex-wrap gap-1.5 mt-3 text-sm text-right text-zinc-500 max-md:mr-2.5">
-                  {paymentMethods?.data?.map((option, index2) => (
-                    <button
-                      key={index2}
-                      onClick={() => {
-                        handleItemChange(
-                          index2,
-                          'payment_method_id',
-                          option.id
-                        );
-                        setPaymentMethod(() => {
-                          return paymentMethod.map((item, i) => {
-                            if (i === index1) {
-                              return {
-                                id: option.id,
-                                name: option.name,
-                                amount: option.amount,
-                                tendered: 180,
-                                tips: 0,
-                                meta: {
-                                  external_additional_payment_info: 'some info',
-                                },
-                                payment_method_id: option.id,
-                              };
-                            }
-                            return item;
-                          });
+            </div> */}
+            {/* {paymentMethod?.map((option1, index1) => ( */}
+            <>
+              <div className="mt-6 text-sm font-bold text-right text-black max-md:mr-2.5">
+                طريقة الدفع
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-3 text-sm text-right text-zinc-500 max-md:mr-2.5">
+                {paymentMethods?.data?.map((option, index2) => (
+                  <button
+                    key={index2}
+                    onClick={() => {
+                      if (params.id) return;
+                      console.log({ paymentMethod, option });
+                      handleItemChange(index2, 'payment_method_id', option.id);
+                      setPaymentMethod(() => {
+                        return paymentMethod.map((item, i) => {
+                          if (i === paymentMethod.length - 1) {
+                            return {
+                              id: option.id,
+                              name: option.name,
+                              amount: option.amount,
+                              tendered: 180,
+                              tips: 0,
+                              notadd: true,
+                              meta: {
+                                external_additional_payment_info: 'some info',
+                              },
+                              payment_method_id: option.id,
+                            };
+                          }
+                          return item;
                         });
-                      }}
-                      className={`h-[40px] w-[93px] whitespace-nowrap min-w-fit  px-md  flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointe flex-grow ${
-                        option1.payment_method_id === option.id
-                          ? 'bg-main text-white font-extrabold'
-                          : 'bg-white'
-                      }`}
-                    >
-                      {option.name}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex  my-md items-center  gap-x-2  ">
-                  <IconInput
-                    type="number"
-                    onChange={(e) => {
-                      handleItemChange(index1, 'amount', e.target.value);
-                      setCurrentPayment({
-                        ...currentPayment,
-                        amount: Number(e.target.value),
                       });
                     }}
-                    value={Number(paymentMethod[index1].amount)}
-                    placeholder="0.00"
-                    label="المبلغ"
-                    width="150px"
-                    disabled={params.id && paymentMethodinit[index1]}
-                  />
-                  {paymentMethod.length > 1 && !params.id && (
+                    className={`h-[40px] w-[93px] whitespace-nowrap min-w-fit  px-md  flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointe flex-grow ${
+                      paymentMethod[paymentMethod.length - 1]
+                        .payment_method_id === option.id
+                        ? 'bg-main text-white font-extrabold'
+                        : 'bg-white'
+                    }`}
+                  >
+                    {option.name}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex  my-md items-center  gap-x-2  ">
+                <IconInput
+                  type="number"
+                  onChange={(e) => {
+                    handleItemChange(
+                      paymentMethod.length - 1,
+                      'amount',
+                      e.target.value
+                    );
+                    setCurrentPayment({
+                      ...currentPayment,
+                      amount: Number(e.target.value),
+                    });
+                  }}
+                  value={
+                    Number(paymentMethod[paymentMethod.length - 1].amount) ||
+                    'NaN'
+                  }
+                  placeholder="0.00"
+                  label="المبلغ"
+                  width="150px"
+                  disabled={
+                    params.id && paymentMethodinit[paymentMethod.length - 1]
+                  }
+                />
+              </div>
+            </>
+            {/* ))} */}
+
+            {paymentMethod?.map((option1, index1) => {
+              if (index1 === paymentMethod?.length - 1) return;
+              console.log({ paymentMethod });
+              return (
+                <div className="flex gap-3 items-center" key={index1}>
+                  <p>{option1?.amount}</p>
+                  <p>{option1?.name || option1?.payment_method?.name}</p>
+                  {paymentMethod?.length > 1 && !params?.id && (
                     <>
                       <div
                         onClick={() => {
@@ -361,11 +394,11 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                           newItems.splice(index1, 1);
                           setPaymentMethod(newItems);
                         }}
-                        className="translate-y-[18px]  mb-2 cursor-pointer hover:scale-105"
+                        className="cursor-pointer hover:scale-105 flex items-center"
                       >
                         <svg
-                          width="24"
-                          height="24"
+                          width="18"
+                          height="18"
                           viewBox="0 0 24 24"
                           fill="none"
                           xmlns="http://www.w3.org/2000/svg"
@@ -379,7 +412,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                     </>
                   )}
                   {paymentMethod.length > 1 &&
-                    params.id &&
+                    params?.id &&
                     !paymentMethodinit[index1] && (
                       <>
                         <div
@@ -388,11 +421,11 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                             newItems.splice(index1, 1);
                             setPaymentMethod(newItems);
                           }}
-                          className="translate-y-[18px]  mb-2 cursor-pointer hover:scale-105"
+                          className="cursor-pointer hover:scale-105 flex items-center"
                         >
                           <svg
-                            width="24"
-                            height="24"
+                            width="18"
+                            height="18"
                             viewBox="0 0 24 24"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
@@ -406,48 +439,44 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       </>
                     )}
                 </div>
-              </>
-            ))}
+              );
+            })}
 
-            <div className="flex">
-              {paymentMethod.length >= 1 && (
-                <>
-                  <Button
-                    onClick={() => {
-                      setCurrentPayment({
-                        id: '',
-                        name: '',
-                        amount: 0,
-                        tendered: 180,
-                        tips: 0,
-                        meta: {
-                          external_additional_payment_info: 'some info',
-                        },
-                        payment_method_id: '',
-                      });
-                      setPaymentMethod(() => {
-                        return [
-                          ...paymentMethod,
-                          {
-                            amount: 0,
-                            payment_method_id: '',
-                            tendered: 180,
-                            tips: 0,
-                            meta: {
-                              external_additional_payment_info: 'some info',
-                            },
+            {!params.id && (
+              <div className="flex">
+                <Button
+                  onClick={() => {
+                    if (
+                      !paymentMethod[paymentMethod.length - 1].payment_method_id
+                    )
+                      return;
+                    setPaymentMethod(() => {
+                      const holder = paymentMethod.map((el) => ({
+                        ...el,
+                        notadd: false,
+                      }));
+                      return [
+                        ...holder,
+                        {
+                          amount: 0,
+                          payment_method_id: '',
+                          tendered: 180,
+                          tips: 0,
+                          notadd: true,
+                          meta: {
+                            external_additional_payment_info: 'some info',
                           },
-                        ];
-                      });
-                    }}
-                    variant="link"
-                    className="mb-5  text-xl"
-                  >
-                    <PlusIcon /> اضف
-                  </Button>
-                </>
-              )}
-            </div>
+                        },
+                      ];
+                    });
+                  }}
+                  variant="link"
+                  className="mb-5  text-xl"
+                >
+                  <PlusIcon /> اضف
+                </Button>
+              </div>
+            )}
           </div>
           <hr
             style={{

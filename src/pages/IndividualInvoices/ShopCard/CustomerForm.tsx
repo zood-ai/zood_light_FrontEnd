@@ -132,6 +132,8 @@ const CustomerForm = () => {
         } catch (error) {
           console.error('Error fetching or processing order:', error);
           setLoading(false);
+        } finally {
+          navigate(`/zood-dashboard/individual-invoices`);
         }
       }
       if (!params.id) {
@@ -158,8 +160,8 @@ const CustomerForm = () => {
   }, [orderSchema?.customer_id]);
 
   return (
-    <div className="mt-5 flex justify-between max-lg:flex-col">
-      <div className="md:max-h-[45vh] col-span-3 md:col-span-2 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-0">
+    <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4">
+      <div className="col-span-3 md:col-span-2 flex flex-wrap gap-x-5 gap-y-5 h-fit">
         <SelectComp
           options={allData?.data?.map((item) => ({
             value: item.id,
@@ -181,7 +183,7 @@ const CustomerForm = () => {
         <IconInput
           disabled
           name="name"
-          className="col-span-10 md:col-span-4"
+          className="col-span-10 md:col-span-4 w-[327px]"
           label="رقم العميل"
           iconSrc={callIcon}
           value={formState.phone}
@@ -190,33 +192,34 @@ const CustomerForm = () => {
         <IconInput
           disabled
           name={formState.name}
-          className="col-span-10 md:col-span-10"
+          className="col-span-10 md:col-span-4 w-[327px]"
           label="اسم الشارع"
           value={formState.address}
           onChange={null}
         />
         <IconInput
           disabled
-          className="col-span-10 md:col-span-4"
+          className="col-span-10 md:col-span-4 w-[327px]"
           label="رقم تسجيل ضريبة القيمة المضافة"
           value={formState.tax_registration_number}
           onChange={null}
         />
         <IconInput
           disabled
-          className="col-span-10 md:col-span-6"
+          className="col-span-10 md:col-span-4 w-[327px]"
           label="معرف اخر"
           value={formState.vat_registration_number}
           onChange={null}
         />
-        <div className="col-span-10">
+
+        <div className="col-span-10 mt-5 max-xl:hidden w-full">
           <CheckboxWithText
             label="اضافة التقرير الي Zatca"
             checked={formState.addToZatca}
             onChange={(e) => handleInputChange('addToZatca', e.target.checked)}
           />
         </div>
-        <div className="col-span-10">
+        <div className="col-span-10 mt-5 max-xl:hidden">
           <Button
             dir="ltr"
             loading={loading}
@@ -227,6 +230,24 @@ const CustomerForm = () => {
             حفظ
           </Button>
         </div>
+      </div>
+      <div className="col-span-10 mt-5 xl:hidden">
+        <CheckboxWithText
+          label="اضافة التقرير الي Zatca"
+          checked={formState.addToZatca}
+          onChange={(e) => handleInputChange('addToZatca', e.target.checked)}
+        />
+      </div>
+      <div className="col-span-10 mt-5 xl:hidden">
+        <Button
+          dir="ltr"
+          loading={loading}
+          disabled={loading}
+          onClick={submitOrder}
+          className="w-[144px]"
+        >
+          حفظ
+        </Button>
       </div>
       <ShopCardSummery />
     </div>

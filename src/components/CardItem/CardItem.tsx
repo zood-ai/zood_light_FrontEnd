@@ -84,7 +84,7 @@ export const CardItem: React.FC<CardItemProps> = ({
   };
 
   return (
-    <div className="flex flex-col rounded-none h-[290px] w-[194px]">
+    <div className="flex flex-col rounded-none h-[290px] w-[194px] flex-grow">
       <div className="flex flex-col pb-2 w-full bg-white rounded border border-gray-200 border-solid">
         <div className="flex flex-col self-stretch px-5 pt-4 w-full bg-white rounded border border-gray-200 border-solid">
           <img

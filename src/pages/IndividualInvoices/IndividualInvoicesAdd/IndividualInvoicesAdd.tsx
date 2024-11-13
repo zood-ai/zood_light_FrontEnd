@@ -35,7 +35,7 @@ export const IndividualInvoicesAdd: React.FC<
           setIsOpen(true);
         }}
       />
-      <div className="grid grid-cols-1 md:grid-cols-6  mt-md gap-x-md gap-y-md">
+      <div className="flex flex-wrap flex-grow gap-4">
         {allUserData?.data?.map((item, index) => (
           <CardItem key={item.id} index={index} item={item} />
         ))}

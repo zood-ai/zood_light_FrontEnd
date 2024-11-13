@@ -1,12 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import createCrudService from '@/api/services/crudService';
 import { Button } from '@/components/custom/button';
 import { SelectComp } from '@/components/custom/SelectItem';
 import { Input } from '@/components/ui/input';
-
+import axiosInstance from '@/api/interceptors';
 export default function Settings() {
   const [taxesValue, setTaxesValue] = useState(15);
   const [selectedFileName, setSelectedFileName] = useState('');
+  const [loadingSettings, setLoadingSettings] = useState(false);
+  const [data, setData] = useState([]);
+  useEffect(function () {
+    async function getSettingsData() {
+      setLoadingSettings(true);
+      const data = await axiosInstance.get(`auth/whoami`);
+      setData(data?.data?.registered_address); 
+      console.log('FETCH');
+      setLoadingSettings(false);
+    }
+    getSettingsData();
+  }, []);
+  console.log(data);
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
   const { data: branches } =
@@ -19,19 +32,26 @@ export default function Settings() {
     createCrudService<any>('manage/settings').useUpdateNoDialog();
   const { mutate: updateTax } =
     createCrudService<any>('manage/taxes').useUpdateNoDialog();
+  const changeTaxType = () => {
+    if (!settingsData) return;
 
-  const [updatedTaxInclusivePricing, setUpdatedTaxInclusivePricing] = useState(
-    settingsData?.tax_inclusive_pricing || false
-  );
-  const changeTaxType = async () => {
-    // if (!settingsData) return;
+    const updatedTaxInclusivePricing = !settingsData.tax_inclusive_pricing;
 
-    // const updatedTaxInclusivePricing = !settingsData.tax_inclusive_pricing;
-
-    await updateSettings({
+    updateSettings({
       id: '',
       data: { tax_inclusive_pricing: updatedTaxInclusivePricing },
     });
+    // updateTax({
+    //   id: taxesData.id,
+    //   data: {
+    //     name: `vat ${input}%`,
+    //     rate: input,
+    //     applies_on_order_types: ['1', '2'],
+    //     name_localized: `vat ${input}%`,
+    //   },
+    // });
+  };
+  function updateTexes() {
     updateTax({
       id: taxesData.id,
       data: {
@@ -41,18 +61,9 @@ export default function Settings() {
         name_localized: `vat ${taxesValue}%`,
       },
     });
-  };
-  function updateTexes() {
-    // updateTax({
-    //   id: taxesData.id,
-    //   data: {
-    //     name: `vat ${taxesValue}%`,
-    //     rate: taxesValue,
-    //     applies_on_order_types: ['1', '2'],
-    //     name_localized: `vat ${taxesValue}%`,
-    //   },
-    // });
+    console.log(taxesValue);
   }
+  console.log(taxesData?.rate);
   console.log(settingsData, taxesData, branchesData, 'settingsData');
   return (
     <>
@@ -164,10 +175,7 @@ export default function Settings() {
                 name="taxOption"
                 value="inclusive"
                 className=" "
-                onClick={() => {
-                  setUpdatedTaxInclusivePricing(true);
-                }}
-                defaultChecked={updatedTaxInclusivePricing}
+                defaultChecked={settingsData?.tax_inclusive_pricing}
               />
 
               <span className="text-zinc-800">السعر شامل الضريبة</span>
@@ -179,10 +187,9 @@ export default function Settings() {
                 name="taxOption"
                 value="exclusive"
                 className=" "
-                onClick={() => {
-                  setUpdatedTaxInclusivePricing(false);
-                }}
-                defaultChecked={updatedTaxInclusivePricing ? false : true}
+                defaultChecked={
+                  settingsData?.tax_inclusive_pricing ? false : true
+                }
               />
 
               <span className="text-zinc-800">السعر غير شامل الضريبة</span>

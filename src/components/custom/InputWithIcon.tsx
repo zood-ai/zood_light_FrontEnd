@@ -25,7 +25,7 @@ const IconInput: React.FC<any> = ({
 }) => {
   return (
     <div className={`flex gap-2   rounded  border-gray-200 ${className} `}>
-      <div className="">
+      <div className="w-full">
         {label && (
           <div className="self-start text-sm font-medium text-right text-secText mb-xs">
             {label}
