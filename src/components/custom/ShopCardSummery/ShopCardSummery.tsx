@@ -57,16 +57,16 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     (acc, item) => acc + item.price * item.qty,
     0
   );
-  console.log(1234, { totalCost });
-
+  // console.log(1234, { totalCost });
+  const { data: Taxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const mainTax = Taxes.data[0];
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
-  const taxAmount = (totalCost * 15) / 100;
-  console.log(123, taxAmount);
+  console.log(55555, { settings });
   const { data: paymentMethods } = createCrudService<any>(
     'manage/payment_methods'
   ).useGetAll();
-  const [discountAmount, setdiscountAmount] = useState('');
+  const [discountAmount, setdiscountAmount] = useState(0);
   const { data: branchData } =
     createCrudService<any>('manage/branches').useGetAll();
 
@@ -78,6 +78,12 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
       return updatedItems;
     });
   };
+  const [subTotal, setSubTotal] = useState(0);
+
+  const [totalAmountIncludeAndExclude, setTotalAmountIncludeAndExclude] =
+    useState(0);
+  const taxAmount = (subTotal * 15) / 100;
+  console.log(123, taxAmount);
 
   useEffect(() => {
     dispatch(addPayment(paymentMethod));
@@ -130,30 +136,34 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   const totalAmount = paymentMethod?.reduce((accumulator, current) => {
     return accumulator + parseFloat(current.amount || 0);
   }, 0);
-  const [subTotal, setSubTotal] = useState(0);
 
-  const [totalAmountIncludeAndExclude, setTotalAmountIncludeAndExclude] =
-    useState(0);
+  // const [SubTotalAfterDiscount, setSubTotalAfterDiscount] = useState(0);
 
   const handleIncludeAndExclude = useCallback(() => {
+    let finalDiscount = 0;
+    let SubTotalAfterDiscount = 0;
     if (settings?.data?.tax_inclusive_pricing === 1) {
-      const totalCostWithTax = totalCost - taxAmount;
-      const finalDiscount =
-        discountAmount === 0 ? taxAmount : taxAmount - discountAmount;
-      setTotalAmountIncludeAndExclude(totalCostWithTax + finalDiscount);
+      // const totalCostWithTax = totalCost - taxAmount;
+      finalDiscount = discountAmount / (1 + mainTax.rate / 100);
+      SubTotalAfterDiscount = subTotal - finalDiscount;
     } else {
-      setTotalAmountIncludeAndExclude(totalCost + (taxAmount - discountAmount));
+      finalDiscount = discountAmount;
+      SubTotalAfterDiscount = subTotal - finalDiscount;
+
     }
-  }, [cardItemValue, discountAmount]);
+    console.log({SubTotalAfterDiscount,finalDiscount})
+    const Drepa = SubTotalAfterDiscount * (mainTax.rate / 100);
+    setTotalAmountIncludeAndExclude(SubTotalAfterDiscount + Drepa);
+  }, [subTotal, cardItemValue, discountAmount, taxAmount, mainTax.rate]);
   useEffect(() => {
-    handleIncludeAndExclude();
     if (settings?.data?.tax_inclusive_pricing === 1) {
-      setSubTotal(totalCost - taxAmount);
+      const holder = totalCost / (1 + mainTax.rate / 100);
+      setSubTotal(holder);
     } else {
       setSubTotal(totalCost);
     }
-  }, [discountAmount, orderSchema]);
-
+    handleIncludeAndExclude();
+  }, [discountAmount, taxAmount, orderSchema, mainTax]);
 
   console.log({ paymentMethod });
 
@@ -168,15 +178,17 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                   <div className="flex flex-col self-stretch my-auto text-sm font-medium text-start text-zinc-500 max-md:mt-10">
                     <div className="flex flex-col items-start pl-8 max-md:pl-5">
                       <div>المجموع الفرعي</div>
-                      <div className="mt-7">تخفيض</div>
+                      <div className="mt-7">خصم</div>
                     </div>
-                    <div className="mt-7">ضريبة القيمة المضافة {'15%'}</div>
+                    <div className="mt-7">
+                      ضريبة القيمة المضافة {mainTax.rate}%
+                    </div>
                   </div>
                 </div>
                 <div className="flex flex-col w-[45%] max-md:ml-0 max-md:w-full">
                   <div className="flex flex-col w-full text-sm font-medium text-right whitespace-nowrap max-md:mt-10">
                     <div className="flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
-                      <div className="text-zinc-800">{subTotal}</div>
+                      <div className="text-zinc-800">{Math.floor(subTotal * 100) / 100}</div>
                       <div className="self-start text-zinc-500">SR</div>
                     </div>
                     <IconInput
@@ -196,7 +208,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                     />
                     {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
-                      <div className="text-zinc-800">{taxAmount}</div>
+                      <div className="text-zinc-800">{Math.floor(taxAmount * 100) / 100}</div>
                       <div className="text-zinc-500">SR</div>
                     </div>
                   </div>
@@ -216,7 +228,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
 
             <div className=" flex gap-5 justify-between self-stretch mt-3 ml-4 w-full text-sm text-right max-w-[458px] text-zinc-800 max-md:mr-2.5 max-md:max-w-full">
               <div className="font-medium">المبلغ الإجمالي</div>
-              <div className="font-bold">SR {totalAmountIncludeAndExclude}</div>
+              <div className="font-bold">SR {Math.floor(totalAmountIncludeAndExclude * 100) / 100}</div>
             </div>
             {(paymentMethod || [])?.map((option1, index1) => (
               <>
@@ -281,8 +293,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                   <IconInput
                     type="number"
                     onChange={(e) => {
-                      if (totalAmountIncludeAndExclude - totalAmount < 0)
-                        return;
                       handleItemChange(index1, 'amount', e.target.value);
                     }}
                     value={Number(paymentMethod[index1].amount)}

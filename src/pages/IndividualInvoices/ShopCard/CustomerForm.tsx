@@ -158,7 +158,7 @@ const CustomerForm = () => {
   }, [orderSchema?.customer_id]);
 
   return (
-    <div className="  grid-cols-1 md:grid-cols-3 gap-0 self-stretch mt-5 flex justify-between">
+    <div className="mt-5 flex justify-between max-lg:flex-col">
       <div className="md:max-h-[45vh] col-span-3 md:col-span-2 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-0">
         <SelectComp
           options={allData?.data?.map((item) => ({

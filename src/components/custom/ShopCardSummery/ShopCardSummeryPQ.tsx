@@ -90,7 +90,7 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                   <div className="flex flex-col self-stretch my-auto text-sm font-medium text-start text-zinc-500 max-md:mt-10">
                     <div className="flex flex-col items-start pl-8 max-md:pl-5">
                       <div>المجموع الفرعي</div>
-                      <div className="mt-7">تخفيض</div>
+                      <div className="mt-7">خصم</div>
                     </div>
                     <div className="mt-7">ضريبة القيمة المضافة {'15%'}</div>
                   </div>

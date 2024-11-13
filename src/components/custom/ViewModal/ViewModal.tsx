@@ -92,7 +92,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           مجموع ضريبة القيمة المضافة %15
                         </div>
                         <div className="mt-4">المبلغ الإجمالي</div>
-                        <div className="mt-4">تخفيض</div>
+                        <div className="mt-4">خصم</div>
                         <div className="mt-4">المبلغ الإجمالي المدفوع</div>
                         <div className="mt-4">نوع الدفع</div>
                         <div className="mt-4">المبلغ المدفوع</div>
