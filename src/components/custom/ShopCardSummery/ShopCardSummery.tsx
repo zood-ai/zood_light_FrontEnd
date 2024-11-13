@@ -29,17 +29,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
       payment_method_id: '',
     },
   ]);
-  const [paymentMethod1, setPaymentMethod1] = useState<any>([
-    {
-      tendered: 180,
-      amount: 0,
-      tips: 0,
-      meta: {
-        external_additional_payment_info: 'some info',
-      },
-      payment_method_id: '',
-    },
-  ]);
   const orderSchema = useSelector((state: any) => state.orderSchema);
   let params = useParams();
   useEffect(() => {
@@ -169,7 +158,19 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     handleIncludeAndExclude();
   }, [discountAmount, taxAmount, orderSchema, mainTax]);
 
-  console.log({ paymentMethod });
+  const [currentPayment, setCurrentPayment] = useState({
+    id: '',
+    name: '',
+    amount: 0,
+    tendered: 180,
+    tips: 0,
+    meta: {
+      external_additional_payment_info: 'some info',
+    },
+    payment_method_id: '',
+  });
+
+  console.log({ paymentMethod, currentPayment });
 
   return (
     <>
@@ -202,7 +203,9 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       // <IconInput
                       placeholder="0.00"
                       onChange={(value) =>
-                        setdiscountAmount(Math.min(value.target.value, totalCost))
+                        setdiscountAmount(
+                          Math.min(value.target.value, totalCost)
+                        )
                       }
                       inputClassName={'w-full max-w-[214px]  '}
                       // label="ضريبة القيمة المضافة"
@@ -240,6 +243,55 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                 SR {Math.floor(totalAmountIncludeAndExclude * 100) / 100}
               </div>
             </div>
+            <div className="mt-6 text-sm font-bold text-right text-black max-md:mr-2.5">
+              طريقة الدفع
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-3 text-sm text-right text-zinc-500 max-md:mr-2.5">
+              {paymentMethods?.data?.map((option, index2) => (
+                <button
+                  key={index2}
+                  onClick={() => {
+                    // handleItemChange(index2, 'payment_method_id', option.id);
+                    setCurrentPayment({
+                      id: option.id,
+                      name: option.name,
+                      amount: option.amount,
+                      tendered: 180,
+                      tips: 0,
+                      meta: {
+                        external_additional_payment_info: 'some info',
+                      },
+                      payment_method_id: option.id,
+                    });
+                    // setPaymentMethod(() => {
+                    //   return paymentMethod.map((item, i) => {
+                    //     if (i === index1) {
+                    //       return {
+                    //         id: option.id,
+                    //         name: option.name,
+                    //         amount: option.amount,
+                    //         tendered: 180,
+                    //         tips: 0,
+                    //         meta: {
+                    //           external_additional_payment_info: 'some info',
+                    //         },
+                    //         payment_method_id: option.id,
+                    //       };
+                    //     }
+                    //     return item;
+                    //   });
+                    // });
+                  }}
+                  className={`h-[40px] w-[93px] whitespace-nowrap min-w-fit  px-md  flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointe flex-grow ${
+                    currentPayment.payment_method_id === option.id
+                      ? 'bg-main text-white font-extrabold'
+                      : 'bg-white'
+                  }`}
+                >
+                  {option.name}
+                </button>
+              ))}
+            </div>
             {(paymentMethod || [])?.map((option1, index1) => (
               <>
                 <div className="mt-6 text-sm font-bold text-right text-black max-md:mr-2.5">
@@ -255,20 +307,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                           'payment_method_id',
                           option.id
                         );
-
-                        // setPaymentMethod([
-                        //   {
-                        //     id: option.id,
-                        //     name: option.name,
-                        //     amount: option.amount,
-                        //     tendered: 180,
-                        //     tips: 0,
-                        //     meta: {
-                        //       external_additional_payment_info: 'some info',
-                        //     },
-                        //     payment_method_id: option.id,
-                        //   },
-                        // ]);
                         setPaymentMethod(() => {
                           return paymentMethod.map((item, i) => {
                             if (i === index1) {
@@ -304,6 +342,10 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                     type="number"
                     onChange={(e) => {
                       handleItemChange(index1, 'amount', e.target.value);
+                      setCurrentPayment({
+                        ...currentPayment,
+                        amount: Number(e.target.value),
+                      });
                     }}
                     value={Number(paymentMethod[index1].amount)}
                     placeholder="0.00"
@@ -372,6 +414,17 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                 <>
                   <Button
                     onClick={() => {
+                      setCurrentPayment({
+                        id: '',
+                        name: '',
+                        amount: 0,
+                        tendered: 180,
+                        tips: 0,
+                        meta: {
+                          external_additional_payment_info: 'some info',
+                        },
+                        payment_method_id: '',
+                      });
                       setPaymentMethod(() => {
                         return [
                           ...paymentMethod,

@@ -28,7 +28,7 @@ interface WelcomeMessageProps {
 
 export const WelcomeMessage: React.FC<WelcomeMessageProps> = ({ name }) => {
   return (
-    <section className="text-base font-thian text-right max-w-[133px] text-neutral-500">
+    <section className="text-base font-thian text-right  text-neutral-500">
       <span>مرحبا بعودتك</span> <span className="font-bold">{name}</span>
     </section>
   );
@@ -119,7 +119,7 @@ const AppShell = () => {
                 </div>
                 {/* <span className="text-[16px] ">{t('WELCOME_BACK')} احمد</span> */}
                 <div className="hidden md:flex">
-                  <WelcomeMessage name="احمد" />
+                  <WelcomeMessage name={`${Cookies.get('name')}`} />
                 </div>
               </h2>
               <div

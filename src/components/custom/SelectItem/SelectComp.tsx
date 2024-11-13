@@ -25,6 +25,7 @@ export const SelectComp: React.FC<SelectCompProps | any> = ({
   className,
   label, // Destructure the label
   item_id,
+  value,
   ...props
 }) => {
   const handleValueChange = (value: string) => {
@@ -52,8 +53,8 @@ export const SelectComp: React.FC<SelectCompProps | any> = ({
       )}
 
       <Select
-      
         {...props}
+        value={value}
         onValueChange={handleValueChange}
         dir={isRtl ? 'rtl' : 'ltr'}
         // style={{ width: '100%' }}

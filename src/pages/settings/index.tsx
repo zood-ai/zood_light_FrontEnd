@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import createCrudService from '@/api/services/crudService';
 import { Button } from '@/components/custom/button';
 import { SelectComp } from '@/components/custom/SelectItem';
 import { Input } from '@/components/ui/input';
 
 export default function Settings() {
+  const [taxesValue, setTaxesValue] = useState(15);
+  const [selectedFileName, setSelectedFileName] = useState('');
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
   const { data: branches } =
@@ -12,7 +15,44 @@ export default function Settings() {
   const settingsData = settings?.data;
   const taxesData = taxes?.data?.[0];
   const branchesData = branches?.data?.[0];
+  const { mutate: updateSettings } =
+    createCrudService<any>('manage/settings').useUpdateNoDialog();
+  const { mutate: updateTax } =
+    createCrudService<any>('manage/taxes').useUpdateNoDialog();
 
+  const [updatedTaxInclusivePricing, setUpdatedTaxInclusivePricing] = useState(
+    settingsData?.tax_inclusive_pricing || false
+  );
+  const changeTaxType = async () => {
+    // if (!settingsData) return;
+
+    // const updatedTaxInclusivePricing = !settingsData.tax_inclusive_pricing;
+
+    await updateSettings({
+      id: '',
+      data: { tax_inclusive_pricing: updatedTaxInclusivePricing },
+    });
+    updateTax({
+      id: taxesData.id,
+      data: {
+        name: `vat ${taxesValue}%`,
+        rate: taxesValue,
+        applies_on_order_types: ['1', '2'],
+        name_localized: `vat ${taxesValue}%`,
+      },
+    });
+  };
+  function updateTexes() {
+    // updateTax({
+    //   id: taxesData.id,
+    //   data: {
+    //     name: `vat ${taxesValue}%`,
+    //     rate: taxesValue,
+    //     applies_on_order_types: ['1', '2'],
+    //     name_localized: `vat ${taxesValue}%`,
+    //   },
+    // });
+  }
   console.log(settingsData, taxesData, branchesData, 'settingsData');
   return (
     <>
@@ -103,7 +143,16 @@ export default function Settings() {
           <div className="mt-2 font-medium text-zinc-500 max-md:mr-2">
             نسبة الضريبة
           </div>
-          <Input value={taxesData?.rate + '% '} className=" " />
+          <div className="relative">
+            <Input
+              defaultValue={taxesData?.rate}
+              onChange={(e) => setTaxesValue(+e.target.value)}
+              className="pr-6"
+            />
+            <span className="absolute right-2 top-1/2 transform -translate-y-1/2">
+              %
+            </span>
+          </div>
 
           <div className="mt-4 font-medium text-zinc-500 max-md:mr-2">
             طريقة حساب الضريبة
@@ -115,7 +164,10 @@ export default function Settings() {
                 name="taxOption"
                 value="inclusive"
                 className=" "
-                defaultChecked={settingsData?.tax_inclusive_pricing}
+                onClick={() => {
+                  setUpdatedTaxInclusivePricing(true);
+                }}
+                defaultChecked={updatedTaxInclusivePricing}
               />
 
               <span className="text-zinc-800">السعر شامل الضريبة</span>
@@ -127,9 +179,10 @@ export default function Settings() {
                 name="taxOption"
                 value="exclusive"
                 className=" "
-                defaultChecked={
-                  settingsData?.tax_inclusive_pricing ? false : true
-                }
+                onClick={() => {
+                  setUpdatedTaxInclusivePricing(false);
+                }}
+                defaultChecked={updatedTaxInclusivePricing ? false : true}
               />
 
               <span className="text-zinc-800">السعر غير شامل الضريبة</span>
@@ -137,7 +190,15 @@ export default function Settings() {
           </div>
 
           <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-indigo-900 rounded min-h-[39px] max-md:px-5">
-            <div className="gap-3 self-stretch">حفظ</div>
+            <button
+              onClick={() => {
+                changeTaxType();
+                updateTexes();
+              }}
+              className="gap-3 self-stretch"
+            >
+              حفظ
+            </button>
           </div>
         </div>
         <div className="flex flex-col items-start self-start mt-4 max-w-full text-sm text-left w-[223px]">
@@ -151,11 +212,12 @@ export default function Settings() {
                 onChange={(e) => {
                   const fileName =
                     e.target.files?.[0]?.name || 'No file chosen';
+                  setSelectedFileName(fileName);
                 }}
               />
             </label>
             <div className="   bg font-medium text-zinc-500" id="file-name">
-              No file chosen
+              {selectedFileName}
             </div>
           </div>
 

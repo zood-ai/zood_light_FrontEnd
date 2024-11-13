@@ -1,10 +1,15 @@
+import { Checkbox } from '@/components/ui/checkbox';
 
-import { Checkbox } from "@/components/ui/checkbox"
-
-export function CheckboxWithText({  label,...props}: any) {
+export function CheckboxWithText({ label, checked, onChange, ...props }: any) {
+  console.log({ props });
   return (
     <div className="items-top flex space-x-2">
-      <Checkbox id="terms1" {...props}  />
+      <Checkbox
+        id="terms1"
+        checked={checked}
+        onCheckedChange={onChange}
+        {...props}
+      />
       <div className="grid gap-1.5 leading-none ">
         <label
           htmlFor="terms1"
@@ -17,5 +22,5 @@ export function CheckboxWithText({  label,...props}: any) {
         </p> */}
       </div>
     </div>
-  )
+  );
 }

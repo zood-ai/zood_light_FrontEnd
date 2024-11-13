@@ -34,7 +34,7 @@ import { CheckboxWithText } from '@/components/custom/CheckboxWithText';
 const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
   type: z.string().nonempty('type is required'),
-  is_active: z.boolean().optional(),
+  is_active: z.union([z.boolean(), z.number()]).optional().default(true),
 });
 
 export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
@@ -46,29 +46,31 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
   const navigate = useNavigate();
   // Fetch services and mutations
   const crudService = createCrudService<any>('manage/payment_methods');
-  const { useGetById, useUpdate, useCreate } = crudService;
+  const { useGetByFillter, useUpdate, useCreate } = crudService;
   const { mutate: createNewUser } = useCreate();
   const { mutate: updateDataUserById } = useUpdate();
-  const { data: getDataById } = useGetById(`${params.objId ?? ''}`);
+  const { data: getDataById } = useGetByFillter(
+    `filter[id]=${params.objId ?? ''}`
+  );
 
   const [loading, setLoading] = useState(false);
 
   // Set default form values based on add/edit mode
   const defaultValues = useMemo(
-    () => (isEditMode ? getDataById?.data : {}),
+    () => (isEditMode ? getDataById?.data[0] : {}),
     [getDataById, isEditMode]
   );
 
   // Initialize form with validation schema and default values
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: { is_active: true, ...defaultValues },
   });
 
   // Reset form when data changes
   useEffect(() => {
     if (isEditMode) {
-      form.reset(getDataById?.data);
+      form.reset(getDataById?.data[0]);
     } else {
       form.reset({});
     }
@@ -77,12 +79,17 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
   // Handle form submission for both add and edit scenarios
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
-
     const onError = () => setLoading(false);
 
     if (isEditMode) {
       await updateDataUserById(
-        { id: params.objId, data: values },
+        {
+          id: params.objId,
+          data: {
+            ...values,
+            is_active: values.is_active ? 1 : 0,
+          },
+        },
         {
           onSuccess: (data) => {
             setLoading(false);
@@ -95,7 +102,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
       await createNewUser(
         {
           ...values,
-          is_active: values.is_active == true ? 1 : 0,
+          is_active: values.is_active ? 1 : 0,
         },
         {
           onSuccess: (data) => {
@@ -150,6 +157,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                       <FormControl>
                         <SelectComp
                           label={t('نوع طريقة الدفع')}
+                          value={field.value}
                           options={paymentmethod}
                           placeholder={t('اختر نوع طريقة الدفع')}
                           onValueChange={field.onChange}
@@ -168,7 +176,8 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                         <CheckboxWithText
                           {...field}
                           label={t('تفعيل')}
-                          onValueChange={field.onChange}
+                          checked={field.value ? true : false}
+                          onChange={(value) => field.onChange(value)}
                         />
                       </FormControl>
                       <FormMessage />
