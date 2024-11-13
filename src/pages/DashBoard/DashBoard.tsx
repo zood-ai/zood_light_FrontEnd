@@ -10,6 +10,7 @@ import { DataTable } from '@/components/custom/DataTableComp/data-table';
 import { RegisterForm } from '@/components/custom/RegisterForm';
 import Loading from '../../components/loader';
 import Cookies from 'js-cookie';
+import axiosInstance from '../../api/interceptors';
 
 export const DashBoard: React.FC<DashBoardProps> = () => {
   const [activeFilter, setActiveFilter] = useState('week');
@@ -19,18 +20,10 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
   useEffect(() => {
     async function getStatics() {
       setLoading(true);
-      const token = Cookies.get('accessToken');
-      const res = await fetch(
-        `http://zood.ai/api/v1/reports/overview/light?groupby=${activeFilter}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Replace YOUR_TOKEN_HERE with the actual token
-            'Content-Type': 'application/json',
-          },
-        }
+      const data = await axiosInstance.get(
+        `reports/overview/light?groupby=${activeFilter}`
       );
-      const data = await res.json();
-      setData(data);
+      setData(data.data);
       setLoading(false);
     }
     getStatics();
