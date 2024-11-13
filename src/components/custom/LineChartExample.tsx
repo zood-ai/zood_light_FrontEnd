@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 
 const LineChartExample = ({ data }) => {
-  const CustomTooltip = ({ payload }) => {
+  const CustomTooltip = ({ payload }: any) => {
     if (payload && payload.length) {
       const value = payload[0].value;
       return (
