@@ -16,19 +16,12 @@ export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
   let params = useParams();
   return (
     <>
+      <div className="flex bg-[#EAEBF5] border border-gray-200 border-solid w-full">
+        <div className="py-3.5 text-center flex-grow">المنتج</div>
+        <div className="py-3.5 text-center flex-grow">الكمية</div>
+        <div className="py-3.5 text-center flex-grow">السعر</div>
+      </div>
       <table className="table-auto text-base font-medium text-right text-black w-full">
-        {/* Header */}
-        <thead className="bg-[#EAEBF5] border border-gray-200 border-solid">
-          <tr className="gap-10">
-            <th className="py-3.5 pr-10">المنتج</th>
-            <th className="py-3.5 ">الكمية</th>
-            <th className="py-3.5 ">السعر</th>
-            <th className="py-3.5  r"></th>
-            <th className="py-3.5  r"></th>
-            <th className="py-3.5  r"></th>
-          </tr>
-        </thead>
-
         {/* Body */}
         <tbody>
           {cardItemValue?.map(
@@ -43,19 +36,21 @@ export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
               index: number
             ) => (
               <tr className="bg-white border border-gray-200 border-solid">
-                <td className="py-7 flex items-center rounded-bl-lg">
+                <td className="py-7 max-md:py-9 flex items-center justify-center rounded-bl-lg">
                   <img
                     loading="lazy"
                     src={item.image ? item?.image : imagePLaceHolder}
-                    className="object-cover max-w-[79px] ms-xl"
+                    className="object-cover max-w-[79px] md:ms-xl ms-4 max-md:hidden"
                   />
                   <span className="ms-3">{item.name}</span>
                 </td>
 
-                <td className="py-7 ">
-                  <Counter item={item} />
+                <td className="py-7">
+                  <div className="flex justify-center">
+                    <Counter item={item} />
+                  </div>
                 </td>
-                <td className="py-7 ">
+                <td className="py-7 text-center">
                   SR {Number(item.price) * Number(item.qty)}
                 </td>
 

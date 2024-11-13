@@ -8,7 +8,11 @@ import { ShopCardSummery } from '@/components/custom/ShopCardSummery';
 import createCrudService from '@/api/services/crudService';
 import axiosInstance from '@/api/interceptors';
 import { useDispatch, useSelector } from 'react-redux';
-import { addProduct, updateField } from '@/store/slices/orderSchema';
+import {
+  addProduct,
+  updateField,
+  updatePayment,
+} from '@/store/slices/orderSchema';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { on } from 'events';
@@ -78,7 +82,7 @@ const CustomerForm = () => {
       });
   };
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
-
+  console.log(1,{ orderSchema });
   const submitOrder = async () => {
     // const products = cardItemValue.map((item: any) => ({
     //   product_id: item.id || '',
@@ -90,7 +94,6 @@ const CustomerForm = () => {
     //   discount_type: 2,
     // }));
     // dispatch(addProduct(products));
-    console.log(orderSchema, 'orderSchema');
 
     try {
       setLoading(true);
@@ -136,7 +139,11 @@ const CustomerForm = () => {
           navigate(`/zood-dashboard/individual-invoices`);
         }
       }
+      // const holder = orderSchema?.payments?.fillter(e => e.payment_method_id);
+
+      // console.log(holder, 'orderSchema');
       if (!params.id) {
+        console.log(orderSchema, 'orderSchema');
         await mutate(orderSchema, {
           onSuccess: (data) => {
             setLoading(false);
@@ -148,8 +155,8 @@ const CustomerForm = () => {
           },
         });
       }
-      // const res = await axiosInstance.post('orders', orderSchema);
-      // console.log(res, 'res');
+      const res = await axiosInstance.post('orders', orderSchema);
+      console.log(res, 'res');
     } catch (error) {
       setLoading(false);
       console.log(error, 'error');
@@ -176,14 +183,14 @@ const CustomerForm = () => {
             }
           }}
           label="اسم العميل"
-          className="col-span-10 md:col-span-4 w-[327px]"
+          className="col-span-10 md:col-span-4 w-[327px] flex-grow"
           value={orderSchema?.customer_id}
           disabled={params.id}
         />
         <IconInput
           disabled
           name="name"
-          className="col-span-10 md:col-span-4 w-[327px]"
+          className="col-span-10 md:col-span-4 w-[327px] flex-grow"
           label="رقم العميل"
           iconSrc={callIcon}
           value={formState.phone}
@@ -192,21 +199,21 @@ const CustomerForm = () => {
         <IconInput
           disabled
           name={formState.name}
-          className="col-span-10 md:col-span-4 w-[327px]"
+          className="col-span-10 md:col-span-4 w-[327px] flex-grow"
           label="اسم الشارع"
           value={formState.address}
           onChange={null}
         />
         <IconInput
           disabled
-          className="col-span-10 md:col-span-4 w-[327px]"
+          className="col-span-10 md:col-span-4 w-[327px] flex-grow"
           label="رقم تسجيل ضريبة القيمة المضافة"
           value={formState.tax_registration_number}
           onChange={null}
         />
         <IconInput
           disabled
-          className="col-span-10 md:col-span-4 w-[327px]"
+          className="col-span-10 md:col-span-4 w-[327px] flex-grow"
           label="معرف اخر"
           value={formState.vat_registration_number}
           onChange={null}

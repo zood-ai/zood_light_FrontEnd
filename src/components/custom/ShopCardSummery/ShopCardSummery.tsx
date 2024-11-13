@@ -8,7 +8,11 @@ import { Button } from '../button';
 import PlusIcon from '@/components/Icons/PlusIcon';
 import { useDispatch, useSelector } from 'react-redux';
 import createCrudService from '@/api/services/crudService';
-import { addPayment, updateField } from '@/store/slices/orderSchema';
+import {
+  addPayment,
+  updateField,
+  updatePayment,
+} from '@/store/slices/orderSchema';
 import { useParams } from 'react-router-dom';
 import { SelectComp } from '../SelectItem';
 import axios from 'axios';
@@ -80,6 +84,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   }, [subTotal, discountAmount]);
 
   useEffect(() => {
+    console.log('here', { paymentMethod });
     dispatch(addPayment(paymentMethod));
     dispatch(
       updateField({
@@ -161,6 +166,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     setTaxAmount(Drepa);
     setTotalAmountIncludeAndExclude(SubTotalAfterDiscount + Drepa);
   }, [subTotal, cardItemValue, discountAmount, mainTax]);
+
   useEffect(() => {
     if (settings?.data?.tax_inclusive_pricing === 1) {
       const holder = totalCost / (1 + mainTax?.rate / 100);
@@ -250,7 +256,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
               }}
             />
 
-            <div className=" flex gap-5 justify-between self-stretch mt-3 px-2 w-full text-sm text-right max-w-[458px] text-zinc-800 max-md:max-w-full">
+            <div className=" flex gap-5 justify-between self-stretch mt-3 px-2 w-full text-sm text-right text-zinc-800 max-md:max-w-full">
               <div className="font-medium">المبلغ الإجمالي</div>
               <div className="font-bold">
                 SR {Math.floor(totalAmountIncludeAndExclude * 100) / 100}
@@ -369,6 +375,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                     'NaN'
                   }
                   placeholder="0.00"
+                  min={0}
                   label="المبلغ"
                   width="150px"
                   disabled={
@@ -450,6 +457,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       !paymentMethod[paymentMethod.length - 1].payment_method_id
                     )
                       return;
+                    if (!paymentMethod[paymentMethod.length - 1].amount) return;
                     setPaymentMethod(() => {
                       const holder = paymentMethod.map((el) => ({
                         ...el,
