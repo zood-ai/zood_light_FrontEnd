@@ -397,7 +397,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
           />
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
             المبلغ المتبقي
-          </div>
+          </div> 
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
             {totalAmountIncludeAndExclude - totalAmount}
           </div>
