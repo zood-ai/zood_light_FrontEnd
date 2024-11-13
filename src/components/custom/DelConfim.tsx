@@ -24,7 +24,7 @@ const DelConfirm = ({
             type="button"
             loading={false}
             disabled={false}
-            className="mt-a h-[39px] w-[118px] mx-md"
+            className="h-[39px] w-[118px]  mx-md"
             onClick={() => {
               delRoute(route);
               openDialog('del');

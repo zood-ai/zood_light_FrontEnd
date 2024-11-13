@@ -1,9 +1,13 @@
 import useDirection from '@/hooks/useDirection';
-import * as React from 'react';
 
-function DashSalesCard() {
+function DashSalesCard({ data }) {
   const isRtl = useDirection();
-
+  console.log(data, 'a');
+  const totalRevent = data?.data?.sum_orders.reduce(
+    (sum, item) => sum + item.value,
+    0
+  );
+  console.log(totalRevent);
   return (
     <>
       <div className={`flex flex-col rounded-none `}>
@@ -26,19 +30,6 @@ function DashSalesCard() {
             <div className="flex shrink-0 bg-indigo-900 h-[98px] rounded-[40px]" />
           </div>
           <div className="flex flex-col relative">
-            <div className="flex gap-2">
-              <div className="grow shrink text-5xl font-bold text-indigo-900 w-[86px]">
-                68%
-              </div>
-              <div
-                className={`grow self-end mt-8 text-base font-medium text-zinc-800 ${
-                  isRtl ? 'text-right' : 'text-left'
-                }`}
-              >
-                نسبة المبيعات
-              </div>
-            </div>
-
             <div
               className={`flex flex-col ${
                 isRtl ? 'pl-1.5 pr-0' : 'pr-1.5 pl-6'
@@ -52,46 +43,34 @@ function DashSalesCard() {
                   isRtl ? 'text-left' : 'text-right'
                 }`}
               >
-                SR 375,392.00
+                SR {totalRevent?.toFixed(2)}
               </div>
             </div>
           </div>
         </div>
+
+        {/* المنتصف */}
+
         <div className="flex flex-col py-7 mt-4 w-full text-base bg-white rounded-lg border border-gray-200 border-solid text-zinc-800">
           <div
             className={`flex flex-col px-3.5 w-full ${
               isRtl ? 'text-right' : 'text-left'
             }`}
           >
-            <>
-              <div className="flex gap-5 justify-between self-center w-full max-w-[295px]">
-                <div className="flex gap-3 font-medium whitespace-nowrap">
-                  <div className="flex shrink-0 my-auto w-2.5 h-2.5 bg-indigo-900 rounded-full" />
-                  <div>اليوم</div>
+            {data?.data?.sum_orders?.map((item) => (
+              <>
+                <div className="flex gap-5 justify-between self-center w-full max-w-[295px]">
+                  <div className="flex gap-3 font-medium whitespace-nowrap">
+                    <div className="flex shrink-0 my-auto w-2.5 h-2.5 bg-indigo-900 rounded-full" />
+                    <div>{item.date}</div>
+                  </div>
+                  <div className="font-semibold">
+                    SR {item.value.toFixed(2)}
+                  </div>
                 </div>
-                <div className="font-semibold">SR 290,385</div>
-              </div>
-              <div className="object-contain mt-5 w-full aspect-[333.33] bg-slate-200 " />
-            </>
-            <>
-              <div className="flex gap-5 justify-between self-center w-full max-w-[295px]">
-                <div className="flex gap-3 font-medium whitespace-nowrap">
-                  <div className="flex shrink-0 my-auto w-2.5 h-2.5 bg-indigo-900 rounded-full" />
-                  <div>اليوم</div>
-                </div>
-                <div className="font-semibold">SR 290,385</div>
-              </div>
-              <div className="object-contain mt-5 w-full aspect-[333.33] bg-slate-200 " />
-            </>
-            <>
-              <div className="flex gap-5 justify-between self-center w-full max-w-[295px]">
-                <div className="flex gap-3 font-medium whitespace-nowrap">
-                  <div className="flex shrink-0 my-auto w-2.5 h-2.5 bg-indigo-900 rounded-full" />
-                  <div>اليوم</div>
-                </div>
-                <div className="font-semibold">SR 290,385</div>
-              </div>
-            </>
+                <div className="object-contain mt-5 w-full aspect-[333.33] bg-slate-200 " />
+              </>
+            ))}
           </div>
         </div>
       </div>

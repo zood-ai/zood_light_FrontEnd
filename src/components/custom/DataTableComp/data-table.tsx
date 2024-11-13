@@ -95,7 +95,7 @@ export function DataTable<TData, TValue>({
   console.log('Screen Height:', window.innerHeight);
   let navigate = useNavigate();
   const pagePath = window.location.pathname; // Get the current path
-  const title = titleMapping[pagePath];
+  const title = titleMapping(pagePath);
   return (
     <>
       {!loading ? (

@@ -99,6 +99,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log({ items });
     try {
       if (isEditMode) {
         // const { data } = await axiosInstance.put(
@@ -163,6 +164,17 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const handleBkAction = () => {
     setIsOpen(true);
   };
+  const handleConfirmation = async () => {
+    try {
+      await axiosInstance.get(
+        `inventory/purchasing/receiver_items/${params.objId}`
+      );
+    } catch (e) {
+      console.log(e);
+    } finally {
+      navigate('/zood-dashboard/purchase-invoices');
+    }
+  };
 
   const [fastActionBtn, setFastActionBtn] = useState(false);
   const setSuppId = (value: string) => {
@@ -215,7 +227,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             <div className="flex justify-start items-center">
               <IconInput
                 name="invoice_number"
-                value={invoice.invoice_number}
+                defaultValue={Number(invoice.invoice_number)}
                 onChange={handleInputChange}
                 label="ادخل الرقم المرجعي للفاتورة أو رقم الفاتورة"
                 inputClassName="w-[274px]"
@@ -350,13 +362,22 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 </a>
               </div>
             )}
-            <div className="flex">
+            <div className="flex flex-wrap gap-y-5">
               <Button
                 type="submit"
                 className="px-6 py-1.5 mta-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
               >
                 {isEditMode ? 'تحديث الفاتورة' : 'اضافة الفاتورة'}
               </Button>
+              {isEditMode && (
+                <Button
+                  type="button"
+                  onClick={handleConfirmation}
+                  className="px-6 py-1.5 mta-8 mr-4 text-sm font-semibold rounded min-h-[39px] w-[144px]"
+                >
+                  تأكيد فاتورة الشراء
+                </Button>
+              )}
               <DelConfirm route={'inventory/purchasing'} />
             </div>
           </div>

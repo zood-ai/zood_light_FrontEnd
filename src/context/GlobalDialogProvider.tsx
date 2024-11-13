@@ -89,7 +89,7 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
 
   console.log(pagePath, 'pagePath');
 
-  const title = titleMapping[pagePath]; // Get the title object based on the path
+  const title = titleMapping(pagePath); // Get the title object based on the path
   const isArabic = true;
   useEffect(() => {
     setLoading(false);

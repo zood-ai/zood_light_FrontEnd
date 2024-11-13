@@ -12,15 +12,15 @@ export default titleMapping;
 export const DetailsHeadWithOutFilter: React.FC<any> = ({
   bkAction,
   mainTittle = 'Title Not Found',
-  subTitle = 'Sub Title Not Found',
+  subTitle = '',
 }) => {
   const pagePath = window.location.pathname; // Get the current path
-  const title = titleMapping[pagePath]; // Get the title object based on the path
+  const title = titleMapping(pagePath); // Get the title object based on the path
   const isArabic = true; // Set this based on your app's localization logic
   return (
     <>
       <div className="grid grid-cols-1">
-        <div  >
+        <div>
           <BackBtn bkAction={bkAction} />
         </div>
         <div className=" max-w-[580px] my-4">
