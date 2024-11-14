@@ -145,6 +145,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                               80mm
                             </button>
                             <div
+                              onClick={() => handleSizeChange('80mm')}
                               className={`flex shrink-0 self-stretch my-auto w-3 h-3 ${
                                 size == '80mm' ? 'bg-indigo-900' : 'bg-white'
                               } rounded-full border-4 border-gray-200 border-solid`}
@@ -158,6 +159,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                               A4
                             </button>
                             <div
+                              onClick={() => handleSizeChange('A4')}
                               className={`flex shrink-0 self-stretch my-auto w-3 h-3 ${
                                 size == 'A4' && 'bg-indigo-900'
                               } rounded-full border-4 border-gray-200 border-solid`}
@@ -173,9 +175,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       </div>
                     </div>
                     <div className="flex flex-col self-end mt-28 max-w-full text-sm text-red-500 whitespace-nowrap rounded-lg w-[100px] max-md:mt-10">
-                      <div className="px-2.5 py-1 bg-white rounded-lg border border-red-500 border-solid max-md:px-5">
+                      <button className="px-2.5 py-1 bg-white rounded-lg border border-red-500 border-solid max-md:px-5">
                         استرجاع
-                      </div>
+                      </button>
                     </div>
                   </div>
                   <div className="flex flex-col self-end mt-24 max-w-full rounded-none w-[154px] max-md:mt-10">
