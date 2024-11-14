@@ -14,10 +14,10 @@ function Loader() {
 
 function DashSalesCard({ data }) {
   const isRtl = useDirection();
-  const [day, setDay] = useState([]);
-  const [month, setMonth] = useState([]);
-  const [week, setWeek] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [day, setDay] = useState<any>([]);
+  const [month, setMonth] = useState<any>([]);
+  const [week, setWeek] = useState<any>([]);
+  const [loading, setLoading] = useState<any>(false);
   useEffect(function () {
     async function getStatistic() {
       setLoading(true);

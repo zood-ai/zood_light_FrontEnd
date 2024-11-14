@@ -9,7 +9,7 @@ export default function Settings() {
   const [selectedFileName, setSelectedFileName] = useState('');
   const [loadingSettings, setLoadingSettings] = useState(false);
   const [phone, setPhone] = useState('');
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any>({});
   useEffect(function () {
     async function getSettingsData() {
       setLoadingSettings(true);
