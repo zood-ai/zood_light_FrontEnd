@@ -12,7 +12,10 @@ import createCrudService from '@/api/services/crudService';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { toggleActionView } from '@/store/slices/toggleAction';
+import {
+  toggleActionView,
+  toggleActionViewData,
+} from '@/store/slices/toggleAction';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
@@ -110,6 +113,7 @@ export const useDataTableColumns = () => {
     //             onClick={(e) => {
     //               e.stopPropagation();
     //               dispatch(toggleActionView(true));
+                  // dispatch(toggleActionViewData(row.original));
     //             }}
     //             className="ps-0"
     //             variant={'linkHover'}

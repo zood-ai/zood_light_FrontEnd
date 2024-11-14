@@ -82,7 +82,6 @@ const CustomerForm = () => {
       });
   };
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
-  console.log(1,{ orderSchema });
   const submitOrder = async () => {
     // const products = cardItemValue.map((item: any) => ({
     //   product_id: item.id || '',
@@ -94,6 +93,7 @@ const CustomerForm = () => {
     //   discount_type: 2,
     // }));
     // dispatch(addProduct(products));
+    console.log(1, { orderSchema });
 
     try {
       setLoading(true);
@@ -138,11 +138,7 @@ const CustomerForm = () => {
         } finally {
           navigate(`/zood-dashboard/individual-invoices`);
         }
-      }
-      // const holder = orderSchema?.payments?.fillter(e => e.payment_method_id);
-
-      // console.log(holder, 'orderSchema');
-      if (!params.id) {
+      } else {
         console.log(orderSchema, 'orderSchema');
         await mutate(orderSchema, {
           onSuccess: (data) => {
@@ -155,8 +151,8 @@ const CustomerForm = () => {
           },
         });
       }
-      const res = await axiosInstance.post('orders', orderSchema);
-      console.log(res, 'res');
+      // const res = await axiosInstance.post('orders', orderSchema);
+      // console.log(res, 'res');
     } catch (error) {
       setLoading(false);
       console.log(error, 'error');

@@ -2,10 +2,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface toggleActionState {
   value: boolean;
+  data: any;
 }
 
 const initialState: toggleActionState = {
   value: false,
+  data: null,
 };
 
 export const toggleActionSlice = createSlice({
@@ -15,9 +17,13 @@ export const toggleActionSlice = createSlice({
     toggleActionView: (state, action: PayloadAction<boolean>) => {
       state.value = action.payload;
     },
+    toggleActionViewData: (state, action: PayloadAction<any>) => {
+      state.data = action.payload;
+    },
   },
 });
 
-export const { toggleActionView } = toggleActionSlice.actions;
+export const { toggleActionView, toggleActionViewData } =
+  toggleActionSlice.actions;
 
 export default toggleActionSlice.reducer;

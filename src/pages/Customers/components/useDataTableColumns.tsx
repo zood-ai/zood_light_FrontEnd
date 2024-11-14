@@ -11,7 +11,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
 import { formatDate } from '@/utils/formatDateTime';
-import { toggleActionView } from '@/store/slices/toggleAction';
+import {
+  toggleActionView,
+  toggleActionViewData,
+} from '@/store/slices/toggleAction';
 import { useDispatch } from 'react-redux';
 
 export const useDataTableColumns = () => {
@@ -119,6 +122,7 @@ export const useDataTableColumns = () => {
     //             onClick={(e) => {
     //               e.stopPropagation();
     //               dispatch(toggleActionView(true));
+                  // dispatch(toggleActionViewData(row.original));
     //             }}
     //             className="ps-0"
     //             variant={'linkHover'}

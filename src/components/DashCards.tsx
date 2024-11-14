@@ -32,7 +32,7 @@ function DashCards({ data, activeFilter, setActiveFilter, loading }) {
   const buttonStyles = (filter) => ({
     padding: '10px 20px',
     borderRadius: '8px',
-    backgroundColor: activeFilter === filter ? '#7D3C98' : '#F5F5F5', // بنفسجي عند التفعيل، وأبيض غامق عند عدم التفعيل
+    backgroundColor: activeFilter === filter ? '#312E81' : '#F5F5F5', // بنفسجي عند التفعيل، وأبيض غامق عند عدم التفعيل
     color: activeFilter === filter ? '#FFF' : '#888', // لون الكلام جراي عند عدم التفعيل
     cursor: 'pointer',
     border: 'none',

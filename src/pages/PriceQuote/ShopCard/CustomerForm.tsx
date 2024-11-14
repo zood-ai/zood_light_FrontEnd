@@ -101,14 +101,11 @@ const CustomerForm = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-0 mt-5 md:flex justify-between">
       <div className="col-span-3 md:col-span-1 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-md">
- 
- 
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
           {orderSchema.products.map((item, index) => (
             <div key={index} className="grid grid-cols-1   gap-md">
               <SelectCompInput
-              
                 className="md:w-[327px]  "
                 placeholder="اسم المنتج"
                 options={getAllPro?.data?.map((product) => ({
@@ -121,47 +118,46 @@ const CustomerForm = () => {
                 }
                 value={item.product_id}
               />
-              <div className='flex gap-x-md '>
-
-              <IconInput
-                value={item.quantity}
-                onChange={(e) =>
-                  handleItemChange(index, 'quantity', e.target.value)
-                }
-                label="الكمية"
-                inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
-              />
-              <IconInput
-                onChange={(e) =>
-                  handleItemChange(index, 'total', e.target.value)
-                }
-                label="السعر"
-                inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
-                iconSrcLeft="SR"
-                value={item.unit_price}
-                disabled
-              />
-              <IconInput
-                onChange={(e) =>
-                  handleItemChange(index, 'total', e.target.value)
-                }
-                label="المجموع"
-                inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
-                iconSrcLeft="SR"
-                value={item.unit_price}
-                disabled
-              />
-              {orderSchema.products.length > 1 && (
-                <TrashIcon
-                  onClick={() => {
-                    const updatedItems = orderSchema.products.filter(
-                      (_, i) => i !== index
-                    );
-                    dispatch(addProduct(updatedItems));
-                  }}
-                  className="translate-y-[34px] cursor-pointer hover:scale-105"
+              <div className="flex gap-x-md ">
+                <IconInput
+                  value={item.quantity}
+                  onChange={(e) =>
+                    handleItemChange(index, 'quantity', e.target.value)
+                  }
+                  label="الكمية"
+                  inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                 />
-              )}
+                <IconInput
+                  onChange={(e) =>
+                    handleItemChange(index, 'total', e.target.value)
+                  }
+                  label="السعر"
+                  inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
+                  iconSrcLeft="SR"
+                  value={item.unit_price}
+                  disabled
+                />
+                <IconInput
+                  onChange={(e) =>
+                    handleItemChange(index, 'total', e.target.value)
+                  }
+                  label="المجموع"
+                  inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
+                  iconSrcLeft="SR"
+                  value={item.unit_price}
+                  disabled
+                />
+                {orderSchema.products.length > 1 && (
+                  <TrashIcon
+                    onClick={() => {
+                      const updatedItems = orderSchema.products.filter(
+                        (_, i) => i !== index
+                      );
+                      dispatch(addProduct(updatedItems));
+                    }}
+                    className="translate-y-[34px] cursor-pointer hover:scale-105"
+                  />
+                )}
               </div>
             </div>
           ))}
@@ -236,7 +232,7 @@ const CustomerForm = () => {
         </div>
       </div>
 
-      <ShopCardSummeryPQ />
+      {/* <ShopCardSummeryPQ /> */}
     </div>
   );
 };

@@ -8,12 +8,14 @@ export default function Settings() {
   const [taxesValue, setTaxesValue] = useState(15);
   const [selectedFileName, setSelectedFileName] = useState('');
   const [loadingSettings, setLoadingSettings] = useState(false);
+  const [phone, setPhone] = useState('');
   const [data, setData] = useState([]);
   useEffect(function () {
     async function getSettingsData() {
       setLoadingSettings(true);
       const data = await axiosInstance.get(`auth/whoami`);
-      setData(data?.data?.registered_address); 
+      setPhone(data?.data?.user?.branches[0]?.phone);
+      setData(JSON.parse(data?.data?.user?.branches[0]?.registered_address));
       console.log('FETCH');
       setLoadingSettings(false);
     }
@@ -28,30 +30,24 @@ export default function Settings() {
   const settingsData = settings?.data;
   const taxesData = taxes?.data?.[0];
   const branchesData = branches?.data?.[0];
+  const [updatedTaxInclusivePricing, setUpdatedTaxInclusivePricing] = useState(
+    settingsData?.tax_inclusive_pricing
+  );
+  const { mutate: updateBranch } =
+    createCrudService<any>('manage/branches').useUpdate();
   const { mutate: updateSettings } =
-    createCrudService<any>('manage/settings').useUpdateNoDialog();
+    createCrudService<any>('manage/settings').useUpdate();
   const { mutate: updateTax } =
     createCrudService<any>('manage/taxes').useUpdateNoDialog();
   const changeTaxType = () => {
     if (!settingsData) return;
 
-    const updatedTaxInclusivePricing = !settingsData.tax_inclusive_pricing;
-
     updateSettings({
       id: '',
       data: { tax_inclusive_pricing: updatedTaxInclusivePricing },
     });
-    // updateTax({
-    //   id: taxesData.id,
-    //   data: {
-    //     name: `vat ${input}%`,
-    //     rate: input,
-    //     applies_on_order_types: ['1', '2'],
-    //     name_localized: `vat ${input}%`,
-    //   },
-    // });
   };
-  function updateTexes() {
+  const updateTexes = () => {
     updateTax({
       id: taxesData.id,
       data: {
@@ -62,7 +58,10 @@ export default function Settings() {
       },
     });
     console.log(taxesValue);
-  }
+  };
+  const handleUpdateBranch = () => {
+    console.log({data});
+  };
   console.log(taxesData?.rate);
   console.log(settingsData, taxesData, branchesData, 'settingsData');
   return (
@@ -84,7 +83,7 @@ export default function Settings() {
                     اسم المتجر
                   </div>
                   <Input
-                    value={settingsData?.business_name}
+                    defaultValue={settingsData?.business_name}
                     className="w-[327px]"
                   />
                 </div>
@@ -94,7 +93,10 @@ export default function Settings() {
                   <div className="self-start font-medium text-zinc-500">
                     عنوان المتجر
                   </div>
-                  <Input value={branchesData?.name} className="w-[327px]" />
+                  <Input
+                    defaultValue={data?.streetName}
+                    className="w-[327px]"
+                  />
                 </div>
               </div>
             </div>
@@ -104,49 +106,91 @@ export default function Settings() {
               <div className="self-start font-medium text-zinc-500">
                 الرقم الاضافي
               </div>
-              <Input className="w-[117px] " />
+              <Input
+                defaultValue={data?.additionalNumber}
+                className="w-[117px] "
+              />
             </div>
             <div className="flex flex-col flex-1">
               <div className="self-start font-medium text-zinc-500">
                 الرمز البريدي
               </div>
-              <Input value={branchesData?.postal_code} className="w-[117px] " />
+              <Input defaultValue={data?.postalCode} className="w-[117px] " />
             </div>
             <div className="flex flex-col flex-1">
               <div className="self-start font-medium text-zinc-500">
                 رقم المبني
               </div>
-              <Input className="w-[117px] " />
+              <Input
+                defaultValue={data?.buildingNumber}
+                className="w-[117px] "
+              />
             </div>
           </div>
-          <Button className="flex flex-col justify-center items-center px-6 py-1.5 mt-6 text-sm font-semibold text-left text-white whitespace-nowrap bg-indigo-900 rounded border border-indigo-900 border-solid min-h-[39px] max-md:px-5">
+          <Button
+            onClick={handleUpdateBranch}
+            className="flex flex-col justify-center items-center px-6 py-1.5 mt-6 text-sm font-semibold text-left text-white whitespace-nowrap bg-indigo-900 rounded border border-indigo-900 border-solid min-h-[39px] max-md:px-5"
+          >
             <div className="gap-3 self-stretch">حفظ</div>
           </Button>
         </div>
-        <div className="flex flex-col py-4 mt-6 w-full text-left bg-white rounded border border-gray-200 border-solid max-md:max-w-full">
-          <div className="flex flex-col self-start max-md:mr-2.5">
-            <div className="text-base font-semibold text-zinc-800">
+
+        {/* one */}
+        {/* two */}
+        {/* three */}
+        {/* four */}
+        <div className="flex flex-col py-4 mt-6  text-left bg-white rounded border border-gray-200 border-solid max-md:max-w-full">
+          <div
+            style={{ textAlign: 'right' }}
+            className="align-justify mr-[10px] align-right"
+          >
+            <div className="text-base align-rigth font-semibold text-zinc-800">
               العنوان والهاتف
             </div>
-            <div className="self-start mt-2 text-sm font-medium text-zinc-500 max-md:mr-2">
-              الدولة
+          </div>
+          <div className="flex flex-col items-start pr-4 pl-5 w-full text-sm max-md:pl-5 max-md:max-w-full">
+            <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full">
+              <div className="w-full flex gap-4">
+                <div className="flex flex-col grow mt-10 text-sm text-left max-md:mt-10 w-[40%]">
+                  <div className="self-start font-medium text-zinc-500">
+                    المدينه
+                  </div>
+                  <Input defaultValue={data?.city} className="w-full" />
+                </div>
+
+                <div className="flex flex-col grow mt-10 text-sm text-left max-md:mt-10 w-[40%]">
+                  <div className="self-start font-medium text-zinc-500">
+                    citySubdivisionName
+                  </div>
+                  <Input
+                    defaultValue={data?.citySubdivisionName}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col grow mt-4 text-sm text-left max-md:mt-4 w-6/12">
+              <div className="self-start font-medium text-zinc-500">الحي</div>
+              <Input defaultValue={data?.district} className="w-[96%]" />
+            </div>
+            <div className="flex flex-col grow mt-4 text-sm text-left max-md:mt-4 w-6/12">
+              <div className="self-start font-medium text-zinc-500">
+                رقم الهاتف
+              </div>
+              <Input defaultValue={phone || ''} className="w-[96%]" />
             </div>
           </div>
-          <div className="flex flex-col items-start pr-4 pl-20 w-full text-sm max-md:pl-5 max-md:max-w-full">
-            <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full">
-              <Input className=" " />
-
-              <Input className=" " />
-            </div>
-            <div className="mt-4 font-medium text-zinc-500">الحي</div>
-            <Input className=" " />
-
-            <div className="mt-4 font-medium text-zinc-500">رقم الهاتف</div>
-            <Input className=" " />
-
-            <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 font-semibold text-white whitespace-nowrap bg-indigo-900 rounded min-h-[39px] max-md:px-5">
-              <div className="gap-3 self-stretch">حفظ</div>
-            </div>
+          <div
+            style={{ textAlign: '-webkit-auto' }}
+            className=" direction-reverse"
+          >
+            <button
+              onClick={handleUpdateBranch}
+              type="button"
+              className="px-6  text-sm py-1.5 mt-8 font-semibold  mr-[12px]  text-white whitespace-nowrap bg-indigo-900 rounded min-h-[39px] max-md:px-5"
+            >
+              حفظ
+            </button>
           </div>
         </div>
         <div className="flex flex-col items-start py-4 pr-2.5 pl-20 mt-7 w-full text-sm font-semibold text-left bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
@@ -175,7 +219,10 @@ export default function Settings() {
                 name="taxOption"
                 value="inclusive"
                 className=" "
-                defaultChecked={settingsData?.tax_inclusive_pricing}
+                onClick={() => {
+                  setUpdatedTaxInclusivePricing(true);
+                }}
+                defaultChecked={updatedTaxInclusivePricing}
               />
 
               <span className="text-zinc-800">السعر شامل الضريبة</span>
@@ -187,9 +234,10 @@ export default function Settings() {
                 name="taxOption"
                 value="exclusive"
                 className=" "
-                defaultChecked={
-                  settingsData?.tax_inclusive_pricing ? false : true
-                }
+                onClick={() => {
+                  setUpdatedTaxInclusivePricing(false);
+                }}
+                defaultChecked={updatedTaxInclusivePricing ? false : true}
               />
 
               <span className="text-zinc-800">السعر غير شامل الضريبة</span>
@@ -231,6 +279,7 @@ export default function Settings() {
           <Button
             variant={'outlineDel'}
             className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 font-semibold text-red-500 bg-white rounded border border-red-500 border-solid min-h-[39px] max-md:px-5"
+            onClick={() => console.log('DELETE')}
           >
             <div className="gap-3 self-stretch">حذف الحساب</div>
           </Button>

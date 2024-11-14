@@ -22,7 +22,6 @@ const LineChartExample = ({ data }) => {
     }
     return null;
   };
-  console.log({ data });
   return (
     <div className="col-span-1 md:col-span-2 w-[120%] md:w-[100%] h-[400px]">
       <ResponsiveContainer width={'100%'} height={'100%'}>
@@ -49,7 +48,7 @@ const LineChartExample = ({ data }) => {
           <Legend />
 
           {/* Set Bar to use 'value' as dataKey for Y-axis values */}
-          <Bar dataKey="value" fill="#8884d8" />
+          <Bar dataKey="value" fill="#312E81" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -57,4 +56,3 @@ const LineChartExample = ({ data }) => {
 };
 
 export default LineChartExample;
-//#8884d8

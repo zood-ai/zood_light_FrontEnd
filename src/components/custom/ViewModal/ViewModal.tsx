@@ -1,10 +1,18 @@
-import React from 'react';
+import { useSelector } from 'react-redux';
+
+import { useState } from 'react';
 
 import { ViewModalProps } from './ViewModal.types';
 
 import './ViewModal.css';
 
 export const ViewModal: React.FC<ViewModalProps> = () => {
+  const data = useSelector((state: any) => state.toggleAction.data);
+  console.log({ data });
+  const [size, setSize] = useState('A4');
+  const handleSizeChange = (newSize: string) => {
+    setSize(newSize);
+  };
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-none h-[90vh] overflow-y-scroll relative ">
@@ -92,7 +100,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           مجموع ضريبة القيمة المضافة %15
                         </div>
                         <div className="mt-4">المبلغ الإجمالي</div>
-                        <div className="mt-4">خصم</div>
+                        <div className="mt-4">تخفيض</div>
                         <div className="mt-4">المبلغ الإجمالي المدفوع</div>
                         <div className="mt-4">نوع الدفع</div>
                         <div className="mt-4">المبلغ المدفوع</div>
@@ -130,17 +138,38 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       <div className="flex flex-col justify-center self-end mt-3 max-w-full text-sm whitespace-nowrap w-[148px]">
                         <div className="flex gap-4 items-center w-full text-zinc-800">
                           <div className="flex gap-2 items-center self-stretch my-auto">
-                            <div className="self-stretch my-auto">88mm</div>
-                            <div className="flex shrink-0 self-stretch my-auto w-3 h-3 bg-white rounded-full border-4 border-gray-200 border-solid" />
+                            <button
+                              onClick={() => handleSizeChange('80mm')}
+                              className={`self-stretch my-auto`}
+                            >
+                              80mm
+                            </button>
+                            <div
+                              className={`flex shrink-0 self-stretch my-auto w-3 h-3 ${
+                                size == '80mm' ? 'bg-indigo-900' : 'bg-white'
+                              } rounded-full border-4 border-gray-200 border-solid`}
+                            />
                           </div>
                           <div className="flex gap-2 items-center self-stretch my-auto">
-                            <div className="self-stretch my-auto">A4</div>
-                            <div className="flex shrink-0 self-stretch my-auto w-3 h-3 bg-indigo-900 rounded-full border-4 border-gray-200 border-solid" />
+                            <button
+                              onClick={() => handleSizeChange('A4')}
+                              className={`self-stretch my-auto `}
+                            >
+                              A4
+                            </button>
+                            <div
+                              className={`flex shrink-0 self-stretch my-auto w-3 h-3 ${
+                                size == 'A4' && 'bg-indigo-900'
+                              } rounded-full border-4 border-gray-200 border-solid`}
+                            />
                           </div>
                         </div>
-                        <div className="gap-2.5 self-end px-8 py-1 mt-4 max-w-full text-white bg-indigo-900 rounded-lg min-h-[32px] w-[100px] max-md:px-5">
+                        <button
+                          onClick={() => console.log('PRINT')}
+                          className="gap-2.5 self-end px-8 py-1 mt-4 max-w-full text-white bg-indigo-900 rounded-lg min-h-[32px] w-[100px] max-md:px-5"
+                        >
                           طباعة
-                        </div>
+                        </button>
                       </div>
                     </div>
                     <div className="flex flex-col self-end mt-28 max-w-full text-sm text-red-500 whitespace-nowrap rounded-lg w-[100px] max-md:mt-10">

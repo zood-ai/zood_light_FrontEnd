@@ -17,6 +17,7 @@ import { useParams } from 'react-router-dom';
 import { SelectComp } from '../SelectItem';
 import axios from 'axios';
 import axiosInstance from '@/api/interceptors';
+import { paymentmethod } from '@/constant/constant';
 
 export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   const [totalShopCardCount, setTotalShopCardCount] = useState(0);
@@ -84,40 +85,42 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   }, [subTotal, discountAmount]);
 
   useEffect(() => {
-    console.log('here', { paymentMethod });
-    dispatch(addPayment(paymentMethod));
-    dispatch(
-      updateField({
-        field: 'subtotal_price',
-        value: totalCost,
-      })
-    );
-    dispatch(
-      updateField({
-        field: 'total_price',
-        value: totalCost + taxAmount,
-      })
-    );
+    // if(!paymentMethod)return;
+    const holder = [...paymentMethod];
+    holder.pop();
+    // dispatch(addPayment(holder));
+    // dispatch(
+    //   updateField({
+    //     field: 'subtotal_price',
+    //     value: subTotal,
+    //   })
+    // );
+    // dispatch(
+    //   updateField({
+    //     field: 'total_price',
+    //     value: totalAmountIncludeAndExclude,
+    //   })
+    // );
 
-    dispatch(
-      updateField({
-        field: 'branch_id',
-        value: branchData?.data?.[0]?.id,
-      })
-    );
-    dispatch(
-      updateField({
-        field: 'discount_amount',
-        value: taxAmount,
-      })
-    );
-    dispatch(
-      updateField({
-        field: 'customer_notes',
-        value: discountAmount,
-      })
-    );
-  }, [paymentMethod, taxAmount, discountAmount]);
+    // dispatch(
+    //   updateField({
+    //     field: 'branch_id',
+    //     value: branchData?.data?.[0]?.id,
+    //   })
+    // );
+    // dispatch(
+    //   updateField({
+    //     field: 'discount_amount',
+    //     value: discountAmount,
+    //   })
+    // );
+    // dispatch(
+    //   updateField({
+    //     field: 'customer_notes',
+    //     value: discountAmount,
+    //   })
+    // );
+  }, [paymentMethod, taxAmount, discountAmount, totalAmountIncludeAndExclude]);
   const [paymentMethodinit, setPaymentMethodinit] = useState([]);
 
   useEffect(() => {
@@ -176,21 +179,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     }
     handleIncludeAndExclude();
   }, [discountAmount, taxAmount, orderSchema, mainTax]);
-
-  const [currentPayment, setCurrentPayment] = useState({
-    id: '',
-    name: '',
-    amount: 0,
-    tendered: 180,
-    tips: 0,
-    meta: {
-      external_additional_payment_info: 'some info',
-    },
-    payment_method_id: '',
-  });
-
-  console.log({ paymentMethod, currentPayment });
-
   return (
     <>
       <div className="flex mt-5 flex-col   rounded-none min-w-[302px]  ">
@@ -346,7 +334,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                     }}
                     className={`h-[40px] w-[93px] whitespace-nowrap min-w-fit  px-md  flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointe flex-grow ${
                       paymentMethod[paymentMethod.length - 1]
-                        .payment_method_id === option.id
+                        ?.payment_method_id === option.id
                         ? 'bg-main text-white font-extrabold'
                         : 'bg-white'
                     }`}
@@ -365,13 +353,9 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       'amount',
                       e.target.value
                     );
-                    setCurrentPayment({
-                      ...currentPayment,
-                      amount: Number(e.target.value),
-                    });
                   }}
                   value={
-                    Number(paymentMethod[paymentMethod.length - 1].amount) ||
+                    Number(paymentMethod[paymentMethod.length - 1]?.amount) ||
                     'NaN'
                   }
                   placeholder="0.00"
