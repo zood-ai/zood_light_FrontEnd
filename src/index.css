@@ -2,21 +2,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Default Page Size: A4 */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  /* If 80mm size is selected */
+  .size-80mm @page {
+    size: 80mm portrait;
+    margin: 10mm;
+  }
+
+  /* Hide elements that should not appear in the printout */
+  .no-print {
+    display: none;
+  }
+}
 
 @layer base {
   :root {
     /* Custom CSS Variables */
     --header-height: 4rem;
     --main: #363088;
-    --mainText : #26262F;
-    --secText : #868686;
-    --mainHover: #5951C8;
+    --mainText: #26262f;
+    --secText: #868686;
+    --mainHover: #5951c8;
     --mainBg: #fcfcfc;
-    --mainBorder: #ECECEC;
-    --mainSuccess: #2DAA48;
-    --mainSuccessHover: #3ED15E;
-    --mainAlert: #FC3030;
-    --mainAlertHover: #FF5659;
+    --mainBorder: #ececec;
+    --mainSuccess: #2daa48;
+    --mainSuccessHover: #3ed15e;
+    --mainAlert: #fc3030;
+    --mainAlertHover: #ff5659;
     /* CSS Variables for light theme */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -212,13 +230,10 @@ body {
   border-width: 1px 0px 0px 0px;
   border-style: solid;
 }
-[data-collapsed="true"] {
-
-  transition:all 0.5s ease;
+[data-collapsed='true'] {
+  transition: all 0.5s ease;
 }
 
-[data-collapsed="false"] {
-
-  transition:all 0.5s ease;
+[data-collapsed='false'] {
+  transition: all 0.5s ease;
 }
- 

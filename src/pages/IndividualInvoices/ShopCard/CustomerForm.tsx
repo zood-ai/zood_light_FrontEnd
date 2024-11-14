@@ -16,6 +16,10 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { on } from 'events';
+import {
+  toggleActionView,
+  toggleActionViewData,
+} from '@/store/slices/toggleAction';
 
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
@@ -132,6 +136,9 @@ const CustomerForm = () => {
               },
             });
           }
+          // console.log(orderData, 'data after create');
+          dispatch(toggleActionView(true));
+          dispatch(toggleActionViewData(orderData));
         } catch (error) {
           console.error('Error fetching or processing order:', error);
           setLoading(false);
@@ -141,10 +148,17 @@ const CustomerForm = () => {
       } else {
         console.log(orderSchema, 'orderSchema');
         await mutate(orderSchema, {
-          onSuccess: (data) => {
+          onSuccess: async (data) => {
+            const res = await axiosInstance.get(
+              `/orders?filter[id]=${data.data.id}`
+            );
+            const orderData = res?.data?.data;
             setLoading(false);
             navigate(`/zood-dashboard/individual-invoices`);
-            console.log(data, 'data');
+            dispatch(toggleActionView(true));
+            // console.log(data.data, 'data after create1');
+            // console.log(orderData, 'data after create2');
+            dispatch(toggleActionViewData(orderData[0]));
           },
           onError: (error) => {
             setLoading(false);
@@ -161,7 +175,6 @@ const CustomerForm = () => {
   useEffect(() => {
     handleInputChangex('customer_id', orderSchema?.customer_id);
   }, [orderSchema?.customer_id]);
-
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4">
       <div className="col-span-3 md:col-span-2 flex flex-wrap gap-x-5 gap-y-5 h-fit">

@@ -5,6 +5,68 @@ import createCrudService from '@/api/services/crudService';
 
 import './ViewModal.css';
 
+function printDiv(pageSize) {
+  const content = document.getElementById('myDiv').innerHTML;
+  const printWindow = window.open('', '_blank', 'width=600,height=400');
+
+  // Set up styles based on the page size
+  let pageStyle = '';
+  const tailwindStylesheet = `
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  `;
+
+  if (pageSize === 'A4') {
+    pageStyle = `
+      .print-content {
+        width: 210mm;
+        height: 297mm;
+        padding: 20mm;
+        box-sizing: border-box;
+      }
+    `;
+  } else if (pageSize === '80mm') {
+    pageStyle = `
+      .print-content {
+        width: 80mm;
+        padding: 5mm;
+        box-sizing: border-box;
+      }
+    `;
+  }
+
+  // Create the print window content
+  printWindow.document.open();
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print</title>
+        ${tailwindStylesheet} <!-- Import Tailwind CSS -->
+        <style>
+          body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+          }
+          ${pageStyle} /* Apply the chosen style */
+        </style>
+      </head>
+      <body>
+        <div class="print-content">${content}</div>
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+
+  printWindow.onload = () => {
+    printWindow.focus();
+    printWindow.print();
+    printWindow.onafterprint = () => {
+      printWindow.close();
+    };
+  };
+}
+
 export const ViewModal: React.FC<ViewModalProps> = () => {
   const data = useSelector((state: any) => state.toggleAction.data);
 
@@ -22,13 +84,47 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);
   };
+
+  const handlePrint = () => {
+    printDiv(size);
+    // Set custom print styles based on size
+    // const printWindow = window.open('', '_blank');
+    // printWindow.document.write(`
+    //   <html>
+    //     <head>
+    //       <style>
+    //         /* Hide elements with class no-print */
+    //         .no-print { display: none !important; }
+    //         /* Set paper size styles */
+    //         @media print {
+    //           body { margin: 0; }
+    //           ${
+    //             size === '80mm'
+    //               ? '@page { size: 80mm auto; }'
+    //               : '@page { size: A5; }'
+    //           }
+    //         }
+    //       </style>
+    //     </head>
+    //     <body onload="window.print(); window.close();">
+    //       ${document.querySelector('.printable').outerHTML}
+    //     </body>
+    //   </html>
+    // `);
+    // printWindow.document.close();
+    // window.print();
+  };
+
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-none h-[90vh] max-w-[80vw] overflow-y-scroll relative ">
         <div className="flex flex-col rounded-none">
           <div className="px-11 py-a12 w-full bg-white rounded-lg border border-gray-200 border-solid max-md:px-5 max-md:max-w-full">
             <div className="flex gap-5 max-md:flex-col">
-              <div className="flex flex-col w-[74%] max-md:ml-0 max-md:w-full">
+              <div
+                id="myDiv"
+                className="print-content flex flex-col w-[74%] max-md:ml-0 max-md:w-full"
+              >
                 <div className="flex flex-col px-3 pt-4 pb-2 mx-auto mt-8 w-full text-sm bg-white rounded-lg border border-gray-200 border-solid text-zinc-800 max-md:mt-10 max-md:max-w-full">
                   <div className="self-center ml-4 font-semibold text-right">
                     فاتورة ضريبية مبسطة
@@ -188,22 +284,22 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                   />
                 </div>
               </div>
-              <div className="flex flex-col ml-5 w-[26%] max-md:ml-0 max-md:w-full">
+              <div className="no-print flex flex-col ml-5 w-[26%] max-md:ml-0 max-md:w-full">
                 <div className="flex flex-col max-md:mt-10">
                   <div className="flex flex-col w-full font-semibold text-right">
                     <div className="flex flex-col w-full">
                       <div className="flex flex-col w-full text-zinc-800">
                         <div className="flex flex-col w-full text-sm">
                           <div className="flex self-end max-w-full min-h-[64px] w-[130px]" />
-                          <div className="mt-3.5">
+                          {/* <div className="mt-3.5">
                             شركة حلول التطبيقات لتقنية المعلوماتحي النخيل الرياض
                             المملكة العربية السعودية0123, 31951
-                          </div>
+                          </div>  */}
                         </div>
                         <div className="mt-8 text-base">طباعة الفاتورة</div>
                       </div>
-                      <div className="flex flex-col justify-center self-end mt-3 max-w-full text-sm whitespace-nowrap w-[148px]">
-                        <div className="flex gap-4 items-center w-full text-zinc-800">
+                      <div className="flex flex-col justify-center self-end mt-3 max-w-full text-sm whitespace-nowrap w-full">
+                        <div className="flex gap-4 items-center w-full flex-grow text-zinc-800">
                           <div className="flex gap-2 items-center self-stretch my-auto">
                             <button
                               onClick={() => handleSizeChange('80mm')}
@@ -234,20 +330,20 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           </div>
                         </div>
                         <button
-                          onClick={() => console.log('PRINT')}
-                          className="gap-2.5 self-end px-8 py-1 mt-4 max-w-full text-white bg-indigo-900 rounded-lg min-h-[32px] w-[100px] max-md:px-5"
+                          onClick={handlePrint}
+                          className="gap-2.5 self-end px-8 py-1 mt-4 max-w-full text-white bg-indigo-900 rounded-lg min-h-[32px] mx-auto w-[100px] max-md:px-5"
                         >
                           طباعة
                         </button>
                       </div>
                     </div>
-                    <div className="flex flex-col self-end mt-28 max-w-full text-sm text-red-500 whitespace-nowrap rounded-lg w-[100px] max-md:mt-10">
-                      <button className="px-2.5 py-1 bg-white rounded-lg border border-red-500 border-solid max-md:px-5">
+                    <div className="flex flex-grow flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg  max-md:mt-10">
+                      <button className="px-2.5 py-1 bg-white rounded-lg border border-red-500 border-solid max-md:px-5 w-[100px]">
                         استرجاع
                       </button>
                     </div>
                   </div>
-                  <div className="flex flex-col self-end mt-24 max-w-full rounded-none w-[154px] max-md:mt-10">
+                  <div className="flex flex-col self-end mx-auto items-center max-w-full rounded-none w-[154px] mt-10">
                     <div className="flex flex-col justify-center px-4 py-5 bg-white rounded-lg border border-gray-200 border-solid max-md:px-5">
                       <img
                         loading="lazy"
