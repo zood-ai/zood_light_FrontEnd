@@ -88,38 +88,38 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     // if(!paymentMethod)return;
     const holder = [...paymentMethod];
     holder.pop();
-    // dispatch(addPayment(holder));
-    // dispatch(
-    //   updateField({
-    //     field: 'subtotal_price',
-    //     value: subTotal,
-    //   })
-    // );
-    // dispatch(
-    //   updateField({
-    //     field: 'total_price',
-    //     value: totalAmountIncludeAndExclude,
-    //   })
-    // );
+    if (!params.id) dispatch(addPayment(holder));
+    dispatch(
+      updateField({
+        field: 'subtotal_price',
+        value: subTotal,
+      })
+    );
+    dispatch(
+      updateField({
+        field: 'total_price',
+        value: totalAmountIncludeAndExclude,
+      })
+    );
 
-    // dispatch(
-    //   updateField({
-    //     field: 'branch_id',
-    //     value: branchData?.data?.[0]?.id,
-    //   })
-    // );
-    // dispatch(
-    //   updateField({
-    //     field: 'discount_amount',
-    //     value: discountAmount,
-    //   })
-    // );
-    // dispatch(
-    //   updateField({
-    //     field: 'customer_notes',
-    //     value: discountAmount,
-    //   })
-    // );
+    dispatch(
+      updateField({
+        field: 'branch_id',
+        value: branchData?.data?.[0]?.id,
+      })
+    );
+    dispatch(
+      updateField({
+        field: 'discount_amount',
+        value: discountAmount,
+      })
+    );
+    dispatch(
+      updateField({
+        field: 'customer_notes',
+        value: discountAmount,
+      })
+    );
   }, [paymentMethod, taxAmount, discountAmount, totalAmountIncludeAndExclude]);
   const [paymentMethodinit, setPaymentMethodinit] = useState([]);
 
@@ -307,6 +307,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
               <div className="flex flex-wrap gap-1.5 mt-3 text-sm text-right text-zinc-500 max-md:mr-2.5">
                 {paymentMethods?.data?.map((option, index2) => (
                   <button
+                    disabled={params.id ? true : false}
                     key={index2}
                     onClick={() => {
                       if (params.id) return;
@@ -333,6 +334,8 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       });
                     }}
                     className={`h-[40px] w-[93px] whitespace-nowrap min-w-fit  px-md  flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointe flex-grow ${
+                      params.id ? 'opacity-50' : ''
+                    } ${
                       paymentMethod[paymentMethod.length - 1]
                         ?.payment_method_id === option.id
                         ? 'bg-main text-white font-extrabold'
@@ -355,8 +358,11 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                     );
                   }}
                   value={
-                    Number(paymentMethod[paymentMethod.length - 1]?.amount) ||
-                    'NaN'
+                    !params.id
+                      ? Number(
+                          paymentMethod[paymentMethod.length - 1]?.amount
+                        ) || 'NaN'
+                      : 'NaN'
                   }
                   placeholder="0.00"
                   min={0}
@@ -371,7 +377,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
             {/* ))} */}
 
             {paymentMethod?.map((option1, index1) => {
-              if (index1 === paymentMethod?.length - 1) return;
+              if (index1 === paymentMethod?.length - 1 && !params.id) return;
               console.log({ paymentMethod });
               return (
                 <div className="flex gap-3 items-center" key={index1}>

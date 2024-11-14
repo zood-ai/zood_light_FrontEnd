@@ -23,8 +23,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import createCrudService from '@/api/services/crudService';
 import { Button } from '@/components/custom/button';
 
+import { useParams } from 'react-router-dom';
 export const ShopCardCo: React.FC<ShopCardProps> = () => {
   const isRtl = useDirection();
+  const params = useParams();
 
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const orderSchema = useSelector((state: any) => state.orderSchema);
@@ -182,7 +184,7 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
             <Button
               dir="ltr"
               loading={loading}
-              disabled={loading}
+              disabled={loading || (params.id ? true : false)}
               onClick={submitOrder}
               className="w-[144px]"
             >

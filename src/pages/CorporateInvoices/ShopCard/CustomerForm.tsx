@@ -220,7 +220,7 @@ const CustomerForm = () => {
           <Button
             dir="ltr"
             loading={loading}
-            disabled={loading}
+            disabled={loading || (params.id ? true : false)}
             onClick={submitOrder}
             className="w-[144px]"
           >
