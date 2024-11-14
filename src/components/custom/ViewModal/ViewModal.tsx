@@ -1,21 +1,30 @@
 import { useSelector } from 'react-redux';
-
 import { useState } from 'react';
-
 import { ViewModalProps } from './ViewModal.types';
+import createCrudService from '@/api/services/crudService';
 
 import './ViewModal.css';
 
 export const ViewModal: React.FC<ViewModalProps> = () => {
   const data = useSelector((state: any) => state.toggleAction.data);
-  console.log({ data });
+
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
+  const { data: Taxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const { data: customerInfo } = createCrudService<any>(
+    'manage/customers'
+  ).useGetById(`${data?.customer?.id}`);
+  const { data: orderInfo } = createCrudService<any>('orders').useGetById(
+    `${data?.id}`
+  );
+  console.log({ data, settings, customerInfo, orderInfo, Taxes });
   const [size, setSize] = useState('A4');
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);
   };
   return (
     <>
-      <div className="flex flex-wrap gap-4 rounded-none h-[90vh] overflow-y-scroll relative ">
+      <div className="flex flex-wrap gap-4 rounded-none h-[90vh] max-w-[80vw] overflow-y-scroll relative ">
         <div className="flex flex-col rounded-none">
           <div className="px-11 py-a12 w-full bg-white rounded-lg border border-gray-200 border-solid max-md:px-5 max-md:max-w-full">
             <div className="flex gap-5 max-md:flex-col">
@@ -25,87 +34,145 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     فاتورة ضريبية مبسطة
                   </div>
                   <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-200 border-solid max-md:mr-1 max-md:max-w-full">
-                    <div className="flex flex-col flex-1 px-5 pt-4 pb-2 bg-white rounded border border-gray-200 border-solid max-md:pl-5">
-                      <div className="self-center">الرقم الضريبي</div>
-                      <div className="mt-4 font-semibold">311006624700003</div>
-                    </div>
-                    <div className="flex z-10 flex-col flex-1 px-6 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5">
-                      <div className="self-center">تاريخ الفاتورة</div>
-                      <div className="flex gap-2 mt-4 font-semibold whitespace-nowrap">
-                        <div className="grow">01-10-2024</div>
-                        <div>12:41</div>
+                    {settings?.data?.business_tax_number && (
+                      <div className="flex flex-col flex-1 px-5 pt-4 pb-2 bg-white rounded border border-gray-200 border-solid max-md:pl-5 justify-between">
+                        <div className="self-center">الرقم الضريبي</div>
+                        <div className="mt-4 font-semibold">
+                          {settings?.data?.business_tax_number || ''}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex z-10 flex-col flex-1 px-8 pt-4 pb-2 whitespace-nowrap bg-white border border-gray-200 border-solid max-md:px-5">
-                      <div className="self-center">الجوال</div>
-                      <div className="self-start mt-4 font-semibold">
-                        0553223734
+                    )}
+                    {data?.business_date && (
+                      <div className="flex z-10 flex-col flex-1 px-6 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
+                        <div className="self-center">تاريخ الفاتورة</div>
+                        <div className="flex gap-2 mt-4 font-semibold whitespace-nowrap">
+                          <div className="grow">
+                            {data?.business_date?.split(' ')[0] || ''}
+                          </div>
+                          <div>
+                            {data?.business_date?.split(' ')[1].slice(0, 5) ||
+                              ''}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex z-10 flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5">
-                      <div>اسم العميل</div>
-                      <div className="mt-4 font-semibold">احمد</div>
-                    </div>
-                    <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5">
-                      <div>رقم الفاتورة</div>
-                      <div className="mt-4 font-semibold">INV0415</div>
-                    </div>
+                    )}
+                    {customerInfo?.data?.phone && (
+                      <div className="flex z-10 flex-col flex-1 px-8 pt-4 pb-2 whitespace-nowrap bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
+                        <div className="self-center">الجوال</div>
+                        <div className="self-start mt-4 font-semibold">
+                          {customerInfo?.data?.phone}
+                        </div>
+                      </div>
+                    )}
+                    {data?.customer?.name && (
+                      <div className="flex z-10 flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
+                        <div>اسم العميل</div>
+                        <div className="mt-4 font-semibold">
+                          {data?.customer?.name || ''}
+                        </div>
+                      </div>
+                    )}
+                    {data?.reference && (
+                      <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                        <div>رقم الفاتورة</div>
+                        <div className="mt-4 font-semibold">
+                          {data?.reference || ''}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex z-10 flex-wrap gap-5 justify-between px-4 py-1.5 mt-4 w-full font-semibold text-right text-white rounded border border-gray-200 border-solid bg-zinc-500 max-md:mr-1 max-md:max-w-full">
-                    <div className="flex gap-10 max-md:max-w-full">
-                      <div>المجموع (شامل الضريبة)</div>
-                      <div>سعر الوحدة</div>
-                      <div>كمية</div>
+                    <div className="flex w-full text-center">
+                      <div className="w-1/3">المجموع (شامل الضريبة)</div>
+                      <div className="w-1/3">سعر الوحدة</div>
+                      <div className="w-1/3">كمية</div>
+                      <div className="w-1/3">اسم المنتج</div>
                     </div>
-                    <div>اسم المنتج</div>
                   </div>
-                  <div className="flex flex-wrap gap-5 justify-between py-5 pr-4 pl-20 mt-0 max-w-full text-right bg-white rounded border border-gray-200 border-solid w-[802px] max-md:pl-5 max-md:mr-1">
-                    <div className="flex gap-10 font-semibold">
-                      <div className="flex flex-col">
-                        <div>SR 53.00</div>
-                        <div className="mt-1">SR 53.00</div>
+                  <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded border border-gray-200 border-solid w-[802px] max-w-full max-md:mr-1 text-center px-3">
+                    {orderInfo?.data?.products.map((e) => (
+                      <div className="flex font-semibold w-full">
+                        <div className="w-1/3">{e?.pivot?.total_price}</div>
+                        <div className="w-1/3">{e?.pivot?.unit_price}</div>
+                        <div className="w-1/3">{e?.pivot?.quantity}</div>
+                        <div className="w-1/3">{e.name}</div>
                       </div>
-                      <div className="flex flex-col">
-                        <div className="flex gap-5 justify-between">
-                          <div>SR 45.05</div>
-                          <div>1</div>
-                        </div>
-                        <div className="flex gap-5 justify-between mt-1">
-                          <div>SR 45.05</div>
-                          <div>1</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-col self-start">
-                      <div className="self-end">ملح</div>
-                      <div className="mt-1">صماء دقيق</div>
-                    </div>
+                    ))}
                   </div>
                   <div className="flex flex-wrap gap-5 justify-between mt-10 max-md:mt-10 max-md:mr-1 max-md:max-w-full">
                     <div className="flex flex-col items-start font-semibold">
-                      <div className="text-right">SR 9,489.40</div>
-                      <div className="mt-4 text-right">SR 1,674.60</div>
-                      <div className="mt-4 text-right">SR 11,164.00</div>
-                      <div className="mt-4 text-right">- SR 0.00</div>
-                      <div className="mt-4 text-right">SR 11,164.00</div>
-                      <div className="mt-4 text-right">حوالة بنكية</div>
-                      <div className="mt-4 text-right">SR 11,164.00</div>
-                      <div className="mt-4 text-right">SR 0.00</div>
-                      <div className="self-stretch mt-4">لا يوجد ملاحظات</div>
+                      <div className="text-right">
+                        SR {orderInfo?.data?.total_price || 0}
+                      </div>
+                      <div className="mt-4 text-right">
+                        SR {orderInfo?.data?.total_taxes || 0}
+                      </div>
+                      <div className="mt-4 text-right">
+                        SR {orderInfo?.data?.subtotal_price || 0}
+                      </div>
+                      <div className="mt-4 text-right">
+                        SR {orderInfo?.data?.discount_amount || 0}
+                      </div>
+                      <div className="mt-4 text-right">
+                        SR{' '}
+                        {orderInfo?.data?.payments?.reduce(
+                          (sum, item) => sum + item.amount,
+                          0
+                        ) || 0}
+                      </div>
+
+                      {orderInfo?.data?.payments?.map((e) => (
+                        <>
+                          <div className="mt-4 text-right">
+                            {e.payment_method?.name || '----'}
+                          </div>
+                          <div className="mt-4 text-right">
+                            SR {e.amount || 0}
+                          </div>
+                        </>
+                      ))}
+
+                      {/* <div className="mt-4 text-right">
+                        {orderInfo?.data?.payments[0]?.payment_method?.name ||
+                          '----'}
+                      </div>
+                      <div className="mt-4 text-right">
+                        SR {orderInfo?.data?.payments[0]?.amount || 0}
+                      </div> */}
+
+                      <div className="mt-4 text-right">
+                        SR{' '}
+                        {(orderInfo?.data?.payments.reduce(
+                          (sum, item) => sum + item.amount,
+                          0
+                        ) > orderInfo?.data?.total_price
+                          ? orderInfo?.data?.payments.reduce(
+                              (sum, item) => sum + item.amount,
+                              0
+                            ) - orderInfo?.data?.total_price
+                          : 0) || 0}
+                      </div>
+                      {/* <div className="self-stretch mt-4">لا يوجد ملاحظات</div> */}
                     </div>
                     <div className="flex flex-col text-right">
-                      <div>الاجمالي (باستثناء ضريبة القيمة المضافة)</div>
-                      <div className="flex flex-col items-end pl-10 mt-4 max-md:pl-5">
-                        <div className="self-start">
-                          مجموع ضريبة القيمة المضافة %15
+                      <div className="">
+                        الاجمالي (باستثناء ضريبة القيمة المضافة)
+                      </div>
+                      <div className="flex flex-col items-end  mt-4 max-md:pl-5">
+                        <div className="">
+                          مجموع ضريبة القيمة المضافة %{Taxes?.data[0]?.rate}
                         </div>
                         <div className="mt-4">المبلغ الإجمالي</div>
                         <div className="mt-4">تخفيض</div>
                         <div className="mt-4">المبلغ الإجمالي المدفوع</div>
-                        <div className="mt-4">نوع الدفع</div>
-                        <div className="mt-4">المبلغ المدفوع</div>
+                        {orderInfo?.data?.payments?.map((e, idx) => (
+                          <>
+                            <div className="mt-4"> نوع الدفع </div>
+                            <div className="mt-4">المبلغ المدفوع </div>
+                          </>
+                        ))}
                         <div className="mt-4">إجمالي المبلغ المستحق</div>
-                        <div className="mt-4">الملاحظات</div>
+                        {/* <div className="mt-4">الملاحظات</div> */}
                       </div>
                     </div>
                   </div>
