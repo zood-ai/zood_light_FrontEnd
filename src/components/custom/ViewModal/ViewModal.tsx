@@ -6,65 +6,65 @@ import createCrudService from '@/api/services/crudService';
 import './ViewModal.css';
 
 function printDiv(pageSize) {
-  const content = document.getElementById('myDiv').innerHTML;
-  const printWindow = window.open('', '_blank', 'width=600,height=400');
+  // const content = document.getElementById('myDiv').innerHTML;
+  // const printWindow = window.open('', '_blank', 'width=600,height=400');
 
-  // Set up styles based on the page size
-  let pageStyle = '';
-  const tailwindStylesheet = `
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  `;
+  // // Set up styles based on the page size
+  // let pageStyle = '';
+  // const tailwindStylesheet = `
+  //   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  // `;
 
-  if (pageSize === 'A4') {
-    pageStyle = `
-      .print-content {
-        width: 210mm;
-        height: 297mm;
-        padding: 20mm;
-        box-sizing: border-box;
-      }
-    `;
-  } else if (pageSize === '80mm') {
-    pageStyle = `
-      .print-content {
-        width: 80mm;
-        padding: 5mm;
-        box-sizing: border-box;
-      }
-    `;
-  }
+  // if (pageSize === 'A4') {
+  //   pageStyle = `
+  //     .print-content {
+  //       width: 210mm;
+  //       height: 297mm;
+  //       padding: 20mm;
+  //       box-sizing: border-box;
+  //     }
+  //   `;
+  // } else if (pageSize === '80mm') {
+  //   pageStyle = `
+  //     .print-content {
+  //       width: 80mm;
+  //       padding: 5mm;
+  //       box-sizing: border-box;
+  //     }
+  //   `;
+  // }
 
-  // Create the print window content
-  printWindow.document.open();
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Print</title>
-        ${tailwindStylesheet} <!-- Import Tailwind CSS -->
-        <style>
-          body, html {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-          }
-          ${pageStyle} /* Apply the chosen style */
-        </style>
-      </head>
-      <body>
-        <div class="print-content">${content}</div>
-      </body>
-    </html>
-  `);
+  // // Create the print window content
+  // printWindow.document.open();
+  // printWindow.document.write(`
+  //   <html>
+  //     <head>
+  //       <title>Print</title>
+  //       ${tailwindStylesheet} <!-- Import Tailwind CSS -->
+  //       <style>
+  //         body, html {
+  //           margin: 0;
+  //           padding: 0;
+  //           font-family: Arial, sans-serif;
+  //         }
+  //         ${pageStyle} /* Apply the chosen style */
+  //       </style>
+  //     </head>
+  //     <body>
+  //       <div class="print-content">${content}</div>
+  //     </body>
+  //   </html>
+  // `);
 
-  printWindow.document.close();
+  // printWindow.document.close();
 
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
-    printWindow.onafterprint = () => {
-      printWindow.close();
-    };
-  };
+  // printWindow.onload = () => {
+  //   printWindow.focus();
+  //   printWindow.print();
+  //   printWindow.onafterprint = () => {
+  //     printWindow.close();
+  //   };
+  // };
 }
 
 export const ViewModal: React.FC<ViewModalProps> = () => {

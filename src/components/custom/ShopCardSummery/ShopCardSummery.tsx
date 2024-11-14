@@ -12,6 +12,7 @@ import {
   addPayment,
   updateField,
   updatePayment,
+  addTax,
 } from '@/store/slices/orderSchema';
 import { useParams } from 'react-router-dom';
 import { SelectComp } from '../SelectItem';
@@ -57,7 +58,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   const mainTax = Taxes?.data[0];
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
-  console.log(55555, { settings });
+  console.log(55555, { mainTax });
   const { data: paymentMethods } = createCrudService<any>(
     'manage/payment_methods?filter[is_active]=1'
   ).useGetAll();
@@ -101,7 +102,12 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
         value: totalAmountIncludeAndExclude,
       })
     );
-
+    dispatch(
+      updateField({
+        field: 'total_taxes',
+        value: taxAmount,
+      })
+    );
     dispatch(
       updateField({
         field: 'branch_id',

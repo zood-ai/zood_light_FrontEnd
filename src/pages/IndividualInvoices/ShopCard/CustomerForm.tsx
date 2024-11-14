@@ -86,7 +86,9 @@ const CustomerForm = () => {
       });
   };
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
+  const holder = useSelector((state: any) => state.orderSchema.total_taxes);
   const submitOrder = async () => {
+    console.log({holder});
     // const products = cardItemValue.map((item: any) => ({
     //   product_id: item.id || '',
     //   quantity: item.qty || 0,

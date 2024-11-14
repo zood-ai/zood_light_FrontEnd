@@ -35,6 +35,7 @@ interface OrderSchemaState {
   subtotal_price: number;
   total_price: number;
   is_sales_order: number;
+  total_taxes: number;
   tendered?: any;
   invoice_number: any;
   discount_type: number;
@@ -47,7 +48,7 @@ const initialState: OrderSchemaState = {
   discount_amount: 0,
   customer_id: '',
   discount_type: 2,
-  discount_id: "0aaa23cb-2156-4778-b6dd-a69ba6642552",
+  discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
 
   taxes: [
     {
@@ -55,7 +56,7 @@ const initialState: OrderSchemaState = {
       rate: 0,
       amount: 0,
     },
-  ],    
+  ],
   products: [
     {
       product_id: '',
@@ -78,6 +79,7 @@ const initialState: OrderSchemaState = {
   ],
   subtotal_price: 0,
   total_price: 0,
+  total_taxes: 0,
   is_sales_order: 0,
   invoice_number: `ORD-${Math.floor(Math.random() * 999999999)}`,
 };
@@ -111,7 +113,7 @@ const orderSchemaSlice: any = createSlice({
     },
     resetOrder: (state) => {
       return initialState;
-    },  
+    },
   },
 });
 
