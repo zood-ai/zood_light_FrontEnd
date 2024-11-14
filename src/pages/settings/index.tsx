@@ -181,7 +181,7 @@ export default function Settings() {
             </div>
           </div>
           <div
-            style={{ textAlign: '-webkit-auto' }}
+            // style={{ textAlign: '-webkit-auto' }}
             className=" direction-reverse"
           >
             <button
