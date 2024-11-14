@@ -9,24 +9,33 @@ export default function Settings() {
   const [loadingSettings, setLoadingSettings] = useState(false);
   const [imagePreviewUrl, setImagePreviewUrl] = useState('');
 
-  const [handleAllData, setHandleAllData] = useState({});
-  const [phone, setPhone] = useState('');
-  const [data, setData] = useState<any>({});
+  const [updateAll, setUpdateAll] = useState({
+    additionalNumber: '',
+    streetName: '',
+    postalCode: '',
+    district: '',
+    commercialRegesterationNumber: '',
+    citySubdivisionName: '',
+    city: '',
+    buildingNumber: '',
+    business_name: '',
+    phone: '',
+    branch_id: '',
+  });
+  const [data, setData] = useState({
+    additionalNumber: '',
+    streetName: '',
+    postalCode: '',
+    district: '',
+    commercialRegesterationNumber: '',
+    citySubdivisionName: '',
+    city: '',
+    buildingNumber: '',
+    business_name: '',
+    phone: '',
+    branch_id: '',
+  });
   const [fileBase64, setFileBase64] = useState<any>('');
-  const updateSettingsData = async () => {
-    try {
-      const response = await axiosInstance.get('auth/whoami', {
-        data: {
-          registered_address: JSON.stringify({
-            buildingNumber: data?.buildingNumber,
-          }),
-        },
-      });
-      console.log('Update successful:', response.data);
-    } catch (error) {
-      console.error('Error updating settings:', error);
-    }
-  };
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
@@ -49,16 +58,28 @@ export default function Settings() {
     async function getSettingsData() {
       setLoadingSettings(true);
       const data = await axiosInstance.get(`auth/whoami`);
-      setPhone(data?.data?.user?.phone);
-      setData(JSON.parse(data?.data?.user?.branches[0]?.registered_address));
-      console.log('FETCH');
+      // setData(JSON.parse(data?.data?.user?.branches[0]?.registered_address));
+      const holder = JSON.parse(
+        data?.data?.user?.branches[0]?.registered_address
+      );
+      setUpdateAll((prev) => ({
+        ...prev,
+        ...holder,
+        business_name: data.data.business.name,
+        phone: data.data.user.phone,
+        branch_id: data.data.user.branches[0].id,
+      }));
+      setData({
+        ...holder,
+        business_name: data.data.business.name,
+        phone: data.data.user.phone,
+        branch_id: data.data.user.branches[0].id,
+      });
       setLoadingSettings(false);
     }
     getSettingsData();
   }, []);
-  console.log('PHONE NUMBER ', phone);
 
-  console.log(data);
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
   const { data: branches } =
@@ -76,7 +97,6 @@ export default function Settings() {
     createCrudService<any>('manage/settings').useUpdate();
 
   // update Branch function
-  console.log(updateBranch);
 
   const { mutate: updateTax } =
     createCrudService<any>('manage/taxes').useUpdateNoDialog();
@@ -109,7 +129,7 @@ export default function Settings() {
     });
   };
 
-  console.log({ settingsData });
+  console.log({ updateAll });
   useEffect(() => {
     if (!fileBase64) return;
     updateSettings({
@@ -117,21 +137,38 @@ export default function Settings() {
       data: { business_logo: fileBase64 },
     });
   }, [fileBase64, updateSettings]);
-  const handleSaveData = () => {
-    // if (!settingsData?.id) {
-    //   console.error('Settings ID is missing');
-    //   return;
-    // }
-    console.log('TEST');
-    updateSettings({
-      id: '',
-      data: { business_name: settingsData?.business_name },
+
+  const updateTop = async () => {
+    await axiosInstance.put(`manage/settings`, {
+      business_name: updateAll.business_name,
+    });
+    await axiosInstance.put(`manage/branches/${updateAll.branch_id}`, {
+      registered_address: JSON.stringify({
+        buildingNumber: updateAll.buildingNumber,
+        additionalNumber: updateAll.additionalNumber,
+        streetName: updateAll.streetName,
+        postalCode: updateAll.postalCode,
+        district: data.district,
+        commercialRegesterationNumber: data.commercialRegesterationNumber,
+        citySubdivisionName: data.citySubdivisionName,
+        city: data.city,
+      }),
     });
   };
-
-  console.log({ fileBase64 });
-  console.log(taxesData?.rate);
-  console.log(settingsData, taxesData, branchesData, 'settingsData');
+  const updateBottom = async () => {
+    await axiosInstance.put(`manage/branches/${updateAll.branch_id}`, {
+      registered_address: JSON.stringify({
+        buildingNumber: data.buildingNumber,
+        additionalNumber: data.additionalNumber,
+        streetName: data.streetName,
+        postalCode: data.postalCode,
+        district: updateAll.district,
+        commercialRegesterationNumber: updateAll.commercialRegesterationNumber,
+        citySubdivisionName: updateAll.citySubdivisionName,
+        city: updateAll.city,
+      }),
+    });
+  };
   return (
     <>
       <div className="flex flex-col rounded-none max-w-[805px]">
@@ -151,7 +188,13 @@ export default function Settings() {
                     اسم المتجر
                   </div>
                   <Input
-                    defaultValue={settingsData?.business_name}
+                    onChange={(e) => {
+                      setUpdateAll((prev) => ({
+                        ...prev,
+                        business_name: e.target.value,
+                      }));
+                    }}
+                    value={updateAll?.business_name}
                     className="w-[327px]"
                   />
                 </div>
@@ -162,7 +205,13 @@ export default function Settings() {
                     عنوان المتجر
                   </div>
                   <Input
-                    defaultValue={data?.streetName}
+                    onChange={(e) => {
+                      setUpdateAll((prev) => ({
+                        ...prev,
+                        streetName: e.target.value,
+                      }));
+                    }}
+                    value={updateAll?.streetName}
                     className="w-[327px]"
                   />
                 </div>
@@ -175,7 +224,13 @@ export default function Settings() {
                 الرقم الاضافي
               </div>
               <Input
-                defaultValue={data?.additionalNumber}
+                onChange={(e) => {
+                  setUpdateAll((prev) => ({
+                    ...prev,
+                    additionalNumber: e.target.value,
+                  }));
+                }}
+                value={updateAll?.additionalNumber}
                 className="w-[117px] "
               />
             </div>
@@ -183,14 +238,29 @@ export default function Settings() {
               <div className="self-start font-medium text-zinc-500">
                 الرمز البريدي
               </div>
-              <Input defaultValue={data?.postalCode} className="w-[117px] " />
+              <Input
+                onChange={(e) => {
+                  setUpdateAll((prev) => ({
+                    ...prev,
+                    postalCode: e.target.value,
+                  }));
+                }}
+                value={updateAll?.postalCode}
+                className="w-[117px] "
+              />
             </div>
             <div className="flex flex-col flex-1">
               <div className="self-start font-medium text-zinc-500">
                 رقم المبني
               </div>
               <Input
-                defaultValue={data?.buildingNumber}
+                onChange={(e) => {
+                  setUpdateAll((prev) => ({
+                    ...prev,
+                    buildingNumber: e.target.value,
+                  }));
+                }}
+                value={updateAll?.buildingNumber}
                 className="w-[117px] "
               />
             </div>
@@ -198,7 +268,7 @@ export default function Settings() {
           <Button
             onClick={() => {
               handleUpdateBranch();
-              updateSettingsData();
+              updateTop();
             }}
             className="flex flex-col justify-center items-center px-6 py-1.5 mt-6 text-sm font-semibold text-left text-white whitespace-nowrap bg-indigo-900 rounded border border-indigo-900 border-solid min-h-[39px] max-md:px-5"
           >
@@ -226,7 +296,16 @@ export default function Settings() {
                   <div className="self-start font-medium text-zinc-500">
                     المدينه
                   </div>
-                  <Input defaultValue={data?.city} className="w-full" />
+                  <Input
+                    onChange={(e) => {
+                      setUpdateAll((prev) => ({
+                        ...prev,
+                        city: e.target.value,
+                      }));
+                    }}
+                    value={updateAll?.city}
+                    className="w-full"
+                  />
                 </div>
 
                 <div className="flex flex-col grow mt-10 text-sm text-left max-md:mt-10 w-[40%]">
@@ -234,7 +313,13 @@ export default function Settings() {
                     citySubdivisionName
                   </div>
                   <Input
-                    defaultValue={data?.citySubdivisionName}
+                    onChange={(e) => {
+                      setUpdateAll((prev) => ({
+                        ...prev,
+                        citySubdivisionName: e.target.value,
+                      }));
+                    }}
+                    value={updateAll?.citySubdivisionName}
                     className="w-full"
                   />
                 </div>
@@ -242,21 +327,33 @@ export default function Settings() {
             </div>
             <div className="flex flex-col grow mt-4 text-sm text-left max-md:mt-4 w-6/12">
               <div className="self-start font-medium text-zinc-500">الحي</div>
-              <Input defaultValue={data?.district} className="w-[96%]" />
+              <Input
+                onChange={(e) => {
+                  setUpdateAll((prev) => ({
+                    ...prev,
+                    district: e.target.value,
+                  }));
+                }}
+                value={updateAll?.district}
+                className="w-[96%]"
+              />
             </div>
-            <div className="flex flex-col grow mt-4 text-sm text-left max-md:mt-4 w-6/12">
+            {/* <div className="flex flex-col grow mt-4 text-sm text-left max-md:mt-4 w-6/12">
               <div className="self-start font-medium text-zinc-500">
                 رقم الهاتف
               </div>
-              <Input defaultValue={phone || ''} className="w-[96%]" />
-            </div>
+              <Input value={updateAll?.phone || ''} className="w-[96%]" />
+            </div> */}
           </div>
           <div
             // style={{ textAlign: '-webkit-auto' }}
             className="self-start"
           >
             <button
-              onClick={handleUpdateBranch}
+              onClick={() => {
+                handleUpdateBranch();
+                updateBottom();
+              }}
               type="button"
               className="px-6  text-sm py-1.5 mt-8 font-semibold  mr-[12px]  text-white whitespace-nowrap bg-indigo-900 rounded min-h-[39px] max-md:px-5"
             >
@@ -271,7 +368,7 @@ export default function Settings() {
           </div>
           <div className="relative">
             <Input
-              defaultValue={taxesData?.rate}
+              value={taxesData?.rate}
               onChange={(e) => setTaxesValue(+e.target.value)}
               className="pr-6"
             />

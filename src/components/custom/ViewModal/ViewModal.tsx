@@ -8,13 +8,11 @@ import './ViewModal.css';
 function printDiv(pageSize) {
   // const content = document.getElementById('myDiv').innerHTML;
   // const printWindow = window.open('', '_blank', 'width=600,height=400');
-
   // // Set up styles based on the page size
   // let pageStyle = '';
   // const tailwindStylesheet = `
   //   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   // `;
-
   // if (pageSize === 'A4') {
   //   pageStyle = `
   //     .print-content {
@@ -33,7 +31,6 @@ function printDiv(pageSize) {
   //     }
   //   `;
   // }
-
   // // Create the print window content
   // printWindow.document.open();
   // printWindow.document.write(`
@@ -55,9 +52,7 @@ function printDiv(pageSize) {
   //     </body>
   //   </html>
   // `);
-
   // printWindow.document.close();
-
   // printWindow.onload = () => {
   //   printWindow.focus();
   //   printWindow.print();
@@ -219,9 +214,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
 
                       {orderInfo?.data?.payments?.map((e) => (
                         <>
-                          <div className="mt-4 text-right">
+                          {/* <div className="mt-4 text-right">
                             {e.payment_method?.name || '----'}
-                          </div>
+                          </div> */}
                           <div className="mt-4 text-right">
                             SR {e.amount || 0}
                           </div>
@@ -255,16 +250,21 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                         الاجمالي (باستثناء ضريبة القيمة المضافة)
                       </div>
                       <div className="flex flex-col items-end  mt-4 max-md:pl-5">
-                        <div className="">
-                          مجموع ضريبة القيمة المضافة %{Taxes?.data[0]?.rate}
-                        </div>
+                        <div className="">مجموع ضريبة القيمة المضافة</div>
                         <div className="mt-4">المبلغ الإجمالي</div>
                         <div className="mt-4">تخفيض</div>
                         <div className="mt-4">المبلغ الإجمالي المدفوع</div>
-                        {orderInfo?.data?.payments?.map((e, idx) => (
+                        {/* {orderInfo?.data?.payments?.map((e, idx) => (
                           <>
                             <div className="mt-4"> نوع الدفع </div>
                             <div className="mt-4">المبلغ المدفوع </div>
+                          </>
+                        ))} */}
+                        {orderInfo?.data?.payments?.map((e) => (
+                          <>
+                            <div className="mt-4 text-right">
+                              {e.payment_method?.name || '----'}
+                            </div>
                           </>
                         ))}
                         <div className="mt-4">إجمالي المبلغ المستحق</div>
