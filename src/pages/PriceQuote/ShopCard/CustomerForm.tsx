@@ -232,7 +232,7 @@ const CustomerForm = () => {
         </div>
       </div>
 
-      {/* <ShopCardSummeryPQ /> */}
+      <ShopCardSummeryPQ />
     </div>
   );
 };

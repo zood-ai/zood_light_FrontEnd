@@ -95,7 +95,7 @@ const CustomerFormEdit = () => {
         </div>
       </div>
 
-      {/* <ShopCardSummeryPQEdit /> */}
+      <ShopCardSummeryPQEdit />
     </div>
   );
 };

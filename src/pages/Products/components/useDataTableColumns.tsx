@@ -81,7 +81,7 @@ export const useDataTableColumns = () => {
       },
     },
     {
-      accessorKey: 'barcode',
+      accessorKey: 'sku',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'الباركود'} />
       ),
@@ -90,7 +90,7 @@ export const useDataTableColumns = () => {
           <div className="flex space-x-2 ">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('barcode')}
+              {row.getValue('sku')}
             </span>
           </div>
         );

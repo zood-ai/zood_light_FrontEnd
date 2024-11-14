@@ -19,12 +19,12 @@ export default function ChangePasswordDial({ isOpen, onClose }) {
                     يجب أن تتكون كلمة المرور الخاصة بك من 6 أحرف على الأقل ويجب
                     أن تتضمن مجموعة من الأرقام والأحرف والأحرف الخاصة (!$@%).
                   </div>
-                  <Input className="  mt-4 ml-3.5 max-w-full bg-white rounded border border-solid border-zinc-300 w-[361px]"/>
-                  
-                  <Input className="  mt-4 ml-3.5 max-w-full bg-white rounded border border-solid border-zinc-300 w-[361px]"/>
-                   
-                  <Input className="  mt-4 ml-3.5 max-w-full bg-white rounded border border-solid border-zinc-300 w-[361px]"/>
-                  
+                  <Input className="  mt-4 ml-3.5 max-w-full bg-white rounded border border-solid border-zinc-300 w-[361px]" />
+
+                  <Input className="  mt-4 ml-3.5 max-w-full bg-white rounded border border-solid border-zinc-300 w-[361px]" />
+
+                  <Input className="  mt-4 ml-3.5 max-w-full bg-white rounded border border-solid border-zinc-300 w-[361px]" />
+
                   <div className="self-end mt-2 text-indigo-900">
                     هل نسيت الرقم السري؟
                   </div>
@@ -38,7 +38,7 @@ export default function ChangePasswordDial({ isOpen, onClose }) {
               onClick={onClose}
               loading="lazy"
               src="https://cdn.builder.io/api/v1/image/assets/TEMP/86098466758eefea48c424850dc7f8dc58fa0a42b1b3b43e6d08b5eb236f964e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
-              className="object-contain shrink-0 self-start mt-4 w-11 aspect-square absolute left-[-60px] top-0 cursor-pointer hover:scale-110"
+              className="object-contain shrink-0 self-start mt-4 w-11 aspect-square absolute right-[-70px] top-0 cursor-pointer hover:scale-110"
             />
           </div>
         </AlertDialogContent>
