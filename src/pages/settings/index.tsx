@@ -8,8 +8,10 @@ export default function Settings() {
   const [taxesValue, setTaxesValue] = useState(15);
   const [selectedFileName, setSelectedFileName] = useState('');
   const [loadingSettings, setLoadingSettings] = useState(false);
+  const [handleAllData, setHandleAllData] = useState({});
   const [phone, setPhone] = useState('');
   const [data, setData] = useState<any>({});
+  const [fileBase64, setFileBase64] = useState<any>('');
   useEffect(function () {
     async function getSettingsData() {
       setLoadingSettings(true);
@@ -60,8 +62,17 @@ export default function Settings() {
     console.log(taxesValue);
   };
   const handleUpdateBranch = () => {
-    console.log({data});
+    console.log({ data });
   };
+
+  useEffect(() => {
+    if (!fileBase64) return;
+    updateSettings({
+      id: '',
+      data: { business_logo: fileBase64 },
+    });
+  }, [fileBase64, updateSettings]);
+  console.log({ fileBase64 });
   console.log(taxesData?.rate);
   console.log(settingsData, taxesData, branchesData, 'settingsData');
   return (
@@ -182,7 +193,7 @@ export default function Settings() {
           </div>
           <div
             // style={{ textAlign: '-webkit-auto' }}
-            className=" direction-reverse"
+            className="self-start"
           >
             <button
               onClick={handleUpdateBranch}
@@ -257,6 +268,11 @@ export default function Settings() {
           </div>
         </div>
         <div className="flex flex-col items-start self-start mt-4 max-w-full text-sm text-left w-[223px]">
+          <img
+            className="mb-5 rounded-full aspect-square size-[150px]"
+            src={settingsData?.business_logo}
+            alt=""
+          />
           <div className="font-medium text-zinc-500 ">Upload logo</div>
           <div className="flex gap-2 items-center">
             <label className="flex flex-1 justify-center items-center  font-semibold bg-gray-200 rounded border border-solid border-zinc-300 w-[117px]  h-[39px] text-mainText cursor-pointer  ">
@@ -265,9 +281,20 @@ export default function Settings() {
                 type="file"
                 className="hidden"
                 onChange={(e) => {
-                  const fileName =
-                    e.target.files?.[0]?.name || 'No file chosen';
-                  setSelectedFileName(fileName);
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (!file.type.startsWith('image/')) {
+                    alert('Please upload a valid image file.');
+                    return;
+                  }
+                  const fileName = file.name || 'No file chosen';
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    const base64 = reader.result?.toString().split(',')[1];
+                    setFileBase64(`data:image/*;base64,${base64}`);
+                    setSelectedFileName(fileName);
+                  };
+                  reader.readAsDataURL(file);
                 }}
               />
             </label>

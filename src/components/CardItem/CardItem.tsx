@@ -9,10 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setCardItem } from '@/store/slices/cardItems';
 import imagePLaceHolder from '/icons/imagePLaceHolder.svg';
 
-export const CardItem: React.FC<CardItemProps> = ({
-  index,
-  item,
-}) => {
+export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
   const dispatch = useDispatch();
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
 
@@ -85,8 +82,8 @@ export const CardItem: React.FC<CardItemProps> = ({
 
   return (
     <div className="flex flex-col rounded-none h-[290px] w-[194px] flex-grow">
-      <div className="flex flex-col pb-2 w-full bg-white rounded border border-gray-200 border-solid">
-        <div className="flex flex-col self-stretch px-5 pt-4 w-full bg-white rounded border border-gray-200 border-solid">
+      <div className="flex flex-col pb-2 w-full bg-white rounded border border-gray-200 border-solid ">
+        <div className="flex justify-center self-stretch px-5 pt-4 w-full bg-white rounded border border-gray-200 border-solid">
           <img
             loading="lazy"
             src={item?.image || imagePLaceHolder}
@@ -95,7 +92,7 @@ export const CardItem: React.FC<CardItemProps> = ({
           />
         </div>
         <div className={'px-[8px] '}>
-          <div className="mt-2.5 font-semibold text-zinc-500 text-center w-full max-w-xs">
+          <div className="mt-2.5 font-semibold text-zinc-500 text-center w-full ">
             <span className="pe-2 text-foreground block overflow-hidden whitespace-nowrap text-ellipsis">
               {item?.name}
             </span>

@@ -59,7 +59,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     createCrudService<any>('manage/settings').useGetAll();
   console.log(55555, { settings });
   const { data: paymentMethods } = createCrudService<any>(
-    'manage/payment_methods'
+    'manage/payment_methods?filter[is_active]=1'
   ).useGetAll();
   const [discountAmount, setdiscountAmount] = useState(0);
   const { data: branchData } =
