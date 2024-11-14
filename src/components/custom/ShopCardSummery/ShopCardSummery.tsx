@@ -137,19 +137,26 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   console.log({ paymentMethod });
 
   const [totalAmount, setTotalAmount] = useState(
-    paymentMethod?.reduce((accumulator, current, i) => {
-      if (current?.notadd) return 0;
-      return accumulator + parseFloat(current.amount || 0);
-    }, 0)
+    params.id
+      ? paymentMethod?.reduce((accumulator, current, i) => {
+          return accumulator + parseFloat(current.amount || 0);
+        }, 0)
+      : 1
   );
+  console.log(params.id, { totalAmount, paymentMethod });
 
   useEffect(() => {
-    setTotalAmount(
-      paymentMethod?.reduce((accumulator, current, i) => {
-        return accumulator + parseFloat(current.amount || 0);
-      }, 0)
-    );
-  }, [paymentMethod.length]);
+    let allSum = 0;
+    let someSum = 0;
+    paymentMethod.forEach((e) => {
+      allSum += parseFloat(e.amount || 0);
+    });
+    paymentMethod.forEach((e) => {
+      if (e?.notadd) someSum += 0;
+      else someSum += parseFloat(e.amount || 0);
+    });
+    setTotalAmount(params.id ? allSum : someSum);
+  }, [params.id, paymentMethod, paymentMethod.length]);
 
   // const [SubTotalAfterDiscount, setSubTotalAfterDiscount] = useState(0);
 
