@@ -431,7 +431,7 @@ export default function Settings() {
             alt=""
           />
           <div className="font-medium text-zinc-500 ">Upload logo</div>
-          {fileBase64 && <img src={fileBase64} />}
+          {/* {fileBase64 && <img src={fileBase64} />} */}
           <div className="flex gap-2 items-center">
             <label className="flex flex-1 justify-center items-center  font-semibold bg-gray-200 rounded border border-solid border-zinc-300 w-[117px]  h-[39px] text-mainText cursor-pointer  ">
               <span className="text-[14px]">اختر الملف</span>
@@ -449,16 +449,16 @@ export default function Settings() {
                   const reader = new FileReader();
                   reader.onloadend = () => {
                     const base64 = reader.result?.toString().split(',')[1];
-                    setFileBase64(`data:image/*;base64,${base64}`);
+                    setFileBase64(`data:image/png;base64,${base64}`);
                     setSelectedFileName(fileName);
                   };
                   reader.readAsDataURL(file);
                 }}
               />
             </label>
-            <div className="   bg font-medium text-zinc-500" id="file-name">
+            {/* <div className="   bg font-medium text-zinc-500" id="file-name">
               {selectedFileName}
-            </div>
+            </div> */}
           </div>
 
           <Button
