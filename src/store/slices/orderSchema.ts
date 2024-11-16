@@ -35,7 +35,7 @@ interface OrderSchemaState {
   subtotal_price: number;
   total_price: number;
   is_sales_order: number;
-  total_taxes: number;
+  tax_exclusive_discount_amount: number;
   tendered?: any;
   invoice_number: any;
   discount_type: number;
@@ -79,7 +79,7 @@ const initialState: OrderSchemaState = {
   ],
   subtotal_price: 0,
   total_price: 0,
-  total_taxes: 0,
+  tax_exclusive_discount_amount: 0,
   is_sales_order: 0,
   invoice_number: `ORD-${Math.floor(Math.random() * 999999999)}`,
 };

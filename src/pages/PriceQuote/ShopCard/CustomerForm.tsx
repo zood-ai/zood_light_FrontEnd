@@ -10,6 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import PlusIcon from '@/components/Icons/PlusIcon';
 import TrashIcon from '@/components/Icons/TrashIcon';
 import ShopCardSummeryPQ from '@/components/custom/ShopCardSummery/ShopCardSummeryPQ';
+import { ShopCardSummery } from '@/components/custom/ShopCardSummery/ShopCardSummery';
 import CustomerForms from './CustomerForms';
 import { Textarea } from '@/components/ui/textarea';
 import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
@@ -59,6 +60,7 @@ const CustomerForm = () => {
     name?: string;
     unit_price?: number;
     index: number;
+    total_price: number;
   }) => {
     const updatedItems = orderSchema.products.map((item, index) =>
       index === newItem.index ? { ...item, ...newItem } : item
@@ -86,25 +88,33 @@ const CustomerForm = () => {
           quantity: 1,
           name: productData.name,
           unit_price: productData.price,
+          total_price:
+            productData.price * productData.quantity || productData.price,
         });
       } catch (error) {
         console.error('Failed to fetch product data', error);
       }
     } else if (field === 'quantity') {
       const updatedProducts = orderSchema.products.map((item, i) =>
-        i === index ? { ...item, quantity: parseInt(value) || 1 } : item
+        i === index
+          ? {
+              ...item,
+              quantity: parseInt(value) || 1,
+              total_price: (parseInt(value) || 1) * item.unit_price || 0,
+            }
+          : item
       );
       dispatch(addProduct(updatedProducts));
     }
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-0 mt-5 md:flex justify-between">
-      <div className="col-span-3 md:col-span-1 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-md">
+    <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
+      <div className="flex-grow">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
           {orderSchema.products.map((item, index) => (
-            <div key={index} className="grid grid-cols-1   gap-md">
+            <div key={index} className="flex flex-wrap">
               <SelectCompInput
                 className="md:w-[327px]  "
                 placeholder="اسم المنتج"
@@ -118,7 +128,7 @@ const CustomerForm = () => {
                 }
                 value={item.product_id}
               />
-              <div className="flex gap-x-md ">
+              <div className="flex gap-x-md">
                 <IconInput
                   value={item.quantity}
                   onChange={(e) =>
@@ -233,6 +243,7 @@ const CustomerForm = () => {
       </div>
 
       <ShopCardSummeryPQ />
+      {/* <ShopCardSummery /> */}
     </div>
   );
 };

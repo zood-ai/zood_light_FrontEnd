@@ -8,7 +8,11 @@ import { addProduct, updateField } from '@/store/slices/orderSchema';
 import { useNavigate, useParams } from 'react-router-dom';
 import TrashIcon from '@/components/Icons/TrashIcon';
 import CustomerFormEdits from './CustomerFormEdits';
+import CustomerForm from './CustomerForm';
 import ShopCardSummeryPQEdit from '@/components/custom/ShopCardSummery/ShopCardSummeryPQEdit';
+import ShopCardSummeryPQ from '@/components/custom/ShopCardSummery/ShopCardSummeryPQ';
+import axiosInstance from '@/api/interceptors';
+import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 
 const CustomerFormEdit = () => {
   const allService = createCrudService<any>('manage/customers');
@@ -19,6 +23,7 @@ const CustomerFormEdit = () => {
   const { useGetAll: fetchAllProducts } = createCrudService<any>(
     'menu/products?not_default=1'
   );
+  const { openDialog } = useGlobalDialog();
 
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const dispatch = useDispatch();
@@ -28,47 +33,66 @@ const CustomerFormEdit = () => {
   const [loading, setLoading] = useState(false);
   const { data: allData, isLoading } = fetchAllCustomers();
   const { data: getAllPro } = fetchAllProducts();
+  const { mutate: confirmOrder } = createCrudService<any>(
+    'confirm-sales-order'
+  ).useCreate();
+  console.log({ loading });
 
   dispatch(updateField({ field: 'is_sales_order', value: 1 }));
-  const handleSubmitOrder = async () => {};
+  const handleSubmitOrder = async () => {
+    console.log(params.id);
+    setLoading(true);
+    try {
+      await axiosInstance.post('confirm-sales-order', { order_id: params.id });
+      navigate('/zood-dashboard/price-quote');
+      openDialog('added');
+      setLoading(false);
+    } catch (e) {
+      console.log(e);
+    }
+  };
   console.log(orderSchema, 'orderSchema');
- 
-  const { data : getOrdersById} = createCrudService<any>('orders').useGetById(
+
+  const { data: getOrdersById } = createCrudService<any>('orders').useGetById(
     `${params.id || ''}`
   );
+  console.log({ hhhhh: getOrdersById });
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-0 mt-5 md:flex justify-between">
-      <div className="col-span-3 md:col-span-2 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-0">
+    <div className="mt-5 flex-wrap flex xl:justify-between max-xl:flex-col gap-x-[120px]">
+      <div className="flex-grow">
         <CustomerFormEdits />
+        {/* <CustomerForm /> */}
 
-        <div className="col-span-10 my-2">
+        <div className="space-y-10 my-2">
           {getOrdersById?.data?.products.map((item, index) => (
-            <div key={index} className="grid grid-cols-1 md:flex gap-md">
+            <div key={index} className="flex flex-wrap gap-md">
               <SelectComp
-                className="w-[220px] min-w-[120px] max-w-[220px]"
+                className="flex-grow"
                 placeholder="اسم الصنف"
-                options={getAllPro?.data?.map((product) => ({
-                  value: product.id,
-                  label: product.name,
-                }))}
+                options={[
+                  {
+                    value: item.id,
+                    label: item.name,
+                  },
+                ]}
                 label="اسم الصنف"
-                value={item.product_id}
+                value={item.id}
                 disabled
               />
               <IconInput
                 value={item?.pivot?.quantity}
                 label="الكمية"
-                inputClassName="w-[117px] max-w-[117px] min-w-[80px]"
+                inputClassName="max-sm:flex-grow sm:w-[117px] sm:max-w-[117px] sm:min-w-[80px]"
                 disabled
               />
               <IconInput
                 label="السعر"
-                inputClassName="w-[138px] max-w-[138px] min-w-[80px]"
+                inputClassName="max-sm:flex-grow sm:w-[138px] sm:max-w-[138px] sm:min-w-[80px]"
                 iconSrcLeft="SR"
-                value={item.unit_price}
+                defaultValue={item.unit_price || item.pivot.unit_price}
                 disabled
               />
-              {orderSchema.products.length > 1 && (
+              {/* {orderSchema.products.length > 1 && (
                 <TrashIcon
                   onClick={() => {
                     const updatedItems = orderSchema.products.filter(
@@ -78,24 +102,25 @@ const CustomerFormEdit = () => {
                   }}
                   className="translate-y-[34px] cursor-pointer hover:scale-105"
                 />
-              )}
+              )} */}
             </div>
           ))}
         </div>
 
-        <div className="col-span-10">
+        <div className="col-span-10 pb-5">
           <Button
             loading={loading}
             disabled={loading}
             onClick={handleSubmitOrder}
             className="w-[144px] mt-md"
           >
-            حفظ
+            تأكيد
           </Button>
         </div>
       </div>
 
       <ShopCardSummeryPQEdit />
+      {/* <ShopCardSummeryPQ /> */}
     </div>
   );
 };

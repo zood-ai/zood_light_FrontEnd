@@ -61,7 +61,7 @@ export const B2BInvoice: React.FC<B2BInvoiceProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allService = createCrudService<any>('orders?filter[type]=2');
+  const allService = createCrudService<any>('orders?filter[type]=2&filter[status]=4');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   console.log(allData, 'allUserData');

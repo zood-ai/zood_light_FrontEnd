@@ -14,6 +14,7 @@ import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
+import axiosInstance from '@/api/interceptors';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
@@ -84,8 +85,9 @@ export const useDataTableColumns = () => {
                 <StatusBadge status="error" text={'غير مدفوع'} />
               ) : row.getValue('payment_status') == 'fully' ? (
                 <StatusBadge status="active" text={'مدفوع'} />
-              ):
-                '-'}
+              ) : (
+                '-'
+              )}
             </span>
           </div>
         );

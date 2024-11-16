@@ -12,10 +12,14 @@ import axiosInstance from '@/api/interceptors';
 import Cookies from 'js-cookie';
 
 const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
+  const { data: getTaxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const mainTax = getTaxes?.data[0];
   const dispatch = useDispatch();
   const { id: orderId } = useParams();
   const orderSchema = useSelector((state: any) => state.orderSchema);
-
+  console.log({ orderSchema });
   const [discountAmount, setDiscountAmount] = useState(0);
   const [subTotal, setSubTotal] = useState(0);
   const [totalAmountIncludeAndExclude, setTotalAmountIncludeAndExclude] =
@@ -25,16 +29,19 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
     (acc, item) => acc + item.unit_price * item.quantity,
     0
   );
-  const taxAmount = (totalCost * 15) / 100;
-
-  const { data: settings } =
-    createCrudService<any>('manage/settings').useGetAll();
-  const { data: getTaxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const [taxAmount, setTaxAmount] = useState((subTotal * 15) / 100);
+  console.log(123, taxAmount);
 
   useEffect(() => {
-    dispatch(updateField({ field: 'subtotal_price', value: totalCost }));
+    dispatch(updateField({ field: 'subtotal_price', value: subTotal }));
     dispatch(
-      updateField({ field: 'total_price', value: totalCost - taxAmount })
+      updateField({ field: 'total_price', value: totalAmountIncludeAndExclude })
+    );
+    dispatch(
+      updateField({
+        field: 'tax_exclusive_discount_amount',
+        value: taxAmount,
+      })
     );
     dispatch(updateField({ field: 'discount_amount', value: discountAmount }));
     dispatch(
@@ -52,8 +59,22 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
         value: Cookies.get('branch_id') || '',
       })
     );
-    // dispatch(updateField({ field: 'customer_notes', value: discountAmount }));
-  }, [dispatch, totalCost, taxAmount, discountAmount]);
+    dispatch(
+      updateField({
+        field: 'discount_amount',
+        value: discountAmount,
+      })
+    );
+    dispatch(updateField({ field: 'customer_notes', value: discountAmount }));
+  }, [
+    dispatch,
+    subTotal,
+    totalCost,
+    taxAmount,
+    discountAmount,
+    getTaxes?.data,
+    totalAmountIncludeAndExclude,
+  ]);
 
   useEffect(() => {
     if (orderId) {
@@ -65,23 +86,54 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
   console.log(settings, 'settings');
 
   const handleIncludeAndExclude = useCallback(() => {
-    const isTaxInclusive = settings?.data?.tax_inclusive_pricing !== 0;
-    const finalDiscount = discountAmount || taxAmount;
-    const calculatedAmount = isTaxInclusive
-      ? totalCost - finalDiscount
-      : totalCost + (taxAmount - discountAmount);
+    // const isTaxInclusive = settings?.data?.tax_inclusive_pricing !== 0;
+    // const finalDiscount = discountAmount || taxAmount;
+    // const calculatedAmount = isTaxInclusive
+    //   ? totalCost - finalDiscount
+    //   : totalCost + (taxAmount - discountAmount);
 
-    setTotalAmountIncludeAndExclude(calculatedAmount);
-    setSubTotal(isTaxInclusive ? totalCost - taxAmount : totalCost);
-  }, [settings, totalCost, taxAmount, discountAmount]);
+    // setTotalAmountIncludeAndExclude(calculatedAmount);
+    // setSubTotal(isTaxInclusive ? totalCost - taxAmount : totalCost);
 
+    let finalDiscount = 0;
+    let SubTotalAfterDiscount = 0;
+    if (settings?.data?.tax_inclusive_pricing === 1) {
+      // const totalCostWithTax = totalCost - taxAmount;
+      finalDiscount = discountAmount / (1 + mainTax?.rate / 100);
+      SubTotalAfterDiscount = subTotal - finalDiscount;
+    } else {
+      finalDiscount = discountAmount;
+      SubTotalAfterDiscount = subTotal - finalDiscount;
+    }
+    const Drepa = SubTotalAfterDiscount * (mainTax?.rate / 100);
+    setTaxAmount(Drepa);
+    setTotalAmountIncludeAndExclude(SubTotalAfterDiscount + Drepa);
+  }, [settings, subTotal, mainTax?.rate, discountAmount]);
   useEffect(() => {
+    console.log(123456789, { subTotal }, (subTotal * 15) / 100);
+    setTaxAmount((subTotal * 15) / 100);
+  }, [subTotal, discountAmount]);
+  useEffect(() => {
+    if (settings?.data?.tax_inclusive_pricing === 1) {
+      const holder = totalCost / (1 + mainTax?.rate / 100);
+      setSubTotal(holder);
+    } else {
+      setSubTotal(totalCost);
+    }
     handleIncludeAndExclude();
-  }, [handleIncludeAndExclude]);
+  }, [
+    totalCost,
+    settings?.data?.tax_inclusive_pricing,
+    discountAmount,
+    taxAmount,
+    orderSchema,
+    mainTax,
+    handleIncludeAndExclude,
+  ]);
 
   return (
     <>
-      <div className="flex  flex-col   rounded-none w-[502px] min-w-[302px] max-w-[502px]  ">
+      <div className="flex flex-grow flex-col   rounded-none w-full  md:min-w-[450px] xl:max-w-[502px]  ">
         <div className="flex flex-col pt-6 pb-12 w-full bg-white rounded border border-solid border-zinc-300 max-md:max-w-full">
           <div className="flex flex-col items-start px-3 w-full max-md:max-w-full">
             <div className="self-stretch max-md:mr-2.5 max-md:max-w-full">
@@ -92,13 +144,17 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                       <div>المجموع الفرعي</div>
                       <div className="mt-7">خصم</div>
                     </div>
-                    <div className="mt-7">ضريبة القيمة المضافة {'15%'}</div>
+                    <div className="mt-7">
+                      ضريبة القيمة المضافة {mainTax?.rate}%
+                    </div>
                   </div>
                 </div>
                 <div className="flex flex-col w-[45%] max-md:ml-0 max-md:w-full">
                   <div className="flex flex-col w-full text-sm font-medium text-right whitespace-nowrap max-md:mt-10">
                     <div className="flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
-                      <div className="text-zinc-800">{subTotal}</div>
+                      <div className="text-zinc-800">
+                        {Math.floor(subTotal * 100) / 100}
+                      </div>
                       <div className="self-start text-zinc-500">SR</div>
                     </div>
                     <IconInput
@@ -106,9 +162,11 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                       // <IconInput
                       placeholder="0.00"
                       onChange={(value) =>
-                        setDiscountAmount(value.target.value)
+                        setDiscountAmount(
+                          Math.min(value.target.value, totalCost)
+                        )
                       }
-                      inputClassName={'w-full max-w-[214px]  '}
+                      inputClassName={'w-full   '}
                       // label="ضريبة القيمة المضافة"
                       iconSrcLeft={'SR'}
                       value={
@@ -118,7 +176,9 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                     />
                     {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
-                      <div className="text-zinc-800">{taxAmount}</div>
+                      <div className="text-zinc-800">
+                        {Math.floor(taxAmount * 100) / 100}
+                      </div>
                       <div className="text-zinc-500">SR</div>
                     </div>
                   </div>
@@ -136,9 +196,11 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
               }}
             />
 
-            <div className=" flex gap-5 justify-between self-stretch mt-3 ml-4 w-full text-sm text-right max-w-[458px] text-zinc-800 max-md:mr-2.5 max-md:max-w-full">
+            <div className="flex-grow flex justify-between self-stretch mt-3 max-md:pl-4 pl-2 w-full text-sm text-right  text-zinc-800 max-md:mr-2.5 max-md:max-w-full">
               <div className="font-medium">المبلغ الإجمالي</div>
-              <div className="font-bold">SR {totalAmountIncludeAndExclude}</div>
+              <div className="font-bold">
+                SR {Math.floor(totalAmountIncludeAndExclude * 100) / 100}
+              </div>
             </div>
           </div>
           <hr
@@ -154,7 +216,7 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
             المبلغ المتبقي
           </div>
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            {totalCost + taxAmount - taxAmount}
+            {totalAmountIncludeAndExclude}
           </div>
         </div>
       </div>

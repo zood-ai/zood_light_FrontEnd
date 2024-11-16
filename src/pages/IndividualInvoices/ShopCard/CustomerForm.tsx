@@ -86,7 +86,7 @@ const CustomerForm = () => {
       });
   };
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
-  const holder = useSelector((state: any) => state.orderSchema.total_taxes);
+  const holder = useSelector((state: any) => state.orderSchema.tax_exclusive_discount_amount);
   const submitOrder = async () => {
     console.log({holder});
     // const products = cardItemValue.map((item: any) => ({
@@ -99,7 +99,7 @@ const CustomerForm = () => {
     //   discount_type: 2,
     // }));
     // dispatch(addProduct(products));
-    console.log(1, { orderSchema });
+    console.log(1, { orderSchema, holder });
 
     try {
       setLoading(true);

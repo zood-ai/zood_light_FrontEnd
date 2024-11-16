@@ -104,7 +104,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     );
     dispatch(
       updateField({
-        field: 'total_taxes',
+        field: 'tax_exclusive_discount_amount',
         value: taxAmount,
       })
     );

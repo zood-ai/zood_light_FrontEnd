@@ -72,19 +72,17 @@ const CustomerFormEdits = () => {
         console.error('Failed to fetch customer data', err);
       });
   };
- 
+
   useEffect(() => {
     if (params.id) {
       handleInputChangex('customer_id', orderSchema?.customer_id);
     }
   }, [orderSchema?.customer_id]);
 
- 
- 
   console.log(orderSchema, 'orderSchema');
 
   return (
-    <>
+    <div className='space-y-4'>
       <SelectComp
         options={allData?.data?.map((item) => ({
           value: item.id,
@@ -99,14 +97,14 @@ const CustomerFormEdits = () => {
           }
         }}
         label="اسم العميل"
-        className="col-span-10 md:col-span-4 md:w-[21vw]"
+        className="flex-grow"
         value={orderSchema?.customer_id}
         disabled={params.id}
       />
       <IconInput
         disabled
         name="name"
-        className="col-span-10 md:col-span-4 md:w-[21vw]"
+        className="flex-grow"
         inputClassName="w-full"
         label="رقم العميل"
         iconSrc={callIcon}
@@ -116,14 +114,14 @@ const CustomerFormEdits = () => {
       <IconInput
         disabled
         name={formState.name}
-        className="col-span-10 md:col-span-10"
+        className="flex-grow"
         label="اسم الشارع"
         value={formState.address}
         onChange={null}
       />
       <IconInput
         disabled
-        className="col-span-10 md:col-span-4 md:w-[21vw]"
+        className="flex-grow"
         inputClassName="w-full"
         label="رقم تسجيل ضريبة القيمة المضافة"
         value={formState.tax_registration_number}
@@ -131,14 +129,13 @@ const CustomerFormEdits = () => {
       />
       <IconInput
         disabled
-        className="col-span-10 md:col-span-4 md:w-[21vw]"
+        className="flex-grow"
         inputClassName="w-full"
         label="معرف اخر"
         value={formState.vat_registration_number}
         onChange={null}
       />
-    </>
+    </div>
   );
 };
-
 export default CustomerFormEdits;

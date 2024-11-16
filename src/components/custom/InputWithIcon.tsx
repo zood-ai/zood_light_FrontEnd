@@ -9,7 +9,7 @@ interface SearchInputProps {
   className?: string;
   inputClassName?: string;
   type?: string;
-  iconSrcLeft?: string
+  iconSrcLeft?: string;
 }
 
 const IconInput: React.FC<any> = ({
@@ -24,7 +24,9 @@ const IconInput: React.FC<any> = ({
   ...props
 }) => {
   return (
-    <div className={`flex gap-2   rounded  border-gray-200 ${className} `}>
+    <div
+      className={`flex gap-2  max-sm:flex-grow rounded  border-gray-200 ${className} `}
+    >
       <div className="w-full">
         {label && (
           <div className="self-start text-sm font-medium text-right text-secText mb-xs">
@@ -33,7 +35,7 @@ const IconInput: React.FC<any> = ({
         )}
         <div className="relative">
           <Input
-          type={type}
+            type={type}
             {...props}
             placeholder={placeholder}
             className={` w-full text-right text-mainText   ${
@@ -58,7 +60,9 @@ const IconInput: React.FC<any> = ({
               className={`w-[18px] absolute left-3 text-secText ${
                 label ? 'top-[14%]' : 'top-[20%]'
               } `}
-            >{iconSrcLeft}</div>
+            >
+              {iconSrcLeft}
+            </div>
           )}
         </div>
       </div>

@@ -19,15 +19,12 @@ const CustomerForm = () => {
   const allServiceOrderPay =
     createCrudService<any>('order-payments').useCreate();
   const orderSchema = useSelector((state: any) => state.orderSchema);
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
   const { mutate: mutateOrderPay } = allServiceOrderPay;
 
   const { useGetAll } = allService;
-  const [loading, setLoading] = useState(false);
-
-  const { data: allData, isLoading } = useGetAll();
   const initialValue = {
     name: '',
     phone: '',
@@ -38,8 +35,58 @@ const CustomerForm = () => {
     addToZatca: true,
   };
   const [formState, setFormState] = useState(initialValue);
-  let dispatch = useDispatch();
-  let params = useParams();
+  const [loading, setLoading] = useState(false);
+  const [loadingCustomerData, setLoadingCustomerData] = useState(false);
+  const { data: allData, isLoading } = useGetAll();
+  const params = useParams();
+  const orderId = params.id;
+  useEffect(() => {
+    async function getCustomerData() {
+      try {
+        setLoadingCustomerData(true);
+        const res = await axiosInstance.get(`/orders/${orderId}`);
+        const customer = res?.data?.data?.customer;
+
+        console.log('FINALLY RESPONSE: ', res?.data?.data);
+        console.log('CUSTOMER DATA: ', customer);
+
+        const getCustomerData = await axiosInstance.get(
+          `/manage/customers/${customer?.id}`
+        );
+        console.log(
+          'FINALLY ADDRESSS : ',
+          getCustomerData?.data?.data?.addresses[0]?.name
+        );
+
+        if (customer) {
+          setFormState({
+            name: customer.name || '',
+            phone: customer.phone || '',
+            notes: customer.notes || '-',
+            tax_registration_number: customer.tax_registration_number || '',
+            vat_registration_number: customer.vat_registration_number || '',
+            address: getCustomerData?.data?.data?.addresses[0]?.name || '',
+            addToZatca: true,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch customer data', error);
+      } finally {
+        setLoadingCustomerData(false);
+      }
+    }
+
+    if (orderId) {
+      getCustomerData();
+    }
+  }, [orderId]);
+  console.log('ALLDATA', allData);
+
+  // console.log('FORM_STATE_FROM_ABDELRAHMAN', formState);
+  // console.log('isLoading_FROM_ABDELRAHMAN', isLoading);
+  // console.log('orderSchema_FROM_ABDELRAHMAN', orderSchema);
+  const dispatch = useDispatch();
+  console.log(params.id);
   const handleInputChange = (field: string, value: any) => {
     setFormState((prevState) => ({ ...prevState, [field]: value }));
   };
@@ -51,10 +98,14 @@ const CustomerForm = () => {
         value: value,
       })
     );
+
     const res = await axiosInstance
       .get(`/manage/customers/${value}`)
       .then((res) => {
         const customerData = res?.data?.data;
+        console.log('CUSTOMER_DATA_FROM: ', customerData);
+
+        console.log('RES_FROM: ', res);
         // setFormState(customerData)
         if (customerData) {
           handleInputChange('name', customerData.id || '');
@@ -159,73 +210,77 @@ const CustomerForm = () => {
 
   return (
     <div className="  grid-cols-1 md:grid-cols-3 gap-0 self-stretch mt-5  flex justify-between">
-      <div className="md:max-h-[45vh] col-span-3 md:col-span-2 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-0">
-        <SelectComp
-          options={allData?.data?.map((item) => ({
-            value: item.id,
-            label: item.name,
-          }))}
-          placeholder="Select Customer"
-          onValueChange={(value) => {
-            if (params.id) {
-              return;
-            } else {
-              handleInputChangex('customer_id', value);
-            }
-          }}
-          label="اسم العميل"
-          className="col-span-10 md:col-span-4 w-[327px]"
-          value={orderSchema?.customer_id}
-          disabled={params.id}
-        />
-        <IconInput
-          disabled
-          name="name"
-          className="col-span-10 md:col-span-4"
-          label="رقم العميل"
-          iconSrc={callIcon}
-          value={formState.phone}
-          onChange={null}
-        />
-        <IconInput
-          disabled
-          name={formState.name}
-          className="col-span-10 md:col-span-10"
-          label="اسم الشارع"
-          value={formState.address}
-          onChange={null}
-        />
-        <IconInput
-          disabled
-          className="col-span-10 md:col-span-4"
-          label="رقم تسجيل ضريبة القيمة المضافة"
-          value={formState.tax_registration_number}
-          onChange={null}
-        />
-        <IconInput
-          disabled
-          className="col-span-10 md:col-span-6"
-          label="معرف اخر"
-          value={formState.vat_registration_number}
-          onChange={null}
-        />
-        <div className="col-span-10">
-          <CheckboxWithText
-            label="اضافة التقرير الي Zatca"
-            checked={formState.addToZatca}
-            onChange={(e) => handleInputChange('addToZatca', e.target.checked)}
+      <div className="px-4 py-2">
+        <div className="md:max-h-[45vh] col-span-3 md:col-span-2 grid grid-cols-1 md:grid-cols-10 gap-x-3xl gap-y-0">
+          <SelectComp
+            options={allData?.data?.map((item) => ({
+              value: item.id,
+              label: item.name,
+            }))}
+            placeholder={formState?.name}
+            onValueChange={(value) => {
+              if (params.id) {
+                return;
+              } else {
+                handleInputChangex('customer_id', value);
+              }
+            }}
+            label="اسم العميل"
+            className="col-span-10 mb-4 md:col-span-4 w-[327px]"
+            defaultValue={formState?.name}
+            disabled={params.id}
           />
-        </div>
-        <div className="col-span-10">
-          <Button
-            dir="ltr"
-            loading={loading}
-            disabled={loading || (params.id ? true : false)}
-            onClick={submitOrder}
-            className="w-[144px]"
-          >
-            حفظ
-          </Button>
+          <IconInput
+            disabled={true}
+            name="name"
+            className="col-span-10 md:col-span-4"
+            label="رقم العميل"
+            iconSrc={callIcon}
+            defaultValue={formState.phone}
+            onChange={null}
+          />
+          <IconInput
+            disabled={true}
+            name={formState.name}
+            className="col-span-10 mb-4 md:col-span-10"
+            label="اسم الشارع"
+            defaultValue={formState.address}
+            onChange={null}
+          />
+          <IconInput
+            disabled={true}
+            className="col-span-10 mb-4 md:col-span-4"
+            label="رقم تسجيل ضريبة القيمة المضافة"
+            defaultValue={formState.tax_registration_number}
+            onChange={null}
+          />
+          <IconInput
+            disabled={true}
+            className="col-span-10 md:col-span-6"
+            label="معرف اخر"
+            defaultValue={formState.vat_registration_number}
+            onChange={null}
+          />
+          <div className="col-span-10 mb-4">
+            <CheckboxWithText
+              label="اضافة التقرير الي Zatca"
+              checked={formState.addToZatca}
+              onChange={(e) =>
+                handleInputChange('addToZatca', e.target.checked)
+              }
+            />
+          </div>
+          <div className="col-span-10">
+            <Button
+              dir="ltr"
+              loading={loading}
+              disabled={loading || (params.id ? true : false)}
+              onClick={submitOrder}
+              className="w-[144px]"
+            >
+              حفظ
+            </Button>
+          </div>
         </div>
       </div>
       <ShopCardSummery />
