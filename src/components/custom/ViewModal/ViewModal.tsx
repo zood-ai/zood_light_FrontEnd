@@ -27,7 +27,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
    }
 `;
 
-  const reactToPrintFn = useReactToPrint({
+  const reactToPrintFn = useReactToPrint<any>({
     contentRef,
     pageStyle,
   });
