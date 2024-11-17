@@ -20,23 +20,38 @@ import axios from 'axios';
 import axiosInstance from '@/api/interceptors';
 import { paymentmethod } from '@/constant/constant';
 
-export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
+export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
+  payment,
+}) => {
+  const { data: Taxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const mainTax = Taxes?.data[0];
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
+  const { data: paymentMethods } = createCrudService<any>(
+    'manage/payment_methods?filter[is_active]=1'
+  ).useGetAll();
+  const [discountAmount, setdiscountAmount] = useState(0);
+  const { data: branchData } =
+    createCrudService<any>('manage/branches').useGetAll();
   const [totalShopCardCount, setTotalShopCardCount] = useState(0);
+  const orderSchema = useSelector((state: any) => state.orderSchema);
 
-  const cardItemValue = useSelector((state: any) => state.cardItems.value);
+  const cardItemValue = useSelector((state: any) => state.orderSchema.products);
+  console.log({branchData});
   const [paymentMethod, setPaymentMethod] = useState<any>([
     {
       tendered: 180,
       amount: 0,
       tips: 0,
       notadd: true,
-      meta: {
-        external_additional_payment_info: 'some info',
-      },
+      business_date: new Date(),
+      meta: 'well done',
+      added_at: new Date(),
       payment_method_id: '',
     },
   ]);
-  const orderSchema = useSelector((state: any) => state.orderSchema);
+  // console.log({cardItemValue});
+  // console.log(1234, { orderSchema, cardItemValue });
   let params = useParams();
   useEffect(() => {
     if (params.id) {
@@ -50,21 +65,10 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
   };
   let dispatch = useDispatch();
   const totalCost = cardItemValue.reduce(
-    (acc, item) => acc + item.price * item.qty,
+    (acc, item) => acc + item.unit_price * item.quantity,
     0
   );
   // console.log(1234, { totalCost });
-  const { data: Taxes } = createCrudService<any>('manage/taxes').useGetAll();
-  const mainTax = Taxes?.data[0];
-  const { data: settings } =
-    createCrudService<any>('manage/settings').useGetAll();
-  console.log(55555, { mainTax });
-  const { data: paymentMethods } = createCrudService<any>(
-    'manage/payment_methods?filter[is_active]=1'
-  ).useGetAll();
-  const [discountAmount, setdiscountAmount] = useState(0);
-  const { data: branchData } =
-    createCrudService<any>('manage/branches').useGetAll();
 
   const handleItemChange = (index: number, field: string, value: string) => {
     setPaymentMethod((prevItems) => {
@@ -79,7 +83,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
   const [totalAmountIncludeAndExclude, setTotalAmountIncludeAndExclude] =
     useState(0);
   const [taxAmount, setTaxAmount] = useState((subTotal * 15) / 100);
-  console.log(123, taxAmount);
 
   useEffect(() => {
     setTaxAmount((subTotal * 15) / 100);
@@ -126,6 +129,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
         value: discountAmount,
       })
     );
+    dispatch(addPayment(paymentMethod));
   }, [paymentMethod, taxAmount, discountAmount, totalAmountIncludeAndExclude]);
   const [paymentMethodinit, setPaymentMethodinit] = useState([]);
 
@@ -140,7 +144,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
     }
   }, []);
 
-  console.log({ paymentMethod });
+  console.log({ orderSchema });
 
   const [totalAmount, setTotalAmount] = useState(
     params.id
@@ -149,7 +153,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
         }, 0)
       : 1
   );
-  console.log(params.id, { totalAmount, paymentMethod });
 
   useEffect(() => {
     let allSum = 0;
@@ -177,7 +180,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
       finalDiscount = discountAmount;
       SubTotalAfterDiscount = subTotal - finalDiscount;
     }
-    console.log({ SubTotalAfterDiscount, finalDiscount });
     const Drepa = SubTotalAfterDiscount * (mainTax?.rate / 100);
     setTaxAmount(Drepa);
     setTotalAmountIncludeAndExclude(SubTotalAfterDiscount + Drepa);
@@ -320,11 +322,10 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
               <div className="flex flex-wrap gap-1.5 mt-3 text-sm text-right text-zinc-500 max-md:mr-2.5">
                 {paymentMethods?.data?.map((option, index2) => (
                   <button
-                    disabled={params.id ? true : false}
+                    disabled={payment === 'fully' ? true : false}
                     key={index2}
                     onClick={() => {
-                      if (params.id) return;
-                      console.log({ paymentMethod, option });
+                      if (payment === 'fully') return;
                       handleItemChange(index2, 'payment_method_id', option.id);
                       setPaymentMethod(() => {
                         return paymentMethod.map((item, i) => {
@@ -336,9 +337,9 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
                               tendered: 180,
                               tips: 0,
                               notadd: true,
-                              meta: {
-                                external_additional_payment_info: 'some info',
-                              },
+                              business_date: new Date(),
+                              meta: 'well done',
+                              added_at: new Date(),
                               payment_method_id: option.id,
                             };
                           }
@@ -347,7 +348,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
                       });
                     }}
                     className={`h-[40px] w-[93px] whitespace-nowrap min-w-fit  px-md  flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointe flex-grow ${
-                      params.id ? 'opacity-50' : ''
+                      payment === 'fully' ? 'opacity-50' : ''
                     } ${
                       paymentMethod[paymentMethod.length - 1]
                         ?.payment_method_id === option.id
@@ -371,7 +372,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
                     );
                   }}
                   value={
-                    !params.id
+                    payment !== 'fully'
                       ? Number(
                           paymentMethod[paymentMethod.length - 1]?.amount
                         ) || 'NaN'
@@ -382,7 +383,8 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
                   label="المبلغ"
                   width="150px"
                   disabled={
-                    params.id && paymentMethodinit[paymentMethod.length - 1]
+                    payment === 'fully' &&
+                    paymentMethodinit[paymentMethod.length - 1]
                   }
                 />
               </div>
@@ -390,13 +392,14 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
             {/* ))} */}
 
             {paymentMethod?.map((option1, index1) => {
-              if (index1 === paymentMethod?.length - 1 && !params.id) return;
+              if (index1 === paymentMethod?.length - 1 && payment !== 'fully')
+                return;
               console.log({ paymentMethod });
               return (
                 <div className="flex gap-3 items-center" key={index1}>
                   <p>{option1?.amount}</p>
                   <p>{option1?.name || option1?.payment_method?.name}</p>
-                  {paymentMethod?.length > 1 && !params?.id && (
+                  {paymentMethod?.length > 1 && payment !== 'fully' && (
                     <>
                       <div
                         onClick={() => {
@@ -421,38 +424,11 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
                       </div>
                     </>
                   )}
-                  {paymentMethod.length > 1 &&
-                    params?.id &&
-                    !paymentMethodinit[index1] && (
-                      <>
-                        <div
-                          onClick={() => {
-                            const newItems = [...paymentMethod];
-                            newItems.splice(index1, 1);
-                            setPaymentMethod(newItems);
-                          }}
-                          className="cursor-pointer hover:scale-105 flex items-center"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M14.2792 2C15.1401 2 15.9044 2.55086 16.1766 3.36754L16.7208 5H20C20.5523 5 21 5.44772 21 6C21 6.55227 20.5523 6.99998 20 7L19.9975 7.07125L19.1301 19.2137C19.018 20.7837 17.7117 22 16.1378 22H7.86224C6.28832 22 4.982 20.7837 4.86986 19.2137L4.00254 7.07125C4.00083 7.04735 3.99998 7.02359 3.99996 7C3.44769 6.99998 3 6.55227 3 6C3 5.44772 3.44772 5 4 5H7.27924L7.82339 3.36754C8.09562 2.55086 8.8599 2 9.72076 2H14.2792ZM17.9975 7H6.00255L6.86478 19.0712C6.90216 19.5946 7.3376 20 7.86224 20H16.1378C16.6624 20 17.0978 19.5946 17.1352 19.0712L17.9975 7ZM10 10C10.5128 10 10.9355 10.386 10.9933 10.8834L11 11V16C11 16.5523 10.5523 17 10 17C9.48716 17 9.06449 16.614 9.00673 16.1166L9 16V11C9 10.4477 9.44771 10 10 10ZM14 10C14.5523 10 15 10.4477 15 11V16C15 16.5523 14.5523 17 14 17C13.4477 17 13 16.5523 13 16V11C13 10.4477 13.4477 10 14 10ZM14.2792 4H9.72076L9.38743 5H14.6126L14.2792 4Z"
-                              fill="#FC3030"
-                            />
-                          </svg>
-                        </div>
-                      </>
-                    )}
                 </div>
               );
             })}
 
-            {!params.id && (
+            {payment !== 'fully' && (
               <div className="flex">
                 <Button
                   onClick={() => {
@@ -474,9 +450,9 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = () => {
                           tendered: 180,
                           tips: 0,
                           notadd: true,
-                          meta: {
-                            external_additional_payment_info: 'some info',
-                          },
+                          business_date: new Date(),
+                          meta: 'well done',
+                          added_at: new Date(),
                         },
                       ];
                     });

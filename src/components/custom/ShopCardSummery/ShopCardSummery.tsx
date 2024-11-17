@@ -53,12 +53,10 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     (acc, item) => acc + item.price * item.qty,
     0
   );
-  // console.log(1234, { totalCost });
   const { data: Taxes } = createCrudService<any>('manage/taxes').useGetAll();
   const mainTax = Taxes?.data[0];
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
-  console.log(55555, { mainTax });
   const { data: paymentMethods } = createCrudService<any>(
     'manage/payment_methods?filter[is_active]=1'
   ).useGetAll();
@@ -79,7 +77,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   const [totalAmountIncludeAndExclude, setTotalAmountIncludeAndExclude] =
     useState(0);
   const [taxAmount, setTaxAmount] = useState((subTotal * 15) / 100);
-  console.log(123, taxAmount);
 
   useEffect(() => {
     setTaxAmount((subTotal * 15) / 100);
@@ -140,7 +137,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     }
   }, []);
 
-  console.log({ paymentMethod });
 
   const [totalAmount, setTotalAmount] = useState(
     params.id
@@ -149,7 +145,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
         }, 0)
       : 1
   );
-  console.log(params.id, { totalAmount, paymentMethod });
 
   useEffect(() => {
     let allSum = 0;
@@ -177,7 +172,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
       finalDiscount = discountAmount;
       SubTotalAfterDiscount = subTotal - finalDiscount;
     }
-    console.log({ SubTotalAfterDiscount, finalDiscount });
     const Drepa = SubTotalAfterDiscount * (mainTax?.rate / 100);
     setTaxAmount(Drepa);
     setTotalAmountIncludeAndExclude(SubTotalAfterDiscount + Drepa);
@@ -324,7 +318,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                     key={index2}
                     onClick={() => {
                       if (params.id) return;
-                      console.log({ paymentMethod, option });
                       handleItemChange(index2, 'payment_method_id', option.id);
                       setPaymentMethod(() => {
                         return paymentMethod.map((item, i) => {
@@ -391,7 +384,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
 
             {paymentMethod?.map((option1, index1) => {
               if (index1 === paymentMethod?.length - 1 && !params.id) return;
-              console.log({ paymentMethod });
               return (
                 <div className="flex gap-3 items-center" key={index1}>
                   <p>{option1?.amount}</p>

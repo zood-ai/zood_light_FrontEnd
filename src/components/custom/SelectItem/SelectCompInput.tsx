@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import useDirection from '@/hooks/useDirection';
+import { useParams } from 'react-router-dom';
 
 interface SelectCompProps {
   options: { value: string; label: string }[];
@@ -33,6 +34,7 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
     const [isInputActive, setIsInputActive] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const isRtl = useDirection();
+    const params = useParams();
 
     const handleInputFocus = () => {
       setIsInputActive(true);
@@ -62,8 +64,6 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
       onInputFieldChange(inputValue);
       onValueChange('');
     }, [inputValue]);
-
-    console.log({ inputValue });
 
     return (
       <div className={className} style={{ position: 'relative' }}>
@@ -95,19 +95,21 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
         </Select>
 
         {/* Transparent Input Overlay */}
-        <input
-          ref={ref}
-          type="text"
-          value={inputValue}
-          onFocus={handleInputFocus}
-          onChange={handleInputChange}
-          // placeholder={placeholder}
-          className="absolute translate-y-3 inset-0 w-[80%] h-full bg-transparent border-none focus:outline-none"
-          style={{
-            zIndex: 10, // Ensures input stays above the dropdown
-            paddingRight: '1rem', // Adjust padding to align text with dropdown (modify as needed)
-          }}
-        />
+        {!params.id && (
+          <input
+            ref={ref}
+            type="text"
+            value={inputValue}
+            onFocus={handleInputFocus}
+            onChange={handleInputChange}
+            // placeholder={placeholder}
+            className="absolute translate-y-3 inset-0 w-[80%] h-full bg-transparent border-none focus:outline-none"
+            style={{
+              zIndex: 10, // Ensures input stays above the dropdown
+              paddingRight: '1rem', // Adjust padding to align text with dropdown (modify as needed)
+            }}
+          />
+        )}
       </div>
     );
   }

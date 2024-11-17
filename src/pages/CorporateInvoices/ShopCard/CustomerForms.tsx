@@ -138,23 +138,24 @@ const CustomerForms = () => {
             disabled={params.id}
           />
         </div>
-
-        <div className="translate-y-[32px]">
-          <Button
-            onClick={() => {
-              setFastActionBtn(true);
-            }}
-            type="button"
-            variant={'link'}
-          >
-            <div className="flex gap-2">
-              <span className="font-semibold">اضافة عميل جديد</span>
-              <span>
-                <PlusIcon />
-              </span>
-            </div>
-          </Button>
-        </div>
+        {!params.id && (
+          <div className="translate-y-[32px]">
+            <Button
+              onClick={() => {
+                setFastActionBtn(true);
+              }}
+              type="button"
+              variant={'link'}
+            >
+              <div className="flex gap-2">
+                <span className="font-semibold">اضافة عميل جديد</span>
+                <span>
+                  <PlusIcon />
+                </span>
+              </div>
+            </Button>
+          </div>
+        )}
       </div>
 
       <FastAddActionsCustomerPQ

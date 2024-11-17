@@ -29,7 +29,6 @@ export const Counter: React.FC<any> = ({ item }: any) => {
     const existingItemIndex = cardItemValue.findIndex(
       (i: { id: string }) => i.id === newItem.id
     );
-    console.log(existingItemIndex);
 
     // If exists, update the quantity
     if (existingItemIndex >= 0) {

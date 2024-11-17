@@ -15,8 +15,9 @@ import ConfirmBk from '@/components/custom/ConfimBk';
 import { useNavigate, useParams } from 'react-router-dom';
 import { setCardItem } from '@/store/slices/cardItems';
 import CustomerForm from './CustomerForm';
+import CustomerFormEdit from './CustomerFormEdit';
 
-export  const ShopCardEditCo: React.FC<ShopCardProps> = () => {
+export const ShopCardEditCo: React.FC<ShopCardProps> = () => {
   const isRtl = useDirection();
   const dispatch = useDispatch();
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
@@ -114,9 +115,10 @@ export  const ShopCardEditCo: React.FC<ShopCardProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
-      <ShopCardTable />
+      {/* <ShopCardTable /> */}
 
-      <CustomerForm />
+      <CustomerFormEdit />
+      {/* <CustomerForm /> */}
       <ConfirmBk
         isOpen={isOpen}
         setIsOpen={undefined}

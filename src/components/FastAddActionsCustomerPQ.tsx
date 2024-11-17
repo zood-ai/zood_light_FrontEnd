@@ -38,8 +38,6 @@ export default function FastAddActionsCustomerPQ({
   onClose,
   setInvoice,
 }) {
-  console.log(isOpen);
-  console.log(onClose);
   const { t } = useTranslation();
   const isRtl = useDirection();
   const params = useParams();

@@ -101,7 +101,6 @@ export default function FastAddActions2({ isOpen, onClose }) {
   }, [getDataById, form, isEditMode, params.objId]);
 
   const { openDialog } = useGlobalDialog();
-  console.log(currData, 'currData');
 
   // Handle form submission for both add and edit scenarios
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {

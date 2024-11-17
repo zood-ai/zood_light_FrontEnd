@@ -46,13 +46,13 @@ const CustomerForm = () => {
           ...orderSchema,
           products: orderSchema.products.map((product) => ({
             ...product,
-            product_id: product.products_id
-              ? product.products_id
+            product_id: product.product_id
+              ? product.product_id
               : defaultProduct?.data[0]?.id,
             name: 'sku-zood-20001',
           })),
         };
-        console.log({myInputRef})
+        console.log({ myInputRef });
         console.log({ updatedOrderSchema });
         await mutate(updatedOrderSchema, {
           onSuccess: () => {

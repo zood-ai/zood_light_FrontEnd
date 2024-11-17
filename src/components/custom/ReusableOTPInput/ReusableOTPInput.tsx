@@ -17,7 +17,6 @@ export const ReusableOTPInput = ({
     // const newOtpValues = [...otpValues];
     // newOtpValues[index] = value;
     // setOtpValues(newOtpValues);
-    console.log("OTP Values:", value);
 
     if (onChange) {
       onChange(value);

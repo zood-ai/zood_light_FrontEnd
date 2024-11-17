@@ -1,7 +1,6 @@
 import { Checkbox } from '@/components/ui/checkbox';
 
 export function CheckboxWithText({ label, checked, onChange, ...props }: any) {
-  console.log({ props });
   return (
     <div className="items-top flex space-x-2">
       <Checkbox

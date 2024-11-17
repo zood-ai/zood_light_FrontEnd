@@ -10,57 +10,59 @@ import { DataTableViewOptions } from './data-table-view-options';
 import { useTranslation } from 'react-i18next';
 import useDirection from '@/hooks/useDirection';
 import { IconFileExport } from '@tabler/icons-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   actionBtn: any;
-  actionText?: string
+  actionText?: string;
 }
 
 export function DataTableToolbar<TData>({
   table,
   actionBtn,
-  actionText
+  actionText,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
   const { t } = useTranslation();
   const isRtl = useDirection();
   const navigate = useNavigate();
+  const location = useLocation();
   return (
     <div className="flex items-center justify-between">
       <div
         className={`flex flex-1 flex-col-reverse items-start gap-y-2   sm:flex-row sm:items-center sm:space-x-2 `}
       >
-
         {/* {actionBtn} */}
 
         {/* <DataTableViewOptions table={table} /> */}
         <div className="flex gap-x-[16px] ">
-        <Button
-          className="rounded-[4px] w-[146px] h-[39px] "
-          variant={'default'}
-          onClick={() => {
-            navigate('add');
-          }}
-        >
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 15 15"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+          <Button
+            className="rounded-[4px] w-[146px] h-[39px] "
+            variant={'default'}
+            onClick={() => {
+              if (location.pathname === '/zood-dashboard/corporate-invoices')
+                navigate('add/shop-card');
+              else navigate('add');
+            }}
           >
-            <path
-              d="M7.5 1V14M1 7.5H14"
-              stroke="white"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <span className="ms-[10px]">{`اضافة ${actionText}`}</span>
-        </Button>
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 15 15"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M7.5 1V14M1 7.5H14"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span className="ms-[10px]">{`اضافة ${actionText}`}</span>
+          </Button>
           <Button
             variant="outline"
             // onClick={() => table.resetColumnFilters()}

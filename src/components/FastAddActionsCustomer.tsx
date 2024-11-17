@@ -88,7 +88,6 @@ export default function FastAddActionsCustomer({
         { ...values, code: `SUP-${Math.floor(Math.random() * 100000)}` },
         {
           onSuccess: (data) => {
-            console.log(data, 'data');
 
             setInvoice(data.data.id);
             setLoading(false);

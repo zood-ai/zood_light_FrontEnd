@@ -37,9 +37,6 @@ function DashSalesCard({ data }) {
     }
     getStatistic();
   }, []);
-  console.log(
-    day?.data?.sum_orders?.reduce((sum, item) => sum + item.value, 0)
-  );
   const totalDay = day?.data?.sum_orders?.reduce(
     (sum, item) => sum + item.value,
     0
@@ -53,12 +50,10 @@ function DashSalesCard({ data }) {
     (sum, item) => sum + item.value,
     0
   );
-  console.log(totalDay);
   const totalRevent = data?.data?.sum_orders.reduce(
     (sum, item) => sum + item.value,
     0
   );
-  // console.log(totalRevent);
   return (
     <>
       {loading ? (

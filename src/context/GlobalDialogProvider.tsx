@@ -171,11 +171,11 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
                   <div className="flex flex-col mt-5 w-full ">
                     <div className="  text-mainText">
                       هل أنت متأكد أنك تريد حذف{' '}
-                      <span className="mx-1">{title.ar}</span>
+                      <span className="mx-1">{title?.ar}</span>
                     </div>
                     <div className="text-sm text-secText">
                       لديك تغييرات غير محفوظة. إذا حذفت{' '}
-                      <span className="mx-1">{title.ar} </span>
+                      <span className="mx-1">{title?.ar} </span>
                       الآن، فسوف تفقد تغييراتك{' '}
                     </div>
                     <div className="flex flex-col mt-6 w-full text-sm font-semibold text-right text-white whitespace-nowrap rounded">

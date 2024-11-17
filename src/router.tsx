@@ -268,16 +268,16 @@ const router = createBrowserRouter([
           </React.Suspense>
         ),
       },
-      {
-        path: 'corporate-invoices/add',
-        element: (
-          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
-            <ProtectedRoute requiredRole={Roles.ADMIN}>
-              <CorporateInvoicesAdd />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
+      // {
+      //   path: 'corporate-invoices/add',
+      //   element: (
+      //     <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+      //       <ProtectedRoute requiredRole={Roles.ADMIN}>
+      //         <CorporateInvoicesAdd />
+      //       </ProtectedRoute>
+      //     </React.Suspense>
+      //   ),
+      // },
       {
         path: 'corporate-invoices/add/shop-card',
         element: (

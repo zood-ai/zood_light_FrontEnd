@@ -26,7 +26,7 @@ export const DetailsHeadWithOutFilter: React.FC<any> = ({
         <div className=" max-w-[580px] my-4">
           <div className="flex gap-3 max-w-full text-right text-zinc-800  shrink grow">
             <div className="    text-2xl  font-semibold ">
-              {title ? (isArabic ? title.ar : title.en) : mainTittle}
+              {title ? (isArabic ? title?.ar : title.en) : mainTittle}
             </div>
             <div className="flex  gap-px  items-center  text-sm font-medium mt-[10px] shrink grow">
               <span>{subTitle}</span>

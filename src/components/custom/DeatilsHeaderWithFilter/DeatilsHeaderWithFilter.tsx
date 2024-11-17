@@ -32,7 +32,6 @@ export const DeatilsHeaderWithFilter: React.FC<
               placeholder="فرز حسب التصنيف"
               options={[{ value: 'all', label: 'All' }]}
               onValueChange={function (value: string): any {
-                console.log(value);
               }}
             />
           </div>
