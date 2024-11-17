@@ -43,9 +43,13 @@ const CustomerFormEdit = () => {
     console.log(params.id);
     setLoading(true);
     try {
-      await axiosInstance.post('confirm-sales-order', { order_id: params.id });
-      navigate('/zood-dashboard/price-quote');
-      openDialog('added');
+      const res = await axiosInstance.post('confirm-sales-order', {
+        order_id: params.id,
+      });
+      if (res.status === 200) {
+        openDialog('added');
+        navigate(`/zood-dashboard/corporate-invoices/edit/${params.id}`);
+      }
       setLoading(false);
     } catch (e) {
       console.log(e);
