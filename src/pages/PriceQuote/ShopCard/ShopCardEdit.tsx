@@ -90,6 +90,7 @@ export const ShopCardEditPQ: React.FC<ShopCardProps> = () => {
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
       <CustomerFormEdit />
+      {/* <CustomerForm /> */}
       <ConfirmBk
         isOpen={isOpen}
         setIsOpen={undefined}

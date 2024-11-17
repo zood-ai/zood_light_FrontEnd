@@ -42,6 +42,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFileSelect }) => {
         <input
           id="fileInput"
           type="file"
+          accept="image/*"
           className="sr-only hidden"
           onChange={handleFileInput}
           aria-label="اختر ملف للتحميل"

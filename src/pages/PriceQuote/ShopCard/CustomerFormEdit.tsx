@@ -9,6 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import TrashIcon from '@/components/Icons/TrashIcon';
 import CustomerFormEdits from './CustomerFormEdits';
 import CustomerForm from './CustomerForm';
+import { Textarea } from '@/components/ui/textarea';
 import ShopCardSummeryPQEdit from '@/components/custom/ShopCardSummery/ShopCardSummeryPQEdit';
 import ShopCardSummeryPQ from '@/components/custom/ShopCardSummery/ShopCardSummeryPQ';
 import axiosInstance from '@/api/interceptors';
@@ -63,7 +64,7 @@ const CustomerFormEdit = () => {
   console.log({ hhhhh: getOrdersById });
   return (
     <div className="mt-5 flex-wrap flex xl:justify-between max-xl:flex-col gap-x-[120px]">
-      <div className="flex-grow">
+      <div className="">
         <CustomerFormEdits />
         {/* <CustomerForm /> */}
 
@@ -72,14 +73,17 @@ const CustomerFormEdit = () => {
             <div key={index} className="flex flex-wrap gap-md">
               <SelectComp
                 className="flex-grow"
-                placeholder="اسم الصنف"
+                placeholder="اسم المنتج"
                 options={[
                   {
                     value: item.id,
-                    label: item.name,
+                    label:
+                      item.sku !== 'sku-zood-20001'
+                        ? item.name
+                        : item.pivot.kitchen_notes,
                   },
                 ]}
-                label="اسم الصنف"
+                label="اسم المنتج"
                 value={item.id}
                 disabled
               />
@@ -93,23 +97,40 @@ const CustomerFormEdit = () => {
                 label="السعر"
                 inputClassName="max-sm:flex-grow sm:w-[138px] sm:max-w-[138px] sm:min-w-[80px]"
                 iconSrcLeft="SR"
-                defaultValue={item.unit_price || item.pivot.unit_price}
+                defaultValue={
+                  item.unit_price * item?.pivot?.quantity ||
+                  item.pivot.unit_price * item?.pivot?.quantity
+                }
                 disabled
               />
-              {/* {orderSchema.products.length > 1 && (
-                <TrashIcon
-                  onClick={() => {
-                    const updatedItems = orderSchema.products.filter(
-                      (_, i) => i !== index
-                    );
-                    dispatch(addProduct(updatedItems));
-                  }}
-                  className="translate-y-[34px] cursor-pointer hover:scale-105"
-                />
-              )} */}
             </div>
           ))}
         </div>
+        <div className="flex gap-x-md mt-5">
+          <IconInput
+            disabled
+            name="kitchen_received_at"
+            value={getOrdersById?.data?.kitchen_received_at}
+            label="نوع السيارة"
+            inputClassName="w-[240px] min-w-[120px]"
+            onChange={null}
+          />
+          <IconInput
+            disabled
+            name="kitchen_done_at"
+            value={getOrdersById?.data?.kitchen_done_at}
+            inputClassName="w-[240px] min-w-[120px] mb-sm "
+            label="رقم اللوحة"
+            onChange={null}
+          />
+        </div>
+        <Textarea
+          disabled
+          name="kitchen_notes"
+          value={getOrdersById?.data?.kitchen_notes}
+          className="w-[499px] my-sm"
+          label="ملاحظات"
+        />
 
         <div className="col-span-10 pb-5">
           <Button

@@ -40,6 +40,9 @@ interface OrderSchemaState {
   invoice_number: any;
   discount_type: number;
   discount_id: string;
+  kitchen_done_at: string;
+  kitchen_received_at: string;
+  kitchen_notes: string;
 }
 
 const initialState: OrderSchemaState = {
@@ -81,6 +84,9 @@ const initialState: OrderSchemaState = {
   total_price: 0,
   tax_exclusive_discount_amount: 0,
   is_sales_order: 0,
+  kitchen_done_at: '',
+  kitchen_notes: '',
+  kitchen_received_at: '',
   invoice_number: `ORD-${Math.floor(Math.random() * 999999999)}`,
 };
 

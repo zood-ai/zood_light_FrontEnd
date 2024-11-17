@@ -82,7 +82,7 @@ const CustomerFormEdits = () => {
   console.log(orderSchema, 'orderSchema');
 
   return (
-    <div className='space-y-4'>
+    <div className="space-y-4">
       <SelectComp
         options={allData?.data?.map((item) => ({
           value: item.id,
@@ -101,7 +101,7 @@ const CustomerFormEdits = () => {
         value={orderSchema?.customer_id}
         disabled={params.id}
       />
-      <IconInput
+      {/* <IconInput
         disabled
         name="name"
         className="flex-grow"
@@ -134,7 +134,7 @@ const CustomerFormEdits = () => {
         label="معرف اخر"
         value={formState.vat_registration_number}
         onChange={null}
-      />
+      /> */}
     </div>
   );
 };

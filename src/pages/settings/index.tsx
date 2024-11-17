@@ -8,8 +8,11 @@ export default function Settings() {
   const [selectedFileName, setSelectedFileName] = useState('');
   const [loadingSettings, setLoadingSettings] = useState(false);
   const [imagePreviewUrl, setImagePreviewUrl] = useState('');
-
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
+  console.log('manage/settings: ', settings?.data?.country);
   const [updateAll, setUpdateAll] = useState({
+    country: settings?.data?.country || '',
     additionalNumber: '',
     streetName: '',
     postalCode: '',
@@ -23,6 +26,7 @@ export default function Settings() {
     branch_id: '',
   });
   const [data, setData] = useState({
+    country: settings?.data?.country || '',
     additionalNumber: '',
     streetName: '',
     postalCode: '',
@@ -36,7 +40,8 @@ export default function Settings() {
     branch_id: '',
   });
   const [fileBase64, setFileBase64] = useState<any>('');
-
+  console.log('FROM ME', data);
+  console.log('SECOND FROM ME', updateAll);
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -54,10 +59,13 @@ export default function Settings() {
     };
     reader.readAsDataURL(file);
   };
+  //TODO ==> PHONE OF BRANCH
   useEffect(function () {
     async function getSettingsData() {
       setLoadingSettings(true);
+      // const phoneNumberFromBranchRoute = await axiosInstance.get(`/manage/branches/${x=051caaaa-f1c9-437f-bcd1-04a06ce569c5}`)
       const data = await axiosInstance.get(`auth/whoami`);
+      console.log('ALL DATA: ', data);
       // setData(JSON.parse(data?.data?.user?.branches[0]?.registered_address));
       const holder = JSON.parse(
         data?.data?.user?.branches[0]?.registered_address
@@ -80,10 +88,9 @@ export default function Settings() {
     getSettingsData();
   }, []);
 
-  const { data: settings } =
-    createCrudService<any>('manage/settings').useGetAll();
   const { data: branches } =
     createCrudService<any>('manage/branches').useGetAll();
+  console.log('manage/branches: ', data);
   const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();
   const settingsData = settings?.data;
   const taxesData = taxes?.data?.[0];
@@ -137,25 +144,33 @@ export default function Settings() {
       data: { business_logo: fileBase64 },
     });
   }, [fileBase64, updateSettings]);
-
+  console.log('updateAll.branch_id: ', updateAll.branch_id);
   const updateTop = async () => {
     await axiosInstance.put(`manage/settings`, {
       business_name: updateAll.business_name,
     });
-    await axiosInstance.put(`manage/branches/${updateAll.branch_id}`, {
-      registered_address: JSON.stringify({
-        buildingNumber: updateAll.buildingNumber,
-        additionalNumber: updateAll.additionalNumber,
-        streetName: updateAll.streetName,
-        postalCode: updateAll.postalCode,
-        district: data.district,
-        commercialRegesterationNumber: data.commercialRegesterationNumber,
-        citySubdivisionName: data.citySubdivisionName,
-        city: data.city,
-      }),
-    });
+    const res = await axiosInstance.put(
+      `manage/branches/${updateAll.branch_id}`,
+      {
+        phone: updateAll.phone,
+        registered_address: JSON.stringify({
+          buildingNumber: updateAll.buildingNumber,
+          additionalNumber: updateAll.additionalNumber,
+          streetName: updateAll.streetName,
+          postalCode: updateAll.postalCode,
+          district: data.district,
+          commercialRegesterationNumber: data.commercialRegesterationNumber,
+          citySubdivisionName: data.citySubdivisionName,
+          city: data.city,
+        }),
+      }
+    );
+    console.log(res);
   };
   const updateBottom = async () => {
+    await axiosInstance.put(`manage/settings`, {
+      country: updateAll.country,
+    });
     await axiosInstance.put(`manage/branches/${updateAll.branch_id}`, {
       registered_address: JSON.stringify({
         buildingNumber: data.buildingNumber,
@@ -180,7 +195,7 @@ export default function Settings() {
           <div className="text-s font-semibold text-zinc-800">
             البيانات الاساسية
           </div>
-          <div className="self-stretch max-md:max-w-full">
+          <div className="self-stretch max-md:max-w-full text-sm">
             <div className="grid grid-cols-2">
               <div className="flex flex-col w-6/12 max-md:ml-0 max-md:w-full">
                 <div className="flex flex-col grow mt-10 text-sm text-left max-md:mt-10">
@@ -218,7 +233,8 @@ export default function Settings() {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4 mt-4 max-w-full text-sm text-left ">
+          {/* second part */}
+          <div className="flex mt-2  w-full text-sm">
             <div className="flex flex-col flex-1">
               <div className="self-start font-medium text-zinc-500">
                 الرقم الاضافي
@@ -231,7 +247,7 @@ export default function Settings() {
                   }));
                 }}
                 value={updateAll?.additionalNumber}
-                className="w-[117px] "
+                className="w-[327px]"
               />
             </div>
             <div className="flex flex-col flex-1">
@@ -246,13 +262,14 @@ export default function Settings() {
                   }));
                 }}
                 value={updateAll?.postalCode}
-                className="w-[117px] "
+                className="w-[327px] "
               />
             </div>
+          </div>
+          {/* Part We Need To Start */}
+          <div className="flex mt-4  w-full text-sm">
             <div className="flex flex-col flex-1">
-              <div className="self-start font-medium text-zinc-500">
-                رقم المبني
-              </div>
+              <div className="self-start text-zinc-500">رقم المبني</div>
               <Input
                 onChange={(e) => {
                   setUpdateAll((prev) => ({
@@ -261,10 +278,11 @@ export default function Settings() {
                   }));
                 }}
                 value={updateAll?.buildingNumber}
-                className="w-[117px] "
+                className="w-[327px]"
               />
             </div>
           </div>
+
           <Button
             onClick={() => {
               handleUpdateBranch();
@@ -294,6 +312,21 @@ export default function Settings() {
               <div className="w-full flex gap-4">
                 <div className="flex flex-col grow mt-10 text-sm text-left max-md:mt-10 w-[40%]">
                   <div className="self-start font-medium text-zinc-500">
+                    الدوله
+                  </div>
+                  <Input
+                    onChange={(e) => {
+                      setUpdateAll((prev) => ({
+                        ...prev,
+                        country: e.target.value,
+                      }));
+                    }}
+                    defaultValue={settings?.data?.country}
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex flex-col grow mt-10 text-sm text-left max-md:mt-10 w-[40%]">
+                  <div className="self-start font-medium text-zinc-500">
                     المدينه
                   </div>
                   <Input
@@ -307,8 +340,12 @@ export default function Settings() {
                     className="w-full"
                   />
                 </div>
+              </div>
+            </div>
 
-                <div className="flex flex-col grow mt-10 text-sm text-left max-md:mt-10 w-[40%]">
+            <div className="flex  gap-4  justify-center w-full text-sm   max-md:max-w-full">
+              <div className=" w-[50%]">
+                <div className="flex flex-col grow mt-5 text-sm text-left max-md:mt-10 w-[100%]">
                   <div className="self-start font-medium text-zinc-500">
                     citySubdivisionName
                   </div>
@@ -324,26 +361,42 @@ export default function Settings() {
                   />
                 </div>
               </div>
+              {/*  */}
+              {/*  */}
+              <div className="w-[50%]">
+                <div className="flex flex-col grow mt-5 text-sm text-left max-md:mt-10 w-[100%]">
+                  <div className="self-start font-medium text-zinc-500">
+                    الحي
+                  </div>
+                  <Input
+                    onChange={(e) => {
+                      setUpdateAll((prev) => ({
+                        ...prev,
+                        district: e.target.value,
+                      }));
+                    }}
+                    value={updateAll?.district}
+                    className="w-full"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col grow mt-4 text-sm text-left max-md:mt-4 w-6/12">
-              <div className="self-start font-medium text-zinc-500">الحي</div>
+
+            <div className="flex flex-col flex-1 mt-3">
+              <div className="self-start font-medium text-zinc-500">
+                رقم الهاتف
+              </div>
               <Input
                 onChange={(e) => {
                   setUpdateAll((prev) => ({
                     ...prev,
-                    district: e.target.value,
+                    phone: e.target.value,
                   }));
                 }}
-                value={updateAll?.district}
-                className="w-[96%]"
+                defaultValue={updateAll?.phone}
+                className="w-[327px]"
               />
             </div>
-            {/* <div className="flex flex-col grow mt-4 text-sm text-left max-md:mt-4 w-6/12">
-              <div className="self-start font-medium text-zinc-500">
-                رقم الهاتف
-              </div>
-              <Input value={updateAll?.phone || ''} className="w-[96%]" />
-            </div> */}
           </div>
           <div
             // style={{ textAlign: '-webkit-auto' }}
@@ -437,6 +490,7 @@ export default function Settings() {
               <span className="text-[14px]">اختر الملف</span>
               <input
                 type="file"
+                accept="image/*"
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
