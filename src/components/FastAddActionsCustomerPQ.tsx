@@ -38,6 +38,8 @@ export default function FastAddActionsCustomerPQ({
   onClose,
   setInvoice,
 }) {
+  console.log(isOpen);
+  console.log(onClose);
   const { t } = useTranslation();
   const isRtl = useDirection();
   const params = useParams();
@@ -88,7 +90,7 @@ export default function FastAddActionsCustomerPQ({
   const { openDialog } = useGlobalDialog();
 
   // Handle form submission for both add and edit scenarios
-  let queryKey = ['manage/customers'];
+  const queryKey = ['manage/customers'];
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
@@ -128,11 +130,20 @@ export default function FastAddActionsCustomerPQ({
       });
   };
   return (
-    <div className=" ">
+    <div onClick={onClose} className="relative ">
       <AlertDialogComp open={isOpen} onOpenChange={onClose}>
         <AlertDialogContentComp className="    ">
-          <div className="bg-mainBg h-[100vh] w-[422px]     relative ps-[24px]">
+          {/* SET WIDTH TO FIT CONTENT AND GIVE PADDING */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-mainBg h-screen overflow-y-scroll w-fit p-4   relative ps-[24px]"
+          >
             <>
+              <div className="absolute flex items-center justify-center w-[25px] h-[25px] border-2 rounded-full  left-[20px]">
+                <button className="" onClick={onClose}>
+                  X
+                </button>
+              </div>
               <div className="grow shrink text-2xl col-span-1 font-semibold w-auto  mt-[35px]">
                 {t('اضافة عميل')}
               </div>
