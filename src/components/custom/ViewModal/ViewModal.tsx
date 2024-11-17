@@ -1,38 +1,71 @@
 import { useSelector } from 'react-redux';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { ViewModalProps } from './ViewModal.types';
 import createCrudService from '@/api/services/crudService';
-import { useRef } from 'react';
-
 import { useReactToPrint } from 'react-to-print';
 import './ViewModal.css';
 
+function printDiv(pageSize) {
+  // const content = document.getElementById('myDiv').innerHTML;
+  // const printWindow = window.open('', '_blank', 'width=600,height=400');
+  // // Set up styles based on the page size
+  // let pageStyle = '';
+  // const tailwindStylesheet = `
+  //   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  // `;
+  // if (pageSize === 'A4') {
+  //   pageStyle = `
+  //     .print-content {
+  //       width: 210mm;
+  //       height: 297mm;
+  //       padding: 20mm;
+  //       box-sizing: border-box;
+  //     }
+  //   `;
+  // } else if (pageSize === '80mm') {
+  //   pageStyle = `
+  //     .print-content {
+  //       width: 80mm;
+  //       padding: 5mm;
+  //       box-sizing: border-box;
+  //     }
+  //   `;
+  // }
+  // // Create the print window content
+  // printWindow.document.open();
+  // printWindow.document.write(`
+  //   <html>
+  //     <head>
+  //       <title>Print</title>
+  //       ${tailwindStylesheet} <!-- Import Tailwind CSS -->
+  //       <style>
+  //         body, html {
+  //           margin: 0;
+  //           padding: 0;
+  //           font-family: Arial, sans-serif;
+  //         }
+  //         ${pageStyle} /* Apply the chosen style */
+  //       </style>
+  //     </head>
+  //     <body>
+  //       <div class="print-content">${content}</div>
+  //     </body>
+  //   </html>
+  // `);
+  // printWindow.document.close();
+  // printWindow.onload = () => {
+  //   printWindow.focus();
+  //   printWindow.print();
+  //   printWindow.onafterprint = () => {
+  //     printWindow.close();
+  //   };
+  // };
+}
+
 export const ViewModal: React.FC<ViewModalProps> = () => {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState('A4');
-  const pageStyle = `
-    @page{
-    size: ${size === 'A4' ? '210mm 297mm' : '80mm auto'}; 
-    margin: ${size === '80mm' ? '5mm' : '10mm'}; 
-     }
-   @media all {
-   .pageBreak{
-   display: none
-   }
-   };
-   @media print{ 
-   .pageBreak{
-    page-break-before:always;
-   }
-   }
-`;
-
-  const reactToPrintFn = useReactToPrint<any>({
-    contentRef,
-    pageStyle,
-  });
-
   const data = useSelector((state: any) => state.toggleAction.data);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const reactToPrintFn = useReactToPrint({ contentRef });
 
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
@@ -44,13 +77,13 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
     `${data?.id}`
   );
   console.log({ data, settings, customerInfo, orderInfo, Taxes });
+  const [size, setSize] = useState('A4');
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);
   };
-  console.log('SIZE : ', size);
 
   const handlePrint = () => {
-    //printDiv(size);
+    printDiv(size);
     // Set custom print styles based on size
     // const printWindow = window.open('', '_blank');
     // printWindow.document.write(`
@@ -78,7 +111,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
     // printWindow.document.close();
     // window.print();
   };
-
+  console.log(size);
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-none h-[90vh] max-w-[80vw] overflow-y-scroll relative ">
@@ -86,187 +119,321 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
           <div className="px-11 py-a12 w-full bg-white rounded-lg border border-gray-200 border-solid max-md:px-5 max-md:max-w-full">
             <div className="flex gap-5 max-md:flex-col">
               <div
-                ref={contentRef}
                 id="myDiv"
-                className="print-content flex flex-col w-[74%] max-md:ml-0 max-md:w-full"
+                ref={contentRef}
+                className={`${"size === 'A4' ? 'a4-size' : 'small-receipt'"} print-content flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
               >
-                <div className="flex flex-col px-3 pt-4 pb-2 mx-auto mt-8 w-full text-sm bg-white rounded-lg border border-gray-200 border-solid text-zinc-800 max-md:mt-10 max-md:max-w-full">
-                  <div className="self-center ml-4 font-semibold text-right">
-                    فاتورة ضريبية مبسطة
-                  </div>
-                  <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-200 border-solid max-md:mr-1 max-md:max-w-full">
-                    {settings?.data?.business_tax_number && (
-                      <div className="flex flex-col flex-1 px-5 pt-4 pb-2 bg-white rounded border border-gray-200 border-solid max-md:pl-5 justify-between">
-                        <div className="self-center">الرقم الضريبي</div>
-                        <div className="mt-4 font-semibold text-center">
-                          {settings?.data?.business_tax_number || ''}
-                        </div>
+                {size === 'A4' ? (
+                  <div className="flex flex-col px-3 pt-4 pb-2 mx-auto mt-8 w-full text-sm bg-white rounded-lg border border-gray-200 border-solid text-zinc-800 max-md:mt-10 max-md:max-w-full">
+                    <div className="w-full flex justify-between items-center mb-4">
+                      <div>
+                        <img src="/icons/logo.webp" alt="Logo" />
+                        <p className="mt-4 w-[277px] leading-[30.18px]">
+                          شركة حلول التطبيقات لتقنية المعلومات حي النخيل الرياض
+                          المملكة العربية السعودية 0123, 31951
+                        </p>
                       </div>
-                    )}
-                    {data?.business_date && (
-                      <div className="flex z-10 flex-col flex-1 px-6 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
-                        <div className="self-center">تاريخ الفاتورة</div>
-                        <div className="flex gap-2 mt-4 font-semibold whitespace-nowrap">
-                          <div className="grow text-center">
-                            {data?.business_date?.split(' ')[0] || ''}
+                      <img
+                        src="/icons/ParCode.webp"
+                        className="w-[100px] h-[100px]"
+                        alt="ParCode"
+                      />
+                    </div>
+                    <div className="self-center ml-4 font-semibold text-right">
+                      فاتورة ضريبية مبسطة
+                    </div>
+                    <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-200 border-solid max-md:mr-1 max-md:max-w-full">
+                      {settings?.data?.business_tax_number && (
+                        <div className="flex flex-col flex-1 px-5 pt-4 pb-2 bg-white rounded border border-gray-200 border-solid max-md:pl-5 justify-between">
+                          <div className="self-center">الرقم الضريبي</div>
+                          <div className="mt-4 text-center font-semibold">
+                            {settings?.data?.business_tax_number || ''}
                           </div>
-                          <div className="">
-                            {data?.business_date?.split(' ')[1]?.slice(0, 5) ||
-                              ''}
+                        </div>
+                      )}
+                      {data?.business_date && (
+                        <div className="flex z-10 flex-col flex-1 px-6 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
+                          <div className="self-center">تاريخ الفاتورة</div>
+                          <div className="flex gap-2 mt-4 font-semibold whitespace-nowrap">
+                            <div className="grow">
+                              {data?.business_date?.split(' ')[0] || ''}
+                            </div>
+                            <div>
+                              {data?.business_date
+                                ?.split(' ')[1]
+                                ?.slice(0, 5) || ''}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                    {customerInfo?.data?.phone && (
-                      <div className="flex z-10 flex-col flex-1 px-8 pt-4 pb-2 whitespace-nowrap bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
-                        <div className="self-center">الجوال</div>
-                        <div className="self-start mt-4 font-semibold">
-                          {customerInfo?.data?.phone}
+                      )}
+                      {customerInfo?.data?.phone && (
+                        <div className="flex z-10 flex-col flex-1 px-8 pt-4 pb-2 whitespace-nowrap bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
+                          <div className="self-center">الجوال</div>
+                          <div className="self-start mt-4 font-semibold">
+                            {customerInfo?.data?.phone}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    {data?.customer?.name && (
-                      <div className="flex z-10 flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
-                        <div>اسم العميل</div>
-                        <div className="mt-4 font-semibold">
-                          {data?.customer?.name || ''}
+                      )}
+                      {data?.customer?.name && (
+                        <div className="flex z-10 flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
+                          <div>اسم العميل</div>
+                          <div className="mt-4 font-semibold">
+                            {data?.customer?.name || ''}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    {data?.reference && (
-                      <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
-                        <div>رقم الفاتورة</div>
-                        <div className="mt-4 font-semibold">
-                          {data?.reference || ''}
+                      )}
+                      {data?.reference && (
+                        <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                          <div>رقم الفاتورة</div>
+                          <div className="mt-4 font-semibold">
+                            {data?.reference || ''}
+                          </div>
                         </div>
+                      )}
+                    </div>
+                    <div className="flex z-10 flex-wrap gap-5 justify-between px-4 py-1.5 mt-4 w-full font-semibold text-right text-white rounded border border-gray-200 border-solid bg-zinc-500 max-md:mr-1 max-md:max-w-full">
+                      <div className="flex w-full  text-center">
+                        <div className="w-1/3">المجموع (شامل الضريبة)</div>
+                        <div className="w-1/3">سعر الوحدة</div>
+                        <div className="w-1/3">كمية</div>
+                        <div className="w-1/3">اسم المنتج</div>
                       </div>
-                    )}
-                  </div>
-                  <div className="flex z-10 flex-wrap gap-5 justify-between px-4 py-1.5 mt-4 w-full font-semibold text-right text-white rounded border border-gray-200 border-solid bg-zinc-500 max-md:mr-1 max-md:max-w-full">
-                    <div className="flex w-full text-center">
-                      <div className="w-1/3">المجموع (شامل الضريبة)</div>
-                      <div className="w-1/3">سعر الوحدة</div>
-                      <div className="w-1/3">كمية</div>
-                      <div className="w-1/3">اسم المنتج</div>
+                    </div>
+                    <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded border border-gray-200 border-solid w-[802px] max-w-full max-md:mr-1 text-center px-3">
+                      {orderInfo?.data?.products.map((e) => (
+                        <div className="flex font-semibold w-full">
+                          <div className="w-1/3">{e?.pivot?.total_price}</div>
+                          <div className="w-1/3">{e?.pivot?.unit_price}</div>
+                          <div className="w-1/3">{e?.pivot?.quantity}</div>
+                          <div className="w-1/3">{e.name}</div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* CODING HERE */}
+                    <div className="flex flex-col gap-3 mt-10 ">
+                      <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
+                        <div> SR {orderInfo?.data?.total_price || 0}</div>
+                        <div>الاجمالي (باستثناء ضريبة القيمة المضافة)</div>
+                      </div>
+                      <div className="flex justify-between p-2 rounded items-center">
+                        <div> SR {orderInfo?.data?.total_taxes || 0}</div>
+                        <div>مجموع ضريبة القيمة المضافة</div>
+                      </div>
+                      <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
+                        <div>SR {orderInfo?.data?.subtotal_price || 0}</div>
+                        <div>المبلغ الإجمالي </div>
+                      </div>
+                      <div className="flex justify-between p-2  rounded items-center">
+                        <div>SR {orderInfo?.data?.discount_amount || 0} </div>
+                        <div>تخفيض</div>
+                      </div>
+                      <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
+                        <div>
+                          {' '}
+                          SR{' '}
+                          {orderInfo?.data?.payments?.reduce(
+                            (sum, item) => sum + item.amount,
+                            0
+                          ) || 0}
+                        </div>
+                        <div>المبلغ الإجمالي المدفوع</div>
+                      </div>
+                      <div className="flex justify-between p-2 rounded items-center">
+                        <div>
+                          SR{' '}
+                          {(orderInfo?.data?.payments.reduce(
+                            (sum, item) => sum + item.amount,
+                            0
+                          ) > orderInfo?.data?.total_price
+                            ? orderInfo?.data?.payments.reduce(
+                                (sum, item) => sum + item.amount,
+                                0
+                              ) - orderInfo?.data?.total_price
+                            : 0) || 0}
+                        </div>
+                        <div>إجمالي المبلغ المستحق</div>
+                      </div>
+
+                      {/* end here */}
+                    </div>
+                    {/* CODE DELETED HERE */}
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm w-[50%] mt-[30px] text-[#26262F]">
+                        الشروط والاحكام
+                      </p>
+                      <div className="justify-items-end">
+                        <img
+                          loading="lazy"
+                          src="https://cdn.builder.io/api/v1/image/assets/TEMP/6f427b12df7330067f0a9d705f3491cda199d05af240961b0cade6a24ca16fbb?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
+                          className="object-contain mt-4 w-full aspect-[1000] max-md:max-w-full"
+                        />
+                        <img
+                          loading="lazy"
+                          srcSet="https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=100 100w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=200 200w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=400 400w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=800 800w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=1200 1200w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=1600 1600w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=2000 2000w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
+                          className="object-contain self-center mt-2 aspect-[1.74] w-[99px]"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded border border-gray-200 border-solid w-[802px] max-w-full max-md:mr-1 text-center px-3">
-                    {orderInfo?.data?.products.map((e) => (
-                      <div className="flex font-semibold w-full">
-                        <div className="w-1/3">{e?.pivot?.total_price}</div>
-                        <div className="w-1/3">{e?.pivot?.unit_price}</div>
-                        <div className="w-1/3">{e?.pivot?.quantity}</div>
-                        <div className="w-1/3">{e.name}</div>
+                ) : (
+                  <div className="flex flex-col w-[390px]  mx-auto text-right border border-gray-300 p-1">
+                    {/* الشعار */}
+                    <div className="text-center mb-4">
+                      <img
+                        src="/icons/logo.webp"
+                        alt="Logo"
+                        className="mx-auto"
+                      />
+                    </div>
+
+                    {/* معلومات الشركة */}
+                    <div className="text-center text-sm leading-6 mb-4">
+                      <p>
+                        شركة حلول التطبيقات لتقنية المعلومات
+                        <br />
+                        حي النخيل الرياض، المملكة العربية السعودية
+                        <br />
+                        0123, 31951
+                      </p>
+                    </div>
+
+                    {/* عنوان الفاتورة */}
+                    <div className="text-center font-semibold text-lg my-6">
+                      فاتورة ضريبية مبسطة
+                    </div>
+
+                    {/* معلومات الفاتورة */}
+                    <div className="flex flex-col gap-3 mb-2">
+                      <div className="flex justify-between">
+                        <p>رقم الفاتورة </p>
+                        <p> {data?.reference || ''}</p>
                       </div>
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap gap-5 justify-between mt-10 max-md:mt-10 max-md:mr-1 max-md:max-w-full">
-                    <div className="flex flex-col items-start font-semibold">
-                      <div className="text-right">
-                        SR {orderInfo?.data?.total_price || 0}
+                      <div className="flex justify-between">
+                        <p>تاريخ الفاتورة </p>
+                        <p> {data?.business_date?.split(' ')[0] || ''}</p>
                       </div>
-                      <div className="mt-4 text-right">
-                        SR {orderInfo?.data?.total_taxes || 0}
+                      <div className="flex justify-between">
+                        <p>الرقم الضريبي </p>
+                        <p> {settings?.data?.business_tax_number || ''}</p>
                       </div>
-                      <div className="mt-4 text-right">
-                        SR {orderInfo?.data?.subtotal_price || 0}
+                      <div className="flex justify-between">
+                        <p>اسم العميل </p>
+                        <p> {data?.customer?.name || ''}</p>
                       </div>
-                      <div className="mt-4 text-right">
-                        SR {orderInfo?.data?.discount_amount || 0}
+                      <div className="flex justify-between">
+                        <p> الجوال</p>
+                        <p> {customerInfo?.data?.phone}</p>
                       </div>
-                      <div className="mt-4 text-right">
-                        SR{' '}
-                        {orderInfo?.data?.payments?.reduce(
-                          (sum, item) => sum + item.amount,
-                          0
-                        ) || 0}
+                    </div>
+
+                    {/* جدول المنتجات */}
+                    <div>
+                      {/* رأس الجدول */}
+                      <div className="flex font-semibold   text-black  mb-2">
+                        <div className="w-[27%] self-end">اسم المنتج</div>
+                        <div className="w-[20%] self-end">كمية</div>
+                        <div className="w-[27%] ml-[10px] self-end">سعر الوحدة</div>
+                        <div className="w-[40%]">المجموع (شامل الضريبة)</div>
                       </div>
 
-                      {orderInfo?.data?.payments?.map((e) => (
-                        <>
-                          {/* <div className="mt-4 text-right">
-                            {e.payment_method?.name || '----'}
-                          </div> */}
-                          <div className="mt-4 text-right">
-                            SR {e.amount || 0}
+                      {/* بيانات الجدول */}
+                      <div className="flex flex-col bg-white border border-gray-200 rounded py-2   text-sm">
+                        {orderInfo?.data?.products.map((product, index) => (
+                          <div key={index} className="flex justify-between">
+                            <div className="w-1/4">{product.name}</div>
+                            <div className="w-1/4">
+                              {product?.pivot?.quantity}
+                            </div>
+                            <div className="w-1/4">
+                              {product?.pivot?.unit_price}
+                            </div>
+                            <div className="w-1/4">
+                              {product?.pivot?.total_price}
+                            </div>
                           </div>
-                        </>
-                      ))}
-
-                      {/* <div className="mt-4 text-right">
-                        {orderInfo?.data?.payments[0]?.payment_method?.name ||
-                          '----'}
+                        ))}
                       </div>
-                      <div className="mt-4 text-right">
-                        SR {orderInfo?.data?.payments[0]?.amount || 0}
-                      </div> */}
+                    </div>
 
-                      <div className="mt-4 text-right">
-                        SR{' '}
-                        {(orderInfo?.data?.payments.reduce(
-                          (sum, item) => sum + item.amount,
-                          0
-                        ) > orderInfo?.data?.total_price
-                          ? orderInfo?.data?.payments.reduce(
+                    {/* معلومات الدفع */}
+                    <div className="flex flex-col mt-4 gap-4">
+                      {/* first col div */}
+                      <div className="flex flex-col gap-2">
+                        <div className="flex justify-between items-center">
+                          <p className="w-[50%]">الاجمالي (باستثناء ضريبة القيمة المضافة) </p>
+                          <p>SR {orderInfo?.data?.total_price || 0}</p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p>مجموع ضريبة القيمة المضافة </p>
+                          <p>SR {orderInfo?.data?.total_taxes || 0}</p>
+                        </div>
+                      </div>
+                      {/* end col div */}
+                      {/* first col div */}
+                      <div className="flex flex-col gap-4">
+                        <div className="flex justify-between items-center">
+                          <p>المبلغ الإجمالي </p>
+                          <p>SR {orderInfo?.data?.subtotal_price || 0}</p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p>مجموع ضريبة القيمة المضافة </p>
+                          <p>SR {orderInfo?.data?.total_taxes || 0}</p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p>تخفيض</p>
+                          <p>SR {orderInfo?.data?.discount_amount || 0} </p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p>المبلغ الإجمالي المدفوع</p>
+
+                          <p>
+                            {' '}
+                            SR{' '}
+                            {orderInfo?.data?.payments?.reduce(
                               (sum, item) => sum + item.amount,
                               0
-                            ) - orderInfo?.data?.total_price
-                          : 0) || 0}
+                            ) || 0}
+                          </p>
+                        </div>
                       </div>
-                      {/* <div className="self-stretch mt-4">لا يوجد ملاحظات</div> */}
+
+                      <div className="flex justify-between items-center">
+                        <p>إجمالي المبلغ المستحق</p>
+
+                        <p>
+                          SR{' '}
+                          {(orderInfo?.data?.payments.reduce(
+                            (sum, item) => sum + item.amount,
+                            0
+                          ) > orderInfo?.data?.total_price
+                            ? orderInfo?.data?.payments.reduce(
+                                (sum, item) => sum + item.amount,
+                                0
+                              ) - orderInfo?.data?.total_price
+                            : 0) || 0}
+                        </p>
+                      </div>
+                      {/* end col div */}
                     </div>
-                    <div className="flex flex-col text-right">
-                      <div className="">
-                        الاجمالي (باستثناء ضريبة القيمة المضافة)
-                      </div>
-                      <div className="flex flex-col items-end  mt-4 max-md:pl-5">
-                        <div className="">مجموع ضريبة القيمة المضافة</div>
-                        <div className="mt-4">المبلغ الإجمالي</div>
-                        <div className="mt-4">خصم</div>
-                        <div className="mt-4">المبلغ الإجمالي المدفوع</div>
-                        {/* {orderInfo?.data?.payments?.map((e, idx) => (
-                          <>
-                            <div className="mt-4"> نوع الدفع </div>
-                            <div className="mt-4">المبلغ المدفوع </div>
-                          </>
-                        ))} */}
-                        {orderInfo?.data?.payments?.map((e) => (
-                          <>
-                            <div className="mt-4 text-right">
-                              {e.payment_method?.name || '----'}
-                            </div>
-                          </>
-                        ))}
-                        <div className="mt-4">إجمالي المبلغ المستحق</div>
-                        {/* <div className="mt-4">الملاحظات</div> */}
-                      </div>
-                    </div>
-                  </div>
-                  <img
-                    loading="lazy"
-                    src="https://cdn.builder.io/api/v1/image/assets/TEMP/6f427b12df7330067f0a9d705f3491cda199d05af240961b0cade6a24ca16fbb?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
-                    className="object-contain mt-4 w-full aspect-[1000] max-md:max-w-full"
-                  />
-                  <div className="flex items-center justify-around mt-2 gap-4 px-4">
-                    <div>
+
+                    {/* الباركود */}
+                    <div className="  my-6">
                       <img
-                        loading="lazy"
-                        srcSet="https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=100 100w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=200 200w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=400 400w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=800 800w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=1200 1200w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=1600 1600w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=2000 2000w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
-                        className="object-contain self-center mt-2 aspect-[1.74] w-[99px]"
+                        src="/icons/parCodeIn80.webp"
+                        alt="Barcode"
+                        className="w-[381px] h-[57px]"
                       />
                     </div>
-                    <div className="flex flex-col   justify-center px-4 py-5 bg-white rounded-lg border border-gray-200 border-solid max-md:px-5">
+                    <div className="  my-4 flex justify-center">
                       <img
-                        loading="lazy"
-                        src="https://cdn.builder.io/api/v1/image/assets/TEMP/0545702f8efd834df3b6f82096b53bd74059f9eaf11522eb1eb8a7fe4841708e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
-                        className="object-contain aspect-[0.99] w-[75px]"
+                        src="/icons/ParCode.webp"
+                        alt="Barcode"
+                        className="w-[76px] h-[77px]"
                       />
                     </div>
                   </div>
-                </div>
+                )}
               </div>
-              {/*--------------------------------*NOT IMPORTATN PART IN PART IN PRINTING*------------------------------------------------  */}
-              {/* Second Part */}
               <div className="no-print flex flex-col ml-5 w-[26%] max-md:ml-0 max-md:w-full">
                 <div className="flex flex-col max-md:mt-10">
                   <div className="flex flex-col w-full font-semibold text-right">
@@ -326,6 +493,15 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       </button>
                     </div>
                   </div>
+                  {/* <div className="flex flex-col self-end mx-auto items-center max-w-full rounded-none w-[154px] mt-10">
+                    <div className="flex flex-col justify-center px-4 py-5 bg-white rounded-lg border border-gray-200 border-solid max-md:px-5">
+                      <img
+                        loading="lazy"
+                        src="https://cdn.builder.io/api/v1/image/assets/TEMP/0545702f8efd834df3b6f82096b53bd74059f9eaf11522eb1eb8a7fe4841708e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
+                        className="object-contain aspect-[0.99] w-[106px]"
+                      />
+                    </div>
+                  </div> */}
                 </div>
               </div>
             </div>
