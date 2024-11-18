@@ -5,63 +5,6 @@ import createCrudService from '@/api/services/crudService';
 import { useReactToPrint } from 'react-to-print';
 import './ViewModal.css';
 
-function printDiv(pageSize) {
-  // const content = document.getElementById('myDiv').innerHTML;
-  // const printWindow = window.open('', '_blank', 'width=600,height=400');
-  // // Set up styles based on the page size
-  // let pageStyle = '';
-  // const tailwindStylesheet = `
-  //   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  // `;
-  // if (pageSize === 'A4') {
-  //   pageStyle = `
-  //     .print-content {
-  //       width: 210mm;
-  //       height: 297mm;
-  //       padding: 20mm;
-  //       box-sizing: border-box;
-  //     }
-  //   `;
-  // } else if (pageSize === '80mm') {
-  //   pageStyle = `
-  //     .print-content {
-  //       width: 80mm;
-  //       padding: 5mm;
-  //       box-sizing: border-box;
-  //     }
-  //   `;
-  // }
-  // // Create the print window content
-  // printWindow.document.open();
-  // printWindow.document.write(`
-  //   <html>
-  //     <head>
-  //       <title>Print</title>
-  //       ${tailwindStylesheet} <!-- Import Tailwind CSS -->
-  //       <style>
-  //         body, html {
-  //           margin: 0;
-  //           padding: 0;
-  //           font-family: Arial, sans-serif;
-  //         }
-  //         ${pageStyle} /* Apply the chosen style */
-  //       </style>
-  //     </head>
-  //     <body>
-  //       <div class="print-content">${content}</div>
-  //     </body>
-  //   </html>
-  // `);
-  // printWindow.document.close();
-  // printWindow.onload = () => {
-  //   printWindow.focus();
-  //   printWindow.print();
-  //   printWindow.onafterprint = () => {
-  //     printWindow.close();
-  //   };
-  // };
-}
-
 export const ViewModal: React.FC<ViewModalProps> = () => {
   const data = useSelector((state: any) => state.toggleAction.data);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -81,37 +24,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);
   };
-
   const handlePrint = () => {
-    printDiv(size);
-    // Set custom print styles based on size
-    // const printWindow = window.open('', '_blank');
-    // printWindow.document.write(`
-    //   <html>
-    //     <head>
-    //       <style>
-    //         /* Hide elements with class no-print */
-    //         .no-print { display: none !important; }
-    //         /* Set paper size styles */
-    //         @media print {
-    //           body { margin: 0; }
-    //           ${
-    //             size === '80mm'
-    //               ? '@page { size: 80mm auto; }'
-    //               : '@page { size: A5; }'
-    //           }
-    //         }
-    //       </style>
-    //     </head>
-    //     <body onload="window.print(); window.close();">
-    //       ${document.querySelector('.printable').outerHTML}
-    //     </body>
-    //   </html>
-    // `);
-    // printWindow.document.close();
-    // window.print();
+    reactToPrintFn();
   };
-  console.log(size);
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-none h-[90vh] max-w-[80vw] overflow-y-scroll relative ">
@@ -124,7 +39,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                 className={`${"size === 'A4' ? 'a4-size' : 'small-receipt'"} print-content flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
               >
                 {size === 'A4' ? (
-                  <div className="flex flex-col px-3 pt-4 pb-2 mx-auto mt-8 w-full text-sm bg-white rounded-lg border border-gray-200 border-solid text-zinc-800 max-md:mt-10 max-md:max-w-full">
+                  <div className="flex flex-col px-3 pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg border border-gray-200 border-solid text-zinc-800 max-md:mt-10 max-md:max-w-full">
                     <div className="w-full flex justify-between items-center mb-4">
                       <div>
                         <img src="/icons/logo.webp" alt="Logo" />
@@ -154,22 +69,28 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {data?.business_date && (
                         <div className="flex z-10 flex-col flex-1 px-6 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
                           <div className="self-center">تاريخ الفاتورة</div>
-                          <div className="flex gap-2 mt-4 font-semibold whitespace-nowrap">
-                            <div className="grow">
-                              {data?.business_date?.split(' ')[0] || ''}
-                            </div>
-                            <div>
-                              {data?.business_date
-                                ?.split(' ')[1]
-                                ?.slice(0, 5) || ''}
-                            </div>
+                          <div className="flex gap-2 mt-4 font-semibold whitespace-nowrap justify-between">
+                            {data?.business_date?.split(' ')[0] && (
+                              <div className="grow text-center">
+                                {data?.business_date?.split(' ')[0]}
+                              </div>
+                            )}
+                            {data?.business_date
+                              ?.split(' ')[1]
+                              ?.slice(0, 5) && (
+                              <div className="grow text-center">
+                                {data?.business_date
+                                  ?.split(' ')[1]
+                                  ?.slice(0, 5)}
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
                       {customerInfo?.data?.phone && (
                         <div className="flex z-10 flex-col flex-1 px-8 pt-4 pb-2 whitespace-nowrap bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
                           <div className="self-center">الجوال</div>
-                          <div className="self-start mt-4 font-semibold">
+                          <div className="self-start mt-4 w-full text-center font-semibold">
                             {customerInfo?.data?.phone}
                           </div>
                         </div>
@@ -177,7 +98,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {data?.customer?.name && (
                         <div className="flex z-10 flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
                           <div>اسم العميل</div>
-                          <div className="mt-4 font-semibold">
+                          <div className="mt-4 font-semibold w-full text-center">
                             {data?.customer?.name || ''}
                           </div>
                         </div>
@@ -185,7 +106,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {data?.reference && (
                         <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
                           <div>رقم الفاتورة</div>
-                          <div className="mt-4 font-semibold">
+                          <div className="mt-4 font-semibold w-full text-center">
                             {data?.reference || ''}
                           </div>
                         </div>
@@ -193,7 +114,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     </div>
                     <div className="flex z-10 flex-wrap gap-5 justify-between px-4 py-1.5 mt-4 w-full font-semibold text-right text-white rounded border border-gray-200 border-solid bg-zinc-500 max-md:mr-1 max-md:max-w-full">
                       <div className="flex w-full  text-center">
-                        <div className="w-1/3">المجموع (شامل الضريبة)</div>
+                        <div className="w-1/3">المجموع</div>
                         <div className="w-1/3">سعر الوحدة</div>
                         <div className="w-1/3">كمية</div>
                         <div className="w-1/3">اسم المنتج</div>
@@ -212,15 +133,15 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     {/* CODING HERE */}
                     <div className="flex flex-col gap-3 mt-10 ">
                       <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
-                        <div> SR {orderInfo?.data?.total_price || 0}</div>
-                        <div>الاجمالي (باستثناء ضريبة القيمة المضافة)</div>
+                        <div> SR {orderInfo?.data?.subtotal_price || 0}</div>
+                        <div>الاجمالي </div>
                       </div>
                       <div className="flex justify-between p-2 rounded items-center">
                         <div> SR {orderInfo?.data?.total_taxes || 0}</div>
                         <div>مجموع ضريبة القيمة المضافة</div>
                       </div>
                       <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
-                        <div>SR {orderInfo?.data?.subtotal_price || 0}</div>
+                        <div>SR {orderInfo?.data?.total_price || 0}</div>
                         <div>المبلغ الإجمالي </div>
                       </div>
                       <div className="flex justify-between p-2  rounded items-center">
@@ -276,7 +197,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col w-[390px]  mx-auto text-right border border-gray-300 p-1">
+                  <div className="flex flex-col w-[390px]  mx-auto text-right border border-gray-300 text-sm p-1 px-10">
                     {/* الشعار */}
                     <div className="text-center mb-4">
                       <img
@@ -304,51 +225,72 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
 
                     {/* معلومات الفاتورة */}
                     <div className="flex flex-col gap-3 mb-2">
-                      <div className="flex justify-between">
-                        <p>رقم الفاتورة </p>
-                        <p> {data?.reference || ''}</p>
-                      </div>
-                      <div className="flex justify-between">
-                        <p>تاريخ الفاتورة </p>
-                        <p> {data?.business_date?.split(' ')[0] || ''}</p>
-                      </div>
-                      <div className="flex justify-between">
-                        <p>الرقم الضريبي </p>
-                        <p> {settings?.data?.business_tax_number || ''}</p>
-                      </div>
-                      <div className="flex justify-between">
-                        <p>اسم العميل </p>
-                        <p> {data?.customer?.name || ''}</p>
-                      </div>
-                      <div className="flex justify-between">
-                        <p> الجوال</p>
-                        <p> {customerInfo?.data?.phone}</p>
-                      </div>
+                      {data?.reference && (
+                        <div className="flex justify-between">
+                          <p>رقم الفاتورة </p>
+                          <p>{data.reference}</p>
+                        </div>
+                      )}
+                      {data?.business_date?.split(' ')[0] && (
+                        <div className="flex justify-between">
+                          <p>تاريخ الفاتورة </p>
+                          <p>{data.business_date.split(' ')[0]}</p>
+                        </div>
+                      )}
+                      {settings?.data?.business_tax_number && (
+                        <div className="flex justify-between">
+                          <p>الرقم الضريبي </p>
+                          <p>{settings.data.business_tax_number}</p>
+                        </div>
+                      )}
+                      {data?.customer?.name && (
+                        <div className="flex justify-between">
+                          <p>اسم العميل </p>
+                          <p>{data.customer.name}</p>
+                        </div>
+                      )}
+                      {customerInfo?.data?.phone && (
+                        <div className="flex justify-between">
+                          <p>الجوال </p>
+                          <p>{customerInfo.data.phone}</p>
+                        </div>
+                      )}
                     </div>
 
                     {/* جدول المنتجات */}
-                    <div>
+                    <div className="">
                       {/* رأس الجدول */}
-                      <div className="flex font-semibold   text-black  mb-2">
-                        <div className="w-[27%] self-end">اسم المنتج</div>
-                        <div className="w-[20%] self-end">كمية</div>
-                        <div className="w-[27%] ml-[10px] self-end">سعر الوحدة</div>
-                        <div className="w-[40%]">المجموع (شامل الضريبة)</div>
+                      <div className="flex font-semibold  gap-8 text-black  mb-2">
+                        <div className="w-full self-end text-center">
+                          اسم المنتج
+                        </div>
+                        <div className=" self-end text-center">كمية</div>
+                        <div className=" ml-[10px] self-end text-center">
+                          سعر الوحدة
+                        </div>
+                        <div className=" text-center">
+                          المجموع (شامل الضريبة)
+                        </div>
                       </div>
 
                       {/* بيانات الجدول */}
-                      <div className="flex flex-col bg-white border border-gray-200 rounded py-2   text-sm">
+                      <div className="flex border-t-2 border-b-black/20 flex-col bg-white border border-gray-200 rounded py-2   text-sm">
                         {orderInfo?.data?.products.map((product, index) => (
-                          <div key={index} className="flex justify-between">
-                            <div className="w-1/4">{product.name}</div>
-                            <div className="w-1/4">
-                              {product?.pivot?.quantity}
+                          <div
+                            key={index}
+                            className="flex justify-between border-b-2 border-b-black/20"
+                          >
+                            <div className="w-1/4 flex-grow items-center text-[12px]">
+                              {product.name}
                             </div>
-                            <div className="w-1/4">
-                              {product?.pivot?.unit_price}
+                            <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
+                              <p>{product?.pivot?.quantity}</p>
                             </div>
-                            <div className="w-1/4">
-                              {product?.pivot?.total_price}
+                            <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
+                              <p>{product?.pivot?.unit_price}</p>
+                            </div>
+                            <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
+                              <p>{product?.pivot?.total_price}</p>
                             </div>
                           </div>
                         ))}
@@ -360,8 +302,10 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {/* first col div */}
                       <div className="flex flex-col gap-2">
                         <div className="flex justify-between items-center">
-                          <p className="w-[50%]">الاجمالي (باستثناء ضريبة القيمة المضافة) </p>
-                          <p>SR {orderInfo?.data?.total_price || 0}</p>
+                          <p className="w-[50%]">
+                            الاجمالي{' '}
+                          </p>
+                          <p>SR {orderInfo?.data?.subtotal_price || 0}</p>
                         </div>
                         <div className="flex justify-between items-center">
                           <p>مجموع ضريبة القيمة المضافة </p>
@@ -373,11 +317,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       <div className="flex flex-col gap-4">
                         <div className="flex justify-between items-center">
                           <p>المبلغ الإجمالي </p>
-                          <p>SR {orderInfo?.data?.subtotal_price || 0}</p>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <p>مجموع ضريبة القيمة المضافة </p>
-                          <p>SR {orderInfo?.data?.total_taxes || 0}</p>
+                          <p>SR {orderInfo?.data?.total_price || 0}</p>
                         </div>
                         <div className="flex justify-between items-center">
                           <p>تخفيض</p>
@@ -480,7 +420,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           </div>
                         </div>
                         <button
-                          onClick={reactToPrintFn}
+                          onClick={handlePrint}
                           className="gap-2.5 self-end px-8 py-1 mt-4 max-w-full text-white bg-indigo-900 rounded-lg min-h-[32px] mx-auto w-[100px] max-md:px-5"
                         >
                           طباعة

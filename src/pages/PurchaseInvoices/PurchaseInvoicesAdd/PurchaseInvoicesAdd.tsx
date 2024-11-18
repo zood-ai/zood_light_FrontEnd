@@ -70,7 +70,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
         purchaseDescription: allDataId?.data?.notes,
         attached_file: allDataId?.data?.attached_file,
       });
-
+ 
       setItems(
         allDataId?.data?.items?.map((item) => ({
           qty: item?.pivot?.quantity,
@@ -87,7 +87,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     setInvoice({ ...invoice, [e.target.name]: e.target.value });
   };
 
-  console.log(invoice);
+  console.log(invoice,{allDataId});
 
   const handleItemChange = (index: number, field: string, value: string) => {
     const updatedItems = [...items];
@@ -99,7 +99,16 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ items });
+    console.log({
+      branch_id: branchData?.data?.[0]?.id,
+      supplier_id: invoice.supplier_id,
+      type: 'items',
+      notes: invoice.purchaseDescription,
+      attached_file: fileBase64,
+      items: items.map((item) => item.item),
+      invoice_number: Math.floor(Math.random() * 100000),
+    });
+    
     try {
       if (isEditMode) {
         // const { data } = await axiosInstance.put(
@@ -227,7 +236,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             <div className="flex justify-start items-center">
               <IconInput
                 name="invoice_number"
-                defaultValue={Number(invoice.invoice_number)}
+                defaultValue={invoice.invoice_number}
                 onChange={handleInputChange}
                 label="ادخل الرقم المرجعي للفاتورة أو رقم الفاتورة"
                 inputClassName="w-[274px]"

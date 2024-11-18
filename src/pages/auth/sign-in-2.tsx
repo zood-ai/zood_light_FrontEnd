@@ -48,7 +48,7 @@ export default function SignIn2() {
 
   // Handle SignUp
   const handleSignUp = () => {
-    navigate('/zood-signup')
+    navigate('/zood-signup');
   };
 
   // Handle form submission
@@ -237,9 +237,9 @@ export default function SignIn2() {
                 variant={'outline'}
                 loading={false}
                 type="button"
-                className="w-full sm:w-[418px] h-[56px]"
+                className="w-full sm:w-[418px] h-[56px] mb-10"
               >
-                انشاء حساب
+                تسجيل
               </Button>
             </div>
           </form>

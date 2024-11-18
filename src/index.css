@@ -4,6 +4,15 @@
 @tailwind utilities;
 /* Default Page Size: A4 */
 @media print {
+  body {
+    margin: 0;
+    padding: 0;
+    direction: rtl;
+  }
+  .print-content {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
   @page {
     size: A4 portrait;
     margin: 10mm;
