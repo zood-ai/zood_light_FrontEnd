@@ -126,7 +126,11 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           <div className="w-1/3">{e?.pivot?.total_price}</div>
                           <div className="w-1/3">{e?.pivot?.unit_price}</div>
                           <div className="w-1/3">{e?.pivot?.quantity}</div>
-                          <div className="w-1/3">{e.name}</div>
+                          <div className="w-1/3">
+                            {e.sku === 'sku-zood-20001'
+                              ? e.pivot.kitchen_notes
+                              : e.name}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -302,9 +306,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {/* first col div */}
                       <div className="flex flex-col gap-2">
                         <div className="flex justify-between items-center">
-                          <p className="w-[50%]">
-                            الاجمالي{' '}
-                          </p>
+                          <p className="w-[50%]">الاجمالي </p>
                           <p>SR {orderInfo?.data?.subtotal_price || 0}</p>
                         </div>
                         <div className="flex justify-between items-center">
