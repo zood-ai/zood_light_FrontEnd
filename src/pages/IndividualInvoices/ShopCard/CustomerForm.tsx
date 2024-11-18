@@ -20,6 +20,7 @@ import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
+import { useToast } from '@/components/custom/useToastComp';
 
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
@@ -87,6 +88,7 @@ const CustomerForm = () => {
   };
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const holder = useSelector((state: any) => state.orderSchema.tax_exclusive_discount_amount);
+  const { showToast } = useToast();
   const submitOrder = async () => {
     console.log({holder});
     // const products = cardItemValue.map((item: any) => ({
@@ -100,9 +102,24 @@ const CustomerForm = () => {
     // }));
     // dispatch(addProduct(products));
     console.log(1, { orderSchema, holder });
+    setLoading(true);
+    
+    const totalPrice = orderSchema.total_price;
+    const totalPayed = orderSchema.payments.reduce(
+      (acc, item) => acc + item.amount,
+      0
+    );
+    if (totalPayed < totalPrice) {
+      showToast({
+        description: 'الرجاء ادخال المبلغ كاملا',
+        duration: 4000,
+        variant: 'destructive',
+      });
+      setLoading(false);
+      return;
+    }
 
     try {
-      setLoading(true);
       if (params.id) {
         console.log(1, '1');
 

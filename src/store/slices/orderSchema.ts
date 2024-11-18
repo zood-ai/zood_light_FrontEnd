@@ -18,6 +18,8 @@ interface Payment {
     external_additional_payment_info: 'some info';
   };
   payment_method_id: '';
+  added_at: any;
+  business_date: any;
 }
 interface Tax {
   id: string;
@@ -74,6 +76,8 @@ const initialState: OrderSchemaState = {
       tendered: 180,
       amount: 0,
       payment_method_id: '',
+      added_at: new Date(),
+      business_date: new Date(),
       tips: 0,
       meta: {
         external_additional_payment_info: 'some info',

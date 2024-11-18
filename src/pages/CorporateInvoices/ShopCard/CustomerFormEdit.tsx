@@ -15,6 +15,7 @@ import { ShopCardSummeryCi } from '@/components/custom/ShopCardSummery/ShopCardS
 import CustomerForms from './CustomerForms';
 import { Textarea } from '@/components/ui/textarea';
 import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
+import { useToast } from '@/components/custom/useToastComp';
 
 const CustomerFormEdit = () => {
   const params = useParams();
@@ -30,9 +31,33 @@ const CustomerFormEdit = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const myInputRef = useRef(null);
+  const { showToast } = useToast();
 
   const handleSubmitOrder = async () => {
-    // setLoading(true);
+    setLoading(true);
+    
+    const totalPrice = orderSchema.total_price;
+    const totalPayed = orderSchema.payments.reduce(
+      (acc, item) => acc + item.amount,
+      0
+    );
+    if (totalPayed < totalPrice) {
+      showToast({
+        description: 'الرجاء ادخال المبلغ كاملا',
+        duration: 4000,
+        variant: 'destructive',
+      });
+      setLoading(false);
+      return;
+    } else if (totalPrice == 0) {
+      showToast({
+        description: 'الرجاء اختيار المنتجات',
+        duration: 4000,
+        variant: 'destructive',
+      });
+      setLoading(false);
+      return;
+    }
 
     try {
       if (payment !== 'fully') {

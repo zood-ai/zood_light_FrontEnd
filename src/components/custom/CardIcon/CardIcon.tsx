@@ -5,7 +5,7 @@ import { CardIconProps } from './CardIcon.types';
 import './CardIcon.css';
 
 export const CardIcon = ({ imgSrc, title, textClass, iconClass }) => (
-    <div className="flex flex-col px-4 py-5 bg-white rounded-xl border border-gray-200 border-solid w-[219px] h-[121px]">
+    <div className="flex flex-col px-4 py-5 bg-white rounded-xl border border-gray-200 border-solid max-md:flex-grow md:w-[219px] md:h-[121px]">
       <div className="flex gap-5 justify-between text-xl font-semibold text-right whitespace-nowrap text-slate-700">
         <div className="my-auto whitespace-pre-line break-words">{title}</div>
         <img

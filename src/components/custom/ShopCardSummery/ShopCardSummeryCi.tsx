@@ -37,7 +37,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
   const orderSchema = useSelector((state: any) => state.orderSchema);
 
   const cardItemValue = useSelector((state: any) => state.orderSchema.products);
-  console.log({branchData});
+  console.log({ branchData });
   const [paymentMethod, setPaymentMethod] = useState<any>([
     {
       tendered: 180,
@@ -50,15 +50,33 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
       payment_method_id: '',
     },
   ]);
+  const [holderState, setHolderState] = useState<any>([]);
   // console.log({cardItemValue});
   // console.log(1234, { orderSchema, cardItemValue });
   let params = useParams();
+  console.log({ holderState });
   useEffect(() => {
-    if (params.id) {
+    // setPaymentMethod(holderState);
+  }, [holderState]);
+  useEffect(() => {
+    if (params.id && orderSchema?.payments) {
       // alert(params.id)
       setPaymentMethod(orderSchema?.payments || []);
+
+      setHolderState(
+        orderSchema?.payments.map((e) => ({
+          tendered: e.tendered || 180,
+          amount: e.amount || 0,
+          tips: e.tips || 0,
+          notadd: true,
+          business_date: new Date(),
+          meta: 'well done',
+          added_at: new Date(),
+          payment_method_id: e.payment_method_id || '',
+        })) || []
+      );
     }
-  }, [orderSchema.payments]);
+  }, [params.id, orderSchema.payments]);
 
   const handleOptionClick = (option) => {
     setPaymentMethod(option); // Set the clicked option as active
@@ -136,6 +154,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
   useEffect(() => {
     if (params.id) {
       axiosInstance.get(`orders/${params.id}`).then((res) => {
+        console.log(123456, { res });
         setPaymentMethod(res?.data?.data?.payments || []);
         setPaymentMethodinit(res?.data?.data?.payments || []);
         setdiscountAmount(res?.data?.data?.customer_notes || 0);
@@ -368,15 +387,15 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                     handleItemChange(
                       paymentMethod.length - 1,
                       'amount',
-                      e.target.value
+                      Number(e.target.value)
                     );
                   }}
                   value={
                     payment !== 'fully'
                       ? Number(
                           paymentMethod[paymentMethod.length - 1]?.amount
-                        ) || 'NaN'
-                      : 'NaN'
+                        ) || 0
+                      : 0
                   }
                   placeholder="0.00"
                   min={0}
