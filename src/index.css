@@ -3,6 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 /* Default Page Size: A4 */
+.makeEvenOddBg > div:nth-child(odd) {
+  background-color: #f1f1f1;
+}
 @media print {
   body {
     margin: 0;

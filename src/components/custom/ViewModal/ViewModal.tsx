@@ -207,9 +207,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       ))}
                     </div>
                     {/* CODING HERE */}
-                    <div className="flex flex-col gap-3 mt-10">
+                    <div className="flex flex-col gap-3 mt-10 makeEvenOddBg">
                       {Data?.data?.subtotal_price && (
-                        <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
+                        <div className="flex justify-between p-2 rounded items-center">
                           <div>SR {Data.data.subtotal_price}</div>
                           <div>الاجمالي</div>
                         </div>
@@ -221,25 +221,35 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                         </div>
                       )}
                       {Data?.data?.total_price && (
-                        <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
+                        <div className="flex justify-between p-2 rounded items-center">
                           <div>SR {Data.data.total_price}</div>
                           <div>المبلغ الإجمالي</div>
                         </div>
                       )}
                       {Data?.data?.total_cost && (
-                        <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
+                        <div className="flex justify-between p-2 rounded items-center">
                           <div>SR {Data.data.total_cost}</div>
                           <div>المبلغ الإجمالي</div>
                         </div>
                       )}
-                      {Data?.data?.discount_amount && (
+                      {Data?.data?.discount_amount ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>SR {Data.data.discount_amount}</div>
                           <div>تخفيض</div>
                         </div>
-                      )}
+                      ) : null}
+                      {Data?.data?.payments?.map((e) => {
+                        if (e.payment_method_id) {
+                          return (
+                            <div className="flex justify-between p-2 rounded items-center">
+                              <div>SR {e.amount}</div>
+                              <div>{e.payment_method.name}</div>
+                            </div>
+                          );
+                        }
+                      })}
                       {Data?.data?.payments?.length > 0 && (
-                        <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
+                        <div className="flex justify-between p-2 rounded items-center">
                           <div>
                             SR{' '}
                             {Data.data.payments.reduce(
