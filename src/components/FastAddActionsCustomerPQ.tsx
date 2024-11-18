@@ -26,12 +26,12 @@ import axiosInstance from '@/api/interceptors';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 
 const formSchema = z.object({
-  name: z.string().nonempty('Name is required'),
-  phone: z.string().nonempty('Phone is required'),
-  address: z.string().nonempty('Address is required'),
-  email: z.string().email({ message: 'Invalid email address' }),
-  taxNum: z.string().min(15, { message: 'Tax number is must be 15 number' }),
-  coTax: z.string().min(15, { message: 'Tax number is must be 15 number' }),
+  name: z.string(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  email: z.string().email({ message: 'Invalid email address' }).optional(),
+  taxNum: z.string().min(15, { message: 'Tax number is must be 15 number' }).optional(),
+  coTax: z.string().min(15, { message: 'Tax number is must be 15 number' }).optional(),
 });
 export default function FastAddActionsCustomerPQ({
   isOpen,

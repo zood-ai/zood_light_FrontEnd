@@ -4,11 +4,13 @@ import { ViewModalProps } from './ViewModal.types';
 import createCrudService from '@/api/services/crudService';
 import { useReactToPrint } from 'react-to-print';
 import './ViewModal.css';
+import { useLocation } from 'react-router-dom';
 
 export const ViewModal: React.FC<ViewModalProps> = () => {
   const data = useSelector((state: any) => state.toggleAction.data);
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
+  const { pathname } = useLocation();
 
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
@@ -71,7 +73,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       />
                     </div>
                     <div className="self-center ml-4 font-semibold text-right">
-                      فاتورة ضريبية مبسطة
+                      فاتورة ضريبية{' '}
+                      {pathname !== '/zood-dashboard/corporate-invoices' &&
+                        'مبسطة'}
                     </div>
                     <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-200 border-solid max-md:mr-1 max-md:max-w-full">
                       {settings?.data?.business_tax_number && (
