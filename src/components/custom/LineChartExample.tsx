@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   BarChart,
   Bar,
@@ -22,32 +21,25 @@ const LineChartExample = ({ data }) => {
     }
     return null;
   };
+
   return (
     <div className="col-span-1 md:col-span-2 w-[120%] md:w-[100%] h-[400px]">
       <ResponsiveContainer width={'100%'} height={'100%'}>
         <BarChart
-          data={data?.data?.sum_orders}
+          data={data?.sum_orders}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
 
-          {/* Set X-axis to display 'date' */}
-          <XAxis
-            dataKey="date"
-            padding={{ left: 10, right: 10 }}
-            // label={{ value: 'Date', position: 'insideBottom', offset: -5 }}
-          />
+          {/* X-Axis without Label */}
+          <XAxis dataKey="date" padding={{ left: 10, right: 10 }} />
 
-          {/* Set Y-axis to display 'value' */}
-          <YAxis
-            // label={{ value: 'Sales Value', angle: 90, position: 'insideLeft' }}
-            tickMargin={50}
-          />
+          {/* Y-Axis without Label */}
+          <YAxis tickMargin={50} />
 
           <Tooltip content={<CustomTooltip />} />
           <Legend />
 
-          {/* Set Bar to use 'value' as dataKey for Y-axis values */}
           <Bar dataKey="value" fill="#312E81" />
         </BarChart>
       </ResponsiveContainer>

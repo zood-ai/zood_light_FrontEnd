@@ -1,30 +1,4 @@
-import { useState, useEffect } from 'react';
-//data={data} activeFilter={activeFilter} setActiveFilter={setActiveFilter} loading={loading}
-function DashCards({ data, activeFilter, setActiveFilter, loading }) {
-  // const [activeFilter, setActiveFilter] = useState('week');
-  // const [loading, setLoading] = useState(false);
-  // const [data, setData] = useState([]);
-  // useEffect(
-  //   function () {
-  //     async function getStatics() {
-  //       setLoading(true);
-  //       const res = await fetch(
-  //         `http://zood.ai/api/v1/reports/overview/light?groupby=${activeFilter}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vem9vZC5haS9hcGkvdjEvYXV0aC9Mb2dpbiIsImlhdCI6MTcyOTY4MTI4MiwiZXhwIjo2OTEzNjgxMjgyLCJuYmYiOjE3Mjk2ODEyODIsImp0aSI6ImpCZ2M1bmVKazM3STJaRWwiLCJzdWIiOiJiZjIwNGU3ZS0zMWUwLTQwZjEtYWFjMy0xN2ZmZGNhZjNhNWIiLCJwcnYiOiIwOWNmNDk1YzM0NzRhMDIwNjExZDA0YWEwMjJiZDM1MWMxYmIwY2NhIn0.LcA4qkfXknBRPjxe04gzJ9kBpew5LMlFSdgr66AUVEo`, // تأكد من استبدال YOUR_TOKEN_HERE بالتوكن الفعلي
-  //             'Content-Type': 'application/json',
-  //           },
-  //         }
-  //       );
-  //       const data = await res.json();
-  //       setData(data);
-  //       setLoading(false);
-  //     }
-  //     getStatics();
-  //   },
-  //   [activeFilter]
-  // );
+function DashCards({ data, activeFilter, setActiveFilter }) {
   const handleFilterClick = (filter) => {
     setActiveFilter(filter);
   };
@@ -32,11 +6,13 @@ function DashCards({ data, activeFilter, setActiveFilter, loading }) {
   const buttonStyles = (filter) => ({
     padding: '10px 20px',
     borderRadius: '8px',
-    backgroundColor: activeFilter === filter ? '#312E81' : '#F5F5F5', // بنفسجي عند التفعيل، وأبيض غامق عند عدم التفعيل
-    color: activeFilter === filter ? '#FFF' : '#888', // لون الكلام جراي عند عدم التفعيل
+    backgroundColor: activeFilter === filter ? '#312E81' : '#F5F5F5',
+    color: activeFilter === filter ? '#FFF' : '#888',
     cursor: 'pointer',
     border: 'none',
   });
+
+  console.log('DATA FROM DASHCARDS: ', data);
   return (
     <>
       <div className="flex gap-4">
@@ -67,7 +43,7 @@ function DashCards({ data, activeFilter, setActiveFilter, loading }) {
                 الفواتير
               </div>
               <div className="mt-2 text-3xl font-semibold">
-                {data?.data?.count_orders}
+                {data?.count_orders}
               </div>
             </div>
             <img
@@ -84,7 +60,7 @@ function DashCards({ data, activeFilter, setActiveFilter, loading }) {
                 المشتريات
               </div>
               <div className="mt-2 text-3xl font-semibold">
-                {data?.data?.count_purchases}
+                {data?.count_purchases}
               </div>
             </div>
             <img
