@@ -47,15 +47,16 @@ const CustomerForm = () => {
       (acc, item) => acc + item.amount,
       0
     );
-    if (totalPayed < totalPrice) {
-      showToast({
-        description: 'الرجاء ادخال المبلغ كاملا',
-        duration: 4000,
-        variant: 'destructive',
-      });
-      setLoading(false);
-      return;
-    } else if (totalPrice == 0) {
+    // if (totalPayed < totalPrice) {
+    //   showToast({
+    //     description: 'الرجاء ادخال المبلغ كاملا',
+    //     duration: 4000,
+    //     variant: 'destructive',
+    //   });
+    //   setLoading(false);
+    //   return;
+    // } else 
+    if (totalPrice == 0) {
       showToast({
         description: 'الرجاء اختيار المنتجات',
         duration: 4000,

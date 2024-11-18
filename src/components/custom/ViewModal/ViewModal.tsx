@@ -15,11 +15,27 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const { data: Taxes } = createCrudService<any>('manage/taxes').useGetAll();
   const { data: customerInfo } = createCrudService<any>(
     'manage/customers'
-  ).useGetById(`${data?.customer?.id}`);
-  const { data: orderInfo } = createCrudService<any>('orders').useGetById(
+  ).useGetById(`${data?.customer?.id || data?.get_supplier?.id}`);
+  const { data: supplierInfo } = createCrudService<any>(
+    `inventory/suppliers`
+  ).useGetById(`${data?.get_supplier?.id}`);
+  const { data: OrderData } = createCrudService<any>('orders').useGetById(
     `${data?.id}`
   );
-  console.log({ data, settings, customerInfo, orderInfo, Taxes });
+  const { data: purchsingInfo } = createCrudService<any>(
+    'inventory/purchasing'
+  ).useGetById(`${data?.id}`);
+
+  const Data = OrderData ? { ...OrderData } : { ...purchsingInfo };
+  console.log({
+    data,
+    settings,
+    supplierInfo,
+    customerInfo,
+    Data,
+    Taxes,
+    purchsingInfo,
+  });
   const [size, setSize] = useState('A4');
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);
@@ -95,6 +111,14 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           </div>
                         </div>
                       )}
+                      {supplierInfo?.data?.phone && (
+                        <div className="flex z-10 flex-col flex-1 px-8 pt-4 pb-2 whitespace-nowrap bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
+                          <div className="self-center">الجوال</div>
+                          <div className="self-start mt-4 w-full text-center font-semibold">
+                            {supplierInfo?.data?.phone}
+                          </div>
+                        </div>
+                      )}
                       {data?.customer?.name && (
                         <div className="flex z-10 flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
                           <div>اسم العميل</div>
@@ -103,11 +127,43 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           </div>
                         </div>
                       )}
+                      {data?.get_supplier?.name && (
+                        <div className="flex z-10 flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
+                          <div>اسم المورد</div>
+                          <div className="mt-4 font-semibold w-full text-center">
+                            {data?.get_supplier?.name || ''}
+                          </div>
+                        </div>
+                      )}
                       {data?.reference && (
                         <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
                           <div>رقم الفاتورة</div>
                           <div className="mt-4 font-semibold w-full text-center">
                             {data?.reference || ''}
+                          </div>
+                        </div>
+                      )}
+                      {data?.kitchen_received_at && (
+                        <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                          <div>نوع السيارة</div>
+                          <div className="mt-4 font-semibold w-full text-center">
+                            {data?.kitchen_received_at || ''}
+                          </div>
+                        </div>
+                      )}
+                      {data?.kitchen_done_at && (
+                        <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                          <div>رقم اللوحة</div>
+                          <div className="mt-4 font-semibold w-full text-center">
+                            {data?.kitchen_done_at || ''}
+                          </div>
+                        </div>
+                      )}
+                      {data?.kitchen_notes && (
+                        <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                          <div>ملاحظات</div>
+                          <div className="mt-4 font-semibold w-full text-center">
+                            {data?.kitchen_notes || ''}
                           </div>
                         </div>
                       )}
@@ -121,7 +177,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded border border-gray-200 border-solid w-[802px] max-w-full max-md:mr-1 text-center px-3">
-                      {orderInfo?.data?.products.map((e) => (
+                      {Data?.data?.products?.map((e) => (
                         <div className="flex font-semibold w-full">
                           <div className="w-1/3">{e?.pivot?.total_price}</div>
                           <div className="w-1/3">{e?.pivot?.unit_price}</div>
@@ -133,54 +189,83 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           </div>
                         </div>
                       ))}
+                      {Data?.data?.items?.map((e) => (
+                        <div className="flex font-semibold w-full">
+                          <div className="w-1/3">{e?.pivot?.total_cost}</div>
+                          <div className="w-1/3">{e?.pivot?.cost}</div>
+                          <div className="w-1/3">{e?.pivot?.quantity}</div>
+                          <div className="w-1/3">
+                            {e.sku === 'sku-zood-20001'
+                              ? e.pivot.kitchen_notes
+                              : e.name}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                     {/* CODING HERE */}
-                    <div className="flex flex-col gap-3 mt-10 ">
-                      <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
-                        <div> SR {orderInfo?.data?.subtotal_price || 0}</div>
-                        <div>الاجمالي </div>
-                      </div>
-                      <div className="flex justify-between p-2 rounded items-center">
-                        <div> SR {orderInfo?.data?.total_taxes || 0}</div>
-                        <div>مجموع ضريبة القيمة المضافة</div>
-                      </div>
-                      <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
-                        <div>SR {orderInfo?.data?.total_price || 0}</div>
-                        <div>المبلغ الإجمالي </div>
-                      </div>
-                      <div className="flex justify-between p-2  rounded items-center">
-                        <div>SR {orderInfo?.data?.discount_amount || 0} </div>
-                        <div>تخفيض</div>
-                      </div>
-                      <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
-                        <div>
-                          {' '}
-                          SR{' '}
-                          {orderInfo?.data?.payments?.reduce(
-                            (sum, item) => sum + item.amount,
-                            0
-                          ) || 0}
+                    <div className="flex flex-col gap-3 mt-10">
+                      {Data?.data?.subtotal_price && (
+                        <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
+                          <div>SR {Data.data.subtotal_price}</div>
+                          <div>الاجمالي</div>
                         </div>
-                        <div>المبلغ الإجمالي المدفوع</div>
-                      </div>
-                      <div className="flex justify-between p-2 rounded items-center">
-                        <div>
-                          SR{' '}
-                          {(orderInfo?.data?.payments.reduce(
-                            (sum, item) => sum + item.amount,
-                            0
-                          ) > orderInfo?.data?.total_price
-                            ? orderInfo?.data?.payments.reduce(
+                      )}
+                      {Data?.data?.total_taxes && (
+                        <div className="flex justify-between p-2 rounded items-center">
+                          <div>SR {Data.data.total_taxes}</div>
+                          <div>مجموع ضريبة القيمة المضافة</div>
+                        </div>
+                      )}
+                      {Data?.data?.total_price && (
+                        <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
+                          <div>SR {Data.data.total_price}</div>
+                          <div>المبلغ الإجمالي</div>
+                        </div>
+                      )}
+                      {Data?.data?.total_cost && (
+                        <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
+                          <div>SR {Data.data.total_cost}</div>
+                          <div>المبلغ الإجمالي</div>
+                        </div>
+                      )}
+                      {Data?.data?.discount_amount && (
+                        <div className="flex justify-between p-2 rounded items-center">
+                          <div>SR {Data.data.discount_amount}</div>
+                          <div>تخفيض</div>
+                        </div>
+                      )}
+                      {Data?.data?.payments?.length > 0 && (
+                        <div className="flex justify-between p-2 bg-[#F1F1F1] rounded items-center">
+                          <div>
+                            SR{' '}
+                            {Data.data.payments.reduce(
+                              (sum, item) => sum + item.amount,
+                              0
+                            )}
+                          </div>
+                          <div>المبلغ الإجمالي المدفوع</div>
+                        </div>
+                      )}
+                      {Data?.data?.payments?.length > 0 &&
+                        Data?.data?.total_price && (
+                          <div className="flex justify-between p-2 rounded items-center">
+                            <div>
+                              SR{' '}
+                              {(Data.data.payments.reduce(
                                 (sum, item) => sum + item.amount,
                                 0
-                              ) - orderInfo?.data?.total_price
-                            : 0) || 0}
-                        </div>
-                        <div>إجمالي المبلغ المستحق</div>
-                      </div>
-
-                      {/* end here */}
+                              ) > Data.data.total_price
+                                ? Data.data.payments.reduce(
+                                    (sum, item) => sum + item.amount,
+                                    0
+                                  ) - Data.data.total_price
+                                : 0) || 0}
+                            </div>
+                            <div>إجمالي المبلغ المستحق</div>
+                          </div>
+                        )}
                     </div>
+
                     {/* CODE DELETED HERE */}
                     <div className="flex justify-between items-center">
                       <p className="text-sm w-[50%] mt-[30px] text-[#26262F]">
@@ -253,6 +338,12 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           <p>{data.customer.name}</p>
                         </div>
                       )}
+                      {data?.get_supplier?.name && (
+                        <div className="flex justify-between">
+                          <p>اسم العميل </p>
+                          <p>{data.get_supplier.name}</p>
+                        </div>
+                      )}
                       {customerInfo?.data?.phone && (
                         <div className="flex justify-between">
                           <p>الجوال </p>
@@ -279,13 +370,15 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
 
                       {/* بيانات الجدول */}
                       <div className="flex border-t-2 border-b-black/20 flex-col bg-white border border-gray-200 rounded py-2   text-sm">
-                        {orderInfo?.data?.products.map((product, index) => (
+                        {Data?.data?.products?.map((product, index) => (
                           <div
                             key={index}
                             className="flex justify-between border-b-2 border-b-black/20"
                           >
                             <div className="w-1/4 flex-grow items-center text-[12px]">
-                              {product.name}
+                              {product.sku === 'sku-zood-20001'
+                                ? product.pivot.kitchen_notes
+                                : product.name}
                             </div>
                             <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
                               <p>{product?.pivot?.quantity}</p>
@@ -298,6 +391,27 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             </div>
                           </div>
                         ))}
+                        {Data?.data?.items?.map((product, index) => (
+                          <div
+                            key={index}
+                            className="flex justify-between border-b-2 border-b-black/20"
+                          >
+                            <div className="w-1/4 flex-grow items-center text-[12px]">
+                              {product.sku === 'sku-zood-20001'
+                                ? product.pivot.kitchen_notes
+                                : product.name}
+                            </div>
+                            <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
+                              <p>{product?.pivot?.quantity}</p>
+                            </div>
+                            <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
+                              <p>{product?.pivot?.cost}</p>
+                            </div>
+                            <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
+                              <p>{product?.pivot?.total_cost}</p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
@@ -305,57 +419,71 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     <div className="flex flex-col mt-4 gap-4">
                       {/* first col div */}
                       <div className="flex flex-col gap-2">
-                        <div className="flex justify-between items-center">
-                          <p className="w-[50%]">الاجمالي </p>
-                          <p>SR {orderInfo?.data?.subtotal_price || 0}</p>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <p>مجموع ضريبة القيمة المضافة </p>
-                          <p>SR {orderInfo?.data?.total_taxes || 0}</p>
-                        </div>
+                        {Data?.data?.subtotal_price && (
+                          <div className="flex justify-between items-center">
+                            <p className="w-[50%]">الاجمالي</p>
+                            <p>SR {Data.data.subtotal_price}</p>
+                          </div>
+                        )}
+                        {Data?.data?.total_cost && (
+                          <div className="flex justify-between items-center">
+                            <p className="w-[50%]">الاجمالي</p>
+                            <p>SR {Data.data.total_cost}</p>
+                          </div>
+                        )}
+                        {Data?.data?.total_taxes && (
+                          <div className="flex justify-between items-center">
+                            <p>مجموع ضريبة القيمة المضافة</p>
+                            <p>SR {Data.data.total_taxes}</p>
+                          </div>
+                        )}
                       </div>
                       {/* end col div */}
                       {/* first col div */}
                       <div className="flex flex-col gap-4">
-                        <div className="flex justify-between items-center">
-                          <p>المبلغ الإجمالي </p>
-                          <p>SR {orderInfo?.data?.total_price || 0}</p>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <p>تخفيض</p>
-                          <p>SR {orderInfo?.data?.discount_amount || 0} </p>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <p>المبلغ الإجمالي المدفوع</p>
-
-                          <p>
-                            {' '}
-                            SR{' '}
-                            {orderInfo?.data?.payments?.reduce(
-                              (sum, item) => sum + item.amount,
-                              0
-                            ) || 0}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-between items-center">
-                        <p>إجمالي المبلغ المستحق</p>
-
-                        <p>
-                          SR{' '}
-                          {(orderInfo?.data?.payments.reduce(
-                            (sum, item) => sum + item.amount,
-                            0
-                          ) > orderInfo?.data?.total_price
-                            ? orderInfo?.data?.payments.reduce(
+                        {Data?.data?.total_price && (
+                          <div className="flex justify-between items-center">
+                            <p>المبلغ الإجمالي</p>
+                            <p>SR {Data.data.total_price}</p>
+                          </div>
+                        )}
+                        {Data?.data?.discount_amount && (
+                          <div className="flex justify-between items-center">
+                            <p>تخفيض</p>
+                            <p>SR {Data.data.discount_amount}</p>
+                          </div>
+                        )}
+                        {Data?.data?.payments?.length > 0 && (
+                          <div className="flex justify-between items-center">
+                            <p>المبلغ الإجمالي المدفوع</p>
+                            <p>
+                              SR{' '}
+                              {Data.data.payments.reduce(
                                 (sum, item) => sum + item.amount,
                                 0
-                              ) - orderInfo?.data?.total_price
-                            : 0) || 0}
-                        </p>
+                              )}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                      {/* end col div */}
+                      {Data?.data?.payments?.length > 0 &&
+                        Data?.data?.total_price && (
+                          <div className="flex justify-between items-center">
+                            <p>إجمالي المبلغ المستحق</p>
+                            <p>
+                              SR{' '}
+                              {Data.data.payments.reduce(
+                                (sum, item) => sum + item.amount,
+                                0
+                              ) > Data.data.total_price
+                                ? Data.data.payments.reduce(
+                                    (sum, item) => sum + item.amount,
+                                    0
+                                  ) - Data.data.total_price
+                                : 0}
+                            </p>
+                          </div>
+                        )}
                     </div>
 
                     {/* الباركود */}
