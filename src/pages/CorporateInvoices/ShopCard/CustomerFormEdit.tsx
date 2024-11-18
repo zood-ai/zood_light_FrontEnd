@@ -35,7 +35,7 @@ const CustomerFormEdit = () => {
 
   const handleSubmitOrder = async () => {
     setLoading(true);
-    
+
     const totalPrice = orderSchema.total_price;
     const totalPayed = orderSchema.payments.reduce(
       (acc, item) => acc + item.amount,
@@ -49,7 +49,7 @@ const CustomerFormEdit = () => {
     //   });
     //   setLoading(false);
     //   return;
-    // } else 
+    // } else
     if (totalPrice == 0) {
       showToast({
         description: 'الرجاء اختيار المنتجات',
@@ -62,15 +62,22 @@ const CustomerFormEdit = () => {
 
     try {
       if (payment !== 'fully') {
-        const myPayments = {...orderSchema.payments}
-        const holder = Object.values(myPayments)
+        const holder = [...orderSchema.payments];
         holder.pop();
-        console.log(holder);
-        if(!holder)return;
+        if (!holder) return;
+
+        const newHolder = holder.filter((ele) => ele.created_at === undefined);
+
+        const holder2 = newHolder.map((ele) => ({
+          ...ele,
+          business_date: ele.business_date || new Date(),
+          added_at: ele.added_at || new Date(),
+        }));
+        if (holder2.length === 0) return;
         await mutate(
           {
             order_id: params.id,
-            payment_data: holder,
+            payment_data: holder2,
           },
           {
             onSuccess: () => {

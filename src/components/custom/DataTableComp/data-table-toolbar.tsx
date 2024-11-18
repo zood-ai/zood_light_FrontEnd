@@ -3,14 +3,14 @@ import { Table } from '@tanstack/react-table';
 
 import { Button } from '@/components/custom/button';
 import { Input } from '@/components/ui/input';
-
+import { useLocation } from 'react-router-dom';
 import { DataTableFacetedFilter } from './data-table-faceted-filter';
 import { priorities, statuses } from '@/pages/tasks/data/data';
 import { DataTableViewOptions } from './data-table-view-options';
 import { useTranslation } from 'react-i18next';
 import useDirection from '@/hooks/useDirection';
 import { IconFileExport } from '@tabler/icons-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -27,7 +27,17 @@ export function DataTableToolbar<TData>({
   const { t } = useTranslation();
   const isRtl = useDirection();
   const navigate = useNavigate();
-  const location = useLocation();
+  const pathName = useLocation();
+  console.log(pathName);
+  const locations = [
+    '/zood-dashboard/corporate-invoices',
+    '/zood-dashboard/individual-invoices',
+    '/zood-dashboard/purchase-invoices',
+  ];
+  console.log(locations);
+  console.log(pathName);
+  console.log(`PathName is ${locations.includes(pathName?.pathname)}`);
+
   return (
     <div className="flex items-center justify-between">
       <div
@@ -41,9 +51,7 @@ export function DataTableToolbar<TData>({
             className="rounded-[4px] w-[146px] h-[39px] "
             variant={'default'}
             onClick={() => {
-              if (location.pathname === '/zood-dashboard/corporate-invoices')
-                navigate('add/shop-card');
-              else navigate('add');
+              navigate('add');
             }}
           >
             <svg
@@ -63,30 +71,32 @@ export function DataTableToolbar<TData>({
             </svg>
             <span className="ms-[10px]">{`اضافة ${actionText}`}</span>
           </Button>
-          <Button
-            variant="outline"
-            // onClick={() => table.resetColumnFilters()}
-            className="h-[39px] w-[103px]"
-          >
-            <span className="me-1">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 18 19"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M17 12.1667V15.7222C17 16.1937 16.8127 16.6459 16.4793 16.9793C16.1459 17.3127 15.6937 17.5 15.2222 17.5H2.77778C2.30628 17.5 1.8541 17.3127 1.5207 16.9793C1.1873 16.6459 1 16.1937 1 15.7222V12.1667M4.55556 7.72222L9 12.1667M9 12.1667L13.4444 7.72222M9 12.1667V1.5"
-                  stroke="#363088"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </span>
-            {t('EXPORT')}
-          </Button>
+          {locations.includes(pathName?.pathname) && (
+            <Button
+              variant="outline"
+              // onClick={() => table.resetColumnFilters()}
+              className="h-[39px] w-[103px]"
+            >
+              <span className="me-1">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 18 19"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M17 12.1667V15.7222C17 16.1937 16.8127 16.6459 16.4793 16.9793C16.1459 17.3127 15.6937 17.5 15.2222 17.5H2.77778C2.30628 17.5 1.8541 17.3127 1.5207 16.9793C1.1873 16.6459 1 16.1937 1 15.7222V12.1667M4.55556 7.72222L9 12.1667M9 12.1667L13.4444 7.72222M9 12.1667V1.5"
+                    stroke="#363088"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+              {t('EXPORT')}
+            </Button>
+          )}
         </div>
         {isFiltered && (
           <Button
