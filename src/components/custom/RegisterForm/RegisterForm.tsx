@@ -42,6 +42,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = () => {
     { text: 'مخبز', imgSrc: '/icons/home page/Vector-9.svg' },
     { text: 'خضار وفواكه', imgSrc: '/icons/home page/Group.svg' },
   ];
+
+  const handleSignUp = () => {
+    navigate('/zood-signup')
+  };
   const isRtl = useDirection();
   const navigate = useNavigate();
   return (
@@ -179,7 +183,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = () => {
               <div className="grow mt-[60px] max-md:mt-10 max-md:max-w-full">
                 <div className="flex gap-5 max-md:flex-col">
                   <div className="flex flex-col ml-5 w-3/12 max-md:ml-0 max-md:w-full">
-                    <Button className="px-12 py-3 mt-48 w-full text-base font-bold text-white whitespace-nowrap bg-indigo-900 rounded-lg max-md:px-5 max-md:mt-10">
+                    <Button
+                      onClick={handleSignUp}
+                      className="px-12 py-3 mt-48 w-full text-base font-bold text-white whitespace-nowrap bg-indigo-900 rounded-lg max-md:px-5 max-md:mt-10"
+                    >
                       اشتراك
                     </Button>
                   </div>

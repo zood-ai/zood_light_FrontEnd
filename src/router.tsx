@@ -27,6 +27,7 @@ const UnauthorisedError = lazy(
   () => import('./pages/errors/unauthorised-error.tsx')
 );
 const SignIn2 = lazy(() => import('./pages/auth/sign-in-2.tsx'));
+const SignUp = lazy(() => import('./pages/auth/sign-up.tsx'));
 const DashBoard = lazy(() =>
   import('./pages/DashBoard/DashBoard.tsx').then((module) => ({
     default: module.DashBoard,
@@ -188,6 +189,14 @@ const router = createBrowserRouter([
     element: (
       <React.Suspense fallback={<div>Loading register...</div>}>
         <SignIn2 />
+      </React.Suspense>
+    ),
+  },
+  {
+    path: 'zood-signup',
+    element: (
+      <React.Suspense fallback={<div>Loading register...</div>}>
+        <SignUp />
       </React.Suspense>
     ),
   },

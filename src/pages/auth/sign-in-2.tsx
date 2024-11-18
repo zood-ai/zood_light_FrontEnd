@@ -46,6 +46,11 @@ export default function SignIn2() {
     },
   });
 
+  // Handle SignUp
+  const handleSignUp = () => {
+    navigate('/zood-signup')
+  };
+
   // Handle form submission
   const handleFormSubmit = async (data: AuthFormValues) => {
     setIsLoading(true);
@@ -66,8 +71,8 @@ export default function SignIn2() {
   const [showPassword, setShowPassword] = React.useState(false);
 
   return (
-    <div className="max-h-[100vh] overflow-hidden">
-      <div className="flex flex-row  justify-between ms-[140px] me-[103px] mt-[44px]  items-center ">
+    <div className="min-h-[100vh] overflow-hidden px-4">
+      <div className="flex flex-row  justify-between md:ms-[140px] md:me-[103px] mt-[44px]  items-center ">
         <Link to="/">
           <svg
             width={76}
@@ -103,7 +108,7 @@ export default function SignIn2() {
           </svg>
         </Link>
 
-        <Link to="/" className="flex gap-2 items-center ">
+        <Link to="/" className="flex gap-2 items-center text-right">
           <div className="">رجوع للصفحة الرئيسية</div>
           <svg
             width="46"
@@ -136,8 +141,8 @@ export default function SignIn2() {
           </svg>
         </Link>
       </div>
-      <div className="flex flex-col items-center justify-center">
-        <div className=" font-bold  text-[46px] w-[326px] h-[87px]  text-black">
+      <div className="flex flex-col items-center justify-center mt-10">
+        <div className=" font-bold leading-[60px] text-[46px] text-center w-full sm:w-[326px]   text-black mb-16">
           تسجيل الدخول
         </div>
         <Form {...form}>
@@ -152,7 +157,7 @@ export default function SignIn2() {
                     <IconInput
                       placeholder="الايميل"
                       className=""
-                      inputClassName="w-[418px] h-[56px]"
+                      inputClassName="w-full sm:w-[418px] h-[56px]"
                       {...field}
                     />
                   </FormControl>
@@ -170,7 +175,7 @@ export default function SignIn2() {
                     <IconInput
                       placeholder="الرقم التعريفي"
                       className=" my-md"
-                      inputClassName="w-[418px] h-[56px]"
+                      inputClassName="w-full sm:w-[418px] h-[56px]"
                       {...field}
                     />
                   </FormControl>
@@ -189,7 +194,7 @@ export default function SignIn2() {
                       <IconInput
                         placeholder="كلمة المرور"
                         className=""
-                        inputClassName="w-[418px] h-[56px]"
+                        inputClassName="w-full sm:w-[418px] h-[56px]"
                         {...field}
                         type={showPassword ? 'text' : 'password'}
                       />
@@ -221,19 +226,20 @@ export default function SignIn2() {
                 loading={isLoading}
                 disabled={isLoading}
                 type="submit"
-                className="w-[418px] h-[56px]"
+                className="w-full sm:w-[418px] h-[56px]"
               >
                 تسجيل الدخول
               </Button>
             </div>
             <div className="  ">
               <Button
+                onClick={handleSignUp}
                 variant={'outline'}
                 loading={false}
-                type="submit"
-                className="w-[418px] h-[56px]"
+                type="button"
+                className="w-full sm:w-[418px] h-[56px]"
               >
-                تسجيل الدخول
+                انشاء حساب
               </Button>
             </div>
           </form>
