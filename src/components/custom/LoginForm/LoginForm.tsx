@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { LoginFormProps } from './LoginForm.types';
 
 import './LoginForm.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../button';
 import { Input } from '@/components/ui/input';
 import IconInput from '../InputWithIcon';
@@ -22,18 +22,14 @@ export const LoginForm: React.FC<LoginFormProps> = () => {
     <div className="relative pt-[87px] max-w-[100vw] overflow-hidden bg-white">
       <AuthForm />
       <div className="flex  gap-6 text-6xl text-main max-md:text-4xl justify-between items-center  ms-[55px] me-[61px] absolute left-[77vw] top-[7vh] w-full h-full z-10">
-        <div
-          onClick={() => navigate('/')}
-          style={{ cursor: 'pointer' }}
-          className="flex gap-2 self-start text-base text-zinc-800"
-        >
-          <div className="grow my-auto font-semibold">رجوع للصفحة الرئيسية</div>
+        <Link to="/" className="flex gap-2 self-start text-base text-zinc-800">
+          <p className="grow my-auto font-semibold">رجوع للصفحة الرئيسية</p>
           <img
             loading="lazy"
             src={back}
             className="object-contain shrink-0 aspect-square w-[46px]"
           />
-        </div>
+        </Link>
       </div>
       <div>
         <img

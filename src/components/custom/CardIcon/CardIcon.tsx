@@ -2,6 +2,8 @@ import React from 'react';
 
 import { CardIconProps } from './CardIcon.types';
 
+import { Link } from 'react-router-dom'
+
 import './CardIcon.css';
 
 export const CardIcon = ({ imgSrc, title, textClass, iconClass }) => (
@@ -17,7 +19,7 @@ export const CardIcon = ({ imgSrc, title, textClass, iconClass }) => (
       <div
         className={`flex items-start self-start mt-1.5 text-sm font-medium text-center ${textClass}`}
       >
-        <div className="self-stretch pe-xs">رؤية المزيد</div>
+        <Link to="/zood-login" className="self-stretch pe-xs">رؤية المزيد</Link>
         {[
           'https://cdn.builder.io/api/v1/image/assets/TEMP/534d8309b19d0cb8a56175db53968c8d0ab8e88fcd1f55c10807c26ce58bb129?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e',
           'https://cdn.builder.io/api/v1/image/assets/TEMP/534d8309b19d0cb8a56175db53968c8d0ab8e88fcd1f55c10807c26ce58bb129?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e',

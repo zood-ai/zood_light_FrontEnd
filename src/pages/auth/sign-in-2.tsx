@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Card } from '@/components/ui/card';
 import { UserAuthForm } from './components/user-auth-form';
 import logo from '/icons/Logo.svg';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import back from '/icons/arrow-right-circle.svg';
 import { Button } from '@/components/custom/button';
 import {
@@ -66,9 +66,9 @@ export default function SignIn2() {
   const [showPassword, setShowPassword] = React.useState(false);
 
   return (
-    <div className='max-h-[100vh] overflow-hidden'>
+    <div className="max-h-[100vh] overflow-hidden">
       <div className="flex flex-row  justify-between ms-[140px] me-[103px] mt-[44px]  items-center ">
-        <div>
+        <Link to="/">
           <svg
             width={76}
             height={94}
@@ -101,9 +101,9 @@ export default function SignIn2() {
               />
             </g>
           </svg>
-        </div>
+        </Link>
 
-        <div className="flex gap-2 items-center ">
+        <Link to="/" className="flex gap-2 items-center ">
           <div className="">رجوع للصفحة الرئيسية</div>
           <svg
             width="46"
@@ -134,7 +134,7 @@ export default function SignIn2() {
               stroke-linejoin="round"
             />
           </svg>
-        </div>
+        </Link>
       </div>
       <div className="flex flex-col items-center justify-center">
         <div className=" font-bold  text-[46px] w-[326px] h-[87px]  text-black">
