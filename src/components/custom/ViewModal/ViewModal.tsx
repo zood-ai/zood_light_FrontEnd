@@ -30,7 +30,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/corporate-invoices';
   const Another = !Corporate;
-  const ShowCar = WhoAmI.business.business_type === 'workshop';
+  const ShowCar = WhoAmI?.business?.business_type === 'workshop';
 
   const Data = OrderData ? { ...OrderData } : { ...purchsingInfo };
   console.log({
