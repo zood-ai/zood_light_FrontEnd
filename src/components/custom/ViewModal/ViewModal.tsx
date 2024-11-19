@@ -49,7 +49,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
     <>
       <div className="flex flex-wrap gap-4 rounded-none h-[90vh] max-w-[80vw] overflow-y-scroll relative ">
         <div className="flex flex-col rounded-none">
-          <div className="px-11 py-a12 w-full bg-white rounded-lg border border-gray-200 border-solid max-md:px-5 max-md:max-w-full">
+          <div className="px-11 py-a12 w-full bg-white rounded-lg  border-solid max-md:px-5 max-md:max-w-full">
             <div className="flex gap-5 max-md:flex-col">
               <div
                 id="myDiv"
@@ -57,7 +57,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                 className={`${"size === 'A4' ? 'a4-size' : 'small-receipt'"} print-content flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
               >
                 {size === 'A4' ? (
-                  <div className="flex flex-col px-3 pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg border border-gray-200 border-solid text-zinc-800 max-md:mt-10 max-md:max-w-full">
+                  <div className="flex flex-col px-3 pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg  text-zinc-800 max-md:mt-10 max-md:max-w-full">
                     <div className="w-full flex justify-between items-center mb-4">
                       <div>
                         <img src="/icons/logo.webp" alt="Logo" />
@@ -300,7 +300,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col w-[390px]  mx-auto text-right border border-gray-300 text-sm p-1 px-10">
+                  <div className="flex print-content2 flex-col w-[390px]  mx-auto text-righ text-sm p-1 px-10">
                     {/* الشعار */}
                     <div className="text-center mb-4">
                       <img

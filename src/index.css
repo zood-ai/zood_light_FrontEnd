@@ -7,18 +7,27 @@
   background-color: #f1f1f1;
 }
 @media print {
-  body {
+  * {
     margin: 0;
     padding: 0;
+  }
+  body {
     direction: rtl;
+    margin-top: -50px;
   }
   .print-content {
     margin-top: 0 !important;
     padding-top: 0 !important;
   }
+  .print-content2 {
+    margin-top: 40px;
+    scale: 2.5;
+    transform-origin: top;
+  }
   @page {
     size: A4 portrait;
     margin: 10mm;
+    scale: 2;
   }
 
   /* If 80mm size is selected */
