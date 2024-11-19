@@ -196,7 +196,7 @@ const CustomerForm = () => {
   }, [orderSchema?.customer_id]);
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4">
-      <div className="col-span-3 md:col-span-2 flex flex-wrap gap-x-5 gap-y-5 h-fit">
+      <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit max-md:flex-grow md:w-[70%]">
         <SelectComp
           options={allData?.data?.map((item) => ({
             value: item.id,
@@ -211,14 +211,14 @@ const CustomerForm = () => {
             }
           }}
           label="اسم العميل"
-          className="col-span-10 md:col-span-4 w-[327px] flex-grow"
+          className=" md:col-span-4 min-w-[327px] flex-grow"
           value={orderSchema?.customer_id}
           disabled={params.id}
         />
         <IconInput
           disabled
           name="name"
-          className="col-span-10 md:col-span-4 w-[327px] flex-grow"
+          className=" md:col-span-4 min-w-[327px] flex-grow"
           label="رقم العميل"
           iconSrc={callIcon}
           value={formState.phone}
@@ -227,34 +227,34 @@ const CustomerForm = () => {
         <IconInput
           disabled
           name={formState.name}
-          className="col-span-10 md:col-span-4 w-[327px] flex-grow"
+          className=" md:col-span-4 min-w-[327px] flex-grow"
           label="اسم الشارع"
           value={formState.address}
           onChange={null}
         />
         <IconInput
           disabled
-          className="col-span-10 md:col-span-4 w-[327px] flex-grow"
+          className=" md:col-span-4 min-w-[327px] flex-grow"
           label="رقم تسجيل ضريبة القيمة المضافة"
           value={formState.tax_registration_number}
           onChange={null}
         />
         <IconInput
           disabled
-          className="col-span-10 md:col-span-4 w-[327px] flex-grow"
+          className=" md:col-span-4 min-w-[327px] flex-grow"
           label="معرف اخر"
           value={formState.vat_registration_number}
           onChange={null}
         />
 
-        <div className="col-span-10 mt-5 max-xl:hidden w-full">
+        <div className=" mt-5 max-xl:hidden w-full">
           <CheckboxWithText
             label="اضافة التقرير الي Zatca"
             checked={formState.addToZatca}
             onChange={(e) => handleInputChange('addToZatca', e.target.checked)}
           />
         </div>
-        <div className="col-span-10 mt-5 max-xl:hidden">
+        <div className=" mt-5 max-xl:hidden">
           <Button
             dir="ltr"
             loading={loading}
@@ -266,14 +266,14 @@ const CustomerForm = () => {
           </Button>
         </div>
       </div>
-      <div className="col-span-10 mt-5 xl:hidden">
+      <div className=" mt-5 xl:hidden">
         <CheckboxWithText
           label="اضافة التقرير الي Zatca"
           checked={formState.addToZatca}
           onChange={(e) => handleInputChange('addToZatca', e.target.checked)}
         />
       </div>
-      <div className="col-span-10 mt-5 xl:hidden">
+      <div className=" mt-5 xl:hidden">
         <Button
           dir="ltr"
           loading={loading}

@@ -188,7 +188,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   }, [discountAmount, taxAmount, orderSchema, mainTax]);
   return (
     <>
-      <div className="flex mt-5 flex-col   rounded-none min-w-[302px]  ">
+      <div className="flex mt-5 flex-col  flex-grow rounded-none min-w-[302px]  ">
         <div className="flex flex-col pt-6 pb-12 w-full bg-white rounded border border-solid border-zinc-300 max-md:max-w-full">
           <div className="flex flex-col items-start px-3 w-full max-md:max-w-full">
             <div className="self-stretch max-md:mr-2.5 max-md:max-w-full">
