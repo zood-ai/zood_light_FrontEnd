@@ -34,22 +34,9 @@ const CustomerFormEdit = () => {
   const { showToast } = useToast();
 
   const handleSubmitOrder = async () => {
-    setLoading(true);
+    // setLoading(true);
 
     const totalPrice = orderSchema.total_price;
-    const totalPayed = orderSchema.payments.reduce(
-      (acc, item) => acc + item.amount,
-      0
-    );
-    // if (totalPayed < totalPrice) {
-    //   showToast({
-    //     description: 'الرجاء ادخال المبلغ كاملا',
-    //     duration: 4000,
-    //     variant: 'destructive',
-    //   });
-    //   setLoading(false);
-    //   return;
-    // } else
     if (totalPrice == 0) {
       showToast({
         description: 'الرجاء اختيار المنتجات',
@@ -64,7 +51,7 @@ const CustomerFormEdit = () => {
       if (payment !== 'fully') {
         const holder = [...orderSchema.payments];
         holder.pop();
-        if (!holder) return;
+        // if (!holder) return;
 
         const newHolder = holder.filter((ele) => ele.created_at === undefined);
 
@@ -74,6 +61,7 @@ const CustomerFormEdit = () => {
           added_at: ele.added_at || new Date(),
         }));
         if (holder2.length === 0) return;
+        console.log({holder2})
         await mutate(
           {
             order_id: params.id,

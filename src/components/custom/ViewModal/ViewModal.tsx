@@ -40,7 +40,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
     Taxes,
     purchsingInfo,
   });
-  const [size, setSize] = useState('80mm');
+  const [size, setSize] = useState('A4');
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);
   };

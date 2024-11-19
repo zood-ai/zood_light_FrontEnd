@@ -55,7 +55,7 @@ const CustomerForm = () => {
     //   });
     //   setLoading(false);
     //   return;
-    // } else 
+    // } else
     if (totalPrice == 0) {
       showToast({
         description: 'الرجاء اختيار المنتجات',
@@ -67,8 +67,11 @@ const CustomerForm = () => {
     }
     try {
       if (!params.id) {
+        const holder = [...orderSchema.payments];
+        const newHolder = holder.filter((ele) => ele.payment_method_id !== '');
         const updatedOrderSchema = {
           ...orderSchema,
+          payments: newHolder,
           products: orderSchema.products.map((product) => ({
             ...product,
             product_id: product.product_id
