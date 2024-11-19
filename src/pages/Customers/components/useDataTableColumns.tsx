@@ -83,22 +83,6 @@ export const useDataTableColumns = () => {
       },
     },
     {
-      accessorKey: 'phone',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'التاريخ'} />
-      ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex space-x-2">
-            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {formatDate(row.getValue('created_at')) || '-'}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
       accessorKey: 'total_orders',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'مجموع الطلبات'} />

@@ -96,7 +96,7 @@ const AppShell = () => {
             {/* ===== Top Heading ===== */}
             <Layout.Header
               // sticky
-              className="border  rounded-main max-w-[95.5%] mx-auto mt-8 bg-background z-[10] "
+              className="border  rounded-[8px] max-w-[95.5%] mx-auto mt-8 bg-background z-[10] "
             >
               <h2 className="text-2xl font-bold tracking-tight flex items-center align-center gap-2 ">
                 <LanguageDropdown />
