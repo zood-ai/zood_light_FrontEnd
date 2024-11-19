@@ -56,7 +56,7 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
       id: item.id,
       qty: 1,
       name: item.name,
-      image: item.images,
+      image: item.image,
       price: item.price,
     });
   };

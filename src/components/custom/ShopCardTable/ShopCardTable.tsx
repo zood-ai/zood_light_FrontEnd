@@ -17,9 +17,9 @@ export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
   return (
     <>
       <div className="flex bg-[#EAEBF5] border border-gray-200 border-solid w-full">
-        <div className="py-3.5 text-center flex-grow">المنتج</div>
-        <div className="py-3.5 text-center flex-grow">الكمية</div>
-        <div className="py-3.5 text-center flex-grow">السعر</div>
+        <div className="py-3.5 px-10 w-1/3">المنتج</div>
+        <div className="py-3.5 text-center w-1/3">الكمية</div>
+        <div className="py-3.5 text-center w-1/3">السعر</div>
       </div>
       <table className="table-auto text-base font-medium text-right text-black w-full">
         {/* Body */}
@@ -36,7 +36,7 @@ export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
               index: number
             ) => (
               <tr className="bg-white border border-gray-200 border-solid">
-                <td className="py-7 max-md:py-9 flex items-center justify-center rounded-bl-lg">
+                <td className="py-7 max-md:py-9 flex items-center justify-right rounded-bl-lg">
                   <img
                     loading="lazy"
                     src={item.image ? item?.image : imagePLaceHolder}
@@ -45,32 +45,31 @@ export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
                   <span className="ms-3">{item.name}</span>
                 </td>
 
-                <td className="py-7">
+                <td className="py-7 w-1/3">
                   <div className="flex justify-center">
                     <Counter item={item} />
                   </div>
                 </td>
-                <td className="py-7 text-center">
-                  SR {Number(item.price) * Number(item.qty)}
+                <td className="py-7 w-1/3">
+                  <div className="flex justify-center">
+                    SR {Number(item.price) * Number(item.qty)}
+                    <button
+                      onClick={() => {
+                        if (!params.id) {
+                          const updatedItems = cardItemValue.filter(
+                            (i: { id: string }) => i.id !== item.id
+                          );
+                          dispatch(setCardItem(updatedItems));
+                        }
+                      }}
+                      className="rounded-br-lg cursor-pointer hover:scale-105 "
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
                 </td>
-
                 {/* {!params.id && ( */}
-                <td
-                  onClick={() => {
-                    if (!params.id) {
-                      const updatedItems = cardItemValue.filter(
-                        (i: { id: string }) => i.id !== item.id
-                      );
-                      dispatch(setCardItem(updatedItems));
-                    }
-                  }}
-                  className="py-7  rounded-br-lg cursor-pointer hover:scale-105 "
-                >
-                  <TrashIcon />
-                </td>
                 {/* )} */}
-                <td className="py-7 w-[6%] "></td>
-                <td className="py-7 w-[6%]"></td>
               </tr>
             )
           )}

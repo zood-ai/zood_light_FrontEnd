@@ -87,10 +87,12 @@ const CustomerForm = () => {
       });
   };
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
-  const holder = useSelector((state: any) => state.orderSchema.tax_exclusive_discount_amount);
+  const holder = useSelector(
+    (state: any) => state.orderSchema.tax_exclusive_discount_amount
+  );
   const { showToast } = useToast();
   const submitOrder = async () => {
-    console.log({holder});
+    console.log({ holder });
     // const products = cardItemValue.map((item: any) => ({
     //   product_id: item.id || '',
     //   quantity: item.qty || 0,
@@ -103,7 +105,7 @@ const CustomerForm = () => {
     // dispatch(addProduct(products));
     console.log(1, { orderSchema, holder });
     setLoading(true);
-    
+
     const totalPrice = orderSchema.total_price;
     const totalPayed = orderSchema.payments.reduce(
       (acc, item) => acc + item.amount,

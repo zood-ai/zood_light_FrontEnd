@@ -29,6 +29,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
 
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
+  const Simple = pathname === '/zood-dashboard/corporate-invoices';
   const Another = !Corporate;
   const ShowCar = WhoAmI?.business?.business_type === 'workshop';
 
@@ -76,8 +77,11 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           </p>
                         </div>
                         <p className="mt-4 w-[277px] leading-[30.18px]">
-                          شركة حلول التطبيقات لتقنية المعلومات حي النخيل الرياض
-                          المملكة العربية السعودية 0123, 31951
+                          {
+                            JSON.parse(
+                              WhoAmI?.user?.branches[0].registered_address
+                            ).streetName
+                          }
                         </p>
                       </div>
                       <img
@@ -87,7 +91,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       />
                     </div>
                     <div className="self-center ml-4 font-semibold text-right">
-                      فاتورة ضريبية {Corporate && 'مبسطة'}
+                      فاتورة ضريبية {!Simple && 'مبسطة'}
                     </div>
                     <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-200 border-solid max-md:mr-1 max-md:max-w-full">
                       <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
@@ -108,13 +112,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       <div className="flex flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white rounded border border-gray-200 border-solid max-md:pl-5 justify-between">
                         <div className="self-center">الرقم الضريبي</div>
                         <div className="mt-4 text-center font-semibold">
-                          {Data.data?.branch?.business_reference}
-                          {/* {Corporate
-                            ? supplierInfo?.data?.tax_registration_number
-                            : ''}
-                          {Another
-                            ? customerInfo?.data?.tax_registration_number
-                            : ''} */}
+                          {Data.data?.customer?.tax_registration_number}
                         </div>
                       </div>
                       <div className="flex z-10 flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
@@ -262,10 +260,12 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                                 (sum, item) => sum + item.amount,
                                 0
                               ) > Data.data.total_price
-                                ? Data.data.payments
-                                    .reduce((sum, item) => sum + item.amount, 0)
-                                    ?.toFixed(2) -
-                                  Data.data.total_price?.toFixed(2)
+                                ? (
+                                    Data.data.payments.reduce(
+                                      (sum, item) => sum + item.amount,
+                                      0
+                                    ) - Data.data.total_price
+                                  )?.toFixed(2)
                                 : 0) || 0}
                             </div>
                           </div>
@@ -299,51 +299,40 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                 ) : (
                   <div className="flex print-content2 flex-col w-[390px]  mx-auto text-righ text-sm p-1 px-10">
                     {/* الشعار */}
-                    <div className="text-center mb-4">
-                      <img
-                        src="/icons/logo.webp"
-                        alt="Logo"
-                        className="mx-auto"
-                      />
-                    </div>
+                    <img
+                      className="mx-auto size-[80px]"
+                      src={`${settings?.data?.business_logo}`}
+                      alt="Logo"
+                    />
+                    <p className="font-semibold text-sm text-center pt-2 pb-5">
+                      {WhoAmI?.business?.name}
+                    </p>
 
                     {/* معلومات الشركة */}
                     <div className="text-center text-sm leading-6 mb-4">
-                      <p>
-                        شركة حلول التطبيقات لتقنية المعلومات
-                        <br />
-                        حي النخيل الرياض، المملكة العربية السعودية
-                        <br />
-                        0123, 31951
-                      </p>
+                      {
+                        JSON.parse(WhoAmI?.user?.branches[0].registered_address)
+                          .streetName
+                      }
                     </div>
 
                     {/* عنوان الفاتورة */}
                     <div className="text-center font-semibold text-lg my-6">
-                      فاتورة ضريبية {Corporate && 'مبسطة'}
+                      فاتورة ضريبية {!Simple && 'مبسطة'}
                     </div>
 
                     {/* معلومات الفاتورة */}
                     <div className="flex flex-col gap-3 mb-2">
                       <div className="flex justify-between">
-                        <p>رقم الفاتورة </p>
-                        <p>{data?.reference}</p>
-                      </div>
-                      <div className="flex justify-between">
-                        <p>تاريخ الفاتورة </p>
-                        <p>{data?.business_date.split(' ')[0]}</p>
-                      </div>
-                      <div className="flex justify-between">
-                        <p>الرقم الضريبي </p>
-                        <p>{settings?.data?.business_tax_number}</p>
-                      </div>
+                        <p>
+                          {Another && 'اسم العميل'}
+                          {Corporate && 'اسم المورد'}
+                        </p>
 
-                      <div className="flex justify-between">
-                        {Another && 'اسم العميل'}
-                        {Corporate && 'اسم المورد'}
-
-                        {Corporate ? data?.get_supplier?.name : 'a'}
-                        {Another ? data?.customer?.name : ''}
+                        <p>
+                          {Corporate ? data?.get_supplier?.name : ''}
+                          {Another ? data?.customer?.name : ''}
+                        </p>
                       </div>
                       <div className="flex justify-between">
                         <p>الجوال </p>
@@ -351,6 +340,18 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           {Corporate ? supplierInfo?.data?.phone : ''}
                           {Another ? customerInfo?.data?.phone : ''}
                         </p>
+                      </div>
+                      <div className="flex justify-between">
+                        <p>الرقم الضريبي </p>
+                        <p>{Data.data?.customer?.tax_registration_number}</p>
+                      </div>
+                      <div className="flex justify-between">
+                        <p>تاريخ الفاتورة </p>
+                        <p>{data?.business_date.split(' ')[0]}</p>
+                      </div>
+                      <div className="flex justify-between">
+                        <p>رقم الفاتورة </p>
+                        <p>{data?.reference}</p>
                       </div>
                     </div>
 
@@ -369,7 +370,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       </div>
 
                       {/* بيانات الجدول */}
-                      <div className="flex border-t-2 border-b-black/20 flex-col bg-white border border-gray-200 rounded py-2   text-sm">
+                      <div className="flex border-t-2 border-b-black/20 flex-col bg-white rounded py-2   text-sm">
                         {Data?.data?.products?.map((product, index) => (
                           <div
                             key={index}
@@ -387,7 +388,12 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                               <p>{product?.pivot?.unit_price}</p>
                             </div>
                             <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
-                              <p>{product?.pivot?.total_price}</p>
+                              <p>
+                                {(
+                                  product?.pivot?.quantity *
+                                  product?.pivot?.unit_price
+                                ).toFixed(2)}
+                              </p>
                             </div>
                           </div>
                         ))}
@@ -408,7 +414,12 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                               <p>{product?.pivot?.cost}</p>
                             </div>
                             <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
-                              <p>{product?.pivot?.total_cost}</p>
+                              <p>
+                                {(
+                                  product?.pivot?.quantity *
+                                  product?.pivot?.cost
+                                ).toFixed(2)}
+                              </p>
                             </div>
                           </div>
                         ))}
@@ -475,10 +486,12 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                                 (sum, item) => sum + item.amount,
                                 0
                               ) > Data.data.total_price
-                                ? Data.data.payments
-                                    .reduce((sum, item) => sum + item.amount, 0)
-                                    ?.toFixed(2) -
-                                  Data.data.total_price?.toFixed(2)
+                                ? (
+                                    Data.data.payments.reduce(
+                                      (sum, item) => sum + item.amount,
+                                      0
+                                    ) - Data.data.total_price
+                                  ).toFixed(2)
                                 : 0}
                             </p>
                           </div>
