@@ -19,7 +19,7 @@ const CustomerFormEdit = () => {
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
-  const ShowCar = WhoAmI.business.business_type === 'workshop';
+  const ShowCar = WhoAmI?.business?.business_type === 'workshop';
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
   const { useGetAll: fetchAllCustomers } = allService;
