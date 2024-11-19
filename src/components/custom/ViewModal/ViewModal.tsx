@@ -11,6 +11,8 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
   const { pathname } = useLocation();
+  const Corporate = pathname === '/zood-dashboard/corporate-invoices';
+  const Another = !Corporate;
 
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
@@ -38,7 +40,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
     Taxes,
     purchsingInfo,
   });
-  const [size, setSize] = useState('A4');
+  const [size, setSize] = useState('80mm');
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);
   };
@@ -73,136 +75,100 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       />
                     </div>
                     <div className="self-center ml-4 font-semibold text-right">
-                      فاتورة ضريبية{' '}
-                      {pathname !== '/zood-dashboard/corporate-invoices' &&
-                        'مبسطة'}
+                      فاتورة ضريبية {Corporate && 'مبسطة'}
                     </div>
                     <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-200 border-solid max-md:mr-1 max-md:max-w-full">
-                      {settings?.data?.business_tax_number && (
-                        <div className="flex flex-col flex-1 px-5 pt-4 pb-2 bg-white rounded border border-gray-200 border-solid max-md:pl-5 justify-between">
-                          <div className="self-center">الرقم الضريبي</div>
-                          <div className="mt-4 text-center font-semibold">
-                            {settings?.data?.business_tax_number || ''}
-                          </div>
+                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                        {Corporate && 'اسم المورد'}
+                        {Another && 'اسم العميل'}
+                        <div className="mt-4 font-semibold w-full text-center">
+                          {Corporate ? data?.get_supplier?.name : ''}
+                          {Another ? data?.customer?.name : ''}
                         </div>
-                      )}
-                      {data?.business_date && (
-                        <div className="flex z-10 flex-col flex-1 px-6 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
-                          <div className="self-center">تاريخ الفاتورة</div>
-                          <div className="flex gap-2 mt-4 font-semibold whitespace-nowrap justify-between">
-                            {data?.business_date?.split(' ')[0] && (
-                              <div className="grow text-center">
-                                {data?.business_date?.split(' ')[0]}
-                              </div>
-                            )}
-                            {data?.business_date
-                              ?.split(' ')[1]
-                              ?.slice(0, 5) && (
-                              <div className="grow text-center">
-                                {data?.business_date
-                                  ?.split(' ')[1]
-                                  ?.slice(0, 5)}
-                              </div>
-                            )}
-                          </div>
+                      </div>
+                      <div className="flex z-10 flex-col flex-1 px-3 min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
+                        <div className="self-center">الجوال</div>
+                        <div className="self-start mt-4 w-full text-center font-semibold">
+                          {Corporate ? supplierInfo?.data?.phone : ''}
+                          {Another ? customerInfo?.data?.phone : ''}
                         </div>
-                      )}
-                      {customerInfo?.data?.phone && (
-                        <div className="flex z-10 flex-col flex-1 px-8 pt-4 pb-2 whitespace-nowrap bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
-                          <div className="self-center">الجوال</div>
-                          <div className="self-start mt-4 w-full text-center font-semibold">
-                            {customerInfo?.data?.phone}
-                          </div>
+                      </div>
+                      <div className="flex flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white rounded border border-gray-200 border-solid max-md:pl-5 justify-between">
+                        <div className="self-center">الرقم الضريبي</div>
+                        <div className="mt-4 text-center font-semibold">
+                          {Corporate
+                            ? supplierInfo?.data?.tax_registration_number
+                            : ''}
+                          {Another
+                            ? customerInfo?.data?.tax_registration_number
+                            : ''}
                         </div>
-                      )}
-                      {supplierInfo?.data?.phone && (
-                        <div className="flex z-10 flex-col flex-1 px-8 pt-4 pb-2 whitespace-nowrap bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
-                          <div className="self-center">الجوال</div>
-                          <div className="self-start mt-4 w-full text-center font-semibold">
-                            {supplierInfo?.data?.phone}
-                          </div>
+                      </div>
+                      <div className="flex z-10 flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
+                        <div className="self-center">تاريخ الفاتورة</div>
+                        <div className="flex gap-2 mt-4 font-semibold whitespace-nowrap justify-between">
+                          {data?.business_date?.split(' ')[0] && (
+                            <div className="grow text-center">
+                              {data?.business_date?.split(' ')[0]}
+                            </div>
+                          )}
+                          {data?.business_date?.split(' ')[1]?.slice(0, 5) && (
+                            <div className="grow text-center">
+                              {data?.business_date?.split(' ')[1]?.slice(0, 5)}
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {data?.customer?.name && (
-                        <div className="flex z-10 flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
-                          <div>اسم العميل</div>
-                          <div className="mt-4 font-semibold w-full text-center">
-                            {data?.customer?.name || ''}
-                          </div>
+                      </div>
+                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                        <div>رقم الفاتورة</div>
+                        <div className="mt-4 font-semibold w-full text-center">
+                          {data?.reference || ''}
                         </div>
-                      )}
-                      {data?.get_supplier?.name && (
-                        <div className="flex z-10 flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
-                          <div>اسم المورد</div>
-                          <div className="mt-4 font-semibold w-full text-center">
-                            {data?.get_supplier?.name || ''}
-                          </div>
+                      </div>
+                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                        <div>نوع السيارة</div>
+                        <div className="mt-4 font-semibold w-full text-center">
+                          {data?.kitchen_received_at || ''}
                         </div>
-                      )}
-                      {data?.reference && (
-                        <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
-                          <div>رقم الفاتورة</div>
-                          <div className="mt-4 font-semibold w-full text-center">
-                            {data?.reference || ''}
-                          </div>
+                      </div>
+                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                        <div>رقم اللوحة</div>
+                        <div className="mt-4 font-semibold w-full text-center">
+                          {data?.kitchen_done_at || ''}
                         </div>
-                      )}
-                      {data?.kitchen_received_at && (
-                        <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
-                          <div>نوع السيارة</div>
-                          <div className="mt-4 font-semibold w-full text-center">
-                            {data?.kitchen_received_at || ''}
-                          </div>
-                        </div>
-                      )}
-                      {data?.kitchen_done_at && (
-                        <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
-                          <div>رقم اللوحة</div>
-                          <div className="mt-4 font-semibold w-full text-center">
-                            {data?.kitchen_done_at || ''}
-                          </div>
-                        </div>
-                      )}
-                      {data?.kitchen_notes && (
-                        <div className="flex flex-col flex-1 items-center px-8 pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
-                          <div>ملاحظات</div>
-                          <div className="mt-4 font-semibold w-full text-center">
-                            {data?.kitchen_notes || ''}
-                          </div>
-                        </div>
-                      )}
+                      </div>
                     </div>
                     <div className="flex z-10 flex-wrap gap-5 justify-between px-4 py-1.5 mt-4 w-full font-semibold text-right text-white rounded border border-gray-200 border-solid bg-zinc-500 max-md:mr-1 max-md:max-w-full">
                       <div className="flex w-full  text-center">
-                        <div className="w-1/3">المجموع</div>
-                        <div className="w-1/3">سعر الوحدة</div>
-                        <div className="w-1/3">كمية</div>
                         <div className="w-1/3">اسم المنتج</div>
+                        <div className="w-1/3">كمية</div>
+                        <div className="w-1/3">سعر الوحدة</div>
+                        <div className="w-1/3">المجموع</div>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded border border-gray-200 border-solid w-[802px] max-w-full max-md:mr-1 text-center px-3">
                       {Data?.data?.products?.map((e) => (
                         <div className="flex font-semibold w-full">
-                          <div className="w-1/3">{e?.pivot?.total_price}</div>
-                          <div className="w-1/3">{e?.pivot?.unit_price}</div>
-                          <div className="w-1/3">{e?.pivot?.quantity}</div>
                           <div className="w-1/3">
                             {e.sku === 'sku-zood-20001'
                               ? e.pivot.kitchen_notes
                               : e.name}
                           </div>
+                          <div className="w-1/3">{e?.pivot?.quantity}</div>
+                          <div className="w-1/3">{e?.pivot?.unit_price}</div>
+                          <div className="w-1/3">{e?.pivot?.total_price}</div>
                         </div>
                       ))}
                       {Data?.data?.items?.map((e) => (
                         <div className="flex font-semibold w-full">
-                          <div className="w-1/3">{e?.pivot?.total_cost}</div>
-                          <div className="w-1/3">{e?.pivot?.cost}</div>
-                          <div className="w-1/3">{e?.pivot?.quantity}</div>
                           <div className="w-1/3">
                             {e.sku === 'sku-zood-20001'
                               ? e.pivot.kitchen_notes
                               : e.name}
                           </div>
+                          <div className="w-1/3">{e?.pivot?.quantity}</div>
+                          <div className="w-1/3">{e?.pivot?.cost}</div>
+                          <div className="w-1/3">{e?.pivot?.total_cost}</div>
                         </div>
                       ))}
                     </div>
@@ -210,46 +176,47 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     <div className="flex flex-col gap-3 mt-10 makeEvenOddBg">
                       {Data?.data?.subtotal_price && (
                         <div className="flex justify-between p-2 rounded items-center">
-                          <div>SR {Data.data.subtotal_price}</div>
                           <div>الاجمالي</div>
+                          <div>SR {Data.data.subtotal_price}</div>
                         </div>
                       )}
                       {Data?.data?.total_taxes && (
                         <div className="flex justify-between p-2 rounded items-center">
-                          <div>SR {Data.data.total_taxes}</div>
                           <div>مجموع ضريبة القيمة المضافة</div>
+                          <div>SR {Data.data.total_taxes}</div>
                         </div>
                       )}
                       {Data?.data?.total_price && (
                         <div className="flex justify-between p-2 rounded items-center">
-                          <div>SR {Data.data.total_price}</div>
                           <div>المبلغ الإجمالي</div>
+                          <div>SR {Data.data.total_price}</div>
                         </div>
                       )}
                       {Data?.data?.total_cost && (
                         <div className="flex justify-between p-2 rounded items-center">
-                          <div>SR {Data.data.total_cost}</div>
                           <div>المبلغ الإجمالي</div>
+                          <div>SR {Data.data.total_cost}</div>
                         </div>
                       )}
                       {Data?.data?.discount_amount ? (
                         <div className="flex justify-between p-2 rounded items-center">
-                          <div>SR {Data.data.discount_amount}</div>
                           <div>تخفيض</div>
+                          <div>SR {Data.data.discount_amount}</div>
                         </div>
                       ) : null}
                       {Data?.data?.payments?.map((e) => {
                         if (e.payment_method_id) {
                           return (
                             <div className="flex justify-between p-2 rounded items-center">
-                              <div>SR {e.amount}</div>
                               <div>{e.payment_method.name}</div>
+                              <div>SR {e.amount}</div>
                             </div>
                           );
                         }
                       })}
                       {Data?.data?.payments?.length > 0 && (
                         <div className="flex justify-between p-2 rounded items-center">
+                          <div>المبلغ الإجمالي المدفوع</div>
                           <div>
                             SR{' '}
                             {Data.data.payments.reduce(
@@ -257,12 +224,12 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                               0
                             )}
                           </div>
-                          <div>المبلغ الإجمالي المدفوع</div>
                         </div>
                       )}
                       {Data?.data?.payments?.length > 0 &&
                         Data?.data?.total_price && (
                           <div className="flex justify-between p-2 rounded items-center">
+                            <div>إجمالي المبلغ المستحق</div>
                             <div>
                               SR{' '}
                               {(Data.data.payments.reduce(
@@ -275,7 +242,6 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                                   ) - Data.data.total_price
                                 : 0) || 0}
                             </div>
-                            <div>إجمالي المبلغ المستحق</div>
                           </div>
                         )}
                     </div>
@@ -298,6 +264,11 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                         />
                       </div>
                     </div>
+                    {data?.kitchen_notes && (
+                      <div className="flex flex-col pt-4 pb-2 bg-white rounded-none  max-md:px-5 justify-between">
+                        <div>ملاحظات : {data?.kitchen_notes || ''}</div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="flex print-content2 flex-col w-[390px]  mx-auto text-righ text-sm p-1 px-10">
@@ -323,63 +294,52 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
 
                     {/* عنوان الفاتورة */}
                     <div className="text-center font-semibold text-lg my-6">
-                      فاتورة ضريبية مبسطة
+                      فاتورة ضريبية {Corporate && 'مبسطة'}
                     </div>
 
                     {/* معلومات الفاتورة */}
                     <div className="flex flex-col gap-3 mb-2">
-                      {data?.reference && (
-                        <div className="flex justify-between">
-                          <p>رقم الفاتورة </p>
-                          <p>{data.reference}</p>
-                        </div>
-                      )}
-                      {data?.business_date?.split(' ')[0] && (
-                        <div className="flex justify-between">
-                          <p>تاريخ الفاتورة </p>
-                          <p>{data.business_date.split(' ')[0]}</p>
-                        </div>
-                      )}
-                      {settings?.data?.business_tax_number && (
-                        <div className="flex justify-between">
-                          <p>الرقم الضريبي </p>
-                          <p>{settings.data.business_tax_number}</p>
-                        </div>
-                      )}
-                      {data?.customer?.name && (
-                        <div className="flex justify-between">
-                          <p>اسم العميل </p>
-                          <p>{data.customer.name}</p>
-                        </div>
-                      )}
-                      {data?.get_supplier?.name && (
-                        <div className="flex justify-between">
-                          <p>اسم العميل </p>
-                          <p>{data.get_supplier.name}</p>
-                        </div>
-                      )}
-                      {customerInfo?.data?.phone && (
-                        <div className="flex justify-between">
-                          <p>الجوال </p>
-                          <p>{customerInfo.data.phone}</p>
-                        </div>
-                      )}
+                      <div className="flex justify-between">
+                        <p>رقم الفاتورة </p>
+                        <p>{data?.reference}</p>
+                      </div>
+                      <div className="flex justify-between">
+                        <p>تاريخ الفاتورة </p>
+                        <p>{data?.business_date.split(' ')[0]}</p>
+                      </div>
+                      <div className="flex justify-between">
+                        <p>الرقم الضريبي </p>
+                        <p>{settings?.data?.business_tax_number}</p>
+                      </div>
+
+                      <div className="flex justify-between">
+                        {Another && 'اسم العميل'}
+                        {Corporate && 'اسم المورد'}
+
+                        {Corporate ? data?.get_supplier?.name : 'a'}
+                        {Another ? data?.customer?.name : ''}
+                      </div>
+                      <div className="flex justify-between">
+                        <p>الجوال </p>
+                        <p>
+                          {Corporate ? supplierInfo?.data?.phone : ''}
+                          {Another ? customerInfo?.data?.phone : ''}
+                        </p>
+                      </div>
                     </div>
 
                     {/* جدول المنتجات */}
                     <div className="">
                       {/* رأس الجدول */}
-                      <div className="flex font-semibold  gap-8 text-black  mb-2">
-                        <div className="w-full self-end text-center">
-                          اسم المنتج
+                      <div className="flex font-semibold justify-between text-black text-xs  mb-2">
+                        <div className="self-end text-center">اسم المنتج</div>
+                        <div className="mr-[20px] self-end text-center">
+                          كمية
                         </div>
-                        <div className=" self-end text-center">كمية</div>
                         <div className=" ml-[10px] self-end text-center">
                           سعر الوحدة
                         </div>
-                        <div className=" text-center">
-                          المجموع (شامل الضريبة)
-                        </div>
+                        <div className="text-center ml-[20px]">المجموع</div>
                       </div>
 
                       {/* بيانات الجدول */}
@@ -461,12 +421,12 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             <p>SR {Data.data.total_price}</p>
                           </div>
                         )}
-                        {Data?.data?.discount_amount && (
+                        {Data?.data?.discount_amount ? (
                           <div className="flex justify-between items-center">
                             <p>تخفيض</p>
                             <p>SR {Data.data.discount_amount}</p>
                           </div>
-                        )}
+                        ) : null}
                         {Data?.data?.payments?.length > 0 && (
                           <div className="flex justify-between items-center">
                             <p>المبلغ الإجمالي المدفوع</p>
@@ -499,6 +459,12 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           </div>
                         )}
                     </div>
+
+                    {data?.kitchen_notes && (
+                      <div className="flex flex-col pt-8 pb-2 bg-white rounded-none  max-md:px-5 justify-between">
+                        <div>ملاحظات : {data?.kitchen_notes || ''}</div>
+                      </div>
+                    )}
 
                     {/* الباركود */}
                     <div className="  my-6">
