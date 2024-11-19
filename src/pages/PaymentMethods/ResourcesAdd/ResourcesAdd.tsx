@@ -141,7 +141,6 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                         <IconInput
                           {...field}
                           label={t('اسم طريقة الدفع')}
-                          iconSrc={personIcon}
                           inputClassName="w-[100%]"
                         />
                       </FormControl>
@@ -193,7 +192,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                   disabled={loading}
                   className="mt-4 h-[39px] w-[163px]"
                 >
-                  {isEditMode ? t('تعديل الدفع') : t('اضافة الدفع')}
+                  {isEditMode ? t('تعديل الدفع') : t('اضافة طريقة الدفع')}
                 </Button>
                 <DelConfirm route={'manage/payment_methods'} />
               </div>

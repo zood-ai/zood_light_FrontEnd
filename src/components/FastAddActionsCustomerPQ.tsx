@@ -30,8 +30,14 @@ const formSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
   email: z.string().email({ message: 'Invalid email address' }).optional(),
-  taxNum: z.string().min(15, { message: 'Tax number is must be 15 number' }).optional(),
-  coTax: z.string().min(15, { message: 'Tax number is must be 15 number' }).optional(),
+  taxNum: z
+    .string()
+    .min(15, { message: 'Tax number is must be 15 number' })
+    .optional(),
+  coTax: z
+    .string()
+    .min(15, { message: 'Tax number is must be 15 number' })
+    .optional(),
 });
 export default function FastAddActionsCustomerPQ({
   isOpen,
@@ -95,37 +101,38 @@ export default function FastAddActionsCustomerPQ({
 
     const onError = () => setLoading(false);
 
-    await axiosInstance
-      .post('/manage/customers', {
+    try {
+      // First API call to create a customer
+      const res = await axiosInstance.post('/manage/customers', {
         ...values,
         notes: '-',
         tax_registration_number: values.taxNum,
         vat_registration_number: values.coTax,
-      })
-      .then((res) => {
-        axiosInstance.post(
+      });
+
+      // Second API call to add an address for the created customer
+      if (values.address)
+        await axiosInstance.post(
           `/manage/customers/addAddress/${res?.data?.data.id}`,
           {
             name: values.address,
             description: '-',
           }
         );
-      })
-      .then(() => {
-        openDialog('added');
-        setLoading(false);
-        form.reset({});
-        queryClient.invalidateQueries(queryKey);
-      })
-      .catch((err) => {
-        form.reset({});
-        setLoading(false);
-      })
-      .finally(() => {
-        setLoading(false);
-        onClose();
-        form.reset({});
-      });
+
+      // Success actions
+      openDialog('added');
+      form.reset({});
+      queryClient.invalidateQueries(queryKey);
+    } catch (err) {
+      // Error handling
+      form.reset({});
+    } finally {
+      // Always executed actions
+      setLoading(false);
+      onClose();
+      form.reset({});
+    }
   };
   return (
     <div onClick={onClose} className="relative ">

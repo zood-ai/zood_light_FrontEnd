@@ -24,16 +24,14 @@ const IconInput: React.FC<any> = ({
   ...props
 }) => {
   return (
-    <div
-      className={`flex gap-2  max-sm:flex-grow rounded  border-gray-200 ${className} `}
-    >
+    <div className={`flex gap-2   rounded  border-gray-200 ${className} `}>
       <div className="w-full">
         {label && (
           <div className="self-start text-sm font-medium text-right text-secText mb-xs">
             {label}
           </div>
         )}
-        <div className="relative">
+        <div className="relative  flex items-end">
           <Input
             type={type}
             {...props}
@@ -47,23 +45,23 @@ const IconInput: React.FC<any> = ({
               loading="lazy"
               src={iconSrc}
               alt=""
-              className={`object-contain shrink-0 my-auto text-secText aspect-square w-[18px] absolute right-3 ${
+              className={`object-contain  shrink-0 my-auto text-secText aspect-square w-[18px] absolute right-3  ${
                 label ? 'top-[25%]' : 'top-[20%]'
-              } `}
+              }`}
             />
           )}
-          {iconSrcLeft && (
-            <div
-              // loading="lazy"
-              // src={iconSrcLeft}
-              // alt=""
-              className={`w-[18px] absolute left-3 text-secText ${
-                label ? 'top-[14%]' : 'top-[20%]'
-              } `}
-            >
-              {iconSrcLeft}
-            </div>
-          )}
+
+          <div className="relative">
+            {iconSrcLeft && (
+              <div
+                className={`absolute inset-y-0 left-3 flex items-center text-gray-400 ${
+                  label ? 'top-[-36px]' : ''
+                }`}
+              >
+                {iconSrcLeft}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

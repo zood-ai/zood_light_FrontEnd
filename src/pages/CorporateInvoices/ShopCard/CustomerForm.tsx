@@ -43,7 +43,7 @@ const CustomerForm = () => {
   dispatch(updateField({ field: 'is_sales_order', value: 0 }));
   const { showToast } = useToast();
   const handleSubmitOrder = async () => {
-    setLoading(true);
+    // setLoading(true);
     const totalPrice = orderSchema.total_price;
     const totalPayed = orderSchema.payments.reduce(
       (acc, item) => acc + item.amount,
@@ -70,7 +70,7 @@ const CustomerForm = () => {
     try {
       if (!params.id) {
         const holder = [...orderSchema.payments];
-        const newHolder = holder.filter((ele) => ele.payment_method_id !== '');
+        const newHolder = holder.filter((ele) => ele.notadd !== true);
         const updatedOrderSchema = {
           ...orderSchema,
           payments: newHolder,

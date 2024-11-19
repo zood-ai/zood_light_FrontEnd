@@ -27,11 +27,17 @@ import DelConfirm from '@/components/custom/DelConfim';
 
 const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
-  phone: z.string().nonempty('Phone is required'),
-  address: z.string().nonempty('Address is required'),
-  email: z.string().email({ message: 'Invalid email address' }),
-  taxNum: z.string().min(15, { message: 'Tax number is must be 15 number' }),
-  coTax: z.string().min(15, { message: 'Tax number is must be 15 number' }),
+  phone: z.string().nonempty('Phone is required').optional(),
+  address: z.string().nonempty('Address is required').optional(),
+  email: z.string().email({ message: 'Invalid email address' }).optional(),
+  taxNum: z
+    .string()
+    .min(15, { message: 'Tax number is must be 15 number' })
+    .optional(),
+  coTax: z
+    .string()
+    .min(15, { message: 'Tax number is must be 15 number' })
+    .optional(),
 });
 
 export const CustomersAdd: React.FC<CustomersAddProps> = () => {
@@ -110,73 +116,77 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
     const onError = () => setLoading(false);
 
     if (isEditMode) {
-      await axiosInstance
-        .put(`/manage/customers/${params.objId}`, {
+      try {
+        // First API call to update the customer
+        await axiosInstance.put(`/manage/customers/${params.objId}`, {
           ...values,
           notes: '-',
           tax_registration_number: values.taxNum,
           vat_registration_number: values.coTax,
-        })
-        .then(() => {
-          axiosInstance
-            .post(
-              `/manage/customers/updateAddress/${
-                currData?.addresses?.[0]?.id || ''
-              }`,
-              {
-                name: values.address,
-              }
-            )
-            .then(() => {
-              openDialog('updated');
-              setLoading(false);
-              navigate('/zood-dashboard/customers');
-            })
-            .catch((err) => {
-              form.reset({});
-              setLoading(false);
-            });
         });
+
+        // Second API call to update the address
+        await axiosInstance.post(
+          `/manage/customers/updateAddress/${
+            currData?.addresses?.[0]?.id || ''
+          }`,
+          {
+            name: values.address,
+          }
+        );
+
+        // Success actions
+        openDialog('updated');
+        setLoading(false);
+        navigate('/zood-dashboard/customers');
+      } catch (err) {
+        // Error handling
+        form.reset({});
+        setLoading(false);
+      }
     } else {
-      await axiosInstance
-        .post('/manage/customers', {
+      try {
+        // First API call to create a customer
+        const res = await axiosInstance.post('/manage/customers', {
           ...values,
           notes: '-',
           tax_registration_number: values.taxNum,
           vat_registration_number: values.coTax,
-        })
-        .then((res) => {
-          axiosInstance.post(
+        });
+
+        // Second API call to add an address for the created customer
+        if (values.address)
+          await axiosInstance.post(
             `/manage/customers/addAddress/${res?.data?.data.id}`,
             {
               name: values.address,
               description: '-',
             }
           );
-        })
-        .then(() => {
-          openDialog('added');
-          setLoading(false);
-          form.reset({});
-          navigate('/zood-dashboard/customers');
-        })
-        .catch((err) => {
-          form.reset({});
-          setLoading(false);
-        });
+
+        // Success actions
+        openDialog('added');
+        setLoading(false);
+        form.reset({});
+        navigate('/zood-dashboard/customers');
+      } catch (err) {
+        // Error handling
+        form.reset({});
+        setLoading(false);
+      }
     }
   };
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-  <DetailsHeadWithOutFilter
+      <DetailsHeadWithOutFilter
         mainTittle={isEditMode ? form.getValues('name') : 'اضافة عميل'}
         bkAction={() => {
           setIsOpen(true);
         }}
       />
-    <ConfirmBk
+      <ConfirmBk
         isOpen={isOpen}
         setIsOpen={undefined}
         closeDialog={() => setIsOpen(false)}
@@ -299,8 +309,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
               >
                 {isEditMode ? 'تعديل عميل' : 'اضافة عميل'}
               </Button>
-              <DelConfirm  route={'manage/customers'} />
-
+              <DelConfirm route={'manage/customers'} />
             </form>
           </Form>
         </div>

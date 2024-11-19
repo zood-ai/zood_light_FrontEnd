@@ -109,62 +109,64 @@ export default function FastAddActions2({ isOpen, onClose }) {
     const onError = () => setLoading(false);
 
     if (isEditMode) {
-      await axiosInstance
-        .put(`/manage/customers/${params.objId}`, {
-          name: values.name,
-          phone: values.phone,
+      try {
+        // First API call to update the customer
+        await axiosInstance.put(`/manage/customers/${params.objId}`, {
+          ...values,
           notes: '-',
           tax_registration_number: values.taxNum,
           vat_registration_number: values.coTax,
-        })
-        .then(() => {
-          axiosInstance
-            .post(
-              `/manage/customers/updateAddress/${
-                currData?.addresses?.[0]?.id || ''
-              }`,
-              {
-                name: values.address,
-              }
-            )
-            .then(() => {
-              openDialog('updated');
-              setLoading(false);
-              navigate('/zood-dashboard/customers');
-            })
-            .catch((err) => {
-              form.reset({});
-              setLoading(false);
-            });
         });
+
+        // Second API call to update the address
+        await axiosInstance.post(
+          `/manage/customers/updateAddress/${
+            currData?.addresses?.[0]?.id || ''
+          }`,
+          {
+            name: values.address,
+          }
+        );
+
+        // Success actions
+        openDialog('updated');
+        setLoading(false);
+        navigate('/zood-dashboard/customers');
+      } catch (err) {
+        // Error handling
+        form.reset({});
+        setLoading(false);
+      }
     } else {
-      await axiosInstance
-        .post('/manage/customers', {
-          name: values.name,
-          phone: values.phone,
+      try {
+        // First API call to create a customer
+        const res = await axiosInstance.post('/manage/customers', {
+          ...values,
           notes: '-',
           tax_registration_number: values.taxNum,
           vat_registration_number: values.coTax,
-        })
-        .then((res) => {
-          axiosInstance.post(
+        });
+
+        // Second API call to add an address for the created customer
+        if (values.address)
+          await axiosInstance.post(
             `/manage/customers/addAddress/${res?.data?.data.id}`,
             {
               name: values.address,
               description: '-',
             }
           );
-        })
-        .then(() => {
-          openDialog('added');
-          setLoading(false);
-          form.reset({});
-          navigate('/zood-dashboard/customers');
-        })
-        .catch((err) => {
-          form.reset({});
-          setLoading(false);
-        });
+
+        // Success actions
+        openDialog('added');
+        setLoading(false);
+        form.reset({});
+        navigate('/zood-dashboard/customers');
+      } catch (err) {
+        // Error handling
+        form.reset({});
+        setLoading(false);
+      }
     }
   };
 
