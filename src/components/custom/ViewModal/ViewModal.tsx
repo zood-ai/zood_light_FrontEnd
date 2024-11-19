@@ -10,13 +10,10 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const data = useSelector((state: any) => state.toggleAction.data);
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
-  const { pathname } = useLocation();
-  const Corporate = pathname === '/zood-dashboard/corporate-invoices';
-  const Another = !Corporate;
-
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
   const { data: Taxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
   const { data: customerInfo } = createCrudService<any>(
     'manage/customers'
   ).useGetById(`${data?.customer?.id || data?.get_supplier?.id}`);
@@ -30,6 +27,11 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
     'inventory/purchasing'
   ).useGetById(`${data?.id}`);
 
+  const { pathname } = useLocation();
+  const Corporate = pathname === '/zood-dashboard/corporate-invoices';
+  const Another = !Corporate;
+  const ShowCar = WhoAmI.business.business_type === 'workshop';
+
   const Data = OrderData ? { ...OrderData } : { ...purchsingInfo };
   console.log({
     data,
@@ -39,6 +41,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
     Data,
     Taxes,
     purchsingInfo,
+    WhoAmI,
   });
   const [size, setSize] = useState('A4');
   const handleSizeChange = (newSize: string) => {
@@ -125,18 +128,22 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           {data?.reference || ''}
                         </div>
                       </div>
-                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
-                        <div>نوع السيارة</div>
-                        <div className="mt-4 font-semibold w-full text-center">
-                          {data?.kitchen_received_at || ''}
+                      {ShowCar && (
+                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                          <div>نوع السيارة</div>
+                          <div className="mt-4 font-semibold w-full text-center">
+                            {data?.kitchen_received_at || ''}
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
-                        <div>رقم اللوحة</div>
-                        <div className="mt-4 font-semibold w-full text-center">
-                          {data?.kitchen_done_at || ''}
+                      )}
+                      {ShowCar && (
+                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                          <div>رقم اللوحة</div>
+                          <div className="mt-4 font-semibold w-full text-center">
+                            {data?.kitchen_done_at || ''}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                     <div className="flex z-10 flex-wrap gap-5 justify-between px-4 py-1.5 mt-4 w-full font-semibold text-right text-white rounded border border-gray-200 border-solid bg-zinc-500 max-md:mr-1 max-md:max-w-full">
                       <div className="flex w-full  text-center">

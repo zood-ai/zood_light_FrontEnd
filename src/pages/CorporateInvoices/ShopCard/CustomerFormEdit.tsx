@@ -21,6 +21,8 @@ const CustomerFormEdit = () => {
   const params = useParams();
   const allServiceOrder = createCrudService<any>('orders');
   const orderPayment = createCrudService<any>('order-payments');
+  const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
+  const ShowCar = WhoAmI.business.business_type === 'workshop';
 
   const { mutate, isLoading: loadingOrder } = orderPayment.useCreate();
   const getOrder = allServiceOrder.useGetById(params.id);
@@ -61,7 +63,7 @@ const CustomerFormEdit = () => {
           added_at: ele.added_at || new Date(),
         }));
         if (holder2.length === 0) return;
-        console.log({holder2})
+        console.log({ holder2 });
         await mutate(
           {
             order_id: params.id,
@@ -126,25 +128,27 @@ const CustomerFormEdit = () => {
               </div>
             </div>
           ))}
-          <div className="flex gap-x-md mt-5">
-            <IconInput
-              disabled={params.id}
-              name="kitchen_received_at"
-              // className="col-span-10 "
-              label="نوع السيارة"
-              inputClassName="w-[240px] min-w-[120px]"
-              value={getOrder?.data?.data?.kitchen_received_at || ''}
-              // value={formState.address}
-              // inputClassName="md:col-span-5"
-            />
-            <IconInput
-              disabled={params.id}
-              name="kitchen_done_at"
-              inputClassName="w-[240px] min-w-[120px] mb-sm "
-              label="رقم اللوحة"
-              value={getOrder?.data?.data?.kitchen_done_at || ''}
-            />
-          </div>
+          {ShowCar && (
+            <div className="flex gap-x-md mt-5">
+              <IconInput
+                disabled={params.id}
+                name="kitchen_received_at"
+                // className="col-span-10 "
+                label="نوع السيارة"
+                inputClassName="w-[240px] min-w-[120px]"
+                value={getOrder?.data?.data?.kitchen_received_at || ''}
+                // value={formState.address}
+                // inputClassName="md:col-span-5"
+              />
+              <IconInput
+                disabled={params.id}
+                name="kitchen_done_at"
+                inputClassName="w-[240px] min-w-[120px] mb-sm "
+                label="رقم اللوحة"
+                value={getOrder?.data?.data?.kitchen_done_at || ''}
+              />
+            </div>
+          )}
           <Textarea
             disabled={params.id}
             name="kitchen_notes"

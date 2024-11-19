@@ -28,6 +28,8 @@ const CustomerForm = () => {
   const { data: defaultProduct } = createCrudService<any>(
     'menu/products?filter[sku]=sku-zood-20001'
   ).useGetAll();
+  const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
+  const ShowCar = WhoAmI.business.business_type === 'workshop';
 
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const dispatch = useDispatch();
@@ -278,42 +280,44 @@ const CustomerForm = () => {
               </div>
             </Button>
           )}
-          <div className="flex gap-x-md mt-5">
-            <IconInput
-              disabled={params.id}
-              name="kitchen_received_at"
-              // className="col-span-10 "
-              label="نوع السيارة"
-              inputClassName="w-[240px] min-w-[120px]"
-              value={orderSchema.kitchen_received_at}
-              onChange={(e) =>
-                dispatch(
-                  updateField({
-                    field: 'kitchen_received_at',
-                    value: e.target.value,
-                  })
-                )
-              }
-              // value={formState.address}
-              // inputClassName="md:col-span-5"
-            />
-            <IconInput
-              disabled={params.id}
-              name="kitchen_done_at"
-              inputClassName="w-[240px] min-w-[120px] mb-sm "
-              label="رقم اللوحة"
-              value={orderSchema.kitchen_done_at}
-              onChange={(e) =>
-                dispatch(
-                  updateField({
-                    field: 'kitchen_done_at',
-                    value: e.target.value,
-                  })
-                )
-              }
-              // value={formState.address}
-            />
-          </div>
+          {ShowCar && (
+            <div className="flex gap-x-md mt-5">
+              <IconInput
+                disabled={params.id}
+                name="kitchen_received_at"
+                // className="col-span-10 "
+                label="نوع السيارة"
+                inputClassName="w-[240px] min-w-[120px]"
+                value={orderSchema.kitchen_received_at}
+                onChange={(e) =>
+                  dispatch(
+                    updateField({
+                      field: 'kitchen_received_at',
+                      value: e.target.value,
+                    })
+                  )
+                }
+                // value={formState.address}
+                // inputClassName="md:col-span-5"
+              />
+              <IconInput
+                disabled={params.id}
+                name="kitchen_done_at"
+                inputClassName="w-[240px] min-w-[120px] mb-sm "
+                label="رقم اللوحة"
+                value={orderSchema.kitchen_done_at}
+                onChange={(e) =>
+                  dispatch(
+                    updateField({
+                      field: 'kitchen_done_at',
+                      value: e.target.value,
+                    })
+                  )
+                }
+                // value={formState.address}
+              />
+            </div>
+          )}
           <Textarea
             disabled={params.id}
             name="kitchen_notes"

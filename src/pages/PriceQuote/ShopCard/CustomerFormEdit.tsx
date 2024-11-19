@@ -18,6 +18,8 @@ import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 const CustomerFormEdit = () => {
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
+  const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
+  const ShowCar = WhoAmI.business.business_type === 'workshop';
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
   const { useGetAll: fetchAllCustomers } = allService;
@@ -106,24 +108,26 @@ const CustomerFormEdit = () => {
             </div>
           ))}
         </div>
-        <div className="flex gap-x-md mt-5">
-          <IconInput
-            disabled
-            name="kitchen_received_at"
-            value={getOrdersById?.data?.kitchen_received_at}
-            label="نوع السيارة"
-            inputClassName="w-[240px] min-w-[120px]"
-            onChange={null}
-          />
-          <IconInput
-            disabled
-            name="kitchen_done_at"
-            value={getOrdersById?.data?.kitchen_done_at}
-            inputClassName="w-[240px] min-w-[120px] mb-sm "
-            label="رقم اللوحة"
-            onChange={null}
-          />
-        </div>
+        {ShowCar && (
+          <div className="flex gap-x-md mt-5">
+            <IconInput
+              disabled
+              name="kitchen_received_at"
+              value={getOrdersById?.data?.kitchen_received_at}
+              label="نوع السيارة"
+              inputClassName="w-[240px] min-w-[120px]"
+              onChange={null}
+            />
+            <IconInput
+              disabled
+              name="kitchen_done_at"
+              value={getOrdersById?.data?.kitchen_done_at}
+              inputClassName="w-[240px] min-w-[120px] mb-sm "
+              label="رقم اللوحة"
+              onChange={null}
+            />
+          </div>
+        )}
         <Textarea
           disabled
           name="kitchen_notes"
