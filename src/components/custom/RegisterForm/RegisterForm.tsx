@@ -125,7 +125,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = () => {
                 </div>
                 <img
                   loading="lazy"
-                  src="https://cdn.builder.io/api/v1/image/assets/TEMP/5df027893b18a92844e73d9db4cd3230a492dd7622d809a4beffc594465749fe?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
+                  src="/images/SH_LOGO.svg"
                   className="object-contain cursor-pointer shrink-0 aspect-[0.81] w-[51px] "
                 />
               </div>

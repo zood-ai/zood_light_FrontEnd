@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import store from './store';
 import { Provider } from 'react-redux';
 import { GlobalDialogProvider } from './context/GlobalDialogProvider';
+import { Analytics } from "@vercel/analytics/react"
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ createRoot(document.getElementById('root')!).render(
             <AuthProvider>
               <LoadingProvider>
                 <RouterProvider router={router} />
+                <Analytics/>
               </LoadingProvider>
             </AuthProvider>
             <Toaster />

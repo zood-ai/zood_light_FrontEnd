@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import logo from '/images/SH_LOGO.webp'
+import logo from '/images/SH_LOGO.svg'
 import { HomeIcon, PlusIcon } from '@radix-ui/react-icons'
 import { IconSearch, IconUserCircle } from '@tabler/icons-react'
 function BottomNavBar() {
