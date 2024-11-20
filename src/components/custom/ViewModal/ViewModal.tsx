@@ -77,9 +77,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           </p>
                         </div>
                         <p className="mt-4 w-[277px] leading-[30.18px]">
-                          {WhoAmI?.user?.branches[0].registered_address &&
+                          {WhoAmI?.user?.branches[0]?.registered_address &&
                             JSON.parse(
-                              WhoAmI?.user?.branches[0].registered_address
+                              WhoAmI?.user?.branches[0]?.registered_address
                             ).streetName}
                         </p>
                       </div>
@@ -333,8 +333,8 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
 
                     {/* معلومات الشركة */}
                     <div className="text-center text-sm leading-6 mb-4">
-                      {WhoAmI?.user?.branches[0].registered_address &&
-                        JSON.parse(WhoAmI?.user?.branches[0].registered_address)
+                      {WhoAmI?.user?.branches[0]?.registered_address &&
+                        JSON.parse(WhoAmI?.user?.branches[0]?.registered_address)
                           .streetName}
                     </div>
 
