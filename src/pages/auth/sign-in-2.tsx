@@ -48,7 +48,7 @@ export default function SignIn2() {
 
   // Handle SignUp
   const handleSignUp = () => {
-    navigate('/zood-signup');
+    navigate('/zood-signup-no-one-can-see-me');
   };
 
   // Handle form submission
@@ -232,7 +232,7 @@ export default function SignIn2() {
               </Button>
             </div>
             <div className="  ">
-              <Button
+              {/* <Button
                 onClick={handleSignUp}
                 variant={'outline'}
                 loading={false}
@@ -240,7 +240,7 @@ export default function SignIn2() {
                 className="w-full sm:w-[418px] h-[56px] mb-10"
               >
                 تسجيل
-              </Button>
+              </Button> */}
             </div>
           </form>
         </Form>

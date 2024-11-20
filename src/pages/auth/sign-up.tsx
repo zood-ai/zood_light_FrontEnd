@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -13,8 +14,17 @@ import {
 import axiosInstance from '@/api/interceptors';
 import { Button } from '@/components/custom/button';
 import { CheckboxWithText } from '@/components/custom/CheckboxWithText';
+import createCrudService from '@/api/services/crudService';
+import { useGlobalDialog } from '@/context/GlobalDialogProvider';
+import { useToast } from '@/components/custom/useToastComp';
 
 export default function SignUp() {
+  const { data: businessTypes } = createCrudService<any>(
+    'manage/business-types'
+  ).useGetAll();
+  const { data: countries } =
+    createCrudService<any>('manage/countries').useGetAll();
+  const { showToast } = useToast();
   const [formState, setFormState] = useState({
     name: '',
     plan: '',
@@ -23,7 +33,6 @@ export default function SignUp() {
     password: '',
     confirmPassword: '',
     business_name: '',
-    country: '',
     city: '',
     district: '',
     streetName: '',
@@ -33,6 +42,8 @@ export default function SignUp() {
     tradeRegister: null,
     emailAlert: false,
   });
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (key: string, value: any) => {
     setFormState((prevState) => ({
@@ -42,17 +53,38 @@ export default function SignUp() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log({ formState });
     const myFormData = new FormData();
     myFormData.append('name', formState.name);
     myFormData.append('email', formState.email);
-    myFormData.append('password', formState.name);
+    myFormData.append('password', formState.password);
     myFormData.append('business_name', formState.business_name);
     myFormData.append('business_type_id', formState.business_type_id);
     myFormData.append('business_location_id', formState.business_location_id);
     myFormData.append('phone', formState.phone);
-
-    const res = await axiosInstance.post('auth/Register', myFormData);
-    console.log(res.data);
+    setLoading(true);
+    try {
+      const res = await axiosInstance.post('auth/Register', myFormData);
+      console.log(res.data);
+      showToast({
+        description: `تم التسجيل بنجاح الرقم التعريفي هو ${res?.data?.data?.user?.business_reference}`,
+        duration: 4000,
+        variant: 'default',
+      });
+      // setTimeout(() => {
+        navigate('/zood-login');
+        // setLoading(false);
+      // }, 2000);
+    } catch (e) {
+      console.log({ e });
+      showToast({
+        description: e.response.data.message,
+        duration: 4000,
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <div className="flex justify-center py-10">
@@ -84,11 +116,9 @@ export default function SignUp() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="apple">Apple</SelectItem>
-                    <SelectItem value="banana">Banana</SelectItem>
-                    <SelectItem value="blueberry">Blueberry</SelectItem>
-                    <SelectItem value="grapes">Grapes</SelectItem>
-                    <SelectItem value="pineapple">Pineapple</SelectItem>
+                    <SelectItem value="a">a</SelectItem>
+                    <SelectItem value="b">b</SelectItem>
+                    <SelectItem value="c">c</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -164,20 +194,24 @@ export default function SignUp() {
                 />
               </div>
               <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="plan">
+                <Label className="align-right" htmlFor="business_type_id">
                   نوع المتجر
                 </Label>
                 <Select
                   dir="rtl"
-                  onValueChange={(value) => handleChange('plan', value)}
+                  onValueChange={(value) =>
+                    handleChange('business_type_id', value)
+                  }
                 >
                   <SelectTrigger className="w-[327px]">
                     <SelectValue placeholder="" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="ًWorkshop">ًWorkshop</SelectItem>
-                      <SelectItem value="business">Business</SelectItem>
+                      {businessTypes &&
+                        businessTypes?.data.map((e) => (
+                          <SelectItem value={e.id}>{e.name}</SelectItem>
+                        ))}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -187,15 +221,27 @@ export default function SignUp() {
           <div dir="rtl" className="flex gap-6 mb-6">
             <div className="flex gap-6">
               <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="country">
+                <Label className="align-right" htmlFor="business_location_id">
                   الدولة
                 </Label>
-                <Input
-                  type="text"
-                  id="country"
-                  value={formState.country}
-                  onChange={(e) => handleChange('country', e.target.value)}
-                />
+                <Select
+                  dir="rtl"
+                  onValueChange={(value) =>
+                    handleChange('business_location_id', value)
+                  }
+                >
+                  <SelectTrigger className="w-[327px]">
+                    <SelectValue placeholder="" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {countries &&
+                        countries?.data.map((e) => (
+                          <SelectItem value={e.id}>{e.name_en}</SelectItem>
+                        ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
               <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
                 <Label className="align-right" htmlFor="city">
@@ -289,8 +335,13 @@ export default function SignUp() {
               />
             </div>
             <div dir="rtl">
-              <Button type="submit" className="px-4 py-2 w-[150px] text-sm">
-                اضافة
+              <Button
+                loading={loading}
+                disabled={loading}
+                type="submit"
+                className="px-4 py-2 w-[150px] text-sm"
+              >
+                {!loading && 'اضافة'}
               </Button>
             </div>
           </div>
