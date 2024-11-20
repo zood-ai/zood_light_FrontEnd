@@ -279,7 +279,7 @@ export default function Settings() {
                   }));
                 }}
                 value={updateAll?.buildingNumber}
-                className="w-[327px]"
+                className="w-[327px] "
               />
             </div>
           </div>
@@ -289,7 +289,7 @@ export default function Settings() {
               handleUpdateBranch();
               updateTop();
             }}
-            className="flex flex-col justify-center items-center px-6 py-1.5 mt-6 text-sm font-semibold text-left text-white whitespace-nowrap bg-indigo-900 rounded border border-indigo-900 border-solid min-h-[39px] max-md:px-5"
+            className="flex flex-col justify-center items-center px-6 py-1.5 mt-6 text-sm font-semibold text-left text-white whitespace-nowrap bg-[var(--main)] rounded border border-[var(--main)] border-solid min-h-[39px] max-md:px-5"
           >
             <div className="gap-3 self-stretch">حفظ</div>
           </Button>
@@ -409,7 +409,7 @@ export default function Settings() {
                 updateBottom();
               }}
               type="button"
-              className="px-6  text-sm py-1.5 mt-8 font-semibold  mr-[12px]  text-white whitespace-nowrap bg-indigo-900 rounded min-h-[39px] max-md:px-5"
+              className="px-6  text-sm py-1.5 mt-8 font-semibold  mr-[12px]  text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5"
             >
               حفظ
             </button>
@@ -466,7 +466,7 @@ export default function Settings() {
             </label>
           </div>
 
-          <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-indigo-900 rounded min-h-[39px] max-md:px-5">
+          <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5">
             <button
               onClick={() => {
                 changeTaxType();

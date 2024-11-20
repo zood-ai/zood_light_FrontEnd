@@ -6,7 +6,7 @@ function DashCards({ data, activeFilter, setActiveFilter }) {
   const buttonStyles = (filter) => ({
     padding: '10px 20px',
     borderRadius: '8px',
-    backgroundColor: activeFilter === filter ? '#312E81' : '#F5F5F5',
+    backgroundColor: activeFilter === filter ? 'var(--main)' : '#F5F5F5',
     color: activeFilter === filter ? '#FFF' : '#888',
     cursor: 'pointer',
     border: 'none',

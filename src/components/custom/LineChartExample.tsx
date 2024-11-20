@@ -40,7 +40,7 @@ const LineChartExample = ({ data }) => {
           <Tooltip content={<CustomTooltip />} />
           <Legend />
 
-          <Bar dataKey="value" fill="#312E81" />
+          <Bar dataKey="value" fill="var(--main)" />
         </BarChart>
       </ResponsiveContainer>
     </div>
