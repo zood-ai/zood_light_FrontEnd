@@ -163,16 +163,18 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded border border-gray-200 border-solid w-[802px] max-w-full max-md:mr-1 text-center px-3">
                       {Data?.data?.products?.map((e) => (
                         <div className="flex font-semibold w-full">
-                          <div className="w-1/3">
+                          <div className="w-1/3 flex justify-center items-center">
                             {e.sku === 'sku-zood-20001'
                               ? e.pivot.kitchen_notes
                               : e.name}
                           </div>
-                          <div className="w-1/3">{e?.pivot?.quantity}</div>
-                          <div className="w-1/3">
+                          <div className="w-1/3 flex justify-center items-center">
+                            {e?.pivot?.quantity}
+                          </div>
+                          <div className="w-1/3 flex justify-center items-center">
                             {e?.pivot?.unit_price?.toFixed(2)}
                           </div>
-                          <div className="w-1/3">
+                          <div className="w-1/3 flex justify-center items-center">
                             {(
                               e?.pivot?.quantity * e?.pivot?.unit_price
                             ).toFixed(2)}
@@ -181,16 +183,18 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       ))}
                       {Data?.data?.items?.map((e) => (
                         <div className="flex font-semibold w-full">
-                          <div className="w-1/3">
+                          <div className="w-1/3 flex justify-center items-center">
                             {e.sku === 'sku-zood-20001'
                               ? e.pivot.kitchen_notes
                               : e.name}
                           </div>
-                          <div className="w-1/3">{e?.pivot?.quantity}</div>
-                          <div className="w-1/3">
+                          <div className="w-1/3 flex justify-center items-center">
+                            {e?.pivot?.quantity}
+                          </div>
+                          <div className="w-1/3 flex justify-center items-center">
                             {e?.pivot?.cost?.toFixed(2)}
                           </div>
-                          <div className="w-1/3">
+                          <div className="w-1/3 flex justify-center items-center">
                             {(e?.pivot?.quantity * e?.pivot?.cost).toFixed(2)}
                           </div>
                         </div>
@@ -198,34 +202,34 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     </div>
                     {/* CODING HERE */}
                     <div className="flex flex-col gap-3 mt-10 makeEvenOddBg">
-                      {Data?.data?.subtotal_price && (
+                      {Data?.data?.subtotal_price ? (
                         <div className="flex justify-between p-2 rounded items-center">
-                          <div>الاجمالي</div>
+                          <div>الإجمالي الفرعي</div>
                           <div>SR {Data.data.subtotal_price?.toFixed(2)}</div>
                         </div>
-                      )}
-                      {Data?.data?.total_taxes && (
+                      ) : null}
+                      {Data?.data?.discount_amount ? (
+                        <div className="flex justify-between p-2 rounded items-center">
+                          <div>خصم</div>
+                          <div>SR {Data.data.discount_amount?.toFixed(2)}</div>
+                        </div>
+                      ) : null}
+                      {Data?.data?.total_taxes ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>مجموع ضريبة القيمة المضافة</div>
                           <div>SR {Data.data.total_taxes?.toFixed(2)}</div>
                         </div>
-                      )}
-                      {Data?.data?.total_price && (
+                      ) : null}
+                      {Data?.data?.total_price ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>المبلغ الإجمالي</div>
                           <div>SR {Data.data.total_price?.toFixed(2)}</div>
                         </div>
-                      )}
-                      {Data?.data?.total_cost && (
+                      ) : null}
+                      {Data?.data?.total_cost ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>المبلغ الإجمالي</div>
                           <div>SR {Data.data.total_cost?.toFixed(2)}</div>
-                        </div>
-                      )}
-                      {Data?.data?.discount_amount ? (
-                        <div className="flex justify-between p-2 rounded items-center">
-                          <div>تخفيض</div>
-                          <div>SR {Data.data.discount_amount?.toFixed(2)}</div>
                         </div>
                       ) : null}
                       {Data?.data?.payments?.map((e) => {
@@ -238,7 +242,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           );
                         }
                       })}
-                      {Data?.data?.payments?.length > 0 && (
+                      {Data?.data?.payments?.length > 0 ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>المبلغ الإجمالي المدفوع</div>
                           <div>
@@ -248,27 +252,47 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                               ?.toFixed(2)}
                           </div>
                         </div>
-                      )}
+                      ) : null}
                       {Data?.data?.payments?.length > 0 &&
-                        Data?.data?.total_price && (
-                          <div className="flex justify-between p-2 rounded items-center">
-                            <div>إجمالي المبلغ المستحق</div>
-                            <div>
-                              SR{' '}
-                              {(Data.data.payments.reduce(
-                                (sum, item) => sum + item.amount,
-                                0
-                              ) > Data.data.total_price
-                                ? (
-                                    Data.data.payments.reduce(
-                                      (sum, item) => sum + item.amount,
-                                      0
-                                    ) - Data.data.total_price
-                                  )?.toFixed(2)
-                                : 0) || 0}
-                            </div>
+                      Data?.data?.total_price ? (
+                        <div className="flex justify-between p-2 rounded items-center">
+                          <div>إجمالي المبلغ المستحق</div>
+                          <div>
+                            SR{' '}
+                            {(Data.data.payments.reduce(
+                              (sum, item) => sum + item.amount,
+                              0
+                            ) > Data.data.total_price
+                              ? (
+                                  Data.data.payments.reduce(
+                                    (sum, item) => sum + item.amount,
+                                    0
+                                  ) - Data.data.total_price
+                                )?.toFixed(2)
+                              : 0) || 0}
                           </div>
-                        )}
+                        </div>
+                      ) : null}
+                      {Data?.data?.total_price ? (
+                        <div className="flex justify-between p-2 rounded items-center">
+                          <div>إجمالي المبلغ المتبقي</div>
+                          <div>
+                            SR{' '}
+                            {((Data?.data?.payments?.reduce(
+                              (sum, item) => sum + item.amount,
+                              0
+                            ) || 0) <= Data.data.total_price
+                              ? (
+                                  Data.data.total_price -
+                                  Data?.data?.payments?.reduce(
+                                    (sum, item) => sum + item.amount,
+                                    0
+                                  )
+                                )?.toFixed(2)
+                              : 0) || 0}
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
 
                     {/* CODE DELETED HERE */}
@@ -289,11 +313,11 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                         />
                       </div>
                     </div>
-                    {data?.kitchen_notes && (
+                    {data?.kitchen_notes ? (
                       <div className="flex flex-col pt-4 pb-2 bg-white rounded-none  max-md:px-5 justify-between">
                         <div>ملاحظات : {data?.kitchen_notes || ''}</div>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 ) : (
                   <div className="flex print-content2 flex-col w-[390px]  mx-auto text-righ text-sm p-1 px-10">
@@ -351,10 +375,22 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                         <p>رقم الفاتورة </p>
                         <p>{data?.reference}</p>
                       </div>
+                      {ShowCar && data?.kitchen_received_at && (
+                        <div className="flex justify-between">
+                          <p>نوع السيارة</p>
+                          <p>{data?.kitchen_received_at || ''}</p>
+                        </div>
+                      )}
+                      {ShowCar && data?.kitchen_done_at && (
+                        <div className="flex justify-between">
+                          <p>رقم اللوحة</p>
+                          <p>{data?.kitchen_done_at || ''}</p>
+                        </div>
+                      )}
                     </div>
 
                     {/* جدول المنتجات */}
-                    <div className="">
+                    <div className=" py-5">
                       {/* رأس الجدول */}
                       <div className="flex font-semibold justify-between text-black text-xs  mb-2">
                         <div className="self-end text-center">اسم المنتج</div>
@@ -428,41 +464,41 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     <div className="flex flex-col mt-4 gap-4">
                       {/* first col div */}
                       <div className="flex flex-col gap-2">
-                        {Data?.data?.subtotal_price && (
+                        {Data?.data?.subtotal_price ? (
                           <div className="flex justify-between items-center">
-                            <p className="w-[50%]">الاجمالي</p>
+                            <p className="w-[50%]">الإجمالي الفرعي</p>
                             <p>SR {Data.data.subtotal_price?.toFixed(2)}</p>
                           </div>
-                        )}
-                        {Data?.data?.total_cost && (
+                        ) : null}
+                        {Data?.data?.total_cost ? (
                           <div className="flex justify-between items-center">
                             <p className="w-[50%]">الاجمالي</p>
                             <p>SR {Data.data.total_cost?.toFixed(2)}</p>
                           </div>
-                        )}
-                        {Data?.data?.total_taxes && (
+                        ) : null}
+                        {Data?.data?.discount_amount ? (
+                          <div className="flex justify-between items-center">
+                            <div>خصم</div>
+                            <p>SR {Data.data.discount_amount?.toFixed(2)}</p>
+                          </div>
+                        ) : null}
+                        {Data?.data?.total_taxes ? (
                           <div className="flex justify-between items-center">
                             <p>مجموع ضريبة القيمة المضافة</p>
                             <p>SR {Data.data.total_taxes?.toFixed(2)}</p>
                           </div>
-                        )}
+                        ) : null}
                       </div>
                       {/* end col div */}
                       {/* first col div */}
                       <div className="flex flex-col gap-4">
-                        {Data?.data?.total_price && (
+                        {Data?.data?.total_price ? (
                           <div className="flex justify-between items-center">
                             <p>المبلغ الإجمالي</p>
                             <p>SR {Data.data.total_price?.toFixed(2)}</p>
                           </div>
-                        )}
-                        {Data?.data?.discount_amount ? (
-                          <div className="flex justify-between items-center">
-                            <p>تخفيض</p>
-                            <p>SR {Data.data.discount_amount?.toFixed(2)}</p>
-                          </div>
                         ) : null}
-                        {Data?.data?.payments?.length > 0 && (
+                        {Data?.data?.payments?.length > 0 ? (
                           <div className="flex justify-between items-center">
                             <p>المبلغ الإجمالي المدفوع</p>
                             <p>
@@ -472,35 +508,56 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                                 ?.toFixed(2)}
                             </p>
                           </div>
-                        )}
+                        ) : null}
                       </div>
                       {Data?.data?.payments?.length > 0 &&
-                        Data?.data?.total_price && (
-                          <div className="flex justify-between items-center">
-                            <p>إجمالي المبلغ المستحق</p>
-                            <p>
-                              SR{' '}
-                              {Data.data.payments.reduce(
-                                (sum, item) => sum + item.amount,
-                                0
-                              ) > Data.data.total_price
-                                ? (
-                                    Data.data.payments.reduce(
-                                      (sum, item) => sum + item.amount,
-                                      0
-                                    ) - Data.data.total_price
-                                  ).toFixed(2)
-                                : 0}
-                            </p>
+                      Data?.data?.total_price ? (
+                        <div className="flex justify-between items-center">
+                          <p>إجمالي المبلغ المستحق</p>
+                          <p>
+                            SR{' '}
+                            {Data.data.payments.reduce(
+                              (sum, item) => sum + item.amount,
+                              0
+                            ) > Data.data.total_price
+                              ? (
+                                  Data.data.payments.reduce(
+                                    (sum, item) => sum + item.amount,
+                                    0
+                                  ) - Data.data.total_price
+                                ).toFixed(2)
+                              : 0}
+                          </p>
+                        </div>
+                      ) : null}
+                      {Data?.data?.payments?.length > 0 &&
+                      Data?.data?.total_price ? (
+                        <div className="flex justify-between p-2 rounded items-center">
+                          <div>إجمالي المبلغ المتبقي</div>
+                          <div>
+                            SR{' '}
+                            {(Data.data.payments.reduce(
+                              (sum, item) => sum + item.amount,
+                              0
+                            ) <= Data.data.total_price
+                              ? (
+                                  Data.data.total_price -
+                                  Data.data.payments.reduce(
+                                    (sum, item) => sum + item.amount,
+                                    0
+                                  )
+                                )?.toFixed(2)
+                              : 0) || 0}
                           </div>
-                        )}
+                        </div>
+                      ) : null}
                     </div>
 
-                    {data?.kitchen_notes && (
+                    {data?.kitchen_notes ? (
                       <div className="flex flex-col pt-8 pb-2 bg-white rounded-none  max-md:px-5 justify-between">
                         <div>ملاحظات : {data?.kitchen_notes || ''}</div>
                       </div>
-                    )}
+                    ) : null}
 
                     {/* الباركود */}
                     <div className="  my-6">

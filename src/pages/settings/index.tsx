@@ -42,6 +42,7 @@ export default function Settings() {
   const [fileBase64, setFileBase64] = useState<any>('');
   console.log('FROM ME', data);
   console.log('SECOND FROM ME', updateAll);
+  console.log({ taxesValue });
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -421,7 +422,7 @@ export default function Settings() {
           </div>
           <div className="relative">
             <Input
-              value={taxesData?.rate}
+              defaultValue={taxesData?.rate}
               onChange={(e) => setTaxesValue(+e.target.value)}
               className="pr-6"
             />
