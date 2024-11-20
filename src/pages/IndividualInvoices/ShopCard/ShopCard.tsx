@@ -28,6 +28,14 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
     [cardItemValue]
   );
   console.log(cardItemValue, 'cardItemValue');
+  
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (cardItemValue.length <= 0) {
+      navigate('/zood-dashboard/individual-invoices/add');
+    }
+  }, [cardItemValue.length, navigate]);
 
   const taxAmount = useMemo(() => (totalCost * 15) / 100, [totalCost]);
   useEffect(() => {

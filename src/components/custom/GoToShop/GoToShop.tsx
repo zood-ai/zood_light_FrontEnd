@@ -10,15 +10,26 @@ export const GoToShop: React.FC<GoToShopProps> = () => {
   const navigate = useNavigate();
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const totalQty = cardItemValue.reduce((sum, item) => sum + item.qty, 0);
-
+  console.log({ cardItemValue });
   return (
     <>
       <div
-        onClick={() => navigate('shop-card')}
-        className="cursor-pointer flex gap-2.5 col-span-4 md:col-span-1  items-center text-sm font-semibold text-right text-main "
+        onClick={() => {
+          if (cardItemValue.length > 0) navigate('shop-card');
+        }}
+        style={{
+          color: totalQty ? 'var(--main)' : 'black',
+        }}
+        className="cursor-pointer flex gap-2.5 col-span-4 md:col-span-1  items-center text-sm font-semibold text-right"
       >
         <div className="mb-5">
-          <div className="text-main ">{totalQty}</div>
+          <div
+            style={{
+              color: totalQty ? 'var(--main)' : 'black',
+            }}
+          >
+            {totalQty}
+          </div>
           <div className="">
             <svg
               width="24"
