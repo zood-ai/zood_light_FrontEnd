@@ -3,7 +3,7 @@ import { IconChevronsLeft, IconMenu2, IconX } from '@tabler/icons-react';
 import { Layout } from './custom/layout';
 import { Button } from './custom/button';
 import Nav from './nav';
-import logo from '/images/SH_LOGO.webp';
+import logo from '/images/SH_LOGO.svg';
 import { cn } from '@/lib/utils';
 import { sidelinks } from '@/data/sidelinks';
 
