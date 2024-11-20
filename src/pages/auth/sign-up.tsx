@@ -1,29 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { useNavigate, Link } from 'react-router-dom';
 import axiosInstance from '@/api/interceptors';
-import { Button } from '@/components/custom/button';
-import { CheckboxWithText } from '@/components/custom/CheckboxWithText';
-import createCrudService from '@/api/services/crudService';
-import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 import { useToast } from '@/components/custom/useToastComp';
 
+import SignUpForm from './components/sign-up-form';
+import Register from './components/Register';
+
 export default function SignUp() {
-  const { data: businessTypes } = createCrudService<any>(
-    'manage/business-types'
-  ).useGetAll();
-  const { data: countries } =
-    createCrudService<any>('manage/countries').useGetAll();
   const { showToast } = useToast();
   const [formState, setFormState] = useState({
     name: '',
@@ -43,6 +26,8 @@ export default function SignUp() {
     emailAlert: false,
   });
   const [loading, setLoading] = useState(false);
+  const [responseData, setResponseData] = useState(null);
+  const [step, setStep] = useState(1);
   const navigate = useNavigate();
 
   const handleChange = (key: string, value: any) => {
@@ -65,15 +50,16 @@ export default function SignUp() {
     setLoading(true);
     try {
       const res = await axiosInstance.post('auth/Register', myFormData);
+      setResponseData(res.data);
       console.log(res.data);
       showToast({
         description: `تم التسجيل بنجاح الرقم التعريفي هو ${res?.data?.data?.user?.business_reference}`,
-        duration: 4000,
+        duration: 100000,
         variant: 'default',
       });
       // setTimeout(() => {
-        navigate('/zood-login');
-        // setLoading(false);
+      navigate('/zood-login');
+      // setLoading(false);
       // }, 2000);
     } catch (e) {
       console.log({ e });
@@ -86,267 +72,74 @@ export default function SignUp() {
       setLoading(false);
     }
   };
+
+  const changeStep = () => {
+    // setStep((prev) => prev + 1);
+  };
   return (
-    <div className="flex justify-center py-10">
-      <form onSubmit={handleSubmit}>
-        <div className="mx-2 my-4">
-          <div dir="rtl" className="flex gap-6 mb-6">
-            <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-              <Label className="align-right" htmlFor="name">
-                الاسم
-              </Label>
-              <Input
-                className=""
-                type="text"
-                id="name"
-                value={formState.name}
-                onChange={(e) => handleChange('name', e.target.value)}
-              />
-            </div>
-            <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-              <Label className="align-right" htmlFor="plan">
-                الخطة
-              </Label>
-              <Select
-                dir="rtl"
-                onValueChange={(value) => handleChange('plan', value)}
-              >
-                <SelectTrigger className="w-[327px]">
-                  <SelectValue placeholder="" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="a">a</SelectItem>
-                    <SelectItem value="b">b</SelectItem>
-                    <SelectItem value="c">c</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div dir="rtl" className="flex gap-6 mb-6">
-            <div className="flex gap-6">
-              <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="email">
-                  عنوان البريد الالكتروني
-                </Label>
-                <Input
-                  type="email"
-                  id="email"
-                  value={formState.email}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                />
-              </div>
-              <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="phone">
-                  رقم التليفون
-                </Label>
-                <Input
-                  type="text"
-                  id="phone"
-                  value={formState.phone}
-                  onChange={(e) => handleChange('phone', e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-          <div dir="rtl" className="flex gap-6 mb-6">
-            <div className="flex gap-6">
-              <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="password">
-                  الرقم السري
-                </Label>
-                <Input
-                  type="password"
-                  id="password"
-                  value={formState.password}
-                  onChange={(e) => handleChange('password', e.target.value)}
-                />
-              </div>
-              <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="confirmPassword">
-                  تاكيد الرقم السري
-                </Label>
-                <Input
-                  type="password"
-                  id="confirmPassword"
-                  value={formState.confirmPassword}
-                  onChange={(e) =>
-                    handleChange('confirmPassword', e.target.value)
-                  }
-                />
-              </div>
-            </div>
-          </div>
-          <div dir="rtl" className="flex gap-6 mb-6">
-            <div className="flex gap-6">
-              <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="business_name">
-                  اسم المتجر
-                </Label>
-                <Input
-                  type="text"
-                  id="business_name"
-                  value={formState.business_name}
-                  onChange={(e) =>
-                    handleChange('business_name', e.target.value)
-                  }
-                />
-              </div>
-              <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="business_type_id">
-                  نوع المتجر
-                </Label>
-                <Select
-                  dir="rtl"
-                  onValueChange={(value) =>
-                    handleChange('business_type_id', value)
-                  }
-                >
-                  <SelectTrigger className="w-[327px]">
-                    <SelectValue placeholder="" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {businessTypes &&
-                        businessTypes?.data.map((e) => (
-                          <SelectItem value={e.id}>{e.name}</SelectItem>
-                        ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-          <div dir="rtl" className="flex gap-6 mb-6">
-            <div className="flex gap-6">
-              <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="business_location_id">
-                  الدولة
-                </Label>
-                <Select
-                  dir="rtl"
-                  onValueChange={(value) =>
-                    handleChange('business_location_id', value)
-                  }
-                >
-                  <SelectTrigger className="w-[327px]">
-                    <SelectValue placeholder="" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {countries &&
-                        countries?.data.map((e) => (
-                          <SelectItem value={e.id}>{e.name_en}</SelectItem>
-                        ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="city">
-                  المدينة
-                </Label>
-                <Input
-                  type="text"
-                  id="city"
-                  value={formState.city}
-                  onChange={(e) => handleChange('city', e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-          <div dir="rtl" className="flex gap-6 mb-6">
-            <div className="flex gap-6">
-              <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="district">
-                  الحي
-                </Label>
-                <Input
-                  type="text"
-                  id="district"
-                  value={formState.district}
-                  onChange={(e) => handleChange('district', e.target.value)}
-                />
-              </div>
-              <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="streetName">
-                  اسم الشارع
-                </Label>
-                <Input
-                  type="text"
-                  id="streetName"
-                  value={formState.streetName}
-                  onChange={(e) => handleChange('streetName', e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-          <div dir="rtl" className="flex gap-6 mb-6">
-            <div className="flex">
-              <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
-                <Label className="align-right" htmlFor="postalCode">
-                  رمز بريدي
-                </Label>
-                <Input
-                  type="text"
-                  id="postalCode"
-                  value={formState.postalCode}
-                  onChange={(e) => handleChange('postalCode', e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col gap-4">
-            <div dir="rtl">
-              <div className="w-[327px]">
-                <div className="flex flex-col items-start self-start mt-4 max-w-full text-sm text-left w-[223px]">
-                  <div className="font-medium text-zinc-500">
-                    تحميل السجل التجاري
-                  </div>
-                  <div className="flex gap-2   max-w-full items-center">
-                    <label className="flex flex-1 justify-center items-center font-semibold bg-gray-200 rounded border border-solid border-zinc-300 w-[117px] h-[39px] text-mainText cursor-pointer">
-                      <span className="text-[14px]">اختر الملف</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) =>
-                          handleChange(
-                            'tradeRegister',
-                            e.target.files?.[0] || null
-                          )
-                        }
-                      />
-                    </label>
-                  </div>
-                  <span className="text-gray-500 text-md">
-                    {formState.tradeRegister?.name || 'no file chosen'}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div dir="rtl">
-              <CheckboxWithText
-                className=""
-                label="ارسال تنبيه للبريد الالكتروني"
-                checked={formState.emailAlert}
-                onChange={(e) => handleChange('emailAlert', e)}
-              />
-            </div>
-            <div dir="rtl">
-              <Button
-                loading={loading}
-                disabled={loading}
-                type="submit"
-                className="px-4 py-2 w-[150px] text-sm"
-              >
-                {!loading && 'اضافة'}
-              </Button>
-            </div>
-          </div>
+    <div className="min-h-[100vh] overflow-hidden px-4 flex flex-col items-center sm:px-[52px]">
+      <div className="w-full flex flex-row gap-5 justify-between mt-[46px]  items-center ">
+        <div className="w-[213px]">
+          <Link to="/">
+            <img loading="lazy" src="/images/SH_LOGO.svg" alt="logo" />
+          </Link>
         </div>
-      </form>
+
+        <div className="flex items-center max-sm:hidden">
+          <span className="flex items-center justify-center bg-main rounded-full text-center size-8 text-white text-lg">
+            1
+          </span>
+          <span className="max-sm:w-[50px] w-[100px] bg-[#363088] h-[3px]"></span>
+          <span className="flex items-center justify-center border-main border-4 rounded-full text-center size-8 text-black text-lg">
+            2
+          </span>
+        </div>
+
+        <Link to="/" className="flex gap-2 items-center text-right">
+          <div className="">رجوع للصفحة الرئيسية</div>
+          <svg
+            width="46"
+            height="46"
+            viewBox="0 0 46 46"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M23.0007 42.1668C33.5861 42.1668 42.1673 33.5856 42.1673 23.0002C42.1673 12.4147 33.5861 3.8335 23.0007 3.8335C12.4152 3.8335 3.83398 12.4147 3.83398 23.0002C3.83398 33.5856 12.4152 42.1668 23.0007 42.1668Z"
+              stroke="#363088"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M23 30.6668L30.6667 23.0002L23 15.3335"
+              stroke="#363088"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M15.334 23H30.6673"
+              stroke="#363088"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </Link>
+      </div>
+      {step === 1 && (
+        <SignUpForm
+          formState={formState}
+          setFormState={setFormState}
+          changeStep={changeStep}
+          handleChange={handleChange}
+          loading={loading}
+          setLoading={setLoading}
+          handleSubmit={handleSubmit}
+        />
+      )}
+      {step === 2 && <Register responseData={responseData} />}
     </div>
   );
 }

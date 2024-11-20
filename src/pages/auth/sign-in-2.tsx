@@ -72,7 +72,7 @@ export default function SignIn2() {
 
   return (
     <div className="min-h-[100vh] overflow-hidden px-4">
-      <div className="flex flex-row  justify-between md:ms-[140px] md:me-[103px] mt-[44px]  items-center ">
+      <div className="flex flex-row  justify-between sm:mx-[52px] mt-[46px]  items-center ">
         <Link to="/">
           <img loading="lazy" src="/images/SH_LOGO.svg" alt="logo" />
         </Link>
