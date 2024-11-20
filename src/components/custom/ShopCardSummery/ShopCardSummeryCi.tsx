@@ -50,7 +50,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
       payment_method_id: '',
     },
   ]);
-  const [fetchedPaymentMethod, setFetchedPaymentMethod] = useState<any>([]); 
+  const [fetchedPaymentMethod, setFetchedPaymentMethod] = useState<any>([]);
   console.log({ fetchedPaymentMethod });
   let params = useParams();
   useEffect(() => {
@@ -136,7 +136,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
       axiosInstance.get(`orders/${params.id}`).then((res) => {
         console.log(123456, { res });
         // setPaymentMethod(res?.data?.data?.payments || []);
-        setFetchedPaymentMethod(res?.data?.data?.payments);  
+        setFetchedPaymentMethod(res?.data?.data?.payments);
         setPaymentMethodinit(res?.data?.data?.payments || []);
         setdiscountAmount(res?.data?.data?.customer_notes || 0);
       });
@@ -164,7 +164,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
       if (e?.notadd) someSum += 0;
       else someSum += parseFloat(e.amount || 0);
     });
-    setTotalAmount(params.id ? allSum : someSum);
+    setTotalAmount(someSum);
   }, [params.id, paymentMethod, paymentMethod.length]);
 
   // const [SubTotalAfterDiscount, setSubTotalAfterDiscount] = useState(0);
@@ -283,7 +283,13 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                             return {
                               id: option.id,
                               name: option.name,
-                              amount: option.amount,
+                              amount:
+                                totalAmountIncludeAndExclude -
+                                totalAmount -
+                                fetchedPaymentMethod.reduce(
+                                  (acc, item) => acc + item.amount,
+                                  0
+                                ),
                               tendered: 180,
                               tips: 0,
                               notadd: true,
@@ -439,7 +445,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
               totalAmount -
               fetchedPaymentMethod.reduce((acc, item) => acc + item.amount, 0)}
           </div>
-        </div> 
+        </div>
       </div>
     </>
   );

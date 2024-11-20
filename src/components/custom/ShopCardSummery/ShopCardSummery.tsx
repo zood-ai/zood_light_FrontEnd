@@ -137,7 +137,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     }
   }, []);
 
-
   const [totalAmount, setTotalAmount] = useState(
     params.id
       ? paymentMethod?.reduce((accumulator, current, i) => {
@@ -257,56 +256,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                 SR {Math.floor(totalAmountIncludeAndExclude * 100) / 100}
               </div>
             </div>
-            {/* <div className="mt-6 text-sm font-bold text-right text-black max-md:mr-2.5">
-              طريقة الدفع
-            </div>
-            <div className="flex flex-wrap gap-1.5 mt-3 text-sm text-right text-zinc-500 max-md:mr-2.5">
-              {paymentMethods?.data?.map((option, index2) => (
-                <button
-                  key={index2}
-                  onClick={() => {
-                    // handleItemChange(index2, 'payment_method_id', option.id);
-                    setCurrentPayment({
-                      id: option.id,
-                      name: option.name,
-                      amount: option.amount,
-                      tendered: 180,
-                      tips: 0,
-                      meta: {
-                        external_additional_payment_info: 'some info',
-                      },
-                      payment_method_id: option.id,
-                    });
-                    // setPaymentMethod(() => {
-                    //   return paymentMethod.map((item, i) => {
-                    //     if (i === index1) {
-                    //       return {
-                    //         id: option.id,
-                    //         name: option.name,
-                    //         amount: option.amount,
-                    //         tendered: 180,
-                    //         tips: 0,
-                    //         meta: {
-                    //           external_additional_payment_info: 'some info',
-                    //         },
-                    //         payment_method_id: option.id,
-                    //       };
-                    //     }
-                    //     return item;
-                    //   });
-                    // });
-                  }}
-                  className={`h-[40px] w-[93px] whitespace-nowrap min-w-fit  px-md  flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointe flex-grow ${
-                    currentPayment.payment_method_id === option.id
-                      ? 'bg-main text-white font-extrabold'
-                      : 'bg-white'
-                  }`}
-                >
-                  {option.name}
-                </button>
-              ))}
-            </div> */}
-            {/* {paymentMethod?.map((option1, index1) => ( */}
             <>
               <div className="mt-6 text-sm font-bold text-right text-black max-md:mr-2.5">
                 طريقة الدفع
@@ -325,7 +274,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                             return {
                               id: option.id,
                               name: option.name,
-                              amount: option.amount,
+                              amount: totalAmountIncludeAndExclude - totalAmount,
                               tendered: 180,
                               tips: 0,
                               notadd: true,
@@ -461,7 +410,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       return [
                         ...holder,
                         {
-                          amount: 0,
+                          amount: totalAmountIncludeAndExclude - totalAmount,
                           payment_method_id: '',
                           tendered: 180,
                           tips: 0,
