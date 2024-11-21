@@ -89,7 +89,8 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       />
                     </div>
                     <div className="self-center ml-4 font-semibold text-right">
-                      فاتورة ضريبية {!Simple && 'مبسطة'}
+                      {Corporate && 'فاتورة شراء'}
+                      {Another && `فاتورة ضريبية ${!Simple && 'مبسطة'}`}
                     </div>
                     <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-200 border-solid max-md:mr-1 max-md:max-w-full">
                       <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
@@ -110,7 +111,12 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       <div className="flex flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white rounded border border-gray-200 border-solid max-md:pl-5 justify-between">
                         <div className="self-center">الرقم الضريبي</div>
                         <div className="mt-4 text-center font-semibold">
-                          {Data.data?.customer?.tax_registration_number}
+                          {Corporate
+                            ? supplierInfo?.data?.tax_registration_number
+                            : ''}
+                          {Another
+                            ? customerInfo?.data?.tax_registration_number
+                            : ''}
                         </div>
                       </div>
                       <div className="flex z-10 flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
@@ -333,13 +339,15 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     {/* معلومات الشركة */}
                     <div className="text-center text-sm leading-6 mb-4">
                       {WhoAmI?.user?.branches[0]?.registered_address &&
-                        JSON.parse(WhoAmI?.user?.branches[0]?.registered_address)
-                          .streetName}
+                        JSON.parse(
+                          WhoAmI?.user?.branches[0]?.registered_address
+                        ).streetName}
                     </div>
 
                     {/* عنوان الفاتورة */}
                     <div className="text-center font-semibold text-lg my-6">
-                      فاتورة ضريبية {!Simple && 'مبسطة'}
+                      {Corporate && 'فاتورة شراء'}
+                      {Another && `فاتورة ضريبية ${!Simple && 'مبسطة'}`}
                     </div>
 
                     {/* معلومات الفاتورة */}
@@ -364,7 +372,14 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       </div>
                       <div className="flex justify-between">
                         <p>الرقم الضريبي </p>
-                        <p>{Data.data?.customer?.tax_registration_number}</p>
+                        <p>
+                          {Corporate
+                            ? supplierInfo?.data?.tax_registration_number
+                            : ''}
+                          {Another
+                            ? customerInfo?.data?.tax_registration_number
+                            : ''}
+                        </p>
                       </div>
                       <div className="flex justify-between">
                         <p>تاريخ الفاتورة </p>
