@@ -10,7 +10,7 @@ export default function Settings() {
   const [imagePreviewUrl, setImagePreviewUrl] = useState('');
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
-  console.log('manage/settings: ', settings?.data?.country);
+  console.log('manage/settings: ', settings);
   const [updateAll, setUpdateAll] = useState({
     country: settings?.data?.country || '',
     additionalNumber: '',
@@ -21,7 +21,7 @@ export default function Settings() {
     citySubdivisionName: '',
     city: '',
     buildingNumber: '',
-    business_name: '',
+    business_name: settings?.data?.business_name || '',
     phone: '',
     branch_id: '',
   });
@@ -40,26 +40,6 @@ export default function Settings() {
     branch_id: '',
   });
   const [fileBase64, setFileBase64] = useState<any>('');
-  console.log('FROM ME', data);
-  console.log('SECOND FROM ME', updateAll);
-  console.log({ taxesValue });
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload a valid image file.');
-      return;
-    }
-    const fileName = file.name || 'No file chosen';
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result?.toString().split(',')[1];
-      setFileBase64(`data:image/*;base64,${base64}`);
-      setSelectedFileName(fileName);
-      setImagePreviewUrl(URL.createObjectURL(file)); // Set the preview URL
-    };
-    reader.readAsDataURL(file);
-  };
   //TODO ==> PHONE OF BRANCH
   useEffect(function () {
     async function getSettingsData() {

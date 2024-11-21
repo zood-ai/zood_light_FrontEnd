@@ -26,10 +26,10 @@ const CustomerForm = () => {
     'menu/products?not_default=1'
   );
   const { data: defaultProduct } = createCrudService<any>(
-    'menu/products?filter[sku]=sku-zood-20001'
+    'menu/products?filter[name]=sku-zood-20001'
   ).useGetAll();
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
-  const ShowCar = WhoAmI?.business?.business_type === 'workshop';
+  const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
 
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const dispatch = useDispatch();
@@ -39,7 +39,7 @@ const CustomerForm = () => {
 
   const [loading, setLoading] = useState(false);
   const { data: getAllPro } = fetchAllProducts();
-  console.log({ orderSchema });
+  console.log({ defaultProduct });
   dispatch(updateField({ field: 'is_sales_order', value: 0 }));
   const { showToast } = useToast();
   const handleSubmitOrder = async () => {

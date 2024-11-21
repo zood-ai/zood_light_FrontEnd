@@ -153,7 +153,10 @@ export default function UserProfile() {
             </div>
           </div>
 
-          <Button className="mt-5 mb-3.5 w-[78px] max-md:mt-10 max-md:mb-5 self-end">
+          <Button
+            onClick={handleSubmitData}
+            className="mt-5 mb-3.5 w-[78px] max-md:mt-10 max-md:mb-5 self-end"
+          >
             حفظ{' '}
           </Button>
         </div>

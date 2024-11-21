@@ -31,8 +31,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
   const Simple = pathname === '/zood-dashboard/corporate-invoices';
   const Another = !Corporate;
-  const ShowCar = WhoAmI?.business?.business_type === 'workshop';
-
+  const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
   const Data = OrderData ? { ...OrderData } : { ...purchsingInfo };
   console.log({
     data,
@@ -164,7 +163,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {Data?.data?.products?.map((e) => (
                         <div className="flex font-semibold w-full">
                           <div className="w-1/3 flex justify-center items-center">
-                            {e.sku === 'sku-zood-20001'
+                            {e.name === 'sku-zood-20001'
                               ? e.pivot.kitchen_notes
                               : e.name}
                           </div>
@@ -184,7 +183,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {Data?.data?.items?.map((e) => (
                         <div className="flex font-semibold w-full">
                           <div className="w-1/3 flex justify-center items-center">
-                            {e.sku === 'sku-zood-20001'
+                            {e.name === 'sku-zood-20001'
                               ? e.pivot.kitchen_notes
                               : e.name}
                           </div>
@@ -411,7 +410,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             className="flex justify-between border-b-2 border-b-black/20"
                           >
                             <div className="w-1/4 flex-grow items-center text-[12px]">
-                              {product.sku === 'sku-zood-20001'
+                              {product.name === 'sku-zood-20001'
                                 ? product.pivot.kitchen_notes
                                 : product.name}
                             </div>
@@ -437,7 +436,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             className="flex justify-between border-b-2 border-b-black/20"
                           >
                             <div className="w-1/4 flex-grow items-center text-[12px]">
-                              {product.sku === 'sku-zood-20001'
+                              {product.name === 'sku-zood-20001'
                                 ? product.pivot.kitchen_notes
                                 : product.name}
                             </div>
