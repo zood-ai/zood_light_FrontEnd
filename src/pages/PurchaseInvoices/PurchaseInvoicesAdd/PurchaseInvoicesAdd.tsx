@@ -50,6 +50,12 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const whoIam = createCrudService<any>(`auth/whoami?${token}`).useGetAll();
   console.log(whoIam?.data, 'whoIam');
 
+  const canClick = items?.find((item) => {
+    if (!(item.item && item.qty && item.total)) {
+      return item;
+    }
+  });
+
   const { useGetById, useUpdate, useCreate } = crudService;
   const { useGetAll: useGetAllPro } = createCrudService<any>(
     'menu/products?not_default=1'
@@ -65,12 +71,12 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   useEffect(() => {
     if (isEditMode) {
       setInvoice({
-        supplier_id: allDataId?.data.supplier.id,
+        supplier_id: allDataId?.data?.supplier?.id,
         invoice_number: allDataId?.data?.invoice_number,
         purchaseDescription: allDataId?.data?.notes,
         attached_file: allDataId?.data?.attached_file,
       });
- 
+
       setItems(
         allDataId?.data?.items?.map((item) => ({
           qty: item?.pivot?.quantity,
@@ -87,7 +93,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     setInvoice({ ...invoice, [e.target.name]: e.target.value });
   };
 
-  console.log(invoice,{allDataId});
+  console.log(invoice, { allDataId });
 
   const handleItemChange = (index: number, field: string, value: string) => {
     const updatedItems = [...items];
@@ -108,7 +114,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       items: items.map((item) => item.item),
       invoice_number: Math.floor(Math.random() * 100000),
     });
-    
+
     try {
       if (isEditMode) {
         // const { data } = await axiosInstance.put(
@@ -373,6 +379,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             )}
             <div className="flex flex-wrap gap-y-5">
               <Button
+                disabled={canClick ? true : false}
                 type="submit"
                 className="px-6 py-1.5 mta-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
               >
