@@ -5,6 +5,7 @@ import { useToast } from '@/components/custom/useToastComp';
 
 import SignUpForm from './components/sign-up-form';
 import Register from './components/Register';
+import Plans from './components/plans';
 
 export default function SignUp() {
   const { showToast } = useToast();
@@ -74,10 +75,10 @@ export default function SignUp() {
   };
 
   const changeStep = () => {
-    // setStep((prev) => prev + 1);
+    setStep((prev) => prev + 1);
   };
   return (
-    <div className="min-h-[100vh] overflow-hidden px-4 flex flex-col items-center sm:px-[52px]">
+    <div className="min-h-[100vh] px-4 flex flex-col items-center sm:px-[68px]">
       <div className="w-full flex flex-row gap-5 justify-between mt-[46px]  items-center ">
         <div className="w-[213px]">
           <Link to="/">
@@ -85,15 +86,19 @@ export default function SignUp() {
           </Link>
         </div>
 
-        <div className="flex items-center max-sm:hidden">
-          <span className="flex items-center justify-center bg-main rounded-full text-center size-8 text-white text-lg">
-            1
-          </span>
-          <span className="max-sm:w-[50px] w-[100px] bg-[#363088] h-[3px]"></span>
-          <span className="flex items-center justify-center border-main border-4 rounded-full text-center size-8 text-black text-lg">
-            2
-          </span>
-        </div>
+        {step === 2 && (
+          <>
+            <div className="flex items-center max-sm:hidden">
+              <span className="flex items-center justify-center bg-main rounded-full text-center size-8 text-white text-lg">
+                1
+              </span>
+              <span className="max-sm:w-[50px] w-[100px] bg-[#363088] h-[3px]"></span>
+              <span className="flex items-center justify-center border-main border-4 rounded-full text-center size-8 text-black text-lg">
+                2
+              </span>
+            </div>
+          </>
+        )}
 
         <Link to="/" className="flex gap-2 items-center text-right">
           <div className="">رجوع للصفحة الرئيسية</div>
@@ -128,7 +133,8 @@ export default function SignUp() {
           </svg>
         </Link>
       </div>
-      {step === 1 && (
+      {step === 1 && <Plans changeStep={changeStep} />}
+      {step === 2 && (
         <SignUpForm
           formState={formState}
           setFormState={setFormState}
@@ -139,7 +145,6 @@ export default function SignUp() {
           handleSubmit={handleSubmit}
         />
       )}
-      {step === 2 && <Register responseData={responseData} />}
     </div>
   );
 }

@@ -59,6 +59,7 @@ const AppShell = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: branchData } =
     createCrudService<any>('manage/branches').useGetAll();
+    
 
   useEffect(() => {
     dispatch(

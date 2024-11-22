@@ -200,6 +200,12 @@ const router = createBrowserRouter([
       </React.Suspense>
     ),
   },
+  {
+    path: '/reset-password',
+    lazy: async () => ({
+      Component: (await import('./pages/auth/reset-password.tsx')).default,
+    }),
+  }, 
   // Main routes
   {
     path: '/zood-dashboard',

@@ -71,11 +71,13 @@ export default function SignIn2() {
   const [showPassword, setShowPassword] = React.useState(false);
 
   return (
-    <div className="min-h-[100vh] overflow-hidden px-4">
-      <div className="flex flex-row  justify-between sm:mx-[52px] mt-[46px]  items-center ">
-        <Link to="/">
-          <img loading="lazy" src="/images/SH_LOGO.svg" alt="logo" />
-        </Link>
+    <div className="min-h-[100vh] overflow-hidden px-4 flex flex-col items-center sm:px-[52px]">
+      <div className="w-full flex flex-row gap-5 justify-between mt-[46px]  items-center ">
+        <div className="w-[213px]">
+          <Link to="/">
+            <img loading="lazy" src="/images/SH_LOGO.svg" alt="logo" />
+          </Link>
+        </div>
 
         <Link to="/" className="flex gap-2 items-center text-right">
           <div className="">رجوع للصفحة الرئيسية</div>
@@ -187,8 +189,13 @@ export default function SignIn2() {
               )}
             />
 
-            <div className=" text-sm text-main cursor-pointer mt-[10px] text-end">
-              هل نسيت كلمة المرور؟
+            <div className="flex justify-end">
+              <Link
+                to="/reset-password"
+                className="text-sm text-main cursor-pointer mt-[10px] text-end"
+              >
+                هل نسيت كلمة المرور؟
+              </Link>
             </div>
             <div className=" mb-[20px] mt-[40px] ">
               <Button
