@@ -26,8 +26,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'رقم الفاتورة'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -44,8 +42,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'اسم العميل'} />
       ),
       cell: ({ row }: any) => {
-         
-
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -62,8 +58,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'رقم الهاتف'} />
       ),
       cell: ({ row }: any) => {
-         
-
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -80,8 +74,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'التاريخ'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -99,8 +91,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'Zatca Reporting'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2 w-[180px] md:w-auto">
             {row.getValue('zatca_report_status') === 'pending' ||
@@ -121,8 +111,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'تنفيذ'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2 w-[180px] md:w-auto">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -140,7 +128,6 @@ export const useDataTableColumns = () => {
               >
                 رؤية الفاتورة
               </Button>
-          
             </div>
           </div>
         );

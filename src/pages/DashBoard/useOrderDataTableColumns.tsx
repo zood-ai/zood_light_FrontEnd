@@ -1,0 +1,95 @@
+// useOrderDataTableColumns.js
+import { useTranslation } from 'react-i18next';
+import { ColumnDef } from '@tanstack/react-table';
+import { Badge } from '@/components/ui/badge';
+import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-table-column-header';
+import { StatusBadge } from '@/components/custom/StatusBadge';
+
+export const useOrderDataTableColumns = () => {
+  const { t } = useTranslation();
+
+  const columns: ColumnDef<any>[] = [
+    {
+      accessorKey: 'reference',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('رقم الفاتورة')} />
+      ),
+      cell: ({ row }) => (
+        <span className="font-medium">{row.getValue('reference')}</span>
+      ),
+    },
+    {
+      accessorKey: 'status',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('الحالة')} />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2 w-[180px] md:w-auto">
+            {row.getValue('status') == '8' && (
+              <StatusBadge status="Inactive" text={'draft'} />
+            )}
+            {row.getValue('status') == '4' && (
+              <StatusBadge status="active" text={'closed'} />
+            )}
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'total_price',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('المبلغ الاجمالي')} />
+      ),
+      cell: ({ row }) => (
+        <span className="font-medium">
+          {row.getValue('total_price').toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'customer', // Access the entire 'customer' object
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('اسم العميل')} />
+      ),
+      cell: ({ row }) => {
+        const customerName = row.getValue('customer')?.name; // Access 'name' from the 'customer' object
+        return <span>{customerName || '-'}</span>;
+      },
+    },
+    {
+      accessorKey: 'business_date',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('التاريخ')} />
+      ),
+      cell: ({ row }) => (
+        <span>{row.getValue('business_date')?.split(' ')[0]}</span>
+      ),
+    },
+    {
+      accessorKey: 'payment_status',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('حالة الدفع')} />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2">
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('payment_status') == 'partial' ? (
+                <StatusBadge status="Inactive" text={'مدفوع جزئي'} />
+              ) : row.getValue('payment_status') == 'unpaid' ? (
+                <StatusBadge status="error" text={'غير مدفوع'} />
+              ) : (
+                <StatusBadge status="active" text={'مدفوع'} />
+              )}
+            </span>
+          </div>
+        );
+      },
+    },
+  ];
+
+  return { columns };
+};

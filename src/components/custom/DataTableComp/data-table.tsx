@@ -23,6 +23,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+import { useDispatch } from 'react-redux';
+import {
+  toggleActionView,
+  toggleActionViewData,
+} from '@/store/slices/toggleAction';
+
 import { DataTableRowActions } from './data-table-row-actions';
 import { DataTablePagination } from './data-table-pagination';
 import { DataTableToolbar } from './data-table-toolbar';
@@ -44,6 +50,7 @@ interface DataTableProps<TData, TValue> {
   meta?: any;
   loading?: boolean;
   actionText?: string;
+  dashBoard: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -54,6 +61,7 @@ export function DataTable<TData, TValue>({
   handleEdit,
   handleDel,
   filterBtn,
+  dashBoard = false,
   meta,
   loading,
   actionText,
@@ -64,6 +72,7 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const dispatch = useDispatch();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
@@ -116,7 +125,7 @@ export function DataTable<TData, TValue>({
         /> */}
               <div className="h-[68px] ps-[16px]  flex z-10 flex-wrap  py-3 mt-4 text-right bg-background  border border-mainBorder border-solid  border-b-0 items-center rounded-t-[8px]">
                 <div className="my-auto text-base font-semibold text-mainText  ">
-                   {title?.ar}
+                  {title?.ar}
                 </div>
                 <div className="max-w-[303px] ms-[14px]">
                   <IconInput
@@ -168,7 +177,15 @@ export function DataTable<TData, TValue>({
                           key={row.id}
                           data-state={row.getIsSelected() && 'selected'}
                           onClick={() => {
-                            navigate(`edit/${row.original.id}`);
+                            if (dashBoard) {
+                              console.log(row.original);
+                              handleRowClick(row.original);
+                              dispatch(toggleActionView(true));
+                              // dispatch(toggleActionViewData(row.original));
+                              // navigate(`${url}/edit/${row.original.id}`);
+                            } else {
+                              navigate(`edit/${row.original.id}`);
+                            }
                             // handleRowClick(row.original);
                           }}
                         >
