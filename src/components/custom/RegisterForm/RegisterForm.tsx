@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { RegisterFormProps } from './RegisterForm.types';
-
+import { useLocation } from 'react-router-dom';
 import './RegisterForm.css';
 import { Button } from '../button';
 import { Input } from '@/components/ui/input';
@@ -43,8 +43,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = () => {
     { text: 'خضار وفواكه', imgSrc: '/icons/home page/Group.svg' },
   ];
 
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (pathname === '/' || pathname === '/zood-login') {
+      window.document.dir = '';
+    }
+  }, [pathname]);
+
   const handleSignUp = () => {
-    navigate('/zood-signup')
+    // navigate('/zood-signup-no-one-can-see-me');
   };
   const isRtl = useDirection();
   const navigate = useNavigate();

@@ -140,12 +140,12 @@ const ErrorExample = React.lazy(() => import('./pages/settings/error-example'));
 
 const router = createBrowserRouter([
   // Auth routes
-  {
-    path: '/login',
-    lazy: async () => ({
-      Component: (await import('./pages/auth/sign-in')).default,
-    }),
-  },
+  // {
+  //   path: '/login',
+  //   lazy: async () => ({
+  //     Component: (await import('./pages/auth/sign-in')).default,
+  //   }),
+  // },
   // {
   //   path: '/sign-in-2',
   //   lazy: async () => ({

@@ -2,22 +2,34 @@ import { useState } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/custom/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/use-toast';
 export default function ResetPassword() {
   const [check, setCheck] = useState(true);
   const [email, setEmail] = useState('');
   const [test, setTest] = useState(false);
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
   const [confirmPassword, setConfirmPassword] = useState('');
   const checkPassword = (password, confirmPassword) => {
     setTest(password !== confirmPassword);
     console.log(test);
+    return password === confirmPassword;
   };
   const handleSubmitEmail = (email) => {
     if (!email) return;
     console.log(email);
     setEmail(email);
     setCheck(false);
+  };
+
+  const handleSubmit = () => {
+    const check = checkPassword(password, confirmPassword);
+    if (!check) {
+      return;
+    }
+    navigate('/zood-login');
+    // console.log('log in');
   };
   return (
     <>
@@ -124,12 +136,12 @@ export default function ResetPassword() {
                 placeholder="تاكيد كلمة المرور"
               />
               {test && (
-                <span className="text-sm text-red-900">
-                  password and Confirm Password not Matched
+                <span className="text-sm text-red-500 text-right">
+                  كلمة المرور ليست متطابقة
                 </span>
               )}
               <Button
-                onClick={() => checkPassword(password, confirmPassword)}
+                onClick={handleSubmit}
                 className="px-2 py-4 text-base font-[600] text-[#FFFFFF] rounded-sm bg-[#7272F6] h-[56px]"
               >
                 إعادة تعيين كلمة المرور

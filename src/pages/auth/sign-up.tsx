@@ -3,8 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import axiosInstance from '@/api/interceptors';
 import { useToast } from '@/components/custom/useToastComp';
 
+import BusinessReference from './components/BusinessReference';
 import SignUpForm from './components/sign-up-form';
-import Register from './components/Register';
 import Plans from './components/plans';
 
 export default function SignUp() {
@@ -27,7 +27,7 @@ export default function SignUp() {
     emailAlert: false,
   });
   const [loading, setLoading] = useState(false);
-  const [responseData, setResponseData] = useState(null);
+  const [responseData, setResponseData] = useState<any>(null);
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
 
@@ -52,20 +52,11 @@ export default function SignUp() {
     try {
       const res = await axiosInstance.post('auth/Register', myFormData);
       setResponseData(res.data);
-      console.log(res.data);
-      showToast({
-        description: `تم التسجيل بنجاح الرقم التعريفي هو ${res?.data?.data?.user?.business_reference}`,
-        duration: 100000,
-        variant: 'default',
-      });
-      // setTimeout(() => {
-      navigate('/zood-login');
-      // setLoading(false);
-      // }, 2000);
-    } catch (e) {
+      // changeStep();
+    } catch (e: any) {
       console.log({ e });
       showToast({
-        description: e.response.data.message,
+        description: e?.response?.data?.message || 'حدث خطأ ما',
         duration: 4000,
         variant: 'destructive',
       });
@@ -74,6 +65,10 @@ export default function SignUp() {
     }
   };
 
+  const handleLogIn = () => {
+    navigate('/zood-login');
+  };
+  // testa1234@zood.ai
   const changeStep = () => {
     setStep((prev) => prev + 1);
   };
@@ -143,6 +138,12 @@ export default function SignUp() {
           loading={loading}
           setLoading={setLoading}
           handleSubmit={handleSubmit}
+        />
+      )}
+      {step >= 2 && responseData && (
+        <BusinessReference
+          number={responseData?.data?.user?.business_reference}
+          handleLogIn={handleLogIn}
         />
       )}
     </div>

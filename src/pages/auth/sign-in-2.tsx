@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { Card } from '@/components/ui/card';
-import { UserAuthForm } from './components/user-auth-form';
 import logo from '/icons/Logo.svg';
 import { useNavigate, Link } from 'react-router-dom';
 import back from '/icons/arrow-right-circle.svg';
@@ -208,7 +207,7 @@ export default function SignIn2() {
               </Button>
             </div>
             <div className="  ">
-              {/* <Button
+              <Button
                 onClick={handleSignUp}
                 variant={'outline'}
                 loading={false}
@@ -216,7 +215,7 @@ export default function SignIn2() {
                 className="w-full sm:w-[418px] h-[56px] mb-10"
               >
                 تسجيل
-              </Button> */}
+              </Button>
             </div>
           </form>
         </Form>
