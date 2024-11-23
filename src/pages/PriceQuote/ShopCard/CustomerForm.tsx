@@ -54,8 +54,6 @@ const CustomerForm = () => {
             name: 'sku-zood-20001',
           })),
         };
-        console.log({ myInputRef });
-        console.log({ updatedOrderSchema });
         await mutate(updatedOrderSchema, {
           onSuccess: () => {
             setLoading(false);
@@ -107,7 +105,6 @@ const CustomerForm = () => {
         });
         return;
       }
-      console.log({ value });
       try {
         const { data } = await axiosInstance.get(`/menu/products/${value}`);
         const productData = data?.data;
@@ -158,15 +155,9 @@ const CustomerForm = () => {
     //         }
     //       : item
     //   );
-    //   console.log('asdasdasdasdasdasdasdasdasd', { updatedProducts });
     //   dispatch(addProduct(updatedProducts));
     // }
   };
-  console.log(
-    'here my frindo',
-    orderSchema.products,
-    defaultProduct?.data[0]?.id
-  );
 
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">

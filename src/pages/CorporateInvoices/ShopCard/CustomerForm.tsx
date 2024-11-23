@@ -39,7 +39,6 @@ const CustomerForm = () => {
 
   const [loading, setLoading] = useState(false);
   const { data: getAllPro } = fetchAllProducts();
-  console.log({ defaultProduct });
   dispatch(updateField({ field: 'is_sales_order', value: 0 }));
   const { showToast } = useToast();
   const handleSubmitOrder = async () => {
@@ -84,8 +83,6 @@ const CustomerForm = () => {
             discount_type: 2,
           })),
         };
-        console.log({ myInputRef });
-        console.log({ updatedOrderSchema });
         await mutate(updatedOrderSchema, {
           onSuccess: () => {
             setLoading(false);
@@ -138,7 +135,6 @@ const CustomerForm = () => {
         });
         return;
       }
-      console.log({ value });
       try {
         const { data } = await axiosInstance.get(`/menu/products/${value}`);
         const productData = data?.data;
@@ -180,11 +176,6 @@ const CustomerForm = () => {
       dispatch(addProduct(updatedProducts));
     }
   };
-  console.log(
-    'here my frindo',
-    orderSchema.products,
-    defaultProduct?.data[0]?.id
-  );
 
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">

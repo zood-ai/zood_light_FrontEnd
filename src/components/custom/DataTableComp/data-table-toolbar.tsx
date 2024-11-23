@@ -28,15 +28,11 @@ export function DataTableToolbar<TData>({
   const isRtl = useDirection();
   const navigate = useNavigate();
   const pathName = useLocation();
-  console.log(pathName);
   const locations = [
     '/zood-dashboard/corporate-invoices',
     '/zood-dashboard/individual-invoices',
     '/zood-dashboard/purchase-invoices',
   ];
-  console.log(locations);
-  console.log(pathName);
-  console.log(`PathName is ${locations.includes(pathName?.pathname)}`);
 
   return (
     <div className="flex items-center justify-between">

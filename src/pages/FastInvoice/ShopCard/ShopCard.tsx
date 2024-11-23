@@ -102,10 +102,8 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
       setLoading(true);
       const res = await axiosInstance.post('orders', orderSchema);
       setLoading(false);
-      console.log(res, 'res');
     } catch (error) {
       setLoading(false);
-      console.log(error, 'error');
     }
   };
   const [isOpen, setIsOpen] = useState(false);

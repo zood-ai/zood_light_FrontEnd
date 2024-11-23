@@ -23,7 +23,6 @@ export const CorporateInvoicesAdd: React.FC<CorporateInvoicesProps> = () => {
   const allServiceUser = createCrudService<any>('menu/products?not_default=1');
   const { useGetAll } = allServiceUser;
   const { data: allUserData } = useGetAll();
-  // console.log(cardItemValue.map((item: any) => item), 'allUserData');
   const [isOpen, setIsOpen] = useState(false);
 
   const dispatch = useDispatch();

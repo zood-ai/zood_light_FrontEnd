@@ -36,9 +36,7 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
   ).useGetAll();
 
   const data = apiData?.data || [];
-  //console.log('DATA: ', data);
   const handleOpenViewModal = (row: any) => {
-    console.log(12345, row);
     setSelectedRow(row);
     setIsViewModalOpen(true);
     dispatch(toggleActionViewData(row));
@@ -62,20 +60,14 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
   };
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
   const filterBtn = () => {
-    console.log('filterBtn');
   };
-  useEffect(() => {
-    console.log(toggleActionData, 'toggleActionData');
-  }, [toggleActionData]);
   const { columns } = useOrderDataTableColumns();
   const allService = createCrudService<any>('inventory/purchasing');
   const { useGetAll } = allService;
   const { data: allData, isLoading: isLoadingData } = useGetAll();
   const Data = isLoadingData ? 'loading' : allData?.data;
-  console.log(Data);
   const { data: lastOrderData, isLoading: isLoadingOrder } =
     createCrudService<any>('/orders?sort=-status').useGetAll();
-  console.log(lastOrderData?.data);
   return (
     <>
       {isLoading ? (

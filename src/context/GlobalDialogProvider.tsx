@@ -87,7 +87,6 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
   let pagePath = window.location.pathname; // Get the current path
   pagePath = pagePath.replace(/\/edit\/[^/]+$/, '/edit');
 
-  console.log(pagePath, 'pagePath');
 
   const title = titleMapping(pagePath); // Get the title object based on the path
   const isArabic = true;

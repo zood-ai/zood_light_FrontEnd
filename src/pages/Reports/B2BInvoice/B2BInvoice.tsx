@@ -56,7 +56,6 @@ export const B2BInvoice: React.FC<B2BInvoiceProps> = () => {
 
   };
   const filterBtn = () => {
-    console.log('filterBtn');
   };
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
@@ -64,7 +63,6 @@ export const B2BInvoice: React.FC<B2BInvoiceProps> = () => {
   const allService = createCrudService<any>('orders?filter[type]=2&filter[status]=4');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
-  console.log(allData, 'allUserData');
 
   const dispatch = useDispatch();
 useEffect(() => {

@@ -57,7 +57,6 @@ export default function UserProfile() {
   }, [personalImage]);
 
   const handleSubmitData = () => {
-    console.log('Submitted Data:', formData);
   };
 
   return (

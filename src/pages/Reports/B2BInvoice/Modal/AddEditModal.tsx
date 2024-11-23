@@ -90,9 +90,6 @@ const AddEditModal: React.FC<SellerDetailsModalProps> = ({
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true)
-    console.log('====================================')
-    console.log(values)
-    console.log('====================================')
     if (modalType === 'Add') {
       await createNewUser(values, {
         onSuccess: () => {

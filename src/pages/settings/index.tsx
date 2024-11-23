@@ -10,7 +10,6 @@ export default function Settings() {
   const [imagePreviewUrl, setImagePreviewUrl] = useState('');
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
-  console.log('manage/settings: ', settings);
   const [updateAll, setUpdateAll] = useState({
     country: settings?.data?.country || '',
     additionalNumber: '',
@@ -46,7 +45,6 @@ export default function Settings() {
       setLoadingSettings(true);
       // const phoneNumberFromBranchRoute = await axiosInstance.get(`/manage/branches/${x=051caaaa-f1c9-437f-bcd1-04a06ce569c5}`)
       const data = await axiosInstance.get(`auth/whoami`);
-      console.log('ALL DATA: ', data);
       // setData(JSON.parse(data?.data?.user?.branches[0]?.registered_address));
       const holder = JSON.parse(
         data?.data?.user?.branches[0]?.registered_address
@@ -71,7 +69,6 @@ export default function Settings() {
 
   const { data: branches } =
     createCrudService<any>('manage/branches').useGetAll();
-  console.log('manage/branches: ', data);
   const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();
   const settingsData = settings?.data;
   const taxesData = taxes?.data?.[0];
@@ -106,18 +103,14 @@ export default function Settings() {
         name_localized: `vat ${taxesValue}%`,
       },
     });
-    console.log(taxesValue);
   };
   const handleUpdateBranch = () => {
-    // console.log({ data });
-    console.log({ branchesData });
     updateSettings({
       id: '',
       data: { tax_inclusive_pricing: updatedTaxInclusivePricing },
     });
   };
 
-  console.log({ updateAll });
   useEffect(() => {
     if (!fileBase64) return;
     updateSettings({
@@ -125,7 +118,6 @@ export default function Settings() {
       data: { business_logo: fileBase64 },
     });
   }, [fileBase64, updateSettings]);
-  console.log('updateAll.branch_id: ', updateAll.branch_id);
   const updateTop = async () => {
     await axiosInstance.put(`manage/settings`, {
       business_name: updateAll.business_name,
@@ -146,7 +138,6 @@ export default function Settings() {
         }),
       }
     );
-    console.log(res);
   };
   const updateBottom = async () => {
     await axiosInstance.put(`manage/settings`, {
@@ -499,7 +490,6 @@ export default function Settings() {
           <Button
             variant={'outlineDel'}
             className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 font-semibold text-red-500 bg-white rounded border border-red-500 border-solid min-h-[39px] max-md:px-5"
-            onClick={() => console.log('DELETE')}
           >
             <div className="gap-3 self-stretch">حذف الحساب</div>
           </Button>

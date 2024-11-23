@@ -178,7 +178,7 @@ export function DataTable<TData, TValue>({
                           data-state={row.getIsSelected() && 'selected'}
                           onClick={() => {
                             if (dashBoard) {
-                              console.log(row.original);
+                              (row.original);
                               handleRowClick(row.original);
                               dispatch(toggleActionView(true));
                               // dispatch(toggleActionViewData(row.original));

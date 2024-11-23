@@ -28,7 +28,6 @@ export const ShopCardEditPQ: React.FC<ShopCardProps> = () => {
     [orderSchema]
   );
   const { data: getTaxes } = createCrudService<any>('manage/taxes').useGetAll();
-  console.log(getTaxes, 'getTaxes');
 
   const taxAmount = useMemo(
     () => (totalCost * getTaxes?.data?.[0]?.rate) / 100,
@@ -51,11 +50,9 @@ export const ShopCardEditPQ: React.FC<ShopCardProps> = () => {
   }, [totalCost, taxAmount]);
 
   const handleBkAction = () => setIsOpen(true);
-  console.log(getOrdersById, 'getOrdersById');
   
   useEffect(() => {
     if (params.id && getOrdersById) {
-      console.log(getOrdersById, 'getOrdersById');
       
       dispatch(updateField({ field: 'discount_amount', value: getOrdersById.data.discount_amount}));
       updateField({ field: 'total_price', value: getOrdersById.data.total_price});
@@ -77,14 +74,12 @@ export const ShopCardEditPQ: React.FC<ShopCardProps> = () => {
         discount_type: 2,
         total_price: item.price * item.quantity || 0,
       }));
-      console.log(orderSchema, 'products');
       
       dispatch(addProduct(products));
             // dispatch(addTax(products));
 
     }
   }, [getOrdersById]);
-  console.log(getOrdersById, 'getOrdersById');
   
   return (
     <>

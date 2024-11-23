@@ -28,7 +28,6 @@ export const ShopCardPQ: React.FC<ShopCardProps> = () => {
     [orderSchema]
   );
   const { data: getTaxes } = createCrudService<any>('manage/taxes').useGetAll();
-  console.log(getTaxes, 'getTaxes');
 
   const taxAmount = useMemo(
     () => (totalCost * getTaxes?.data?.[0]?.rate) / 100,
@@ -64,7 +63,6 @@ export const ShopCardPQ: React.FC<ShopCardProps> = () => {
   }, [totalCost, taxAmount]);
 
   const handleBkAction = () => setIsOpen(true);
-  console.log(getOrdersById, 'getOrdersById');
 
   return (
     <>

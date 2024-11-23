@@ -56,7 +56,7 @@ export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
   };
 
   const filterBtn = () => {
-    console.log('filterBtn');
+    ('filterBtn');
   };
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
@@ -64,7 +64,6 @@ export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
   const allService = createCrudService<any>('orders?filter[type]=1');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
-  console.log(allData, 'allUserData');
 
   useEffect(() => {
     dispatch(resetCard());

@@ -10,7 +10,6 @@ export const GoToShop: React.FC<GoToShopProps> = () => {
   const navigate = useNavigate();
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const totalQty = cardItemValue.reduce((sum, item) => sum + item.qty, 0);
-  console.log({ cardItemValue });
   return (
     <>
       <div

@@ -53,7 +53,6 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
 
   };
   const filterBtn = () => {
-    console.log('filterBtn');
   };
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
@@ -62,10 +61,6 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
     const toggleActionData = useSelector((state: any) => state?.toggleAction);
-    useEffect(() => {
-      console.log(toggleActionData, 'toggleActionData');
-
-    }, [toggleActionData])
     
     
   return (

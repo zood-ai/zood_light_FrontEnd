@@ -19,7 +19,6 @@ const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
   // const dispatch = useDispatch();
   const { id: orderId } = useParams();
   // const orderSchema = useSelector((state: any) => state.orderSchema);
-  // console.log({ orderSchema });
   // const [discountAmount, setDiscountAmount] = useState(0);
   // const [subTotal, setSubTotal] = useState(0);
   const [data, setData] = useState<any>({});
@@ -31,8 +30,6 @@ const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
   //   0
   // );
   // const [taxAmount, setTaxAmount] = useState((subTotal * 15) / 100);
-  // console.log(123, taxAmount)
-  console.log({ data }, data?.data?.discount_amount);
 
   useEffect(() => {
     if (orderId) {

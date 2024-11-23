@@ -65,7 +65,6 @@
 //   }, [initialData, form])
 
 //   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
-//     console.log(values)
 //   }
 
 //   const renderFormField = (field: typeof fieldConfigurations[number]) => {

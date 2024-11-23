@@ -12,7 +12,6 @@ function DashCards({ data, activeFilter, setActiveFilter }) {
     border: 'none',
   });
 
-  console.log('DATA FROM DASHCARDS: ', data);
   return (
     <>
       <div className="flex gap-4">

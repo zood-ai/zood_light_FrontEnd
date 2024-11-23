@@ -27,7 +27,6 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
     () => cardItemValue?.reduce((acc, item) => acc + item.price * item.qty, 0),
     [cardItemValue]
   );
-  console.log(cardItemValue, 'cardItemValue');
   
   const navigate = useNavigate();
 

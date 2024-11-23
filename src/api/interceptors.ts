@@ -15,7 +15,7 @@ const axiosInstance = axios.create({
 
 // Helper function to display toast
 const showToast = (title: string, description: string) => {
-  // console.log({description})
+  // ({description})
   toast({
     title: title,
     description: description,

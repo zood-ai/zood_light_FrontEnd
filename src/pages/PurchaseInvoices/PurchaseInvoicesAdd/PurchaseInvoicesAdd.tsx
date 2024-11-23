@@ -48,7 +48,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const token = getToken();
   const crudService = createCrudService<any>('inventory/purchasing');
   const whoIam = createCrudService<any>(`auth/whoami?${token}`).useGetAll();
-  console.log(whoIam?.data, 'whoIam');
 
   const canClick = items?.find((item) => {
     if (!(item.item && item.qty && item.total)) {
@@ -93,7 +92,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     setInvoice({ ...invoice, [e.target.name]: e.target.value });
   };
 
-  console.log(invoice, { allDataId });
 
   const handleItemChange = (index: number, field: string, value: string) => {
     const updatedItems = [...items];
@@ -105,15 +103,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({
-      branch_id: branchData?.data?.[0]?.id,
-      supplier_id: invoice.supplier_id,
-      type: 'items',
-      notes: invoice.purchaseDescription,
-      attached_file: fileBase64,
-      items: items.map((item) => item.item),
-      invoice_number: Math.floor(Math.random() * 100000),
-    });
 
     try {
       if (isEditMode) {
@@ -155,7 +144,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           items: items.map((item) => item.item),
           invoice_number: Math.floor(Math.random() * 100000),
         });
-        console.log({ data }, fileBase64);
         // const res =  await axiosInstance.get(
         //   `inventory/purchasing/${data?.data?.id}`
         // )
@@ -193,7 +181,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
   const [fastActionBtn, setFastActionBtn] = useState(false);
   const setSuppId = (value: string) => {
-    console.log(value, 'value');
 
     setInvoice({ ...invoice, supplier_id: value });
   };

@@ -31,8 +31,6 @@ export function OtpForm({ className, ...props }: any) {
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
-    console.log({ data })
-
   }
 
   return (

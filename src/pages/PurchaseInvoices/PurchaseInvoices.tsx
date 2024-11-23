@@ -52,7 +52,6 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
     dispatch(toggleActionView(false));
   };
   const filterBtn = () => {
-    console.log('filterBtn');
   };
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
@@ -62,11 +61,9 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
   const { data: allData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
   useEffect(() => {
-    console.log(toggleActionData, 'toggleActionData');
   }, [toggleActionData]);
 
   const Data = isLoading ? 'loading' : allData?.data;
-  console.log(Data);
   return (
     <>
       <AddEditModal

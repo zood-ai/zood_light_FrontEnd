@@ -141,7 +141,6 @@ export const useDataTableColumns = () => {
               <Button
                 type="button"
                 onClick={(e) => {
-                  console.log(row.original);
                   e.stopPropagation();
                   dispatch(toggleActionView(true));
                   dispatch(toggleActionViewData(row.original));

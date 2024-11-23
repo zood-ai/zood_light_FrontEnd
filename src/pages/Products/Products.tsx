@@ -53,7 +53,6 @@ export const Products: React.FC<ProductsProps> = () => {
 
   };
   const filterBtn = () => {
-    console.log('filterBtn');
   };
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();

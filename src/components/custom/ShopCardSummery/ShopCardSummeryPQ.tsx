@@ -19,7 +19,6 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
   const dispatch = useDispatch();
   const { id: orderId } = useParams();
   const orderSchema = useSelector((state: any) => state.orderSchema);
-  console.log({ orderSchema });
   const [discountAmount, setDiscountAmount] = useState(0);
   const [subTotal, setSubTotal] = useState(0);
   const [totalAmountIncludeAndExclude, setTotalAmountIncludeAndExclude] =
@@ -30,7 +29,6 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
     0
   );
   const [taxAmount, setTaxAmount] = useState((subTotal * 15) / 100);
-  console.log(123, taxAmount);
 
   useEffect(() => {
     dispatch(updateField({ field: 'subtotal_price', value: subTotal }));
@@ -83,7 +81,6 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
       });
     }
   }, [orderId]);
-  console.log(settings, 'settings');
 
   const handleIncludeAndExclude = useCallback(() => {
     // const isTaxInclusive = settings?.data?.tax_inclusive_pricing !== 0;
@@ -110,7 +107,6 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
     setTotalAmountIncludeAndExclude(SubTotalAfterDiscount + Drepa);
   }, [settings, subTotal, mainTax?.rate, discountAmount]);
   useEffect(() => {
-    console.log(123456789, { subTotal }, (subTotal * 15) / 100);
     setTaxAmount((subTotal * 15) / 100);
   }, [subTotal, discountAmount]);
   useEffect(() => {

@@ -37,7 +37,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
   const orderSchema = useSelector((state: any) => state.orderSchema);
 
   const cardItemValue = useSelector((state: any) => state.orderSchema.products);
-  console.log({ branchData });
   const [paymentMethod, setPaymentMethod] = useState<any>([
     {
       tendered: 180,
@@ -51,7 +50,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     },
   ]);
   const [fetchedPaymentMethod, setFetchedPaymentMethod] = useState<any>([]);
-  console.log({ fetchedPaymentMethod });
   let params = useParams();
   useEffect(() => {
     if (params.id && orderSchema?.payments) {
@@ -66,7 +64,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     (acc, item) => acc + item.unit_price * item.quantity,
     0
   );
-  // console.log(1234, { totalCost });
 
   const handleItemChange = (index: number, field: string, value: string) => {
     setPaymentMethod((prevItems) => {
@@ -134,7 +131,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
   useEffect(() => {
     if (params.id) {
       axiosInstance.get(`orders/${params.id}`).then((res) => {
-        console.log(123456, { res });
         // setPaymentMethod(res?.data?.data?.payments || []);
         setFetchedPaymentMethod(res?.data?.data?.payments);
         setPaymentMethodinit(res?.data?.data?.payments || []);
@@ -144,7 +140,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     }
   }, []);
 
-  console.log({ orderSchema });
 
   const [totalAmount, setTotalAmount] = useState(
     params.id
@@ -356,7 +351,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
             {paymentMethod?.map((option1, index1) => {
               if (index1 === paymentMethod?.length - 1 && payment !== 'fully')
                 return;
-              console.log({ paymentMethod });
               return (
                 <div className="flex gap-3 items-center" key={index1}>
                   <p>{option1?.amount}</p>

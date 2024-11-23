@@ -13,12 +13,10 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const checkPassword = (password, confirmPassword) => {
     setTest(password !== confirmPassword);
-    console.log(test);
     return password === confirmPassword;
   };
   const handleSubmitEmail = (email) => {
     if (!email) return;
-    console.log(email);
     setEmail(email);
     setCheck(false);
   };
@@ -29,7 +27,6 @@ export default function ResetPassword() {
       return;
     }
     navigate('/zood-login');
-    // console.log('log in');
   };
   return (
     <>

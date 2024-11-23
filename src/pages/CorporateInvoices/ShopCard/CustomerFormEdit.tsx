@@ -27,7 +27,6 @@ const CustomerFormEdit = () => {
   const { mutate, isLoading: loadingOrder } = orderPayment.useCreate();
   const getOrder = allServiceOrder.useGetById(params.id);
   const payment = getOrder?.data?.data?.payment_status;
-  console.log(payment, params.id);
 
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const dispatch = useDispatch();
@@ -63,7 +62,6 @@ const CustomerFormEdit = () => {
           added_at: ele.added_at || new Date(),
         }));
         if (holder2.length === 0) return;
-        console.log({ holder2 });
         await mutate(
           {
             order_id: params.id,

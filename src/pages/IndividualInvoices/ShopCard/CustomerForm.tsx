@@ -92,7 +92,6 @@ const CustomerForm = () => {
   );
   const { showToast } = useToast();
   const submitOrder = async () => {
-    console.log({ holder });
     // const products = cardItemValue.map((item: any) => ({
     //   product_id: item.id || '',
     //   quantity: item.qty || 0,
@@ -103,7 +102,6 @@ const CustomerForm = () => {
     //   discount_type: 2,
     // }));
     // dispatch(addProduct(products));
-    console.log(1, { orderSchema, holder });
     setLoading(true);
 
     const totalPrice = orderSchema.total_price;
@@ -123,15 +121,13 @@ const CustomerForm = () => {
 
     try {
       if (params.id) {
-        console.log(1, '1');
 
         try {
           const res = await axiosInstance.get(`/orders/${params.id}`);
           const orderData = res?.data?.data;
-          console.log(orderData, 'orderData');
+          (orderData, 'orderData');
 
           if (orderData?.payments?.length < orderSchema?.payments?.length) {
-            console.log(2, '2');
             const newData = orderSchema?.payments.slice(
               orderData?.payments.length
             );
@@ -153,11 +149,9 @@ const CustomerForm = () => {
               onSuccess: (data) => {
                 setLoading(false);
                 navigate(`/zood-dashboard/individual-invoices`);
-                console.log(data, 'data');
               },
             });
           }
-          // console.log(orderData, 'data after create');
           dispatch(toggleActionView(true));
           dispatch(toggleActionViewData(orderData));
         } catch (error) {
@@ -167,7 +161,6 @@ const CustomerForm = () => {
           navigate(`/zood-dashboard/individual-invoices`);
         }
       } else {
-        console.log(orderSchema, 'orderSchema');
         await mutate(orderSchema, {
           onSuccess: async (data) => {
             const res = await axiosInstance.get(
@@ -177,8 +170,6 @@ const CustomerForm = () => {
             setLoading(false);
             navigate(`/zood-dashboard/individual-invoices`);
             dispatch(toggleActionView(true));
-            // console.log(data.data, 'data after create1');
-            // console.log(orderData, 'data after create2');
             dispatch(toggleActionViewData(orderData[0]));
           },
           onError: (error) => {
@@ -187,10 +178,8 @@ const CustomerForm = () => {
         });
       }
       // const res = await axiosInstance.post('orders', orderSchema);
-      // console.log(res, 'res');
     } catch (error) {
       setLoading(false);
-      console.log(error, 'error');
     }
   };
   useEffect(() => {

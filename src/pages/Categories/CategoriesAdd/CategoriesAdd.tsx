@@ -65,8 +65,6 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
           const customerData = res?.data?.data;
           // setcurrData(customerData);
           if (customerData) {
-            console.log(customerData.image, 'customerData');
-
             form.setValue('name', customerData.name || '');
             form.setValue('name_localized', customerData.name_localized || '');
             setfile(customerData.image || '');
@@ -81,8 +79,6 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
   }, [form, isEditMode, params.objId]);
 
   const { openDialog } = useGlobalDialog();
-  console.log(currData, 'currData');
-
   // Handle form submission for both add and edit scenarios
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);

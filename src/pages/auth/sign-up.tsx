@@ -39,7 +39,6 @@ export default function SignUp() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ formState });
     const myFormData = new FormData();
     myFormData.append('name', formState.name);
     myFormData.append('email', formState.email);
@@ -54,7 +53,6 @@ export default function SignUp() {
       setResponseData(res.data);
       // changeStep();
     } catch (e: any) {
-      console.log({ e });
       showToast({
         description: e?.response?.data?.message || 'حدث خطأ ما',
         duration: 4000,
@@ -68,7 +66,6 @@ export default function SignUp() {
   const handleLogIn = () => {
     navigate('/zood-login');
   };
-  // testa1234@zood.ai
   const changeStep = () => {
     setStep((prev) => prev + 1);
   };

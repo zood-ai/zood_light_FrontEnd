@@ -79,7 +79,6 @@ const CustomerFormEdits = () => {
     }
   }, [orderSchema?.customer_id]);
 
-  console.log(orderSchema, 'orderSchema');
 
   return (
     <div className="space-y-4">

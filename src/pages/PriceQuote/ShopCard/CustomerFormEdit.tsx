@@ -39,11 +39,9 @@ const CustomerFormEdit = () => {
   const { mutate: confirmOrder } = createCrudService<any>(
     'confirm-sales-order'
   ).useCreate();
-  console.log({ loading });
 
   dispatch(updateField({ field: 'is_sales_order', value: 1 }));
   const handleSubmitOrder = async () => {
-    console.log(params.id);
     setLoading(true);
     try {
       const res = await axiosInstance.post('confirm-sales-order', {
@@ -58,12 +56,10 @@ const CustomerFormEdit = () => {
       console.log(e);
     }
   };
-  console.log(orderSchema, 'orderSchema');
 
   const { data: getOrdersById } = createCrudService<any>('orders').useGetById(
     `${params.id || ''}`
   );
-  console.log({ hhhhh: getOrdersById });
   return (
     <div className="mt-5 flex-wrap flex xl:justify-between max-xl:flex-col gap-x-[120px]">
       <div className="">

@@ -57,7 +57,6 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   };
 
   const filterBtn = () => {
-    console.log('filterBtn');
   };
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
@@ -71,7 +70,6 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   });
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
-  console.log(allData, 'allUserData');
 
   useEffect(() => {
     dispatch(resetCard());

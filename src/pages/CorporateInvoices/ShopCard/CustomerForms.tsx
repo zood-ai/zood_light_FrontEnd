@@ -77,7 +77,6 @@ const CustomerForms = () => {
         console.error('Failed to fetch customer data', err);
       });
   };
-  console.log(orderSchema, 'orderSchema');
 
   const submitOrder = async () => {
     try {
@@ -88,7 +87,6 @@ const CustomerForms = () => {
           onSuccess: (data) => {
             setLoading(false);
             navigate(`/zood-dashboard/price-quote`);
-            console.log(data, 'data');
           },
           onError: (error) => {
             setLoading(false);
@@ -96,10 +94,8 @@ const CustomerForms = () => {
         });
       }
       // const res = await axiosInstance.post('orders', orderSchema);
-      // console.log(res, 'res');
     } catch (error) {
       setLoading(false);
-      console.log(error, 'error');
     }
   };
   useEffect(() => {
@@ -113,7 +109,6 @@ const CustomerForms = () => {
   );
   const { data: getAllPro } = useGetAllPro();
 
-  console.log(orderSchema, 'orderSchema');
 
   return (
     <>

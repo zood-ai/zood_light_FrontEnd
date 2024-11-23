@@ -73,7 +73,6 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
   // Reset form when data changes
   useEffect(() => {
     if (isEditMode) {
-      console.log(getDataById?.data?.category?.id);
 
       form.reset({
         ...getDataById?.data,
@@ -128,7 +127,6 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
           const itemPivotId = proData?.data.ingredients[0]?.pivot?.item_id;
           try {
             // setLoading(false);
-            console.log(proData);
 
             const inventoryPayload = {
               branch: Cookies.get('branch_id'),
@@ -180,7 +178,6 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
         // const skuData = await axiosInstance.post('manage/generate_sku', {
         //   model: 'products',
         // });
-        // console.log(skuData);
 
         const productPayload = {
           ...values,
@@ -194,7 +191,6 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
         await createNewProduct(productPayload, {
           onSuccess: async (proData) => {
             try {
-              console.log(proData);
               const itemPivotId = proData?.data.ingredients[0]?.pivot?.item_id;
 
               const inventoryPayload = {

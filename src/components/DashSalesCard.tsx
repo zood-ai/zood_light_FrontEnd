@@ -26,7 +26,6 @@ function DashSalesCard({ data }) {
     (sum, item) => sum + item.value,
     0
   );
-  console.log(totalDay);
   const totalRevent = data?.sum_orders.reduce(
     (sum, item) => sum + item.value,
     0

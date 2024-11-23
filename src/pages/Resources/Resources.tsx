@@ -54,7 +54,6 @@ export const Resources: React.FC<ResourcesProps> = () => {
 
   };
   const filterBtn = () => {
-    console.log('filterBtn');
   };
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
@@ -62,7 +61,6 @@ export const Resources: React.FC<ResourcesProps> = () => {
   const allService = createCrudService<any>('inventory/suppliers');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
-  console.log(allData, 'allData');
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
 
   return (

@@ -33,16 +33,6 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const Another = !Corporate;
   const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
   const Data = OrderData ? { ...OrderData } : { ...purchsingInfo };
-  console.log({
-    data,
-    settings,
-    supplierInfo,
-    customerInfo,
-    Data,
-    Taxes,
-    purchsingInfo,
-    WhoAmI,
-  });
   const [size, setSize] = useState('A4');
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);
