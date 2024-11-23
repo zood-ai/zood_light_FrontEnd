@@ -51,10 +51,8 @@ export const Categories: React.FC<CategoriesProps> = () => {
     setIsDelModalOpen(false);
 
     dispatch(toggleActionView(false));
-
   };
-  const filterBtn = () => {
-  };
+  const filterBtn = () => {};
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
@@ -82,19 +80,18 @@ export const Categories: React.FC<CategoriesProps> = () => {
         onClose={handleCloseModal}
       />
 
- 
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
-            handleDel={handleOpenDeleteModal}
-            handleRowClick={handleOpenViewModal}
-            data={allData?.data || []}
-            columns={columns}
-            handleEdit={handleOpenEditModal}
-            actionBtn={handleCreateTask}
-            filterBtn={filterBtn}
-            meta={allData?.meta || {}}
-            actionText={'فئة '}
-            loading={isLoading}
+          handleDel={handleOpenDeleteModal}
+          handleRowClick={handleOpenViewModal}
+          data={allData?.data || []}
+          columns={columns}
+          handleEdit={handleOpenEditModal}
+          actionBtn={handleCreateTask}
+          filterBtn={filterBtn}
+          meta={allData?.meta || {}}
+          actionText={'فئة '}
+          loading={isLoading}
         />
       </div>
     </>

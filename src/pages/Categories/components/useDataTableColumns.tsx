@@ -21,9 +21,41 @@ export const useDataTableColumns = () => {
 
   const columns: ColumnDef<Task>[] = [
     {
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'اسم الفئة'} />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2">
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('name') || '-'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'products',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'عدد المنتجات'} />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2">
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('products') || '0'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'رقم الفاتورة'} />
+        <DataTableColumnHeader column={column} title={'رقم الفئة'} />
       ),
       cell: ({ row }) => {
         return (
@@ -57,4 +89,3 @@ export const useDataTableColumns = () => {
 
   return { columns };
 };
- 
