@@ -33,6 +33,27 @@ export default function Settings() {
     phone: whoami?.user?.branches[0]?.phone || '',
     business_logo: settings?.data?.business_logo || '',
   });
+
+  useEffect(() => {
+    const holder = whoami
+      ? JSON.parse(whoami?.user?.branches[0]?.registered_address)
+      : {};
+    setUpdateAll({
+      country: settings?.data?.country || '',
+      additionalNumber: holder?.additionalNumber || '',
+      streetName: holder?.streetName || '',
+      postalCode: holder?.postalCode || '',
+      district: holder?.district || '',
+      commercialRegesterationNumber:
+        holder?.commercialRegesterationNumber || '',
+      citySubdivisionName: holder?.citySubdivisionName || '',
+      city: holder?.city || '',
+      buildingNumber: holder?.buildingNumber || '',
+      business_name: settings?.data?.business_name || '',
+      phone: whoami?.user?.branches[0]?.phone || '',
+      business_logo: settings?.data?.business_logo || '',
+    });
+  }, [settings, whoami]);
   const taxesData = taxes?.data?.[0];
   const [taxesValue, setTaxesValue] = useState(taxes?.data?.[0]?.rate || 0);
   const brancheId = whoami?.user?.branches[0]?.id;

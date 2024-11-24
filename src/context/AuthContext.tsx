@@ -29,7 +29,9 @@ const showToast = (title: string, description: string) => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<string | null>(Cookies.get('accessToken') || null);
+  const [user, setUser] = useState<string | null>(
+    Cookies.get('accessToken') || null
+  );
 
   const login = async (data: LoginData): Promise<'success' | 'error'> => {
     const apiUrl = `${baseURL}auth/Login`;
@@ -41,13 +43,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           Accept: 'application/json',
         },
       });
-
       const token = responseData?.data?.token;
       const name = responseData?.data?.user?.name;
+      const userId = responseData?.data?.user?.id;
       if (token) {
         Cookies.set('accessToken', token, { expires: 1, path: '/' });
         Cookies.set('refreshToken', token, { expires: 1, path: '/' });
         Cookies.set('name', name, { expires: 1, path: '/' });
+        Cookies.set('userId', userId, { expires: 1 });
         setUser(token);
         return 'success';
       }
@@ -56,7 +59,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return 'error';
     } catch (error: any) {
       console.error('Login failed', error);
-      const errorMessage = error.response?.data?.message || 'An unexpected error occurred';
+      const errorMessage =
+        error.response?.data?.message || 'An unexpected error occurred';
       const errorCode = error.response?.status || 'Unknown';
       showToast(errorMessage, `Error: ${errorCode} - ${errorMessage}`);
       return 'error';
