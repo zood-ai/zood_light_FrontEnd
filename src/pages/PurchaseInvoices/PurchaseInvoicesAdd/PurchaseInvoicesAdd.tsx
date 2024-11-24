@@ -50,12 +50,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const crudService = createCrudService<any>('inventory/purchasing');
   const whoIam = createCrudService<any>(`auth/whoami?${token}`).useGetAll();
 
-  const canClick = items?.find((item) => {
-    if (!(item.item && item.qty && item.total)) {
-      return item;
-    }
-  });
-
   const { useGetById, useUpdate, useCreate } = crudService;
   const { useGetAll: useGetAllPro } = createCrudService<any>(
     'menu/products?not_default=1'
@@ -67,7 +61,14 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const { data: allDataId } = createCrudService<any>(
     `inventory/purchasing/${params.objId ?? ''}`
   ).useGetAll();
+  console.log({ allDataId });
 
+  const canClick =
+    items?.find((item) => {
+      if (!(item.item && item.qty && item.total)) {
+        return item;
+      }
+    }) || allDataId?.data?.status === 'Closed';
   useEffect(() => {
     if (isEditMode) {
       setInvoice({
@@ -192,8 +193,8 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
         <div className="flex flex-col items-start">
           <div className="grid grid-cols-1 gap-y-[16px]">
             <div className="grid grid-cols-1 md:grid-cols-2">
-                <div>
-                  <CustomSearchInbox
+              <div>
+                <CustomSearchInbox
                   placeholder={'اختر المورد'}
                   options={allData?.data?.map((item) => ({
                     value: item.id,
@@ -384,7 +385,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
               >
                 {isEditMode ? 'تحديث الفاتورة' : 'اضافة الفاتورة'}
               </Button>
-              {isEditMode && (
+              {isEditMode && allDataId?.data?.status !== 'Closed' && (
                 <Button
                   type="button"
                   onClick={handleConfirmation}
