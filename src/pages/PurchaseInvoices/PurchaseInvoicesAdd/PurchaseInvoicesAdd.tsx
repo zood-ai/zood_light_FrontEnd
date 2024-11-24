@@ -63,8 +63,8 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   ).useGetAll();
   console.log({ allDataId });
 
-  const canClick = items?.find((item) => {
-    if (!(item.item && item.qty && item.total)) {
+  const cantClick = items?.find((item) => {
+    if (!(item.item && item.qty)) {
       return item;
     }
   });
@@ -379,7 +379,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             <div className="flex flex-wrap gap-y-5">
               <Button
                 disabled={
-                  canClick ||
+                  cantClick ||
                   !(allDataId && allDataId?.data?.status !== 'Closed')
                     ? true
                     : false
