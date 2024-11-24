@@ -34,8 +34,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'اسم العميل'} />
       ),
       cell: ({ row }: any) => {
-         
-
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -53,8 +51,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'رقم المرجع'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -66,13 +62,32 @@ export const useDataTableColumns = () => {
       },
     },
     {
+      accessorKey: 'status',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'الحالة'} />
+      ),
+      cell: ({ row }: any) => {
+        return (
+          <div className="flex space-x-2 ">
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('status') == 'Closed' && (
+                <StatusBadge status="active" text={'Closed'} />
+              )}
+              {row.getValue('status') == 'Draft' && (
+                <StatusBadge status="Inactive" text={'Draft'} />
+              )}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: 'get_supplier',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'رقم الهاتف'} />
       ),
       cell: ({ row }: any) => {
-         
-
         return (
           <div className="flex space-x-2 ">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -89,8 +104,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'التاريخ'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2 ">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -107,8 +120,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'رقم الفاتورة'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -125,8 +136,6 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'تنفيذ'} />
       ),
       cell: ({ row }) => {
-         
-
         return (
           <div className="flex space-x-2 w-[180px] md:w-auto">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
@@ -144,7 +153,6 @@ export const useDataTableColumns = () => {
               >
                 رؤية الفاتورة
               </Button>
-          
             </div>
           </div>
         );
