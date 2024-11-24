@@ -3,6 +3,7 @@ import createCrudService from '@/api/services/crudService';
 import { Button } from '@/components/custom/button';
 import { Input } from '@/components/ui/input';
 import axiosInstance from '@/api/interceptors';
+import { set } from 'zod';
 export default function Settings() {
   const [selectedFileName, setSelectedFileName] = useState('');
   const { data: settings } =
@@ -33,6 +34,9 @@ export default function Settings() {
     phone: whoami?.user?.branches[0]?.phone || '',
     business_logo: settings?.data?.business_logo || '',
   });
+  const [updatedTaxInclusivePricing, setUpdatedTaxInclusivePricing] = useState(
+    settings?.data?.tax_inclusive_pricing
+  );
 
   useEffect(() => {
     const holder = whoami
@@ -53,13 +57,12 @@ export default function Settings() {
       phone: whoami?.user?.branches[0]?.phone || '',
       business_logo: settings?.data?.business_logo || '',
     });
+
+    setUpdatedTaxInclusivePricing(settings?.data?.tax_inclusive_pricing);
   }, [settings, whoami]);
   const taxesData = taxes?.data?.[0];
   const [taxesValue, setTaxesValue] = useState(taxes?.data?.[0]?.rate || 0);
   const brancheId = whoami?.user?.branches[0]?.id;
-  const [updatedTaxInclusivePricing, setUpdatedTaxInclusivePricing] = useState(
-    settings?.data?.tax_inclusive_pricing
-  );
   const [fileBase64, setFileBase64] = useState<any>('');
   // update Branch function
 
