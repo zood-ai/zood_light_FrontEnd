@@ -58,8 +58,8 @@ const CustomerFormEdit = () => {
 
         const holder2 = newHolder.map((ele) => ({
           ...ele,
-          business_date: ele.business_date || new Date(),
-          added_at: ele.added_at || new Date(),
+          business_date: ele.business_date || new Date().toISOString(),
+          added_at: ele.added_at || new Date().toISOString(),
         }));
         if (holder2.length === 0) return;
         await mutate(

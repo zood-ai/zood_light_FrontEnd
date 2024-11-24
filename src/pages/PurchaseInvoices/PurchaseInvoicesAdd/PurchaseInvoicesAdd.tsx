@@ -21,6 +21,7 @@ import ConfirmBk from '@/components/custom/ConfimBk';
 import DelConfirm from '@/components/custom/DelConfim';
 import FastAddActionsCustomer from '@/components/FastAddActionsCustomer';
 import FileUpload from './uploadicon/FileUpload';
+import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
 
 export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const { t } = useTranslation();
@@ -91,7 +92,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInvoice({ ...invoice, [e.target.name]: e.target.value });
   };
-
 
   const handleItemChange = (index: number, field: string, value: string) => {
     const updatedItems = [...items];
@@ -181,7 +181,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
   const [fastActionBtn, setFastActionBtn] = useState(false);
   const setSuppId = (value: string) => {
-
     setInvoice({ ...invoice, supplier_id: value });
   };
 
@@ -193,8 +192,8 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
         <div className="flex flex-col items-start">
           <div className="grid grid-cols-1 gap-y-[16px]">
             <div className="grid grid-cols-1 md:grid-cols-2">
-              <div>
-                <SelectComp
+                <div>
+                  <CustomSearchInbox
                   placeholder={'اختر المورد'}
                   options={allData?.data?.map((item) => ({
                     value: item.id,
@@ -250,8 +249,21 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             {items?.map((item, index) => (
               <>
                 <div className="flex gap-md">
-                  <SelectComp
+                  {/* <SelectComp
                     className="w-[220px] "
+                    placeholder="اسم الصنف"
+                    options={getAllPro?.data?.map((item) => ({
+                      value: item.item_id,
+                      label: item.name,
+                    }))}
+                    onValueChange={(value) =>
+                      handleItemChange(index, 'item', value)
+                    }
+                    label="اسم الصنف"
+                    value={items[index]?.item}
+                  /> */}
+                  <CustomSearchInbox
+                    className="w-[220px]"
                     placeholder="اسم الصنف"
                     options={getAllPro?.data?.map((item) => ({
                       value: item.item_id,

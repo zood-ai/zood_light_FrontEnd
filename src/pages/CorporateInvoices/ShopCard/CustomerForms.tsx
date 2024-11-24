@@ -11,6 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import FastAddActionsCustomer from '@/components/FastAddActionsCustomer';
 import PlusIcon from '@/components/Icons/PlusIcon';
 import FastAddActionsCustomerPQ from '@/components/FastAddActionsCustomerPQ';
+import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
 
 const CustomerForms = () => {
   const allService = createCrudService<any>('manage/customers');
@@ -109,12 +110,11 @@ const CustomerForms = () => {
   );
   const { data: getAllPro } = useGetAllPro();
 
-
   return (
     <>
       <div className=" flex gap-md mb-md ">
         <div>
-          <SelectComp
+          <CustomSearchInbox
             options={allData?.data?.map((item) => ({
               value: item.id,
               label: item.name,

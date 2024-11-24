@@ -43,9 +43,9 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
       amount: 0,
       tips: 0,
       notadd: true,
-      business_date: new Date(),
+      business_date: new Date().toISOString(),
       meta: 'well done',
-      added_at: new Date(),
+      added_at: new Date().toISOString(),
       payment_method_id: '',
     },
   ]);
@@ -131,7 +131,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     if (params.id) {
       axiosInstance.get(`orders/${params.id}`).then((res) => {
         // setPaymentMethod(res?.data?.data?.payments || []);
-        console.log({res});
+        console.log({ res });
         setFetchedPaymentMethod(res?.data?.data?.payments);
         setPaymentMethodinit(res?.data?.data?.payments || []);
         setdiscountAmount(res?.data?.data?.discount_amount || 0);
@@ -175,7 +175,13 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
       SubTotalAfterDiscount = subTotal - finalDiscount;
     }
     const Drepa = SubTotalAfterDiscount * (mainTax?.rate / 100);
-    console.log({Drepa, mainTax, SubTotalAfterDiscount, subTotal, discountAmount})
+    console.log({
+      Drepa,
+      mainTax,
+      SubTotalAfterDiscount,
+      subTotal,
+      discountAmount,
+    });
     setTaxAmount(Drepa);
     setTotalAmountIncludeAndExclude(SubTotalAfterDiscount + Drepa);
   }, [subTotal, cardItemValue, discountAmount, mainTax]);
@@ -228,7 +234,9 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                       // label="ضريبة القيمة المضافة"
                       iconSrcLeft={'SR'}
                       value={Number(
-                        params.id ? orderSchema?.discount_amount : discountAmount
+                        params.id
+                          ? orderSchema?.discount_amount
+                          : discountAmount
                       )}
                       disabled={params.id}
                     />
@@ -288,9 +296,9 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                               tendered: 180,
                               tips: 0,
                               notadd: true,
-                              business_date: new Date(),
+                              business_date: new Date().toISOString(),
                               meta: 'well done',
-                              added_at: new Date(),
+                              added_at: new Date().toISOString(),
                               payment_method_id: option.id,
                             };
                           }
@@ -407,9 +415,9 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                           tendered: 180,
                           tips: 0,
                           notadd: true,
-                          business_date: new Date(),
+                          business_date: new Date().toISOString(),
                           meta: 'well done',
-                          added_at: new Date(),
+                          added_at: new Date().toISOString(),
                         },
                       ];
                     });

@@ -14,6 +14,7 @@ import {
   updatePayment,
 } from '@/store/slices/orderSchema';
 import { useNavigate, useParams } from 'react-router-dom';
+import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
 import axios from 'axios';
 import { on } from 'events';
 import {
@@ -121,11 +122,10 @@ const CustomerForm = () => {
 
     try {
       if (params.id) {
-
         try {
           const res = await axiosInstance.get(`/orders/${params.id}`);
           const orderData = res?.data?.data;
-          (orderData, 'orderData');
+          orderData, 'orderData';
 
           if (orderData?.payments?.length < orderSchema?.payments?.length) {
             const newData = orderSchema?.payments.slice(
@@ -139,9 +139,9 @@ const CustomerForm = () => {
                 amount: item.amount,
                 tendered: 2,
                 tips: 20,
-                business_date: new Date(),
+                business_date: new Date().toISOString(),
                 meta: 'well done',
-                added_at: new Date(),
+                added_at: new Date().toISOString(),
               })),
             };
 
@@ -188,7 +188,7 @@ const CustomerForm = () => {
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4">
       <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit w-full xl:w-1/2">
-        <SelectComp
+        <CustomSearchInbox
           options={allData?.data?.map((item) => ({
             value: item.id,
             label: item.name,

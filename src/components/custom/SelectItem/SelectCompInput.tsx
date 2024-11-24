@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/select';
 import useDirection from '@/hooks/useDirection';
 import { useParams } from 'react-router-dom';
+import CustomSearchInbox from '../CustomSearchInbox';
+import { set } from 'zod';
 
 interface SelectCompProps {
   options: { value: string; label: string }[];
@@ -33,6 +35,7 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
   ) => {
     const [isInputActive, setIsInputActive] = useState(false);
     const [inputValue, setInputValue] = useState('');
+    const [dropDownValue, setDropDownValue] = useState('');
     const isRtl = useDirection();
     const params = useParams();
 
@@ -44,7 +47,8 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
 
-      // onValueChange('');
+      onValueChange('');
+      setDropDownValue('');
       setInputValue(value);
     };
 
@@ -67,13 +71,27 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
 
     return (
       <div className={className} style={{ position: 'relative' }}>
-        {label && (
+        {/* {label && (
           <label className="mb-2 block text-sm font-medium text-secText">
             {label}
           </label>
-        )}
+        )} */}
 
-        <Select
+        <CustomSearchInbox
+          options={options}
+          value={dropDownValue}
+          onValueChange={(value) => {
+            onValueChange(value);
+            setDropDownValue(value);
+            setInputValue('');
+          }}
+          placeholder={inputValue == '' && placeholder}
+          label={label}
+          className={className}
+          disabled={params.id}
+        />
+
+        {/* <Select
           {...props}
           onValueChange={handleValueChange}
           dir={isRtl ? 'rtl' : 'ltr'}
@@ -92,7 +110,7 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
+        </Select> */}
 
         {/* Transparent Input Overlay */}
         {!params.id && (

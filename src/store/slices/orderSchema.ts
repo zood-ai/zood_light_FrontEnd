@@ -76,8 +76,8 @@ const initialState: OrderSchemaState = {
       tendered: 180,
       amount: 0,
       payment_method_id: '',
-      added_at: new Date(),
-      business_date: new Date(),
+      added_at: new Date().toISOString(),
+      business_date: new Date().toISOString(),
       tips: 0,
       meta: {
         external_additional_payment_info: 'some info',
