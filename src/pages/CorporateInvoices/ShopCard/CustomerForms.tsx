@@ -79,26 +79,6 @@ const CustomerForms = () => {
       });
   };
 
-  const submitOrder = async () => {
-    try {
-      setLoading(true);
-
-      if (!params.id) {
-        await mutate(orderSchema, {
-          onSuccess: (data) => {
-            setLoading(false);
-            navigate(`/zood-dashboard/price-quote`);
-          },
-          onError: (error) => {
-            setLoading(false);
-          },
-        });
-      }
-      // const res = await axiosInstance.post('orders', orderSchema);
-    } catch (error) {
-      setLoading(false);
-    }
-  };
   useEffect(() => {
     if (!params.id) {
       handleInputChangex('customer_id', orderSchema?.customer_id);
@@ -108,7 +88,6 @@ const CustomerForms = () => {
   const { useGetAll: useGetAllPro } = createCrudService<any>(
     'menu/products?not_default=1'
   );
-  const { data: getAllPro } = useGetAllPro();
 
   return (
     <>

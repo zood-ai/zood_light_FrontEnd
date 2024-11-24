@@ -22,6 +22,8 @@ import {
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
 import { useToast } from '@/components/custom/useToastComp';
+import PlusIcon from '@/components/Icons/PlusIcon';
+import FastAddActionsCustomerPQ from '@/components/FastAddActionsCustomerPQ';
 
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
@@ -50,6 +52,7 @@ const CustomerForm = () => {
   const [formState, setFormState] = useState(initialValue);
   let dispatch = useDispatch();
   let params = useParams();
+  const [fastActionBtn, setFastActionBtn] = useState(false);
   const handleInputChange = (field: string, value: any) => {
     setFormState((prevState) => ({ ...prevState, [field]: value }));
   };
@@ -206,10 +209,28 @@ const CustomerForm = () => {
           value={orderSchema?.customer_id}
           disabled={params.id}
         />
+        {!params.id && (
+          <div className="flex-grow mt-auto">
+            <Button
+              onClick={() => {
+                setFastActionBtn(true);
+              }}
+              type="button"
+              variant={'link'}
+            >
+              <div className="flex gap-2">
+                <span className="font-semibold">اضافة عميل جديد</span>
+                <span>
+                  <PlusIcon />
+                </span>
+              </div>
+            </Button>
+          </div>
+        )}
         <IconInput
           disabled
           name="name"
-          className=" md:col-span-4 min-w-[327px] flex-grow"
+          className=" md:col-span-4 min-w-full flex-grow"
           label="رقم العميل"
           iconSrc={callIcon}
           value={formState.phone}
@@ -218,21 +239,21 @@ const CustomerForm = () => {
         <IconInput
           disabled
           name={formState.name}
-          className=" md:col-span-4 min-w-[327px] flex-grow"
+          className=" md:col-span-4 min-w-full flex-grow"
           label="اسم الشارع"
           value={formState.address}
           onChange={null}
         />
         <IconInput
           disabled
-          className=" md:col-span-4 min-w-[327px] flex-grow"
+          className=" md:col-span-4 min-w-full flex-grow"
           label="رقم تسجيل ضريبة القيمة المضافة"
           value={formState.tax_registration_number}
           onChange={null}
         />
         <IconInput
           disabled
-          className=" md:col-span-4 min-w-[327px] flex-grow"
+          className=" md:col-span-4 min-w-full flex-grow"
           label="معرف اخر"
           value={formState.vat_registration_number}
           onChange={null}
@@ -276,6 +297,11 @@ const CustomerForm = () => {
         </Button>
       </div>
       <ShopCardSummery />
+      <FastAddActionsCustomerPQ
+        setInvoice={() => {}}
+        isOpen={fastActionBtn}
+        onClose={() => setFastActionBtn(false)}
+      />
     </div>
   );
 };

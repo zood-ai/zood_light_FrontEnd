@@ -36,7 +36,7 @@ const IconInput: React.FC<any> = ({
             type={type}
             {...props}
             placeholder={placeholder}
-            className={` w-full text-right text-mainText   ${
+            className={`w-full text-right text-mainText ${
               iconSrc && 'ps-10  w-full'
             } ${inputClassName}`}
           />
