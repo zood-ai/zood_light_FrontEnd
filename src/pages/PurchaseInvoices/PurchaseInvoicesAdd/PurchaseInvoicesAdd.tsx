@@ -63,12 +63,11 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   ).useGetAll();
   console.log({ allDataId });
 
-  const canClick =
-    items?.find((item) => {
-      if (!(item.item && item.qty && item.total)) {
-        return item;
-      }
-    }) || allDataId?.data?.status === 'Closed';
+  const canClick = items?.find((item) => {
+    if (!(item.item && item.qty && item.total)) {
+      return item;
+    }
+  });
   useEffect(() => {
     if (isEditMode) {
       setInvoice({
@@ -379,21 +378,28 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             )}
             <div className="flex flex-wrap gap-y-5">
               <Button
-                disabled={canClick ? true : false}
+                disabled={
+                  canClick ||
+                  !(allDataId && allDataId?.data?.status !== 'Closed')
+                    ? true
+                    : false
+                }
                 type="submit"
                 className="px-6 py-1.5 mta-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
               >
                 {isEditMode ? 'تحديث الفاتورة' : 'اضافة الفاتورة'}
               </Button>
-              {isEditMode && allDataId?.data?.status !== 'Closed' && (
-                <Button
-                  type="button"
-                  onClick={handleConfirmation}
-                  className="px-6 py-1.5 mta-8 mr-4 text-sm font-semibold rounded min-h-[39px] w-[144px]"
-                >
-                  تأكيد فاتورة الشراء
-                </Button>
-              )}
+              {allDataId &&
+                isEditMode &&
+                allDataId?.data?.status !== 'Closed' && (
+                  <Button
+                    type="button"
+                    onClick={handleConfirmation}
+                    className="px-6 py-1.5 mta-8 mr-4 text-sm font-semibold rounded min-h-[39px] w-[144px]"
+                  >
+                    تأكيد فاتورة الشراء
+                  </Button>
+                )}
               <DelConfirm route={'inventory/purchasing'} />
             </div>
           </div>
