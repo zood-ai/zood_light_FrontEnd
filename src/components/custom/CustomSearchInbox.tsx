@@ -32,7 +32,7 @@ export default function CustomSearchInbox({
 
   // Filter options based on the search input
   const filteredOptions = React.useMemo(() => {
-    if(options?.length === 0) return [];
+    if (options?.length === 0) return [];
     return options?.filter((option) =>
       option?.label?.toLowerCase()?.includes(search?.toLowerCase())
     );
@@ -44,6 +44,7 @@ export default function CustomSearchInbox({
     }
     setOpen(false); // Close the popover
   };
+  if (options?.length === 0 || !options) return null;
 
   return (
     <div className={className}>
