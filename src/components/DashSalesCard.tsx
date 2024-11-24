@@ -98,7 +98,7 @@ function DashSalesCard({ data }) {
                   <div>الاسبوع</div>
                 </div>
                 <div className="font-semibold">
-                  SR {Number(totalMonth)?.toFixed(2)}
+                  SR {Number(totalWeek)?.toFixed(2)}
                 </div>
               </div>
               <div className="object-contain mt-5 w-full aspect-[333.33] bg-slate-200 " />
@@ -110,7 +110,7 @@ function DashSalesCard({ data }) {
                   <div>الشهر</div>
                 </div>
                 <div className="font-semibold">
-                  SR {Number(totalWeek)?.toFixed(2)}
+                  SR {Number(totalMonth)?.toFixed(2)}
                 </div>
               </div>
               <div className="object-contain mt-5 w-full aspect-[333.33] bg-slate-200 " />
