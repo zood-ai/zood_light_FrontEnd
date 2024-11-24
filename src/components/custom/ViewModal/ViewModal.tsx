@@ -80,7 +80,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     </div>
                     <div className="self-center ml-4 font-semibold text-right">
                       {Corporate && 'فاتورة شراء'}
-                      {Another && `فاتورة ضريبية ${!Simple && 'مبسطة'}`}
+                      {Another && `فاتورة ضريبية ${Simple ? '': 'مبسطة' }`}
                     </div>
                     <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-200 border-solid max-md:mr-1 max-md:max-w-full">
                       <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
