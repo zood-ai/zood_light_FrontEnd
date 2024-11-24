@@ -32,6 +32,7 @@ export default function CustomSearchInbox({
 
   // Filter options based on the search input
   const filteredOptions = React.useMemo(() => {
+    if(options?.length === 0) return [];
     return options?.filter((option) =>
       option?.label?.toLowerCase()?.includes(search?.toLowerCase())
     );
