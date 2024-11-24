@@ -44,7 +44,7 @@ export default function CustomSearchInbox({
     }
     setOpen(false); // Close the popover
   };
-  if (options?.length === 0 || !options) return null;
+  // if (options?.length === 0 || !options) return null;
 
   return (
     <div className={className}>
@@ -60,7 +60,7 @@ export default function CustomSearchInbox({
             className="w-full justify-between"
           >
             {value
-              ? options.find((option) => option.value === value)?.label
+              ? options?.find((option) => option?.value === value)?.label
               : placeholder}
             <ChevronsUpDown className="opacity-50 mr-auto" />
           </Button>
@@ -77,18 +77,18 @@ export default function CustomSearchInbox({
             <CommandList>
               {filteredOptions?.length > 0 ? (
                 <CommandGroup>
-                  {filteredOptions.map((option) => (
+                  {filteredOptions?.map((option) => (
                     <CommandItem
                       disabled={disabled}
-                      key={option.value}
-                      onSelect={() => handleSelect(option.value)} // Trigger selection
+                      key={option?.value}
+                      onSelect={() => handleSelect(option?.value)} // Trigger selection
                       className="cursor-pointer hover:bg-gray-100 active:bg-gray-200 data-[disabled]:pointer-events-auto"
                     >
-                      {option.label}
+                      {option?.label}
                       <Check
                         className={cn(
                           'ml-auto',
-                          value === option.value ? 'opacity-100' : 'opacity-0'
+                          value === option?.value ? 'opacity-100' : 'opacity-0'
                         )}
                       />
                     </CommandItem>
