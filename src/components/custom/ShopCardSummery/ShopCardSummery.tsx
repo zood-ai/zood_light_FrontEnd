@@ -131,9 +131,9 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
       axiosInstance.get(`orders/${params.id}`).then((res) => {
         setPaymentMethod(res?.data?.data?.payments || []);
         setPaymentMethodinit(res?.data?.data?.payments || []);
-        setdiscountAmount(res?.data?.data?.customer_notes || 0);
+        setdiscountAmount(res?.data?.data?.discount_amount || 0);
       });
-      // setdiscountAmount(orderSchema?.customer_notes || 0);
+      // setdiscountAmount(orderSchema?.discount_amount || 0);
     }
   }, []);
 
@@ -187,7 +187,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   }, [discountAmount, taxAmount, orderSchema, mainTax]);
   return (
     <>
-      <div className="flex mt-5 flex-col  flex-grow rounded-none min-w-[302px]  ">
+      <div className="flex mt-5 flex-col  flex-grow rounded-none w-full xl:w-1/2">
         <div className="flex flex-col pt-6 pb-12 w-full bg-white rounded border border-solid border-zinc-300 max-md:max-w-full">
           <div className="flex flex-col items-start px-3 w-full max-md:max-w-full">
             <div className="self-stretch max-md:mr-2.5 max-md:max-w-full">
@@ -207,7 +207,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                   <div className="flex flex-col w-full text-sm font-medium text-right whitespace-nowrap max-md:mt-10">
                     <div className="flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {Math.floor(subTotal * 100) / 100}
+                        {Math.floor(Number(subTotal) * 100) / 100}
                       </div>
                       <div className="self-start text-zinc-500">SR</div>
                     </div>
@@ -217,21 +217,21 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       placeholder="0.00"
                       onChange={(value) =>
                         setdiscountAmount(
-                          Math.min(value.target.value, totalCost)
+                          Math.min(Number(value.target.value), Number(totalCost))
                         )
                       }
                       inputClassName={'w-full flex-grow '}
                       // label="ضريبة القيمة المضافة"
                       iconSrcLeft={'SR'}
                       value={Number(
-                        params.id ? orderSchema?.customer_notes : discountAmount
+                        params.id ? orderSchema?.discount_amount : discountAmount
                       )}
                       disabled={params.id}
                     />
                     {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {Math.floor(taxAmount * 100) / 100}
+                        {Math.floor(Number(taxAmount) * 100) / 100}
                       </div>
                       <div className="text-zinc-500">SR</div>
                     </div>
@@ -253,7 +253,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
             <div className=" flex gap-5 justify-between self-stretch mt-3 px-2 w-full text-sm text-right text-zinc-800 max-md:max-w-full">
               <div className="font-medium">المبلغ الإجمالي</div>
               <div className="font-bold">
-                SR {Math.floor(totalAmountIncludeAndExclude * 100) / 100}
+                SR {Math.floor(Number(totalAmountIncludeAndExclude) * 100) / 100}
               </div>
             </div>
             <>
@@ -443,7 +443,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
             المبلغ المتبقي
           </div>
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            {totalAmountIncludeAndExclude - totalAmount}
+            {Number(totalAmountIncludeAndExclude) - Number(totalAmount)}
           </div>
         </div>
       </div>

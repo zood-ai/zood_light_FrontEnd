@@ -61,7 +61,7 @@ const CustomerFormEdit = () => {
     `${params.id || ''}`
   );
   return (
-    <div className="mt-5 flex-wrap flex xl:justify-between max-xl:flex-col gap-x-[120px]">
+    <div className="mt-5 max-lg:flex-wrap flex xl:justify-between max-xl:flex-col gap-x-10">
       <div className="">
         <CustomerFormEdits />
         {/* <CustomerForm /> */}

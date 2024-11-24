@@ -132,9 +132,9 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
       axiosInstance.get(`orders/${params.id}`).then((res) => {
         setPaymentMethod(res?.data?.data?.payments || []);
         setPaymentMethodinit(res?.data?.data?.payments || []);
-        setdiscountAmount(res?.data?.data?.customer_notes || 0);
+        setdiscountAmount(res?.data?.data?.discount_amount || 0);
       });
-      // setdiscountAmount(orderSchema?.customer_notes || 0);
+      // setdiscountAmount(orderSchema?.discount_amount || 0);
     }
   }, []);
 
@@ -226,7 +226,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       // label="ضريبة القيمة المضافة"
                       iconSrcLeft={'SR'}
                       value={Number(
-                        params.id ? orderSchema?.customer_notes : discountAmount
+                        params.id ? orderSchema?.discount_amount : discountAmount
                       )}
                       disabled={params.id}
                     />

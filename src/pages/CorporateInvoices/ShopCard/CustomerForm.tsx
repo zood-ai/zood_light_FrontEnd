@@ -179,7 +179,7 @@ const CustomerForm = () => {
 
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
-      <div className="flex-grow">
+      <div className="w-full xl:w-1/2">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
           {orderSchema.products.map((item, index) => (

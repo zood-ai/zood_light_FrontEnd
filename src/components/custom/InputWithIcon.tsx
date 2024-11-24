@@ -55,7 +55,7 @@ const IconInput: React.FC<any> = ({
             {iconSrcLeft && (
               <div
                 className={`absolute inset-y-0 left-3 flex items-center text-gray-400 ${
-                  label ? 'top-[-36px]' : ''
+                  label ? 'top-[-36px]' : 'top-[-36px]'
                 }`}
               >
                 {iconSrcLeft}

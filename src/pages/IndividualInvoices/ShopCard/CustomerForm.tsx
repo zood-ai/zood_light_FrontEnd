@@ -187,7 +187,7 @@ const CustomerForm = () => {
   }, [orderSchema?.customer_id]);
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4">
-      <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit max-md:flex-grow md:w-[70%]">
+      <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit w-full xl:w-1/2">
         <SelectComp
           options={allData?.data?.map((item) => ({
             value: item.id,

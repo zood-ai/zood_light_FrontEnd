@@ -80,13 +80,13 @@ export const ShopCardEdit: React.FC<ShopCardProps> = () => {
       const { data } = getOrdersById.data;
       dispatch(updateField({ field: 'customer_id', value: data.customer?.id }));
       dispatch(
-        updateField({ field: 'customer_notes', value: data.customer_notes })
+        updateField({ field: 'customer_notes', value: data.discount_amount })
       );
       dispatch(addPayment(data.payments || []));
     }
   }, [getOrdersById?.data?.data]);
   const { data: branchData } =
-  createCrudService<any>('manage/branches').useGetAll();
+    createCrudService<any>('manage/branches').useGetAll();
 
   // Set remaining fields
   useEffect(() => {

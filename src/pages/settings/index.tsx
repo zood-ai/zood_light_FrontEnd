@@ -20,7 +20,7 @@ export default function Settings() {
     citySubdivisionName: '',
     city: '',
     buildingNumber: '',
-    business_name: settings?.data?.business_name || '',
+    business_name: '',
     phone: '',
     branch_id: '',
   });

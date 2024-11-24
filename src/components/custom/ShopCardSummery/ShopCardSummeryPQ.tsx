@@ -129,7 +129,7 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
 
   return (
     <>
-      <div className="flex flex-grow flex-col   rounded-none w-full  md:min-w-[450px] xl:max-w-[502px]  ">
+      <div className="flex flex-grow flex-col   rounded-none  w-full xl:w-1/2  ">
         <div className="flex flex-col pt-6 pb-12 w-full bg-white rounded border border-solid border-zinc-300 max-md:max-w-full">
           <div className="flex flex-col items-start px-3 w-full max-md:max-w-full">
             <div className="self-stretch max-md:mr-2.5 max-md:max-w-full">

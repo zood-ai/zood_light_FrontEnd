@@ -78,9 +78,8 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
   const [totalAmountIncludeAndExclude, setTotalAmountIncludeAndExclude] =
     useState(0);
   const [taxAmount, setTaxAmount] = useState((subTotal * 15) / 100);
-
   useEffect(() => {
-    setTaxAmount((subTotal * 15) / 100);
+    setTaxAmount((Number(subTotal) * 15) / 100);
   }, [subTotal, discountAmount]);
 
   useEffect(() => {
@@ -120,7 +119,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     );
     dispatch(
       updateField({
-        field: 'customer_notes',
+        field: 'discount_amount',
         value: discountAmount,
       })
     );
@@ -132,14 +131,14 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     if (params.id) {
       axiosInstance.get(`orders/${params.id}`).then((res) => {
         // setPaymentMethod(res?.data?.data?.payments || []);
+        console.log({res});
         setFetchedPaymentMethod(res?.data?.data?.payments);
         setPaymentMethodinit(res?.data?.data?.payments || []);
-        setdiscountAmount(res?.data?.data?.customer_notes || 0);
+        setdiscountAmount(res?.data?.data?.discount_amount || 0);
       });
-      // setdiscountAmount(orderSchema?.customer_notes || 0);
+      // setdiscountAmount(orderSchema?.discount_amount || 0);
     }
   }, []);
-
 
   const [totalAmount, setTotalAmount] = useState(
     params.id
@@ -176,6 +175,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
       SubTotalAfterDiscount = subTotal - finalDiscount;
     }
     const Drepa = SubTotalAfterDiscount * (mainTax?.rate / 100);
+    console.log({Drepa, mainTax, SubTotalAfterDiscount, subTotal, discountAmount})
     setTaxAmount(Drepa);
     setTotalAmountIncludeAndExclude(SubTotalAfterDiscount + Drepa);
   }, [subTotal, cardItemValue, discountAmount, mainTax]);
@@ -191,7 +191,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
   }, [discountAmount, taxAmount, orderSchema, mainTax]);
   return (
     <>
-      <div className="flex mt-5 flex-col   rounded-none min-w-[302px]  ">
+      <div className="flex mt-5 flex-col   rounded-none  w-full xl:w-1/2  ">
         <div className="flex flex-col pt-6 pb-12 w-full bg-white rounded border border-solid border-zinc-300 max-md:max-w-full">
           <div className="flex flex-col items-start px-3 w-full max-md:max-w-full">
             <div className="self-stretch max-md:mr-2.5 max-md:max-w-full">
@@ -221,21 +221,21 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                       placeholder="0.00"
                       onChange={(value) =>
                         setdiscountAmount(
-                          Math.min(value.target.value, totalCost)
+                          Math.min(value.target.value, Number(totalCost))
                         )
                       }
                       inputClassName={'w-full flex-grow '}
                       // label="ضريبة القيمة المضافة"
                       iconSrcLeft={'SR'}
                       value={Number(
-                        params.id ? orderSchema?.customer_notes : discountAmount
+                        params.id ? orderSchema?.discount_amount : discountAmount
                       )}
                       disabled={params.id}
                     />
                     {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {Math.floor(taxAmount * 100) / 100}
+                        {Math.floor(Number(taxAmount) * 100) / 100}
                       </div>
                       <div className="text-zinc-500">SR</div>
                     </div>

@@ -81,7 +81,7 @@ const CustomerFormEdits = () => {
 
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 ">
       <SelectComp
         options={allData?.data?.map((item) => ({
           value: item.id,
