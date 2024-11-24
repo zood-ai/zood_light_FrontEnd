@@ -70,6 +70,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     Cookies.remove('accessToken');
     Cookies.remove('refreshToken');
+    Cookies.remove('name');
+    Cookies.remove('userId');
+    Cookies.remove('branch_id');
     setUser(null);
     window.location.href = '/zood-login';
   };
