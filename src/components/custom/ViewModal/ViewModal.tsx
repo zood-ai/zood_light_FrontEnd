@@ -32,7 +32,8 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
   const Simple = pathname === '/zood-dashboard/corporate-invoices';
   const Another = !Corporate;
-  const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  // const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  const ShowCar = true;
   const Data = OrderData ? { ...OrderData } : { ...purchsingInfo };
   const [size, setSize] = useState('A4');
   const handleSizeChange = (newSize: string) => {
@@ -74,7 +75,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             ).streetName}
                         </p>
                       </div>
-                      <QRCodeComp settings={settings}/>
+                      <QRCodeComp settings={settings} />
                     </div>
                     <div className="self-center ml-4 font-semibold text-right">
                       {Corporate && 'فاتورة شراء'}
@@ -570,7 +571,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       />
                     </div>
                     <div className="  my-4 flex justify-center">
-                      <QRCodeComp settings={settings}/>
+                      <QRCodeComp settings={settings} />
                     </div>
                   </div>
                 )}

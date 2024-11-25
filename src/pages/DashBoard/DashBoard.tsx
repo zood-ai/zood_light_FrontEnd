@@ -59,8 +59,7 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
     dispatch(toggleActionView(false));
   };
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
-  const filterBtn = () => {
-  };
+  const filterBtn = () => {};
   const { columns } = useOrderDataTableColumns();
   const allService = createCrudService<any>('inventory/purchasing');
   const { useGetAll } = allService;
