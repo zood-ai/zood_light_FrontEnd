@@ -42,10 +42,8 @@ const encodeZATCA = (
 
 export const QRCodeComp: React.FC<QRCodeCompProps> = ({ settings }: any) => {
   const data = useSelector((state: any) => state.toggleAction.data);
-  const sellerName = String(settings?.data?.business_name || 'بائع مجهول');
-  const vatNumber = String(
-    settings?.data?.business_tax_number || '0000000000000'
-  );
+  const sellerName = String(settings?.data?.business_name || '');
+  const vatNumber = String(settings?.data?.business_tax_number || '');
   const invoiceDate = String(data?.business_date || new Date().toISOString()); // Use ISO 8601 format
   const totalAmount = String(`${data?.total_price.toFixed(2) || '0.00'}`);
   const vatAmount = String(
