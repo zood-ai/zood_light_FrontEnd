@@ -21,6 +21,7 @@ export default function UserProfile() {
     phone: data?.data?.phone,
     image: data?.data?.image,
   });
+  console.log({ personalImage });
 
   useEffect(() => {
     setFormDataState({
@@ -29,6 +30,7 @@ export default function UserProfile() {
       phone: data?.data?.phone,
       image: data?.data?.image,
     });
+    setPersonalImage(data?.data?.image);
   }, [data]);
 
   const handleInputChanges = (e) => {
@@ -40,10 +42,9 @@ export default function UserProfile() {
   };
 
   const handleButtonClick = () => {
-    return;
+    // return;
     fileInputRef.current.click();
   };
-  console.log(formDataState);
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -55,7 +56,7 @@ export default function UserProfile() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64 = reader.result?.toString().split(',')[1];
-        const base64String = `data:image/*;base64,${base64}`;
+        const base64String = `data:image/png;base64,${base64}`;
         setFormDataState((prevData) => ({
           ...prevData,
           image: base64String,
@@ -165,7 +166,6 @@ export default function UserProfile() {
               )}
             </div>
             <Button
-              disabled
               onClick={handleButtonClick}
               variant={'outlineMain'}
               className="w-full px-6 py-2 text-sm font-semibold"

@@ -40,7 +40,7 @@ export const DeatilsHeaderWithFilter: React.FC<
           <GoToShop  />
         </div>
         <div className="flex justify-end">
-          <QRCodeComp />
+          {/* <QRCodeComp /> */}
         </div>
       </div>
     </>

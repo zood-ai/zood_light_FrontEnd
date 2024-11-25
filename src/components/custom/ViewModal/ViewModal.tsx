@@ -5,6 +5,7 @@ import createCrudService from '@/api/services/crudService';
 import { useReactToPrint } from 'react-to-print';
 import './ViewModal.css';
 import { useLocation } from 'react-router-dom';
+import { QRCodeComp } from '@/components/custom/QRCodeComp';
 
 export const ViewModal: React.FC<ViewModalProps> = () => {
   const data = useSelector((state: any) => state.toggleAction.data);
@@ -40,6 +41,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const handlePrint = () => {
     reactToPrintFn();
   };
+  console.log({ Data, supplierInfo, OrderData, purchsingInfo, WhoAmI });
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-none h-[90vh] max-w-[80vw] overflow-y-scroll relative ">
@@ -72,15 +74,11 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             ).streetName}
                         </p>
                       </div>
-                      <img
-                        src="/icons/ParCode.webp"
-                        className="w-[100px] h-[100px]"
-                        alt="ParCode"
-                      />
+                      <QRCodeComp settings={settings}/>
                     </div>
                     <div className="self-center ml-4 font-semibold text-right">
                       {Corporate && 'فاتورة شراء'}
-                      {Another && `فاتورة ضريبية ${Simple ? '': 'مبسطة' }`}
+                      {Another && `فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`}
                     </div>
                     <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-200 border-solid max-md:mr-1 max-md:max-w-full">
                       <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
@@ -572,11 +570,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       />
                     </div>
                     <div className="  my-4 flex justify-center">
-                      <img
-                        src="/icons/ParCode.webp"
-                        alt="Barcode"
-                        className="w-[76px] h-[77px]"
-                      />
+                      <QRCodeComp />
                     </div>
                   </div>
                 )}

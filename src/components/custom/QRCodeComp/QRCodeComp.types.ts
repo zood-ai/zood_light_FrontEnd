@@ -1,1 +1,3 @@
-export type QRCodeCompProps = {};
+export type QRCodeCompProps = {
+  settings: any;
+};

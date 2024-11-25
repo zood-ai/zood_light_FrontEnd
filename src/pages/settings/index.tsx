@@ -33,6 +33,7 @@ export default function Settings() {
     business_name: settings?.data?.business_name || '',
     phone: whoami?.user?.branches[0]?.phone || '',
     business_logo: settings?.data?.business_logo || '',
+    business_tax_number: settings?.data?.business_tax_number || '',
   });
   const [updatedTaxInclusivePricing, setUpdatedTaxInclusivePricing] = useState(
     settings?.data?.tax_inclusive_pricing
@@ -56,6 +57,7 @@ export default function Settings() {
       business_name: settings?.data?.business_name || '',
       phone: whoami?.user?.branches[0]?.phone || '',
       business_logo: settings?.data?.business_logo || '',
+      business_tax_number: settings?.data?.business_tax_number || '',
     });
 
     setUpdatedTaxInclusivePricing(settings?.data?.tax_inclusive_pricing);
@@ -108,6 +110,7 @@ export default function Settings() {
       data: {
         country: updateAll.country,
         business_name: updateAll.business_name,
+        business_tax_number: updateAll.business_tax_number,
       },
     });
 
@@ -222,7 +225,9 @@ export default function Settings() {
           <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full">
             <div className="w-full flex max-sm:flex-col gap-y-4 gap-x-4">
               <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
-                <div className="self-start text-zinc-500">الرقم الضريبي</div>
+                <div className="self-start text-zinc-500">
+                  رقم السجل التجاري
+                </div>
                 <Input
                   onChange={(e) => {
                     setUpdateAll((prev) => ({
@@ -247,6 +252,21 @@ export default function Settings() {
                   className="w-full "
                 />
               </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full">
+            <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
+              <div className="self-start text-zinc-500">الرقم الضريبي</div>
+              <Input
+                onChange={(e) => {
+                  setUpdateAll((prev) => ({
+                    ...prev,
+                    business_tax_number: e.target.value,
+                  }));
+                }}
+                value={updateAll?.business_tax_number}
+                className="w-full "
+              />
             </div>
           </div>
           <div
