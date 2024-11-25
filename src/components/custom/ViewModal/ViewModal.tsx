@@ -570,7 +570,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       />
                     </div>
                     <div className="  my-4 flex justify-center">
-                      <QRCodeComp />
+                      <QRCodeComp settings={settings}/>
                     </div>
                   </div>
                 )}

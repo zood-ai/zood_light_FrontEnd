@@ -22,6 +22,7 @@ import { PriceQuote } from './pages/PriceQuote/index.ts';
 import { PriceQuoteAdd } from './pages/PriceQuote/IndividualInvoicesAdd/index.ts';
 import { ShopCardPQ } from './pages/PriceQuote/ShopCard/ShopCard.tsx';
 import { ShopCardEditPQ } from './pages/PriceQuote/ShopCard/ShopCardEdit.tsx';
+import Customer from './pages/Customers/Customer.tsx';
 const MaintenanceError = lazy(() => import('./pages/errors/maintenance-error'));
 const UnauthorisedError = lazy(
   () => import('./pages/errors/unauthorised-error.tsx')
@@ -75,6 +76,11 @@ const Customers = lazy(() =>
     default: module.Customers,
   }))
 );
+// const Customer = lazy(() =>
+//   import('./pages/Customers/Customer.tsx').then((module) => ({
+//     default: module.Customer,
+//   }))
+// );
 const Resources = lazy(() =>
   import('./pages/Resources/Resources.tsx').then((module) => ({
     default: module.Resources,
@@ -140,12 +146,18 @@ const ErrorExample = React.lazy(() => import('./pages/settings/error-example'));
 
 const router = createBrowserRouter([
   // Auth routes
-  // {
-  //   path: '/login',
-  //   lazy: async () => ({
-  //     Component: (await import('./pages/auth/sign-in')).default,
-  //   }),
-  // },
+  {
+    path: '/login',
+    lazy: async () => ({
+      Component: (await import('./pages/auth/sign-in')).default,
+    }),
+  },
+  {
+    path: '/reset-password',
+    lazy: async () => ({
+      Component: (await import('./pages/auth/reset-password.tsx')).default,
+    }),
+  },
   // {
   //   path: '/sign-in-2',
   //   lazy: async () => ({
@@ -161,7 +173,7 @@ const router = createBrowserRouter([
   {
     path: '/forgot-password',
     lazy: async () => ({
-      Component: (await import('./pages/auth/forgot-password')).default,
+      Component: (await import('./pages/auth/forgot-password.tsx')).default,
     }),
   },
   {
@@ -193,19 +205,21 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: 'zood-signup-no-one-can-see-me',
+    path: 'zood-signup',
     element: (
       <React.Suspense fallback={<div>Loading register...</div>}>
         <SignUp />
       </React.Suspense>
     ),
   },
-  {
-    path: '/reset-password',
-    lazy: async () => ({
-      Component: (await import('./pages/auth/reset-password.tsx')).default,
-    }),
-  }, 
+  // {
+  //   path: 'zood-reset-password',
+  //   element: (
+  //     <React.Suspense fallback={<div>Loading register...</div>}>
+  //       <SignUp />
+  //     </React.Suspense>
+  //   ),
+  // },
   // Main routes
   {
     path: '/zood-dashboard',
@@ -404,7 +418,16 @@ const router = createBrowserRouter([
       //     </React.Suspense>
       //   ),
       // },
-
+      {
+        path: 'customer-profile/:id',
+        element: (
+          <React.Suspense fallback={<div>Loading Customers...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <Customer />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
       {
         path: 'price-quote/edit/:id',
         element: (
@@ -465,6 +488,7 @@ const router = createBrowserRouter([
           </React.Suspense>
         ),
       },
+
       {
         path: 'customers/:id/:objId?',
         element: (

@@ -7,6 +7,7 @@ import './StatusBadge.css';
 export const StatusBadge: React.FC<StatusBadgeProps> = ({
   status,
   text,
+  type,
 }: any) => {
   return (
     <>
@@ -41,9 +42,12 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
           </div>
         </div>
       )}
-
       {status === 'active' && (
-        <div className="flex flex-col justify-center py-xs text-sm font-semibold text-teal-500 whitespace-nowrap max-w-[81px]">
+        <div
+          className={`flex flex-col justify-center py-xs text-sm font-semibold text-teal-500 whitespace-nowrap ${
+            type ? 'max-w-[100px]' : 'max-w-[81px]'
+          } `}
+        >
           <div className="gap-2.5 capitalize self-stretch py-1 px-2 bg-[#D2F9F4] rounded border border-[#1BDAC0] border-solid">
             {text}
           </div>

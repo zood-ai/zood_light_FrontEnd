@@ -28,7 +28,8 @@ export const Categories: React.FC<CategoriesProps> = () => {
     // setSelectedRow({});
     setModalType('Add');
     // setIsAddEditOpen(true);
-    navigate('/individual-invoices/add');
+        // navigate('/individual-invoices/add');
+    navigate('add');
   };
   const handleOpenViewModal = (row: any) => {
     setSelectedRow(row);

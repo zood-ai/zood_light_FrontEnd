@@ -33,7 +33,8 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
     // setSelectedRow({});
     setModalType('Add');
     // setIsAddEditOpen(true);
-    navigate('/individual-invoices/add');
+        // navigate('/individual-invoices/add');
+    navigate('add');
   };
   const handleOpenViewModal = (row: any) => {
     setSelectedRow(row);

@@ -1,5 +1,12 @@
 export type StatusBadgeProps = {
-  status?: 'reported' | 'pending' | 'completed' | 'error' | 'active' | 'Inactive';
+  status?:
+    | 'reported'
+    | 'pending'
+    | 'completed'
+    | 'error'
+    | 'active'
+    | 'Inactive';
 
   text?: string;
+  type?: number;
 };

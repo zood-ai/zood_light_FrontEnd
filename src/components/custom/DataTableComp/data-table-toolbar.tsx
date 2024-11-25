@@ -46,9 +46,7 @@ export function DataTableToolbar<TData>({
           <Button
             className="rounded-[4px] w-[146px] h-[39px] "
             variant={'default'}
-            onClick={() => {
-              navigate('add');
-            }}
+            onClick={actionBtn}
           >
             <svg
               width="13"

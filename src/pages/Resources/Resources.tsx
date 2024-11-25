@@ -30,7 +30,8 @@ export const Resources: React.FC<ResourcesProps> = () => {
     // setSelectedRow({});
     setModalType('Add');
     // setIsAddEditOpen(true);
-    navigate('/individual-invoices/add');
+        // navigate('/individual-invoices/add');
+    navigate('add');
   };
   const handleOpenViewModal = (row: any) => {
     setSelectedRow(row);

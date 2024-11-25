@@ -8,9 +8,12 @@ import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-ta
 import { StatusBadge } from '@/components/custom/StatusBadge';
 import { Button } from '@/components/custom/button';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
 import { formatDate } from '@/utils/formatDateTime';
+import { useResolvedPath } from 'react-router-dom';
+
 import {
   toggleActionView,
   toggleActionViewData,
@@ -25,6 +28,7 @@ export const useDataTableColumns = () => {
   const { mutate: remove } = useRemove();
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const resolvedPath = useResolvedPath('customer-profile');
 
   const columns: ColumnDef<Task>[] = [
     // {
@@ -85,19 +89,51 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'total_orders',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'مجموع الطلبات'} />
+        <DataTableColumnHeader column={column} title={'عدد الطلبات'} />
       ),
       cell: ({ row }) => {
+        const id = row?.original?.id;
         return (
           <div className="flex space-x-2">
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+            <Link
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              to={`/zood-dashboard/customer-profile/${id}`}
+              className="max-w-32 truncate text-[#363088] underline  font-medium sm:max-w-72 md:max-w-[31rem]"
+            >
               {row.getValue('total_orders')}
+            </Link>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'last_orders',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'اخر طلب'} />
+      ),
+      cell: ({ row }) => {
+        const date = row
+          .getValue('last_orders')
+          ?.split(' ')[0]
+          ?.replaceAll('-', '/');
+        const time = row
+          .getValue('last_orders')
+          ?.split(' ')[1]
+          ?.split(':')
+          ?.slice(0, 2)
+          ?.join(':');
+        const timing = time + '  ' + date;
+        return (
+          <div className="flex space-x-2">
+            <span className="max-w-32 text-[#363088] truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {time && date ? timing : '-'}
             </span>
           </div>
         );
       },
     },
-     
   ];
 
   return { columns };
