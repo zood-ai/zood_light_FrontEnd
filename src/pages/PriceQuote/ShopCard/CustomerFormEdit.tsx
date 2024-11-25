@@ -104,7 +104,7 @@ const CustomerFormEdit = () => {
             </div>
           ))}
         </div>
-        {ShowCar && (
+        {/* {ShowCar && ( */}
           <div className="flex gap-x-md mt-5">
             <IconInput
               disabled
@@ -123,7 +123,7 @@ const CustomerFormEdit = () => {
               onChange={null}
             />
           </div>
-        )}
+        {/* )} */}
         <Textarea
           disabled
           name="kitchen_notes"

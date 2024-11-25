@@ -271,7 +271,7 @@ const CustomerForm = () => {
               </div>
             </Button>
           )}
-          {ShowCar && (
+          {/* {ShowCar && ( */}
             <div className="flex gap-x-md mt-5">
               <IconInput
                 disabled={params.id}
@@ -308,7 +308,7 @@ const CustomerForm = () => {
                 // value={formState.address}
               />
             </div>
-          )}
+          {/* )} */}
           <Textarea
             disabled={params.id}
             name="kitchen_notes"

@@ -126,7 +126,7 @@ const CustomerFormEdit = () => {
               </div>
             </div>
           ))}
-          {ShowCar && (
+          {/* {ShowCar && ( */}
             <div className="flex gap-x-md mt-5">
               <IconInput
                 disabled={params.id}
@@ -146,7 +146,7 @@ const CustomerFormEdit = () => {
                 value={getOrder?.data?.data?.kitchen_done_at || ''}
               />
             </div>
-          )}
+          {/* )} */}
           <Textarea
             disabled={params.id}
             name="kitchen_notes"
