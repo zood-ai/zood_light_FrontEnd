@@ -47,9 +47,9 @@ export const QRCodeComp: React.FC<QRCodeCompProps> = ({ settings }: any) => {
     settings?.data?.business_tax_number || '0000000000000'
   );
   const invoiceDate = String(data?.business_date || new Date().toISOString()); // Use ISO 8601 format
-  const totalAmount = String(`SR ${data?.total_price.toFixed(2) || '0.00'}`);
+  const totalAmount = String(`${data?.total_price.toFixed(2) || '0.00'}`);
   const vatAmount = String(
-    `SR ${data?.tax_exclusive_discount_amount.toFixed(2) || '0.00'}`
+    `${data?.tax_exclusive_discount_amount.toFixed(2) || '0.00'}`
   );
   const [qrCodeData, setQRCodeData] = useState('/icons/ParCode.webp');
 
