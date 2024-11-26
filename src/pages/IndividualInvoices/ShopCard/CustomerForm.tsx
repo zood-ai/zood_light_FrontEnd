@@ -166,11 +166,11 @@ const CustomerForm = () => {
       } else {
         await mutate(orderSchema, {
           onSuccess: async (data) => {
+            setLoading(false);
             const res = await axiosInstance.get(
               `/orders?filter[id]=${data.data.id}`
             );
             const orderData = res?.data?.data;
-            setLoading(false);
             navigate(`/zood-dashboard/individual-invoices`);
             dispatch(toggleActionView(true));
             dispatch(toggleActionViewData(orderData[0]));

@@ -76,7 +76,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           {WhoAmI?.user?.branches[0]?.registered_address &&
                             JSON.parse(
                               WhoAmI?.user?.branches[0]?.registered_address
-                            ).streetName}
+                            )?.streetName}
                         </p>
                       </div>
                       <QRCodeComp settings={settings} Data={Data} />
@@ -162,9 +162,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {Data?.data?.products?.map((e) => (
                         <div className="flex font-semibold w-full">
                           <div className="w-1/3 flex justify-center items-center">
-                            {e.name === 'sku-zood-20001'
-                              ? e.pivot.kitchen_notes
-                              : e.name}
+                            {e?.name === 'sku-zood-20001'
+                              ? e?.pivot?.kitchen_notes
+                              : e?.name}
                           </div>
                           <div className="w-1/3 flex justify-center items-center">
                             {e?.pivot?.quantity}
@@ -175,16 +175,16 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           <div className="w-1/3 flex justify-center items-center">
                             {(
                               e?.pivot?.quantity * e?.pivot?.unit_price
-                            ).toFixed(2)}
+                            )?.toFixed(2)}
                           </div>
                         </div>
                       ))}
                       {Data?.data?.items?.map((e) => (
                         <div className="flex font-semibold w-full">
                           <div className="w-1/3 flex justify-center items-center">
-                            {e.name === 'sku-zood-20001'
-                              ? e.pivot.kitchen_notes
-                              : e.name}
+                            {e?.name === 'sku-zood-20001'
+                              ? e?.pivot?.kitchen_notes
+                              : e?.name}
                           </div>
                           <div className="w-1/3 flex justify-center items-center">
                             {e?.pivot?.quantity}
@@ -193,7 +193,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             {e?.pivot?.cost?.toFixed(2)}
                           </div>
                           <div className="w-1/3 flex justify-center items-center">
-                            {(e?.pivot?.quantity * e?.pivot?.cost).toFixed(2)}
+                            {(e?.pivot?.quantity * e?.pivot?.cost)?.toFixed(2)}
                           </div>
                         </div>
                       ))}
@@ -203,13 +203,13 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {Data?.data?.subtotal_price ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>الإجمالي الفرعي</div>
-                          <div>SR {Data.data.subtotal_price?.toFixed(2)}</div>
+                          <div>SR {Data?.data?.subtotal_price?.toFixed(2)}</div>
                         </div>
                       ) : null}
                       {Data?.data?.discount_amount ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>خصم</div>
-                          <div>SR {Data.data.discount_amount?.toFixed(2)}</div>
+                          <div>SR {Data?.data?.discount_amount?.toFixed(2)}</div>
                         </div>
                       ) : null}
                       {Data?.data?.total_taxes ? (
@@ -221,21 +221,21 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {Data?.data?.total_price ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>المبلغ الإجمالي</div>
-                          <div>SR {Data.data.total_price?.toFixed(2)}</div>
+                          <div>SR {Data?.data?.total_price?.toFixed(2)}</div>
                         </div>
                       ) : null}
                       {Data?.data?.total_cost ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>المبلغ الإجمالي</div>
-                          <div>SR {Data.data.total_cost?.toFixed(2)}</div>
+                          <div>SR {Data?.data?.total_cost?.toFixed(2)}</div>
                         </div>
                       ) : null}
                       {Data?.data?.payments?.map((e) => {
-                        if (e.payment_method_id) {
+                        if (e?.payment_method_id) {
                           return (
                             <div className="flex justify-between p-2 rounded items-center">
-                              <div>{e.payment_method.name}</div>
-                              <div>SR {e.amount?.toFixed(2)}</div>
+                              <div>{e?.payment_method?.name}</div>
+                              <div>SR {e?.amount?.toFixed(2)}</div>
                             </div>
                           );
                         }
@@ -245,8 +245,8 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           <div>المبلغ الإجمالي المدفوع</div>
                           <div>
                             SR{' '}
-                            {Data.data.payments
-                              .reduce((sum, item) => sum + item.amount, 0)
+                            {Data?.data?.payments
+                              .reduce((sum, item) => sum + item?.amount, 0)
                               ?.toFixed(2)}
                           </div>
                         </div>
@@ -257,15 +257,15 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           <div>إجمالي المبلغ المستحق</div>
                           <div>
                             SR{' '}
-                            {(Data.data.payments.reduce(
-                              (sum, item) => sum + item.amount,
+                            {(Data?.data?.payments?.reduce(
+                              (sum, item) => sum + item?.amount,
                               0
-                            ) > Data.data.total_price
+                            ) > Data?.data?.total_price
                               ? (
-                                  Data.data.payments.reduce(
-                                    (sum, item) => sum + item.amount,
+                                  Data?.data?.payments?.reduce(
+                                    (sum, item) => sum + item?.amount,
                                     0
-                                  ) - Data.data.total_price
+                                  ) - Data?.data?.total_price
                                 )?.toFixed(2)
                               : 0) || 0}
                           </div>
@@ -334,7 +334,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {WhoAmI?.user?.branches[0]?.registered_address &&
                         JSON.parse(
                           WhoAmI?.user?.branches[0]?.registered_address
-                        ).streetName}
+                        )?.streetName}
                     </div>
 
                     {/* عنوان الفاتورة */}
@@ -418,9 +418,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             className="flex justify-between border-b-2 border-b-black/20"
                           >
                             <div className="w-1/4 flex-grow items-center text-[12px]">
-                              {product.name === 'sku-zood-20001'
-                                ? product.pivot.kitchen_notes
-                                : product.name}
+                              {product?.name === 'sku-zood-20001'
+                                ? product?.pivot?.kitchen_notes
+                                : product?.name}
                             </div>
                             <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
                               <p>{product?.pivot?.quantity}</p>
@@ -433,7 +433,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                                 {(
                                   product?.pivot?.quantity *
                                   product?.pivot?.unit_price
-                                ).toFixed(2)}
+                                )?.toFixed(2)}
                               </p>
                             </div>
                           </div>
@@ -444,9 +444,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             className="flex justify-between border-b-2 border-b-black/20"
                           >
                             <div className="w-1/4 flex-grow items-center text-[12px]">
-                              {product.name === 'sku-zood-20001'
-                                ? product.pivot.kitchen_notes
-                                : product.name}
+                              {product?.name === 'sku-zood-20001'
+                                ? product?.pivot?.kitchen_notes
+                                : product?.name}
                             </div>
                             <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
                               <p>{product?.pivot?.quantity}</p>
@@ -459,7 +459,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                                 {(
                                   product?.pivot?.quantity *
                                   product?.pivot?.cost
-                                ).toFixed(2)}
+                                )?.toFixed(2)}
                               </p>
                             </div>
                           </div>
@@ -474,25 +474,25 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                         {Data?.data?.subtotal_price ? (
                           <div className="flex justify-between items-center">
                             <p className="w-[50%]">الإجمالي الفرعي</p>
-                            <p>SR {Data.data.subtotal_price?.toFixed(2)}</p>
+                            <p>SR {Data?.data?.subtotal_price?.toFixed(2)}</p>
                           </div>
                         ) : null}
                         {Data?.data?.total_cost ? (
                           <div className="flex justify-between items-center">
                             <p className="w-[50%]">الاجمالي</p>
-                            <p>SR {Data.data.total_cost?.toFixed(2)}</p>
+                            <p>SR {Data?.data?.total_cost?.toFixed(2)}</p>
                           </div>
                         ) : null}
                         {Data?.data?.discount_amount ? (
                           <div className="flex justify-between items-center">
                             <div>خصم</div>
-                            <p>SR {Data.data.discount_amount?.toFixed(2)}</p>
+                            <p>SR {Data?.data?.discount_amount?.toFixed(2)}</p>
                           </div>
                         ) : null}
                         {Data?.data?.total_taxes ? (
                           <div className="flex justify-between items-center">
                             <p>مجموع ضريبة القيمة المضافة</p>
-                            <p>SR {Data.data.total_taxes?.toFixed(2)}</p>
+                            <p>SR {Data?.data?.total_taxes?.toFixed(2)}</p>
                           </div>
                         ) : null}
                       </div>
@@ -502,7 +502,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                         {Data?.data?.total_price ? (
                           <div className="flex justify-between items-center">
                             <p>المبلغ الإجمالي</p>
-                            <p>SR {Data.data.total_price?.toFixed(2)}</p>
+                            <p>SR {Data?.data?.total_price?.toFixed(2)}</p>
                           </div>
                         ) : null}
                         {Data?.data?.payments?.length > 0 ? (
@@ -510,8 +510,8 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             <p>المبلغ الإجمالي المدفوع</p>
                             <p>
                               SR{' '}
-                              {Data.data.payments
-                                .reduce((sum, item) => sum + item.amount, 0)
+                              {Data?.data?.payments
+                                .reduce((sum, item) => sum + item?.amount, 0)
                                 ?.toFixed(2)}
                             </p>
                           </div>
@@ -523,16 +523,16 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           <p>إجمالي المبلغ المستحق</p>
                           <p>
                             SR{' '}
-                            {Data.data.payments.reduce(
-                              (sum, item) => sum + item.amount,
+                            {Data?.data?.payments?.reduce(
+                              (sum, item) => sum + item?.amount,
                               0
-                            ) > Data.data.total_price
+                            ) > Data?.data?.total_price
                               ? (
-                                  Data.data.payments.reduce(
-                                    (sum, item) => sum + item.amount,
+                                  Data?.data?.payments?.reduce(
+                                    (sum, item) => sum + item?.amount,
                                     0
-                                  ) - Data.data.total_price
-                                ).toFixed(2)
+                                  ) - Data?.data?.total_price
+                                )?.toFixed(2)
                               : 0}
                           </p>
                         </div>
@@ -543,14 +543,14 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           <div>إجمالي المبلغ المتبقي</div>
                           <div>
                             SR{' '}
-                            {(Data.data.payments.reduce(
-                              (sum, item) => sum + item.amount,
+                            {(Data?.data?.payments?.reduce(
+                              (sum, item) => sum + item?.amount,
                               0
-                            ) <= Data.data.total_price
+                            ) <= Data?.data?.total_price
                               ? (
-                                  Data.data.total_price -
-                                  Data.data.payments.reduce(
-                                    (sum, item) => sum + item.amount,
+                                  Data?.data?.total_price -
+                                  Data?.data?.payments?.reduce(
+                                    (sum, item) => sum + item?.amount,
                                     0
                                   )
                                 )?.toFixed(2)

@@ -16,6 +16,10 @@ import CustomerForms from './CustomerForms';
 import { Textarea } from '@/components/ui/textarea';
 import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
 import { useToast } from '@/components/custom/useToastComp';
+import {
+  toggleActionView,
+  toggleActionViewData,
+} from '@/store/slices/orderSchema';
 
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
@@ -44,19 +48,6 @@ const CustomerForm = () => {
   const handleSubmitOrder = async () => {
     // setLoading(true);
     const totalPrice = orderSchema.total_price;
-    const totalPayed = orderSchema.payments.reduce(
-      (acc, item) => acc + item.amount,
-      0
-    );
-    // if (totalPayed < totalPrice) {
-    //   showToast({
-    //     description: 'الرجاء ادخال المبلغ كاملا',
-    //     duration: 4000,
-    //     variant: 'destructive',
-    //   });
-    //   setLoading(false);
-    //   return;
-    // } else
     if (totalPrice == 0) {
       showToast({
         description: 'الرجاء اختيار المنتجات',
@@ -83,17 +74,27 @@ const CustomerForm = () => {
             discount_type: 2,
           })),
         };
-        await mutate(updatedOrderSchema, {
-          onSuccess: () => {
-            setLoading(false);
-            navigate('/zood-dashboard/corporate-invoices');
-          },
-          onError: () => setLoading(false),
-        });
+
+        console.log({ updatedOrderSchema });
+        // await mutate(updatedOrderSchema, {
+        //   onSuccess: async (data) => {
+        //     setLoading(false);
+        //     const res = await axiosInstance.get(
+        //       `/orders?filter[id]=${data.data.id}`
+        //     );
+        //     const orderData = res?.data?.data;
+        //     navigate('/zood-dashboard/corporate-invoices');
+        //     dispatch(toggleActionView(true));
+        //     dispatch(toggleActionViewData(orderData[0]));
+        //   },
+        //   onError: () => setLoading(false),
+        // });
       }
     } catch (error) {
       setLoading(false);
       console.error('Failed to submit order', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -272,42 +273,42 @@ const CustomerForm = () => {
             </Button>
           )}
           {/* {ShowCar && ( */}
-            <div className="flex gap-x-md mt-5">
-              <IconInput
-                disabled={params.id}
-                name="kitchen_received_at"
-                // className="col-span-10 "
-                label="نوع السيارة"
-                inputClassName="w-[240px] min-w-[120px]"
-                value={orderSchema.kitchen_received_at}
-                onChange={(e) =>
-                  dispatch(
-                    updateField({
-                      field: 'kitchen_received_at',
-                      value: e.target.value,
-                    })
-                  )
-                }
-                // value={formState.address}
-                // inputClassName="md:col-span-5"
-              />
-              <IconInput
-                disabled={params.id}
-                name="kitchen_done_at"
-                inputClassName="w-[240px] min-w-[120px] mb-sm "
-                label="رقم اللوحة"
-                value={orderSchema.kitchen_done_at}
-                onChange={(e) =>
-                  dispatch(
-                    updateField({
-                      field: 'kitchen_done_at',
-                      value: e.target.value,
-                    })
-                  )
-                }
-                // value={formState.address}
-              />
-            </div>
+          <div className="flex gap-x-md mt-5">
+            <IconInput
+              disabled={params.id}
+              name="kitchen_received_at"
+              // className="col-span-10 "
+              label="نوع السيارة"
+              inputClassName="w-[240px] min-w-[120px]"
+              value={orderSchema.kitchen_received_at}
+              onChange={(e) =>
+                dispatch(
+                  updateField({
+                    field: 'kitchen_received_at',
+                    value: e.target.value,
+                  })
+                )
+              }
+              // value={formState.address}
+              // inputClassName="md:col-span-5"
+            />
+            <IconInput
+              disabled={params.id}
+              name="kitchen_done_at"
+              inputClassName="w-[240px] min-w-[120px] mb-sm "
+              label="رقم اللوحة"
+              value={orderSchema.kitchen_done_at}
+              onChange={(e) =>
+                dispatch(
+                  updateField({
+                    field: 'kitchen_done_at',
+                    value: e.target.value,
+                  })
+                )
+              }
+              // value={formState.address}
+            />
+          </div>
           {/* )} */}
           <Textarea
             disabled={params.id}
@@ -322,7 +323,7 @@ const CustomerForm = () => {
             label="ملاحظات"
           />
         </div>
-            {/* dispatch(toggleActionView(true));
+        {/* dispatch(toggleActionView(true));
             dispatch(toggleActionViewData(orderData[0])); */}
         <div className="col-span-10">
           <Button
