@@ -205,7 +205,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: 'zood-signup',
+    path: 'zood-signup-no-one-can-see-me',
     element: (
       <React.Suspense fallback={<div>Loading register...</div>}>
         <SignUp />

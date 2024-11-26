@@ -322,6 +322,8 @@ const CustomerForm = () => {
             label="ملاحظات"
           />
         </div>
+            {/* dispatch(toggleActionView(true));
+            dispatch(toggleActionViewData(orderData[0])); */}
         <div className="col-span-10">
           <Button
             loading={loading}

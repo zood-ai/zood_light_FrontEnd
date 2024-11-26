@@ -39,7 +39,7 @@ export const useDataTableColumns = () => {
               <img
                 loading="lazy"
                 src={row.original.image || placeHolderImg}
-                className="object-cover"
+                className="size-[50px]"
                 alt="placeholder"
               />
             </div>

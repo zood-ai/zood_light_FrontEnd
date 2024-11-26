@@ -6,6 +6,7 @@ import { useReactToPrint } from 'react-to-print';
 import './ViewModal.css';
 import { useLocation } from 'react-router-dom';
 import { QRCodeComp } from '@/components/custom/QRCodeComp';
+import Loading from '@/components/loader';
 
 export const ViewModal: React.FC<ViewModalProps> = () => {
   const data = useSelector((state: any) => state.toggleAction.data);
@@ -45,8 +46,11 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   console.log({ Data, supplierInfo, OrderData, purchsingInfo, WhoAmI });
   return (
     <>
-      <div className="flex flex-wrap gap-4 rounded-none h-[90vh] max-w-[80vw] overflow-y-scroll relative ">
-        <div className="flex flex-col rounded-none">
+      <div className="flex flex-wrap gap-4 rounded-none h-[90vh] max-w-[80vw] overflow-y-auto relative bg-white">
+        {/* <div className="w-full h-full bg-black/50 z-[1000] sticky top-0 left-0 flex justify-start items-center">
+          <Loading className="max-h-fit block text-white" />
+        </div> */}
+        <div className="flex flex-col rounded-none ">
           <div className="px-11 py-a12 w-full bg-white rounded-lg  border-solid max-md:px-5 max-md:max-w-full">
             <div className="flex gap-5 max-md:flex-col">
               <div
@@ -75,7 +79,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             ).streetName}
                         </p>
                       </div>
-                      <QRCodeComp settings={settings} />
+                      <QRCodeComp settings={settings} Data={Data} />
                     </div>
                     <div className="self-center ml-4 font-semibold text-right">
                       {Corporate && 'فاتورة شراء'}
@@ -372,7 +376,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       </div>
                       <div className="flex justify-between">
                         <p>تاريخ الفاتورة </p>
-                        <p>{data?.business_date.split(' ')[0]}</p>
+                        <p>{data?.business_date?.split(' ')[0]}</p>
                       </div>
                       <div className="flex justify-between">
                         <p>رقم الفاتورة </p>
@@ -571,7 +575,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       />
                     </div>
                     <div className="  my-4 flex justify-center">
-                      <QRCodeComp settings={settings} />
+                      <QRCodeComp settings={settings} Data={Data} />
                     </div>
                   </div>
                 )}

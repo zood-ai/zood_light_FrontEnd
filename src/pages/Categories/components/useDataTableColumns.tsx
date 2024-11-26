@@ -10,6 +10,8 @@ import { Button } from '@/components/custom/button';
 import dayjs from 'dayjs';
 import { formatDate } from '@/utils/formatDateTime';
 import { useDispatch } from 'react-redux';
+import placeHolderImg from '/images/image.png';
+
 import {
   toggleActionView,
   toggleActionViewData,
@@ -25,17 +27,23 @@ export const useDataTableColumns = () => {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'اسم الفئة'} />
       ),
-      cell: ({ row }) => {
+      cell: ({ row }: any) => {
         return (
-          <div className="flex space-x-2">
-            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('name') || '-'}
-            </span>
+          <div className="  flex justify-start items-center py-[11.5px] w-[500px]  ">
+            <div className="flex justify-start items-center max-w-[79px]">
+              <img
+                loading="lazy"
+                src={row.original.image || placeHolderImg}
+                className=" size-[50px] "
+                alt="placeholder"
+              />
+            </div>
+            <div className="ms-[20px]">{row.getValue('name')}</div>
           </div>
         );
       },
     },
+
     {
       accessorKey: 'products',
       header: ({ column }) => (
