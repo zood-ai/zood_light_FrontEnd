@@ -2,9 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useDirection from '@/hooks/useDirection';
 import personIcon from '/icons/name person.svg';
-
 import callIcon from '/icons/call.svg';
-
 import { Button } from './custom/button';
 import { AlertDialogContentComp, AlertDialogComp } from './ui/alert-dialog2';
 import createCrudService from '@/api/services/crudService';
@@ -24,13 +22,25 @@ import IconInput from './custom/InputWithIcon';
 import { useQueryClient } from '@tanstack/react-query';
 
 const formSchema = z.object({
-  name: z.string(),
-  phone: z.string(),
+  name: z.string().min(1, 'Name is required'),
+  phone: z.string().min(1, 'Phone is required'),
+  email: z.string().email('Invalid email address').optional(),
+  tax_registration_number: z
+    .string()
+    .length(15, 'Tax registration number must be exactly 15 digits')
+    .regex(/^\d{15}$/, 'Tax registration number must only contain 15 digits')
+    .optional(),
+  vat_registration_number: z
+    .string()
+    .length(15, 'Vat registration number must be exactly 15 digits')
+    .regex(/^\d{15}$/, 'Tax registration number must only contain 15 digits')
+    .optional(),
 });
+
 export default function FastAddActionsCustomer({
   isOpen,
   onClose,
-  setInvoice ,
+  setInvoice,
 }) {
   const { t } = useTranslation();
   const isRtl = useDirection();
@@ -38,25 +48,19 @@ export default function FastAddActionsCustomer({
   const modalType = params.id;
   const isEditMode = modalType !== 'add';
   const navigate = useNavigate();
-  // Fetch services and mutations
   const crudService = createCrudService<any>('inventory/suppliers');
   const { useGetById, useUpdate, useCreate } = crudService;
   const { mutate: createNewUser } = useCreate();
   const { mutate: updateDataUserById } = useUpdate();
-  // const { data: getDataById } = useGetById(`${params.objId ?? ''}`);
 
   const [loading, setLoading] = useState(false);
-
-  // Set default form values based on add/edit mode
   const defaultValues = useMemo(() => (isEditMode ? {} : {}), [isEditMode]);
 
-  // Initialize form with validation schema and default values
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
 
-  // Reset form when data changes
   useEffect(() => {
     if (isEditMode) {
       form.reset({});
@@ -66,111 +70,188 @@ export default function FastAddActionsCustomer({
   }, [form, isEditMode]);
   const queryClient: any = useQueryClient();
 
-  // Handle form submission for both add and edit scenarios
-  const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    // The react-hook-form automatically checks errors, no need for custom check here
     setLoading(true);
 
-    const onError = () => setLoading(false);
+    const formData = new FormData();
+    formData.append('name', values.name);
+    formData.append('phone', values.phone);
+    formData.append('primary_email', values.email || '');
+    formData.append(
+      'tax_registration_number',
+      values.tax_registration_number || ''
+    );
+    formData.append(
+      'vat_registration_number',
+      values.vat_registration_number || ''
+    );
 
-    if (isEditMode) {
-      await updateDataUserById(
-        { id: params.objId, data: values },
-        {
+    try {
+      if (isEditMode) {
+        await updateDataUserById(
+          { id: params.objId, data: formData },
+          {
+            onSuccess: (data) => {
+              setLoading(false);
+              form.reset(values);
+            },
+            onError: () => setLoading(false),
+          }
+        );
+      } else {
+        await createNewUser(formData, {
           onSuccess: (data) => {
-            setLoading(false);
-            form.reset(values);
-          },
-          onError,
-        }
-      );
-    } else {
-      await createNewUser(
-        { ...values, code: `SUP-${Math.floor(Math.random() * 100000)}` },
-        {
-          onSuccess: (data) => {
-
             setInvoice(data.data.id);
             setLoading(false);
             form.reset({});
             onClose();
             queryClient.invalidateQueries(['inventory/suppliers']);
           },
-          onError,
-        }
-      );
+          onError: () => setLoading(false),
+        });
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Error submitting form data:', error);
     }
   };
+
+  const handleClickSubmit = () => {
+    // React Hook Form handleSubmit already takes care of validation
+    form.handleSubmit(handleSubmit)(); // Call handleSubmit directly
+  };
+
   return (
-    <div className=" ">
+    <div onClick={onClose}>
       <AlertDialogComp open={isOpen} onOpenChange={onClose}>
-        <AlertDialogContentComp className="    ">
-          <div className="bg-mainBg h-[100vh] w-[422px]     relative ps-[24px]">
-            <>
-              <div className="grow shrink text-2xl col-span-1 font-semibold w-[102px]  mt-[35px]">
-                فاتورة
-              </div>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(handleFormSubmit)}
-                  className="my-md"
-                >
-                  <div className="grid grid-cols-1  gap-y-md">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <IconInput
-                              {...field}
-                              label={t('اسم المورد')}
-                              iconSrc={personIcon}
-                              inputClassName="w-[105%]"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <IconInput
-                              {...field}
-                              label={t('هاتف المورد')}
-                              iconSrc={callIcon}
-                              inputClassName="w-[105%]"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="  ">
-                    <Button
-                      dir="ltr"
-                      type="submit"
-                      loading={loading}
-                      disabled={loading}
-                      className="mt-4 h-[39px] w-[163px]"
-                    >
-                      {isEditMode ? t('تعديل المورد') : t('اضافة المورد')}
-                    </Button>
-                    <DelConfirm route={'inventory/suppliers'} />
-                  </div>
-                </form>
-              </Form>
-            </>
-            <img
+        <AlertDialogContentComp>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-mainBg h-[100vh] w-[326px] relative px-4"
+          >
+            <button
               onClick={onClose}
-              loading="lazy"
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/86098466758eefea48c424850dc7f8dc58fa0a42b1b3b43e6d08b5eb236f964e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
-              className="object-contain shrink-0 self-start mt-4 w-11 aspect-square absolute right-[-70px] top-0 cursor-pointer hover:scale-110"
-            />
+              className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-100 transition"
+            >
+              X
+            </button>
+
+            <div className="grow shrink text-2xl col-span-1 font-semibold w-fit mt-[50px]">
+              اضافة مورد
+            </div>
+
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(handleSubmit)}
+                className="my-md mt-6 space-y-4"
+              >
+                <div className="grid grid-cols-1 gap-y-md">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <IconInput
+                            {...field}
+                            label={t('اسم المورد')}
+                            iconSrc={personIcon}
+                            inputClassName="w-[105%] rounded-md mb-2 border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Phone Field */}
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <IconInput
+                            {...field}
+                            label={t('هاتف المورد')}
+                            iconSrc={callIcon}
+                            inputClassName="w-[105%] rounded-md mb-2 border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <IconInput
+                            {...field}
+                            type="email"
+                            label={t('البريد الإلكتروني')}
+                            inputClassName="w-[105%] rounded-md mb-2 border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="tax_registration_number"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <IconInput
+                            {...field}
+                            label={t('رقم التسجيل الضريبي')}
+                            inputClassName="w-[105%] rounded-md mb-2 border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="vat_registration_number"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <IconInput
+                            {...field}
+                            label={t('رقم تسجيل ضريبة القيمة المضافة')}
+                            inputClassName="w-[105%] rounded-md mb-2 border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between mt-4">
+                  <Button
+                    dir="ltr"
+                    type="submit"
+                    loading={loading}
+                    disabled={loading}
+                    onClick={handleClickSubmit}
+                    className="h-[39px] w-[163px]"
+                  >
+                    {isEditMode ? t('تعديل المورد') : t('اضافة المورد')}
+                  </Button>
+                  <DelConfirm route={'inventory/suppliers'} />
+                </div>
+              </form>
+            </Form>
           </div>
         </AlertDialogContentComp>
       </AlertDialogComp>
