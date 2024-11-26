@@ -19,7 +19,7 @@ import { useToast } from '@/components/custom/useToastComp';
 import {
   toggleActionView,
   toggleActionViewData,
-} from '@/store/slices/orderSchema';
+} from '@/store/slices/toggleAction';
 
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
@@ -80,10 +80,12 @@ const CustomerForm = () => {
         await mutate(updatedOrderSchema, {
           onSuccess: async (data) => {
             setLoading(false);
+            // console.log({ data });
             const res = await axiosInstance.get(
               `/orders?filter[id]=${data.data.id}`
             );
             const orderData = res?.data?.data;
+            // console.log({ orderData });
             navigate('/zood-dashboard/corporate-invoices');
             dispatch(toggleActionView(true));
             dispatch(toggleActionViewData(orderData[0]));
@@ -274,42 +276,42 @@ const CustomerForm = () => {
             </Button>
           )}
           {ShowCar && (
-          <div className="flex gap-x-md mt-5">
-            <IconInput
-              disabled={params.id}
-              name="kitchen_received_at"
-              // className="col-span-10 "
-              label="نوع السيارة"
-              inputClassName="w-[240px] min-w-[120px]"
-              value={orderSchema.kitchen_received_at}
-              onChange={(e) =>
-                dispatch(
-                  updateField({
-                    field: 'kitchen_received_at',
-                    value: e.target.value,
-                  })
-                )
-              }
-              // value={formState.address}
-              // inputClassName="md:col-span-5"
-            />
-            <IconInput
-              disabled={params.id}
-              name="kitchen_done_at"
-              inputClassName="w-[240px] min-w-[120px] mb-sm "
-              label="رقم اللوحة"
-              value={orderSchema.kitchen_done_at}
-              onChange={(e) =>
-                dispatch(
-                  updateField({
-                    field: 'kitchen_done_at',
-                    value: e.target.value,
-                  })
-                )
-              }
-              // value={formState.address}
-            />
-          </div>
+            <div className="flex gap-x-md mt-5">
+              <IconInput
+                disabled={params.id}
+                name="kitchen_received_at"
+                // className="col-span-10 "
+                label="نوع السيارة"
+                inputClassName="w-[240px] min-w-[120px]"
+                value={orderSchema.kitchen_received_at}
+                onChange={(e) =>
+                  dispatch(
+                    updateField({
+                      field: 'kitchen_received_at',
+                      value: e.target.value,
+                    })
+                  )
+                }
+                // value={formState.address}
+                // inputClassName="md:col-span-5"
+              />
+              <IconInput
+                disabled={params.id}
+                name="kitchen_done_at"
+                inputClassName="w-[240px] min-w-[120px] mb-sm "
+                label="رقم اللوحة"
+                value={orderSchema.kitchen_done_at}
+                onChange={(e) =>
+                  dispatch(
+                    updateField({
+                      field: 'kitchen_done_at',
+                      value: e.target.value,
+                    })
+                  )
+                }
+                // value={formState.address}
+              />
+            </div>
           )}
           <Textarea
             disabled={params.id}

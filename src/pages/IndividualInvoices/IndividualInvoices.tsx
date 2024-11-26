@@ -33,7 +33,7 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
     // setSelectedRow({});
     setModalType('Add');
     // setIsAddEditOpen(true);
-        // navigate('/individual-invoices/add');
+    // navigate('/individual-invoices/add');
     navigate('add');
   };
   const handleOpenViewModal = (row: any) => {
@@ -57,8 +57,7 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
     dispatch(toggleActionView(false));
   };
 
-  const filterBtn = () => {
-  };
+  const filterBtn = () => {};
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();

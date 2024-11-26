@@ -1,1 +1,3 @@
-export type ShopCardSummeryProps = {};
+export type ShopCardSummeryProps = {
+  payment: any
+};

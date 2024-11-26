@@ -16,6 +16,10 @@ import CustomerForms from './CustomerForms';
 import { Textarea } from '@/components/ui/textarea';
 import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
 import { useToast } from '@/components/custom/useToastComp';
+import {
+  toggleActionView,
+  toggleActionViewData,
+} from '@/store/slices/toggleAction';
 
 const CustomerFormEdit = () => {
   const params = useParams();
@@ -69,9 +73,16 @@ const CustomerFormEdit = () => {
             payment_data: holder2,
           },
           {
-            onSuccess: () => {
+            onSuccess: async (data) => {
               setLoading(false);
+              const res = await axiosInstance.get(
+                `/orders?filter[id]=${data.data[0].order_id}`
+              );
+              const orderData = res?.data?.data;
+              // console.log({ data, res, orderData });
               navigate('/zood-dashboard/corporate-invoices');
+              dispatch(toggleActionView(true));
+              dispatch(toggleActionViewData(orderData[0]));
             },
             onError: () => setLoading(false),
           }
