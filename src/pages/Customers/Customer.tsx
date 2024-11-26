@@ -27,7 +27,6 @@ const Customer: React.FC<CustomersProps> = () => {
   const dispatch = useDispatch();
   const param = useParams();
   const customerId = param?.id;
-  console.log('LOCATION: ', param?.id);
   const handleCreateTask = () => {
     // setSelectedRow({});
     // setModalType('Add');
@@ -61,25 +60,14 @@ const Customer: React.FC<CustomersProps> = () => {
   const isRtl = useDirection();
   const { columns } = useCustomersDataTable();
   const allService = createCrudService<any>('manage/customers');
-  const ordersData = createCrudService<any>('orders').useGetAll();
-  console.log(ordersData?.data?.data);
+  const ordersData = createCrudService<any>('orders').useGetByFillter(
+    `filter[customer]=${customerId}`
+  );
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
-  console.log(
-    ordersData?.data?.data?.filter((customer) => customer?.id == customerId)
-  );
-  console.log('THIS IS ORDER DATA: ', ordersData?.data?.data);
-  console.log(
-    'THIS IS ORDER DATA Filtred: ',
-    ordersData?.data?.data?.filter(
-      (customer) => customer?.customer?.id == customerId
-    )
-  );
 
-  const filtredData = ordersData?.data?.data?.filter(
-    (customer) => customer?.customer?.id == customerId
-  );
+  const filtredData = ordersData?.data?.data;
   return (
     <>
       <AddEditModal

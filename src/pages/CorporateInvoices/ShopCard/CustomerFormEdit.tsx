@@ -79,7 +79,6 @@ const CustomerFormEdit = () => {
                 `/orders?filter[id]=${data.data[0].order_id}`
               );
               const orderData = res?.data?.data;
-              // console.log({ data, res, orderData });
               navigate('/zood-dashboard/corporate-invoices');
               dispatch(toggleActionView(true));
               dispatch(toggleActionViewData(orderData[0]));

@@ -76,16 +76,13 @@ const CustomerForm = () => {
           })),
         };
 
-        console.log({ updatedOrderSchema });
         await mutate(updatedOrderSchema, {
           onSuccess: async (data) => {
             setLoading(false);
-            // console.log({ data });
             const res = await axiosInstance.get(
               `/orders?filter[id]=${data.data.id}`
             );
             const orderData = res?.data?.data;
-            // console.log({ orderData });
             navigate('/zood-dashboard/corporate-invoices');
             dispatch(toggleActionView(true));
             dispatch(toggleActionViewData(orderData[0]));

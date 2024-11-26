@@ -114,7 +114,10 @@ export const ShopCardEditCo: React.FC<ShopCardProps> = () => {
 
   return (
     <>
-      <DetailsHeadWithOutFilter bkAction={handleBkAction} />
+      <DetailsHeadWithOutFilter
+        mainTittle={'فاتورة مؤسسة'}
+        bkAction={handleBkAction}
+      />
       {/* <ShopCardTable /> */}
 
       <CustomerFormEdit />

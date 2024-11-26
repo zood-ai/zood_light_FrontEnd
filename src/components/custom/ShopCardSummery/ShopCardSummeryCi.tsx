@@ -131,7 +131,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     if (params.id) {
       axiosInstance.get(`orders/${params.id}`).then((res) => {
         // setPaymentMethod(res?.data?.data?.payments || []);
-        console.log({ res });
         setFetchedPaymentMethod(res?.data?.data?.payments);
         setPaymentMethodinit(res?.data?.data?.payments || []);
         setdiscountAmount(res?.data?.data?.discount_amount || 0);
@@ -175,13 +174,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
       SubTotalAfterDiscount = subTotal - finalDiscount;
     }
     const Drepa = SubTotalAfterDiscount * (mainTax?.rate / 100);
-    console.log({
-      Drepa,
-      mainTax,
-      SubTotalAfterDiscount,
-      subTotal,
-      discountAmount,
-    });
     setTaxAmount(Drepa);
     setTotalAmountIncludeAndExclude(SubTotalAfterDiscount + Drepa);
   }, [subTotal, cardItemValue, discountAmount, mainTax]);

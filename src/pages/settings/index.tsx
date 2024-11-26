@@ -16,7 +16,6 @@ export default function Settings() {
     createCrudService<any>('manage/taxes').useUpdateNoDialog();
   const { mutate: updateBranch } =
     createCrudService<any>('manage/branches').useUpdate();
-  console.log({ whoami, settings });
   const holder = whoami
     ? JSON.parse(whoami?.user?.branches[0]?.registered_address)
     : {};
@@ -77,7 +76,6 @@ export default function Settings() {
       data: { tax_inclusive_pricing: updatedTaxInclusivePricing },
     });
   };
-  console.log({ taxesData });
   const updateTexes = () => {
     if (!taxesData) return;
     if (taxesData.rate === taxesValue) return;

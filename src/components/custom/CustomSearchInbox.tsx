@@ -28,7 +28,6 @@ export default function CustomSearchInbox({
 }: any) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState(''); // For managing search input
-  console.log({ options, value, onValueChange, placeholder, label, className });
 
   // Filter options based on the search input
   const filteredOptions = React.useMemo(() => {

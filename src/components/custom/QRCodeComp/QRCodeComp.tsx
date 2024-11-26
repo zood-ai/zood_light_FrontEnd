@@ -47,10 +47,10 @@ export const QRCodeComp: React.FC<QRCodeCompProps> = ({
   const data = useSelector((state: any) => state.toggleAction.data);
   const sellerName = String(settings?.data?.business_name || '');
   const vatNumber = String(settings?.data?.business_tax_number || '');
-  const invoiceDate = String(data?.business_date || new Date().toISOString()); // Use ISO 8601 format
+  const invoiceDate = String(data?.business_date || new Date().toISOString()); // Use ISO 8601 formatx
   const totalAmount = String(
     `${
-      (data.type === 'Purchasing'
+      (data?.type === 'Purchasing'
         ? Data?.data?.total_cost?.toFixed(2)
         : Data?.data?.total_price?.toFixed(2)) || '0.00'
     }`
@@ -59,16 +59,6 @@ export const QRCodeComp: React.FC<QRCodeCompProps> = ({
     `${data?.tax_exclusive_discount_amount?.toFixed(2) || '0.00'}`
   );
   const [qrCodeData, setQRCodeData] = useState('/icons/ParCode.webp');
-
-  console.log({
-    Data,
-    data,
-    sellerName,
-    vatNumber,
-    invoiceDate,
-    totalAmount,
-    vatAmount,
-  });
 
   useEffect(() => {
     const encodedData = encodeZATCA(

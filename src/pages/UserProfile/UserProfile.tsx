@@ -14,14 +14,12 @@ export default function UserProfile() {
 
   const userId = Cookies.get('userId');
   const { data } = createCrudService<any>(`/auth/users/${userId}`).useGetAll();
-  console.log({ data });
   const [formDataState, setFormDataState] = useState({
     name: data?.data?.name,
     email: data?.data?.email,
     phone: data?.data?.phone,
     image: data?.data?.image,
   });
-  console.log({ personalImage });
 
   useEffect(() => {
     setFormDataState({
@@ -90,7 +88,7 @@ export default function UserProfile() {
         Cookies.set('name', formDataState.name);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

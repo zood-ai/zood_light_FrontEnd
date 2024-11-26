@@ -178,10 +178,10 @@ export function DataTable<TData, TValue>({
                           data-state={row.getIsSelected() && 'selected'}
                           onClick={() => {
                             if (dashBoard) {
-                              (row.original);
+                              // (row.original);
                               handleRowClick(row.original);
                               dispatch(toggleActionView(true));
-                              // dispatch(toggleActionViewData(row.original));
+                              dispatch(toggleActionViewData(row.original));
                               // navigate(`${url}/edit/${row.original.id}`);
                             } else {
                               navigate(`edit/${row.original.id}`);

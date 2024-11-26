@@ -43,7 +43,6 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const handlePrint = () => {
     reactToPrintFn();
   };
-  console.log({ Data, supplierInfo, OrderData, purchsingInfo, WhoAmI });
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-none h-[90vh] max-w-[80vw] overflow-y-auto relative bg-white">

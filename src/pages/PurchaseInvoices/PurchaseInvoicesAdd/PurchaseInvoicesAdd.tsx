@@ -61,7 +61,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const { data: allDataId } = createCrudService<any>(
     `inventory/purchasing/${params.objId ?? ''}`
   ).useGetAll();
-  console.log({ allDataId });
 
   const cantClick = items?.find((item) => {
     if (!(item.item && item.qty)) {
@@ -173,7 +172,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
         `inventory/purchasing/receiver_items/${params.objId}`
       );
     } catch (e) {
-      console.log(e);
+      console.error(e);
     } finally {
       navigate('/zood-dashboard/purchase-invoices');
     }
