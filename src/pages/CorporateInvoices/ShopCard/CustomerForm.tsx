@@ -76,19 +76,19 @@ const CustomerForm = () => {
         };
 
         console.log({ updatedOrderSchema });
-        // await mutate(updatedOrderSchema, {
-        //   onSuccess: async (data) => {
-        //     setLoading(false);
-        //     const res = await axiosInstance.get(
-        //       `/orders?filter[id]=${data.data.id}`
-        //     );
-        //     const orderData = res?.data?.data;
-        //     navigate('/zood-dashboard/corporate-invoices');
-        //     dispatch(toggleActionView(true));
-        //     dispatch(toggleActionViewData(orderData[0]));
-        //   },
-        //   onError: () => setLoading(false),
-        // });
+        await mutate(updatedOrderSchema, {
+          onSuccess: async (data) => {
+            // setLoading(false);
+            // const res = await axiosInstance.get(
+            //   `/orders?filter[id]=${data.data.id}`
+            // );
+            // const orderData = res?.data?.data;
+            // navigate('/zood-dashboard/corporate-invoices');
+            // dispatch(toggleActionView(true));
+            // dispatch(toggleActionViewData(orderData[0]));
+          },
+          onError: () => setLoading(false),
+        });
       }
     } catch (error) {
       setLoading(false);
