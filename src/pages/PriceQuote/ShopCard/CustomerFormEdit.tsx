@@ -19,7 +19,8 @@ const CustomerFormEdit = () => {
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
-  const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  // const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  const ShowCar = true;
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
   const { useGetAll: fetchAllCustomers } = allService;
@@ -104,7 +105,7 @@ const CustomerFormEdit = () => {
             </div>
           ))}
         </div>
-        {/* {ShowCar && ( */}
+        {ShowCar && (
           <div className="flex gap-x-md mt-5">
             <IconInput
               disabled
@@ -123,7 +124,7 @@ const CustomerFormEdit = () => {
               onChange={null}
             />
           </div>
-        {/* )} */}
+        )}
         <Textarea
           disabled
           name="kitchen_notes"

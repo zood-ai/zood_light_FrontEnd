@@ -27,7 +27,8 @@ const CustomerForm = () => {
     'menu/products?filter[name]=sku-zood-20001'
   ).useGetAll();
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
-  const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  // const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  const ShowCar = true;
 
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const dispatch = useDispatch();
@@ -253,7 +254,7 @@ const CustomerForm = () => {
               </div>
             </Button>
           )}
-          {/* {ShowCar && ( */}
+          {ShowCar && (
             <div className="flex gap-x-md mt-5">
               <IconInput
                 disabled={params.id}
@@ -290,7 +291,7 @@ const CustomerForm = () => {
                 // value={formState.address}
               />
             </div>
-          {/* )} */}
+          )}
           <Textarea
             disabled={params.id}
             name="kitchen_notes"

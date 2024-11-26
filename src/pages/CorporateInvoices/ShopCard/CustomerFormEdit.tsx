@@ -22,7 +22,8 @@ const CustomerFormEdit = () => {
   const allServiceOrder = createCrudService<any>('orders');
   const orderPayment = createCrudService<any>('order-payments');
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
-  const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  // const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  const ShowCar = true;
 
   const { mutate, isLoading: loadingOrder } = orderPayment.useCreate();
   const getOrder = allServiceOrder.useGetById(params.id);
@@ -126,7 +127,7 @@ const CustomerFormEdit = () => {
               </div>
             </div>
           ))}
-          {/* {ShowCar && ( */}
+          {ShowCar && (
             <div className="flex gap-x-md mt-5">
               <IconInput
                 disabled={params.id}
@@ -146,7 +147,7 @@ const CustomerFormEdit = () => {
                 value={getOrder?.data?.data?.kitchen_done_at || ''}
               />
             </div>
-          {/* )} */}
+          )}
           <Textarea
             disabled={params.id}
             name="kitchen_notes"
