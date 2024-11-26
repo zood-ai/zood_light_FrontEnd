@@ -125,7 +125,7 @@ export function DataTable<TData, TValue>({
         /> */}
               <div className="h-[68px] ps-[16px]  flex z-10 flex-wrap  py-3 mt-4 text-right bg-background  border border-mainBorder border-solid  border-b-0 items-center rounded-t-[8px]">
                 <div className="my-auto text-base font-semibold text-mainText  ">
-                  {title?.ar}
+                  {title?.ar === 'لوحة التحكم' ? 'احدث الفواتير' : title?.ar}
                 </div>
                 <div className="max-w-[303px] ms-[14px]">
                   <IconInput

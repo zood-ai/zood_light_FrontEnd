@@ -27,17 +27,11 @@ import DelConfirm from '@/components/custom/DelConfim';
 
 const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
-  phone: z.string().nonempty('Phone is required').optional(),
-  address: z.string().nonempty('Address is required').optional(),
-  email: z.string().email({ message: 'Invalid email address' }).optional(),
-  taxNum: z
-    .string()
-    .min(15, { message: 'Tax number is must be 15 number' })
-    .optional(),
-  coTax: z
-    .string()
-    .min(15, { message: 'Tax number is must be 15 number' })
-    .optional(),
+  phone: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  email: z.string().nullable().optional(),
+  taxNum: z.string().nullable().optional(),
+  coTax: z.string().nullable().optional(),
 });
 
 export const CustomersAdd: React.FC<CustomersAddProps> = () => {
@@ -117,22 +111,34 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
     if (isEditMode) {
       try {
         // First API call to update the customer
-        await axiosInstance.put(`/manage/customers/${params.objId}`, {
-          ...values,
-          notes: '-',
-          tax_registration_number: values.taxNum,
-          vat_registration_number: values.coTax,
-        });
-
-        // Second API call to update the address
-        await axiosInstance.post(
-          `/manage/customers/updateAddress/${
-            currData?.addresses?.[0]?.id || ''
-          }`,
+        const res = await axiosInstance.put(
+          `/manage/customers/${params.objId}`,
           {
-            name: values.address,
+            ...values,
+            notes: '-',
+            tax_registration_number: values.taxNum,
+            vat_registration_number: values.coTax,
           }
         );
+
+        // Second API call to update the address
+        if (values.address)
+          await axiosInstance.post(
+            `/manage/customers/addAddress/${res?.data?.data.id}`,
+            {
+              name: values.address,
+              description: '-',
+            }
+          );
+        else
+          await axiosInstance.post(
+            `/manage/customers/updateAddress/${
+              currData?.addresses?.[0]?.id || ''
+            }`,
+            {
+              name: values.address,
+            }
+          );
 
         // Success actions
         openDialog('updated');

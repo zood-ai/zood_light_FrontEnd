@@ -6,7 +6,7 @@ import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-ta
 import { StatusBadge } from '@/components/custom/StatusBadge';
 import { Button } from '@/components/custom/button';
 import dayjs from 'dayjs';
-import { formatDate } from '@/utils/formatDateTime';
+import { formatDateTime } from '@/utils/formatDateTime';
 import { useDispatch } from 'react-redux';
 import {
   toggleActionView,
@@ -51,16 +51,16 @@ export const useDataTableColumns = () => {
       },
     },
     {
-      accessorKey: 'customer',
+      accessorKey: 'total_cost',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'رقم الهاتف'} />
+        <DataTableColumnHeader column={column} title={'المبلغ الكلي'} />
       ),
       cell: ({ row }: any) => {
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('customer')?.phone || '-'}
+              {row.getValue('total_cost') || '0'}
             </span>
           </div>
         );
@@ -77,7 +77,7 @@ export const useDataTableColumns = () => {
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
               {/* {dayjs(row.getValue('created_at')).format('MMMM D, YYYY h:mm A')} */}
-              {formatDate(row.getValue('created_at'))}
+              {formatDateTime(row.getValue('created_at'))}
             </span>
           </div>
         );

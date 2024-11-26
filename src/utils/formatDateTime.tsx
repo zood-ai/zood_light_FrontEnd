@@ -6,11 +6,9 @@ import dayjs from 'dayjs';
  * @param {string} format - Optional. The format you want the date to be in (default: 'YYYY-MM-DD HH:mm:ss')
  * @returns {string} - The formatted date string
  */
-export const formatDateTime = (dateString, format = 'YYYY-MM-DD HH:mm:ss') => {
+export const formatDateTime = (dateString, format = 'HH:mm YYYY/MM/DD') => {
   return dayjs(dateString).format(format);
 };
 export const formatDate = (dateString, format = 'DD/MM/YYYY') => {
   return dayjs(dateString).format(format);
 };
-
-

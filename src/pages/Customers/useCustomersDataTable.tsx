@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { formatDate } from '@/utils/formatDateTime'; // A utility to format dates
+import { formatDateTime } from '@/utils/formatDateTime'; // A utility to format dates
 import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-table-column-header';
 import { StatusBadge } from '@/components/custom/StatusBadge';
 
@@ -21,7 +21,7 @@ export const useCustomersDataTable = () => {
       ),
       cell: ({ row }) => {
         const createdAt = row.getValue('created_at');
-        const formattedDate = createdAt ? formatDate(createdAt) : '-';
+        const formattedDate = createdAt ? formatDateTime(createdAt) : '-';
         return (
           <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
             {formattedDate}
@@ -37,7 +37,7 @@ export const useCustomersDataTable = () => {
       cell: ({ row }) => {
         return (
           <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-            {row.getValue('total_price') || '-'}
+            {row.getValue('total_price').toFixed(2) || '-'}
           </span>
         );
       },
@@ -64,7 +64,7 @@ export const useCustomersDataTable = () => {
     {
       accessorKey: 'type',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'حالة الدفع'} />
+        <DataTableColumnHeader column={column} title={'نوع الفاتورة '} />
       ),
       cell: ({ row }) => {
         return (
@@ -72,9 +72,9 @@ export const useCustomersDataTable = () => {
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
               {row.getValue('type') == 2 ? (
-                <StatusBadge type={2} status="Inactive" text={'فاتورة مؤسسه'} />
+                <StatusBadge type={2} status="Inactive" text={'مؤسسة'} />
               ) : (
-                <StatusBadge type={1} status="active" text={'فاتورة افراد'} />
+                <StatusBadge type={1} status="active" text={'افراد'} />
               )}
             </span>
           </div>

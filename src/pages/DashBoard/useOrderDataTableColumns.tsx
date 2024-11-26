@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-table-column-header';
+import { formatDateTime } from '@/utils/formatDateTime';
 import { StatusBadge } from '@/components/custom/StatusBadge';
 
 export const useOrderDataTableColumns = () => {
@@ -19,18 +20,17 @@ export const useOrderDataTableColumns = () => {
       ),
     },
     {
-      accessorKey: 'status',
+      accessorKey: 'type',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('الحالة')} />
+        <DataTableColumnHeader column={column} title={t('نوع الفاتورة')} />
       ),
       cell: ({ row }) => {
         return (
           <div className="flex space-x-2 w-[180px] md:w-auto">
-            {row.getValue('status') == '8' && (
-              <StatusBadge status="Inactive" text={'draft'} />
-            )}
-            {row.getValue('status') == '4' && (
-              <StatusBadge status="active" text={'closed'} />
+            {row.getValue('type') == 2 ? (
+              <StatusBadge type={2} status="Inactive" text={'مؤسسة'} />
+            ) : (
+              <StatusBadge type={1} status="active" text={'افراد'} />
             )}
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
           </div>
@@ -59,12 +59,12 @@ export const useOrderDataTableColumns = () => {
       },
     },
     {
-      accessorKey: 'business_date',
+      accessorKey: 'created_at',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('التاريخ')} />
       ),
       cell: ({ row }) => (
-        <span>{row.getValue('business_date')?.split(' ')[0]}</span>
+        <span>{formatDateTime(row.getValue('created_at')) || '-'}</span>
       ),
     },
     {

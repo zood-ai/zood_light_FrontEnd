@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
-import { formatDate } from '@/utils/formatDateTime';
+import { formatDateTime } from '@/utils/formatDateTime';
 import { useResolvedPath } from 'react-router-dom';
 
 import {
@@ -114,21 +114,11 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={'اخر طلب'} />
       ),
       cell: ({ row }) => {
-        const date = row
-          .getValue('last_orders')
-          ?.split(' ')[0]
-          ?.replaceAll('-', '/');
-        const time = row
-          .getValue('last_orders')
-          ?.split(' ')[1]
-          ?.split(':')
-          ?.slice(0, 2)
-          ?.join(':');
-        const timing = time + '  ' + date;
+        const timing = row.getValue('last_orders');
         return (
           <div className="flex space-x-2">
             <span className="max-w-32 text-[#363088] truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {time && date ? timing : '-'}
+              {timing ? formatDateTime(timing) : '-'}
             </span>
           </div>
         );
