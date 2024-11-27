@@ -7,6 +7,22 @@
   background-color: #d9d9d9;
 }
 @media print {
+  html,
+  body {
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .myDiv {
+    width: 100%;
+    max-width: 800px; /* Adjust as needed */
+    margin: auto; /* Center the content */
+  }
+  .myDiv * {
+    page-break-inside: avoid; /* Prevent elements from splitting across pages */
+  }
   * {
     margin: 0;
     padding: 0;
@@ -46,7 +62,7 @@
   :root {
     /* Custom CSS Variables */
     --header-height: 4rem;
-    --main: #7272F6;
+    --main: #7272f6;
     --mainText: #26262f;
     --secText: #868686;
     --mainHover: #5951c8;

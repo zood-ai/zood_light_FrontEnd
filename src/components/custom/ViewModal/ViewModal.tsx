@@ -52,10 +52,15 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
         </div> */}
         <div className="flex flex-col rounded-none ">
           <div className="px-11 py-a12 w-full bg-white rounded-lg  border-solid max-md:px-5 max-md:max-w-full">
-            <div className="flex gap-5 max-md:flex-col">
+            <div className="flex gap-5 max-md:flex-col myDiv">
               <div
-                id="myDiv"
                 ref={contentRef}
+                style={{
+                  width: '100%',
+                  maxWidth: '800px', // Ensures the content doesn't stretch
+                  margin: 'auto',
+                  padding: '20px', // Adds spacing for better readability
+                }}
                 className={`${"size === 'A4' ? 'a4-size' : 'small-receipt'"} print-content flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
               >
                 {size === 'A4' ? (
