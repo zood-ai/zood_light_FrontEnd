@@ -91,8 +91,8 @@ const CustomerForms = () => {
 
   return (
     <>
-      <div className=" flex gap-md mb-md ">
-        <div>
+      <div className="flex-wrap flex gap-md mb-md ">
+        <div className='flex-grow md:flex-grow-0'>
           <CustomSearchInbox
             options={allData?.data?.map((item) => ({
               value: item.id,
@@ -107,13 +107,13 @@ const CustomerForms = () => {
               }
             }}
             label="اسم العميل"
-            className="  md:w-[21vw]"
+            className=" w-full  md:w-[21vw]"
             value={orderSchema?.customer_id}
             disabled={params.id}
           />
         </div>
         {!params.id && (
-          <div className="translate-y-[32px]">
+          <div className="flex items-end">
             <Button
               onClick={() => {
                 setFastActionBtn(true);

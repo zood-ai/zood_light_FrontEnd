@@ -23,7 +23,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  phone: z.string().min(1, 'Phone is required'),
+  phone: z.string().min(1, 'Phone is required').optional(),
   email: z.string().email('Invalid email address').optional(),
   tax_registration_number: z
     .string()

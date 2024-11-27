@@ -51,6 +51,7 @@ interface DataTableProps<TData, TValue> {
   loading?: boolean;
   actionText?: string;
   dashBoard: boolean;
+  handleSearch: any;
 }
 
 export function DataTable<TData, TValue>({
@@ -64,6 +65,7 @@ export function DataTable<TData, TValue>({
   dashBoard = false,
   meta,
   loading,
+  handleSearch,
   actionText,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
@@ -129,6 +131,11 @@ export function DataTable<TData, TValue>({
                 </div>
                 <div className="max-w-[303px] ms-[14px]">
                   <IconInput
+                    onChange={(e) => {
+                      // e.preventDefault();
+                      // console.log(1234);
+                      handleSearch(e.target.value);
+                    }}
                     inputClassName="h-[35px]"
                     placeholder="بحث عن فاتورة, عميل, تاريخ"
                     iconSrc={search}

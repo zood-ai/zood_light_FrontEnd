@@ -162,9 +162,9 @@ export const AuthForm: React.FC<AuthFormProps> = () => {
                   />
 
                   <br />
-                  <div className=" text-sm text-main cursor-pointer">
+                  {/* <div className=" text-sm text-main cursor-pointer">
                     هل نسيت كلمة المرور؟
-                  </div>
+                  </div> */}
                   <Button
                     loading={isLoading}
                     type="submit"

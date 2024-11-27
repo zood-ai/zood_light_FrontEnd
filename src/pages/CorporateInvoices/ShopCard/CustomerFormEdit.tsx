@@ -20,6 +20,8 @@ import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
+import { TbMenuDeep } from 'react-icons/tb';
+import { GrMenu } from 'react-icons/gr';
 
 const CustomerFormEdit = () => {
   const params = useParams();
@@ -38,6 +40,7 @@ const CustomerFormEdit = () => {
   const navigate = useNavigate();
   const myInputRef = useRef(null);
   const { showToast } = useToast();
+  const [isTextArea, setIsTextArea] = useState(false);
 
   const handleSubmitOrder = async () => {
     // setLoading(true);
@@ -95,6 +98,9 @@ const CustomerFormEdit = () => {
 
   const [loading, setLoading] = useState(false);
 
+  const changeToTextArea = () => {
+    setIsTextArea(!isTextArea);
+  };
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
       <div className=" w-full xl:w-1/2">
@@ -102,28 +108,46 @@ const CustomerFormEdit = () => {
           <CustomerForms />
           {getOrder?.data?.data?.products.map((item, index) => (
             <div key={index} className="flex flex-wrap">
-              <IconInput
-                disabled
-                value={
-                  item.name === 'sku-zood-20001'
-                    ? item?.pivot?.kitchen_notes
-                    : item?.name
-                }
-                label="اسم المنتج"
-                // inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
-                inputClassName="md:w-[327px]  "
-              />
-              {/* <textarea
-                disabled
-                value={
-                  item.name === 'sku-zood-20001'
-                    ? item?.pivot?.kitchen_notes
-                    : item?.name
-                }
-                // label="اسم المنتج"
-                // inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
-                // inputClassName="md:w-[327px]  "
-              /> */}
+              <div className="flex md:w-fit max-md:flex-grow gap-x-2 mb-5">
+                {!isTextArea ? (
+                  <>
+                    <IconInput
+                      disabled={params.id}
+                      className="flex-grow w-full md:w-[327px] "
+                      placeholder="اسم المنتج"
+                      label="اسم المنتج"
+                      value={
+                        item.name === 'sku-zood-20001'
+                          ? item?.pivot?.kitchen_notes
+                          : item?.name
+                      }
+                    />
+                    <button
+                      onClick={changeToTextArea}
+                      className="w-fit h-fit mt-8"
+                    >
+                      <GrMenu size={25} />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Textarea
+                      disabled={params.id}
+                      placeholder="وصف المنتج"
+                      defaultValue={
+                        item.name === 'sku-zood-20001'
+                          ? item?.pivot?.kitchen_notes
+                          : item?.name
+                      }
+                      label="اسم المنتج"
+                      className="w-full md:w-[327px] h-min"
+                    />
+                    <button onClick={changeToTextArea} className="h-fit mt-6">
+                      <TbMenuDeep size={25} />
+                    </button>
+                  </>
+                )}
+              </div>
               <div className="flex gap-x-md">
                 <IconInput
                   disabled

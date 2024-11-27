@@ -47,7 +47,7 @@ export default function SignUpForm({
               onChange={(e) => handleChange('name', e.target.value)}
             />
           </div>
-          <div
+          {/* <div
             dir="rtl"
             className="flex flex-col flex-grow gap-y-2 max-sm:w-full"
           >
@@ -69,7 +69,7 @@ export default function SignUpForm({
                 </SelectGroup>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
         </div>
         <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
           <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
@@ -98,20 +98,20 @@ export default function SignUpForm({
           </div>
         </div>
         <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
-          <div className="flex gap-6">
-            <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
+          <div className="flex gap-6 flex-grow">
+            <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
               <Label className="align-right" htmlFor="password">
                 الرقم السري
               </Label>
               <Input
-                className="w-full border-[#DCDBDB]"
+                className="w-full flex-grow border-[#DCDBDB]"
                 type="password"
                 id="password"
                 value={formState.password}
                 onChange={(e) => handleChange('password', e.target.value)}
               />
             </div>
-            <div dir="rtl" className="grid max-w-sm items-center gap-1.5">
+            {/* <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
               <Label className="align-right" htmlFor="confirmPassword">
                 تاكيد الرقم السري
               </Label>
@@ -124,7 +124,7 @@ export default function SignUpForm({
                   handleChange('confirmPassword', e.target.value)
                 }
               />
-            </div>
+            </div> */}
           </div>
         </div>
         <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
@@ -176,7 +176,8 @@ export default function SignUpForm({
                 handleChange('business_location_id', value)
               }
             >
-              <SelectTrigger className="w-full border-[#DCDBDB] sm:w-[327px]">
+              {/* sm:w-[327px] */}
+              <SelectTrigger className="w-full border-[#DCDBDB] ">
                 <SelectValue placeholder="" />
               </SelectTrigger>
               <SelectContent>
@@ -189,7 +190,7 @@ export default function SignUpForm({
               </SelectContent>
             </Select>
           </div>
-          <div
+          {/* <div
             dir="rtl"
             className="flex flex-col flex-grow gap-y-2 max-sm:w-full"
           >
@@ -203,9 +204,9 @@ export default function SignUpForm({
               value={formState.city}
               onChange={(e) => handleChange('city', e.target.value)}
             />
-          </div>
+          </div> */}
         </div>
-        <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
+        {/* <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
           <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
             <Label className="align-right" htmlFor="district">
               الحي
@@ -230,8 +231,8 @@ export default function SignUpForm({
               onChange={(e) => handleChange('streetName', e.target.value)}
             />
           </div>
-        </div>
-        <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
+        </div> */}
+        {/* <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
           <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
             <Label className="align-right" htmlFor="postalCode">
               رمز بريدي
@@ -244,7 +245,7 @@ export default function SignUpForm({
               onChange={(e) => handleChange('postalCode', e.target.value)}
             />
           </div>
-        </div>
+        </div> */}
         <div className="flex flex-col gap-4">
           <div dir="rtl">
             <div className="sm:w-[327px]">

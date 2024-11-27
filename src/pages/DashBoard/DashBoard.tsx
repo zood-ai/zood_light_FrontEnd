@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { DashBoardProps } from './DashBoard.types';
 
@@ -61,12 +61,49 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
   const filterBtn = () => {};
   const { columns } = useOrderDataTableColumns();
-  const allService = createCrudService<any>('inventory/purchasing');
+  const allService = createCrudService<any>('/orders?sort=-status');
   const { useGetAll } = allService;
-  const { data: allData, isLoading: isLoadingData } = useGetAll();
-  const Data = isLoadingData ? 'loading' : allData?.data;
-  const { data: lastOrderData, isLoading: isLoadingOrder } =
-    createCrudService<any>('/orders?sort=-status').useGetAll();
+  const { data: lastOrderData, isLoading: isLoadingOrder } = useGetAll();
+  const [searchedData, setSearchedData] = useState<any>(lastOrderData);
+  useEffect(() => {
+    setSearchedData(lastOrderData);
+  }, [lastOrderData]);
+  console.log({ lastOrderData, searchedData });
+
+  const debounce = (func: Function, delay: number) => {
+    let timer: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => func(...args), delay);
+    };
+  };
+  const handleDebounce = useCallback(
+    debounce((searchTerm: string) => {
+      if (!searchTerm) {
+        setSearchedData(lastOrderData); // Reset if search is cleared
+        return;
+      }
+
+      const holder = lastOrderData?.data.filter((item: any) => {
+        const referenceMatch = item?.reference
+          ?.toLowerCase()
+          ?.includes(searchTerm.toLowerCase());
+        const customerName = item?.customer?.name
+          ?.toLowerCase()
+          ?.includes(searchTerm.toLowerCase());
+        return referenceMatch || customerName;
+      });
+      console.log({ holder });
+
+      setSearchedData({ ...lastOrderData, data: holder });
+    }, 300), // 300ms debounce delay
+    [lastOrderData]
+  );
+
+  const handleSearch = (e: string) => {
+    console.log(e, searchedData);
+    handleDebounce(e);
+  };
   return (
     <>
       {isLoading ? (
@@ -105,14 +142,15 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
                 <DataTable
                   handleDel={handleOpenDeleteModal}
                   handleRowClick={handleOpenViewModal}
-                  data={lastOrderData?.data || []}
+                  data={searchedData?.data || []}
                   columns={columns}
                   handleEdit={handleOpenEditModal}
-                  meta={allData || {}}
+                  meta={searchedData || {}}
                   filterBtn={filterBtn}
                   dashBoard={true}
                   actionText={'احدث الفواتير'}
                   loading={isLoadingOrder}
+                  handleSearch={handleSearch}
                 />
               </div>
             </>

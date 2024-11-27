@@ -28,18 +28,21 @@ import ConfirmBk from '@/components/custom/ConfimBk';
 import DelConfirm from '@/components/custom/DelConfim';
 
 // Validation schema using Zod
+
 const formSchema = z.object({
-  name: z.string(),
-  contact_name: z.string(),
-  phone: z.string(),
-  vat_registration_number: z
-    .string()
-    .min(15, { message: 'Tax number is must be 15 number' }),
+  name: z.string().min(1, 'Name is required'),
+  phone: z.string().min(1, 'Phone is required').optional(),
+  email: z.string().email('Invalid email address').optional(),
   tax_registration_number: z
     .string()
-    .min(15, { message: 'Tax number is must be 15 number' }),
-  primary_email: z.string().email({ message: 'Invalid email address' }),
-  code: z.string(),
+    .length(15, 'Tax registration number must be exactly 15 digits')
+    .regex(/^\d{15}$/, 'Tax registration number must only contain 15 digits')
+    .optional(),
+  vat_registration_number: z
+    .string()
+    .length(15, 'Vat registration number must be exactly 15 digits')
+    .regex(/^\d{15}$/, 'Tax registration number must only contain 15 digits')
+    .optional(),
 });
 
 export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {

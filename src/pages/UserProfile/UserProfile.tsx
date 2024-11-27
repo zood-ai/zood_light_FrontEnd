@@ -10,6 +10,7 @@ import Cookies from 'js-cookie';
 export default function UserProfile() {
   const fileInputRef = useRef<any>(null);
   const [personalImage, setPersonalImage] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState('');
 
   const userId = Cookies.get('userId');
@@ -91,47 +92,59 @@ export default function UserProfile() {
       console.error(error);
     }
   };
+  const handleClose = () => {
+    setIsOpen(false);
+  };
 
   return (
-    <div className="flex flex-col rounded-none max-w-[633px]" dir="ltr">
+    <div className="flex flex-col rounded-none max-w-[633px]">
       <div className="pt-6 pr-7 pb-11 pl-16 w-full bg-white rounded border border-gray-200 max-md:px-5 max-md:max-w-full">
-        <div className="flex gap-10 items-start max-md:flex-col">
-          <div className="flex flex-col w-2/3 gap-4">
-            <div className="flex flex-col items-end">
+        <div className="flex flex-row-reverse gap-10 items-start max-md:flex-col">
+          <div className="flex flex-col sm:w-2/3 gap-4">
+            <div className="flex flex-col">
               <label className="mb-1 text-sm font-medium text-zinc-800">
                 الاسم
               </label>
               <Input
-                dir="rtl"
                 name="name"
                 defaultValue={formDataState.name}
                 onChange={handleInputChanges}
                 className="w-full"
               />
             </div>
-            <div className="flex flex-col items-end">
+            <div className="flex flex-col">
               <label className="mb-1 text-sm font-medium text-zinc-800">
                 الإيميل
               </label>
               <Input
-                dir="rtl"
                 name="email"
                 defaultValue={formDataState.email}
                 onChange={handleInputChanges}
                 className="w-full"
               />
             </div>
-            <div className="flex flex-col items-end">
+            <div className="flex flex-col">
               <label className="mb-1 text-sm font-medium text-zinc-800">
                 رقم الموبايل
               </label>
               <Input
-                dir="rtl"
                 name="phone"
                 defaultValue={formDataState.phone}
                 onChange={handleInputChanges}
                 className="w-full"
               />
+            </div>
+            {/* ChangePasswordDial */}
+            <div>
+              {/* <button
+                className="text-blue-800 text-sm"
+                onClick={() => {
+                  setIsOpen(true);
+                }}
+              >
+                تغير الرقم السري
+              </button>
+              <ChangePasswordDial isOpen={isOpen} onClose={handleClose} /> */}
             </div>
           </div>
 

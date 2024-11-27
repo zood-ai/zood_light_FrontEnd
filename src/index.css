@@ -4,7 +4,7 @@
 @tailwind utilities;
 /* Default Page Size: A4 */
 .makeEvenOddBg > div:nth-child(odd) {
-  background-color: #f1f1f1;
+  background-color: #d9d9d9;
 }
 @media print {
   * {

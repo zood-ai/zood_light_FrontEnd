@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 
 import { IndividualInvoicesProps } from './IndividualInvoices.types';
 
@@ -57,20 +57,59 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
     dispatch(toggleActionView(false));
   };
 
-  const filterBtn = () => {
-  };
+  const filterBtn = () => {};
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allService = createCrudService<any>('orders?filter[type]=2&filter[status]=4');
+  const allService = createCrudService<any>(
+    'orders?filter[type]=2&filter[status]=4'
+  );
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
+  const [searchedData, setSearchedData] = useState({});
+  useEffect(() => {
+    setSearchedData(allData);
+  }, [allData]);
 
   useEffect(() => {
     dispatch(resetCard());
     dispatch(resetOrder());
   }, [dispatch]);
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
+
+  const debounce = (func: Function, delay: number) => {
+    let timer: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => func(...args), delay);
+    };
+  };
+  const handleDebounce = useCallback(
+    debounce((searchTerm: string) => {
+      if (!searchTerm) {
+        setSearchedData(allData); // Reset if search is cleared
+        return;
+      }
+
+      const holder = allData?.data.filter((item: any) => {
+        const referenceMatch = item?.reference
+          ?.toLowerCase()
+          ?.includes(searchTerm.toLowerCase());
+        const customerName = item?.customer?.name
+          ?.toLowerCase()
+          ?.includes(searchTerm.toLowerCase());
+        return referenceMatch || customerName;
+      });
+
+      setSearchedData({ ...allData, data: holder });
+    }, 300), // 300ms debounce delay
+    [allData]
+  );
+
+  const handleSearch = (e: string) => {
+    console.log(e, allData);
+    handleDebounce(e);
+  };
 
   return (
     <>
@@ -95,14 +134,15 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
         <DataTable
           handleDel={handleOpenDeleteModal}
           handleRowClick={handleOpenViewModal}
-          data={allData?.data || []}
+          data={searchedData?.data || []}
           columns={columns}
           handleEdit={handleOpenEditModal}
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
-          meta={allData || {}}
+          meta={searchedData || {}}
           actionText={'فاتورة '}
           loading={isLoading}
+          handleSearch={handleSearch}
         />
       </div>
     </>

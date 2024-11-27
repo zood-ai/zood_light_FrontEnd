@@ -29,16 +29,16 @@ export const useDataTableColumns = () => {
   const [loading, setLoading] = useState(false);
   const columns: ColumnDef<Task>[] = [
     {
-      accessorKey: 'purchasing_number',
+      accessorKey: 'reference',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'رقم المرجع'} />
       ),
       cell: ({ row }) => {
-        return ( 
+        return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('purchasing_number') || '-'}
+              {row.getValue('reference') || '-'}
             </span>
           </div>
         );

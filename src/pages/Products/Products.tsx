@@ -4,7 +4,7 @@ import { ProductsProps } from './Products.types';
 
 import './Products.css';
 import { tasks } from './data/tasks';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DetailsModal } from './Modal/DetailsModal';
 import { DataTable } from '@/components/custom/DataTableComp/data-table';
 import { ConfirmDelModal } from './Modal/ConfirmDelModal';
@@ -29,7 +29,7 @@ export const Products: React.FC<ProductsProps> = () => {
     // setSelectedRow({});
     setModalType('Add');
     // setIsAddEditOpen(true);
-        // navigate('/individual-invoices/add');
+    // navigate('/individual-invoices/add');
     navigate('add');
   };
   const handleOpenViewModal = (row: any) => {
@@ -51,10 +51,8 @@ export const Products: React.FC<ProductsProps> = () => {
     setIsDelModalOpen(false);
 
     dispatch(toggleActionView(false));
-
   };
-  const filterBtn = () => {
-  };
+  const filterBtn = () => {};
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
@@ -62,7 +60,40 @@ export const Products: React.FC<ProductsProps> = () => {
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
+  const [searchedData, setSearchedData] = useState({});
+  useEffect(() => {
+    setSearchedData(allData);
+  }, [allData]);
 
+  const debounce = (func: Function, delay: number) => {
+    let timer: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => func(...args), delay);
+    };
+  };
+  const handleDebounce = useCallback(
+    debounce((searchTerm: string) => {
+      if (!searchTerm) {
+        setSearchedData(allData); // Reset if search is cleared
+        return;
+      }
+
+      const holder = allData?.data.filter((item: any) => {
+        const referenceMatch = item?.sku?.includes(searchTerm);
+        const customerMatch = item?.name?.includes(searchTerm);
+        return referenceMatch || customerMatch;
+      });
+
+      setSearchedData({ ...allData, data: holder });
+    }, 300), // 300ms debounce delay
+    [allData]
+  );
+
+  const handleSearch = (e: string) => {
+    console.log(e, allData);
+    handleDebounce(e);
+  };
   return (
     <>
       <AddEditModal
@@ -86,14 +117,15 @@ export const Products: React.FC<ProductsProps> = () => {
         <DataTable
           handleDel={handleOpenDeleteModal}
           handleRowClick={handleOpenViewModal}
-          data={allData?.data || []}
+          data={searchedData?.data || []}
           columns={columns}
           handleEdit={handleOpenEditModal}
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
-          meta={allData?.meta || {}}
+          meta={searchedData?.meta || {}}
           actionText={'منتج'}
           loading={isLoading}
+          handleSearch={handleSearch}
         />
       </div>
     </>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import callIcon from '/icons/call.svg';
 import { SelectComp } from '@/components/custom/SelectItem';
 import IconInput from '@/components/custom/InputWithIcon';
@@ -13,10 +13,15 @@ import {
   updateField,
   updatePayment,
 } from '@/store/slices/orderSchema';
-import { useNavigate, useParams } from 'react-router-dom';
+import {
+  useNavigate,
+  useParams,
+  useLocation,
+  useBeforeUnload,
+  useBlocker,
+} from 'react-router-dom';
 import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
 import axios from 'axios';
-import { on } from 'events';
 import {
   toggleActionView,
   toggleActionViewData,
@@ -25,13 +30,52 @@ import { useToast } from '@/components/custom/useToastComp';
 import PlusIcon from '@/components/Icons/PlusIcon';
 import FastAddActionsCustomerPQ from '@/components/FastAddActionsCustomerPQ';
 
+function usePrompt(message, { beforeUnload } = {}) {
+  const blocker = useBlocker(
+    useCallback(
+      () => (typeof message === 'string' ? !window.confirm(message) : false),
+      [message]
+    )
+  );
+  const prevState = useRef(blocker.state);
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      blocker.reset();
+    }
+    prevState.current = blocker.state;
+  }, [blocker]);
+
+  useBeforeUnload(
+    useCallback(
+      (event) => {
+        if (beforeUnload && typeof message === 'string') {
+          event.preventDefault();
+          event.returnValue = message;
+        }
+      },
+      [message, beforeUnload]
+    ),
+    { capture: true }
+  );
+}
+
+function Prompt({ when, message, ...props }) {
+  usePrompt(when ? message : false, props);
+  return null;
+}
+
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
   const allServiceOrderPay =
     createCrudService<any>('order-payments').useCreate();
   const orderSchema = useSelector((state: any) => state.orderSchema);
-  let navigate = useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [showAlert, setShowAlert] = useState(false);
+  const [nextPath, setNextPath] = useState<string | null>(null);
+  const [reload, setReload] = useState(false);
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
   const { mutate: mutateOrderPay } = allServiceOrderPay;
@@ -50,12 +94,14 @@ const CustomerForm = () => {
     addToZatca: true,
   };
   const [formState, setFormState] = useState(initialValue);
-  let dispatch = useDispatch();
-  let params = useParams();
+  const dispatch = useDispatch();
+  const params = useParams();
   const [fastActionBtn, setFastActionBtn] = useState(false);
+
   const handleInputChange = (field: string, value: any) => {
     setFormState((prevState) => ({ ...prevState, [field]: value }));
   };
+
   const handleInputChangex = async (field: string, value: any) => {
     setFormState((prevState) => ({ ...prevState, [field]: value }));
     dispatch(
@@ -90,22 +136,14 @@ const CustomerForm = () => {
         console.error('Failed to fetch customer data', err);
       });
   };
+
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const holder = useSelector(
     (state: any) => state.orderSchema.tax_exclusive_discount_amount
   );
   const { showToast } = useToast();
+
   const submitOrder = async () => {
-    // const products = cardItemValue.map((item: any) => ({
-    //   product_id: item.id || '',
-    //   quantity: item.qty || 0,
-    //   unit_price: item.price || 0,
-    //   total_price: item.price * item.qty || 0,
-    //   discount_amount: 0,
-    //   discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
-    //   discount_type: 2,
-    // }));
-    // dispatch(addProduct(products));
     setLoading(true);
 
     const totalPrice = orderSchema.total_price;
@@ -180,16 +218,51 @@ const CustomerForm = () => {
           },
         });
       }
-      // const res = await axiosInstance.post('orders', orderSchema);
     } catch (error) {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     handleInputChangex('customer_id', orderSchema?.customer_id);
   }, [orderSchema?.customer_id]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      setShowAlert(true);
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  const handleCancel = () => {
+    setShowAlert(false);
+    setNextPath(null);
+  };
+
+  const handleOk = () => {
+    setShowAlert(false);
+    navigate(nextPath!);
+  };
+  useEffect(() => {
+    if (reload) {
+      window.location.reload();
+    }
+  }, [reload]);
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4">
+      {!params.id && (
+        <Prompt
+          when={true}
+          message="هل أنت متأكد أنك تريد الخروج؟ لن تحفظ البيانات"
+        />
+      )}
       <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit w-full xl:w-1/2">
         <CustomSearchInbox
           options={allData?.data?.map((item) => ({
@@ -302,6 +375,13 @@ const CustomerForm = () => {
         isOpen={fastActionBtn}
         onClose={() => setFastActionBtn(false)}
       />
+      {showAlert && (
+        <div className="alert">
+          <p>Data is not saved. Are you sure you want to leave?</p>
+          <button onClick={handleCancel}>Cancel</button>
+          <button onClick={handleOk}>OK</button>
+        </div>
+      )}
     </div>
   );
 };

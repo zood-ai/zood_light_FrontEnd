@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ViewModalProps } from './ViewModal.types';
 import createCrudService from '@/api/services/crudService';
 import { useReactToPrint } from 'react-to-print';
@@ -43,6 +43,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const handlePrint = () => {
     reactToPrintFn();
   };
+
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-none h-[90vh] max-w-[80vw] overflow-y-auto relative bg-white">
@@ -84,8 +85,8 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {Corporate && 'فاتورة شراء'}
                       {Another && `فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`}
                     </div>
-                    <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-200 border-solid max-md:mr-1 max-md:max-w-full">
-                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                    <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-500 border-solid max-md:mr-1 max-md:max-w-full">
+                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
                         {Corporate && 'اسم المورد'}
                         {Another && 'اسم العميل'}
                         <div className="mt-4 font-semibold w-full text-center">
@@ -93,14 +94,14 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           {Another ? data?.customer?.name : ''}
                         </div>
                       </div>
-                      <div className="flex z-10 flex-col flex-1 px-3 min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
+                      <div className="flex z-10 flex-col flex-1 px-3 min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-gray-500 border-solid max-md:px-5 justify-between">
                         <div className="self-center">الجوال</div>
                         <div className="self-start mt-4 w-full text-center font-semibold">
                           {Corporate ? supplierInfo?.data?.phone : ''}
                           {Another ? customerInfo?.data?.phone : ''}
                         </div>
                       </div>
-                      <div className="flex flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white rounded border border-gray-200 border-solid max-md:pl-5 justify-between">
+                      <div className="flex flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white rounded border border-gray-500 border-solid max-md:pl-5 justify-between">
                         <div className="self-center">الرقم الضريبي</div>
                         <div className="mt-4 text-center font-semibold">
                           {Corporate
@@ -111,7 +112,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             : ''}
                         </div>
                       </div>
-                      <div className="flex z-10 flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white border border-gray-200 border-solid max-md:px-5 justify-between">
+                      <div className="flex z-10 flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white border border-gray-500 border-solid max-md:px-5 justify-between">
                         <div className="self-center">تاريخ الفاتورة</div>
                         <div className="flex gap-2 mt-4 font-semibold whitespace-nowrap justify-between">
                           {data?.business_date?.split(' ')[0] && (
@@ -126,14 +127,16 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
                         <div>رقم الفاتورة</div>
                         <div className="mt-4 font-semibold w-full text-center">
                           {data?.reference || ''}
                         </div>
                       </div>
+                    </div>
+                    <div className="flex">
                       {ShowCar && data?.kitchen_received_at && (
-                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
                           <div>نوع السيارة</div>
                           <div className="mt-4 font-semibold w-full text-center">
                             {data?.kitchen_received_at || ''}
@@ -141,7 +144,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                         </div>
                       )}
                       {ShowCar && data?.kitchen_done_at && (
-                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-200 border-solid max-md:px-5 justify-between">
+                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
                           <div>رقم اللوحة</div>
                           <div className="mt-4 font-semibold w-full text-center">
                             {data?.kitchen_done_at || ''}
@@ -149,29 +152,29 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                         </div>
                       )}
                     </div>
-                    <div className="flex z-10 flex-wrap gap-5 justify-between px-4 py-1.5 mt-4 w-full font-semibold text-right text-white rounded border border-gray-200 border-solid bg-zinc-500 max-md:mr-1 max-md:max-w-full">
+                    <div className="flex z-10 flex-wrap gap-5 justify-between px-4 py-1.5 mt-4 w-full font-semibold text-right text-white rounded border border-gray-500 border-solid bg-zinc-500 max-md:mr-1 max-md:max-w-full">
                       <div className="flex w-full  text-center">
-                        <div className="w-1/3">اسم المنتج</div>
-                        <div className="w-1/3">كمية</div>
-                        <div className="w-1/3">سعر الوحدة</div>
-                        <div className="w-1/3">المجموع</div>
+                        <div className="w-1/2">اسم المنتج</div>
+                        <div className="flex-grow">كمية</div>
+                        <div className="flex-grow">سعر الوحدة</div>
+                        <div className="flex-grow">المجموع</div>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded border border-gray-200 border-solid w-[802px] max-w-full max-md:mr-1 text-center px-3">
+                    <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded border border-gray-500 border-solid w-[802px] max-w-full max-md:mr-1 px-3 text-right">
                       {Data?.data?.products?.map((e) => (
                         <div className="flex font-semibold w-full">
-                          <div className="w-1/3 flex justify-center items-center">
+                          <div className="w-1/2 flex justify-center items-center">
                             {e?.name === 'sku-zood-20001'
                               ? e?.pivot?.kitchen_notes
                               : e?.name}
                           </div>
-                          <div className="w-1/3 flex justify-center items-center">
+                          <div className="flex-grow flex justify-center items-center">
                             {e?.pivot?.quantity}
                           </div>
-                          <div className="w-1/3 flex justify-center items-center">
+                          <div className="flex-grow flex justify-center items-center">
                             {e?.pivot?.unit_price?.toFixed(2)}
                           </div>
-                          <div className="w-1/3 flex justify-center items-center">
+                          <div className="flex-grow flex justify-center items-center">
                             {(
                               e?.pivot?.quantity * e?.pivot?.unit_price
                             )?.toFixed(2)}
@@ -180,7 +183,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       ))}
                       {Data?.data?.items?.map((e) => (
                         <div className="flex font-semibold w-full">
-                          <div className="w-1/3 flex justify-center items-center">
+                          <div className="w-1/2">
                             {e?.name === 'sku-zood-20001'
                               ? e?.pivot?.kitchen_notes
                               : e?.name}
@@ -208,7 +211,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {Data?.data?.discount_amount ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>خصم</div>
-                          <div>SR {Data?.data?.discount_amount?.toFixed(2)}</div>
+                          <div>
+                            SR {Data?.data?.discount_amount?.toFixed(2)}
+                          </div>
                         </div>
                       ) : null}
                       {Data?.data?.total_taxes ? (
@@ -266,7 +271,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                                     0
                                   ) - Data?.data?.total_price
                                 )?.toFixed(2)
-                              : 0) || 0}
+                              : Number(0).toFixed(2)) || 0}
                           </div>
                         </div>
                       ) : null}
@@ -339,7 +344,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     {/* عنوان الفاتورة */}
                     <div className="text-center font-semibold text-lg my-6">
                       {Corporate && 'فاتورة شراء'}
-                      {Another && `فاتورة ضريبية ${!Simple && 'مبسطة'}`}
+                      {Another && `فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`}
                     </div>
 
                     {/* معلومات الفاتورة */}
@@ -442,18 +447,21 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             key={index}
                             className="flex justify-between border-b-2 border-b-black/20"
                           >
-                            <div className="w-1/4 flex-grow items-center text-[12px]">
+                            <div
+                              style={{ width: `calc(100%/3)` }}
+                              className="flex-grow items-center text-[12px]"
+                            >
                               {product?.name === 'sku-zood-20001'
                                 ? product?.pivot?.kitchen_notes
                                 : product?.name}
                             </div>
-                            <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
+                            <div className="flex-grow items-center flex justify-center text-[12px]">
                               <p>{product?.pivot?.quantity}</p>
                             </div>
-                            <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
+                            <div className="flex-grow items-center flex justify-center text-[12px]">
                               <p>{product?.pivot?.cost}</p>
                             </div>
-                            <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
+                            <div className="flex-grow items-center flex justify-center text-[12px]">
                               <p>
                                 {(
                                   product?.pivot?.quantity *
@@ -532,13 +540,13 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                                     0
                                   ) - Data?.data?.total_price
                                 )?.toFixed(2)
-                              : 0}
+                              : Number(0).toFixed(2)}
                           </p>
                         </div>
                       ) : null}
                       {Data?.data?.payments?.length > 0 &&
                       Data?.data?.total_price ? (
-                        <div className="flex justify-between p-2 rounded items-center">
+                        <div className="flex justify-between rounded items-center">
                           <div>إجمالي المبلغ المتبقي</div>
                           <div>
                             SR{' '}
@@ -639,7 +647,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                     </div>
                   </div>
                   {/* <div className="flex flex-col self-end mx-auto items-center max-w-full rounded-none w-[154px] mt-10">
-                    <div className="flex flex-col justify-center px-4 py-5 bg-white rounded-lg border border-gray-200 border-solid max-md:px-5">
+                    <div className="flex flex-col justify-center px-4 py-5 bg-white rounded-lg border border-gray-500 border-solid max-md:px-5">
                       <img
                         loading="lazy"
                         src="https://cdn.builder.io/api/v1/image/assets/TEMP/0545702f8efd834df3b6f82096b53bd74059f9eaf11522eb1eb8a7fe4841708e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"

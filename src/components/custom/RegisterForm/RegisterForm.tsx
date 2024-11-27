@@ -67,14 +67,18 @@ export const RegisterForm: React.FC<RegisterFormProps> = () => {
             <div className="flex justify-center  w-full text-base font-semibold rounded-none text-zinc-100">
               <div className="flex   justify-between px-7 py-1.5 w-full bg-white rounded-lg border border-gray-200 border-solid max-md:px-5 max-md:max-w-full">
                 <div className="flex flex-wrap gap-6 my-auto max-md:max-w-full">
-                  <button className="flex gap-2 cursor-pointer px-5 py-3 bg-green-500 rounded-lg">
+                  <a
+                    href={`https://wa.me/+201080925119`}
+                    target="_blank"
+                    className="flex gap-2 cursor-pointer px-5 py-3 bg-green-500 rounded-lg"
+                  >
                     <div className="grow my-auto">تواصل عبر الواتس</div>
                     <img
                       loading="lazy"
                       src="https://cdn.builder.io/api/v1/image/assets/TEMP/3769057990693e0194a9bacc9caa2588cf42c25f2fe1a813eeab42095ea7745e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
                       className="object-contain shrink-0 w-6 aspect-square"
                     />
-                  </button>
+                  </a>
                   <Button
                     onClick={() => navigate('/zood-login')}
                     className="cursor-pointer  gap-2 px-5 py-6   rounded-lg"

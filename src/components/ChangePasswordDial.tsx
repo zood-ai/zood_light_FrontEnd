@@ -1,9 +1,38 @@
+import { useState } from 'react';
 import { IconLoader } from '@tabler/icons-react';
 import { AlertDialog, AlertDialogContent } from './ui/alert-dialog';
 import { Button } from './custom/button';
 import { Input } from './ui/input';
+import { toast } from '@/components/ui/use-toast';
 
 export default function ChangePasswordDial({ isOpen, onClose }) {
+  const [data, setData] = useState({
+    // currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  const handleChangePass = () => {
+    console.log(data);
+    if (data.newPassword.length < 6) {
+      toast({
+        title: 'خطأ',
+        description: 'يجب أن تتكون كلمة المرور الخاصة بك من 6 أحرف على الأقل',
+        duration: 3000,
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (data.newPassword !== data.confirmPassword) {
+      toast({
+        title: 'خطأ',
+        description: 'الرقم السري الجديد غير متطابق',
+        duration: 3000,
+        variant: 'destructive',
+      });
+      return;
+    }
+  };
   return (
     <div className=" ">
       <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -14,22 +43,50 @@ export default function ChangePasswordDial({ isOpen, onClose }) {
                 <div className="self-end mr-5 text-xl text-black">
                   تغير الرقم السري
                 </div>
-                <div className="flex flex-col items-start pr-5 pl-2 w-full font-medium text-zinc-500">
-                  <div className="self-stretch text-xs text-zinc-800">
-                    يجب أن تتكون كلمة المرور الخاصة بك من 6 أحرف على الأقل ويجب
-                    أن تتضمن مجموعة من الأرقام والأحرف والأحرف الخاصة (!$@%).
+                <div
+                  dir="rtl"
+                  className="flex flex-col items-start pr-5 pl-2 w-full font-medium text-zinc-500"
+                >
+                  <div className="self-stretch text-xs text-zinc-800 mb-2">
+                    {/* يجب أن تتكون كلمة المرور الخاصة بك من 6 أحرف على الأقل ويجب
+                    أن تتضمن مجموعة من الأرقام والأحرف والأحرف الخاصة (!$@%). */}
                   </div>
-                  <Input className="  mt-4 ml-3.5 max-w-full bg-white rounded border border-solid border-zinc-300 w-[361px]" />
+                  {/* <Input
+                    onChange={(e) =>
+                      setData({ ...data, currentPassword: e.target.value })
+                    }
+                    autoComplete="off"
+                    type="password"
+                    label="الرقم السري الحالي"
+                    placeholder="الرقم السري الحالي"
+                    className="  mt-2 ml-3.5 max-w-full bg-white rounded border border-solid border-zinc-300 w-[361px]"
+                  /> */}
 
-                  <Input className="  mt-4 ml-3.5 max-w-full bg-white rounded border border-solid border-zinc-300 w-[361px]" />
+                  <Input
+                    onChange={(e) =>
+                      setData({ ...data, newPassword: e.target.value })
+                    }
+                    autoComplete="off"
+                    type="password"
+                    label="الرقم السري الجديد"
+                    placeholder="الرقم السري الجديد"
+                    className="  mt-2 ml-3.5 max-w-full bg-white rounded border border-solid border-zinc-300 w-[361px]"
+                  />
 
-                  <Input className="  mt-4 ml-3.5 max-w-full bg-white rounded border border-solid border-zinc-300 w-[361px]" />
-
-                  <div className="self-end mt-2 text-indigo-900">
-                    هل نسيت الرقم السري؟
-                  </div>
+                  <Input
+                    onChange={(e) =>
+                      setData({ ...data, confirmPassword: e.target.value })
+                    }
+                    type="password"
+                    label="اعادة كتابة الرقم السري الجديد"
+                    placeholder="اعادة كتابة الرقم السري الجديد"
+                    className="  mt-2 ml-3.5 max-w-full bg-white rounded border border-solid border-zinc-300 w-[361px]"
+                  />
                 </div>
-                <Button className="flex flex-col justify-center items-center self-center px-6 py-1.5 mt-8 w-full text-white bg-indigo-900 rounded max-w-[361px] min-h-[39px]">
+                <Button
+                  onClick={handleChangePass}
+                  className="flex flex-col justify-center items-center self-center px-6 py-1.5 mt-8 w-full text-white bg-indigo-900 rounded max-w-[361px] min-h-[39px]"
+                >
                   <div className="gap-3 self-stretch">تغير الباسورد</div>
                 </Button>
               </div>

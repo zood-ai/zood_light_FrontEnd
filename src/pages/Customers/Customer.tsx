@@ -4,7 +4,7 @@ import { CustomersProps } from './Customers.types';
 
 import './Customers.css';
 import { tasks } from './data/tasks';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DetailsModal } from './Modal/DetailsModal';
 import { DataTable } from '@/components/custom/DataTableComp/data-table';
 import { ConfirmDelModal } from './Modal/ConfirmDelModal';
@@ -59,15 +59,48 @@ const Customer: React.FC<CustomersProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useCustomersDataTable();
-  const allService = createCrudService<any>('manage/customers');
-  const ordersData = createCrudService<any>('orders').useGetByFillter(
-    `filter[customer]=${customerId}`
+  const allService = createCrudService<any>(
+    `orders?filter[customer]=${customerId}`
   );
   const { useGetAll } = allService;
-  const { data: allData, isLoading } = useGetAll();
+  const { data: ordersData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
 
-  const filtredData = ordersData?.data?.data;
+  const [searchedData, setSearchedData] = useState({});
+  useEffect(() => {
+    setSearchedData(ordersData);
+  }, [ordersData]);
+
+  const debounce = (func: Function, delay: number) => {
+    let timer: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => func(...args), delay);
+    };
+  };
+  const handleDebounce = useCallback(
+    debounce((searchTerm: string) => {
+      if (!searchTerm) {
+        setSearchedData(ordersData); // Reset if search is cleared
+        return;
+      }
+
+      const holder = ordersData?.data.filter((item: any) => {
+        const referenceMatch = item?.reference?.includes(searchTerm);
+        return referenceMatch;
+      });
+      console.log({ holder });
+
+      setSearchedData({ ...ordersData, data: holder });
+    }, 300), // 300ms debounce delay
+    [ordersData]
+  );
+
+  const handleSearch = (e: string) => {
+    console.log(e, searchedData);
+    handleDebounce(e);
+  };
+  console.log({ searchedData });
   return (
     <>
       <AddEditModal
@@ -91,15 +124,16 @@ const Customer: React.FC<CustomersProps> = () => {
         <DataTable
           handleDel={handleOpenDeleteModal}
           handleRowClick={handleOpenViewModal}
-          data={filtredData || []}
+          data={searchedData?.data || []}
           columns={columns}
           handleEdit={handleOpenEditModal}
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
-          meta={allData?.meta || {}}
+          meta={searchedData?.meta || {}}
           actionText={'عميل'}
           dashBoard={true}
           loading={isLoading}
+          handleSearch={handleSearch}
         />
       </div>
     </>

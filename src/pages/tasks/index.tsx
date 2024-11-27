@@ -1,6 +1,6 @@
 // import { columns } from './components/useDataTableColumns';
 import { tasks } from './data/tasks';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DetailsModal } from './Modal/DetailsModal';
 import { DataTable } from '@/components/custom/DataTableComp/data-table';
 import { ConfirmDelModal } from './Modal/ConfirmDelModal';
@@ -49,6 +49,14 @@ function Tasks() {
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
 
+  const handleSearch = (e: any) => {
+    console.log(e);
+  };
+  const [searchedData, setSearchedData] = useState({});
+  useEffect(() => {
+    setSearchedData(tasks);
+  }, [tasks]);
+
   return (
     <>
       <AddEditModal
@@ -80,11 +88,12 @@ function Tasks() {
         <DataTable
           handleDel={handleOpenDeleteModal}
           handleRowClick={handleOpenViewModal}
-          data={tasks}
+          data={searchedData}
           columns={columns}
           handleEdit={handleOpenEditModal}
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
+          handleSearch={handleSearch}
         />
       </div>
     </>

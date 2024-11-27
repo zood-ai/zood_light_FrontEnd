@@ -16,10 +16,13 @@ import CustomerForms from './CustomerForms';
 import { Textarea } from '@/components/ui/textarea';
 import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
 import { useToast } from '@/components/custom/useToastComp';
+
 import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
+import { TbMenuDeep } from 'react-icons/tb';
+import { GrMenu } from 'react-icons/gr';
 
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
@@ -41,6 +44,7 @@ const CustomerForm = () => {
   const navigate = useNavigate();
   const params = useParams();
   const myInputRef = useRef(null);
+  const [isTextArea, setIsTextArea] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const { data: getAllPro } = fetchAllProducts();
@@ -122,6 +126,11 @@ const CustomerForm = () => {
     field: string,
     value: string
   ) => {
+    console.log({
+      index,
+      field,
+      value,
+    });
     // if (params.id) return;
     if (field === 'product_id') {
       if (!value) {
@@ -178,32 +187,67 @@ const CustomerForm = () => {
     }
   };
 
+  const changeToTextArea = () => {
+    setIsTextArea(!isTextArea);
+  };
+  console.log({ orderSchema });
+
   return (
-    <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
+    <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-10 space-y-5">
       <div className="w-full xl:w-1/2">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
           {orderSchema.products.map((item, index) => (
-            <div key={index} className="flex flex-wrap">
-              <SelectCompInput
-                disabled={params.id}
-                className="md:w-[327px]  "
-                placeholder="اسم المنتج"
-                options={getAllPro?.data?.map((product) => ({
-                  value: product.id,
-                  label: product.name,
-                }))}
-                label="اسم المنتج"
-                ref={myInputRef}
-                onValueChange={(value) =>
-                  handleItemChange(index, 'product_id', value)
-                }
-                onInputFieldChange={(value) =>
-                  handleItemChange(index, 'name', value)
-                }
-                value={item.product_id}
-              />
-              <div className="flex gap-x-md">
+            <div key={index} className="flex flex-col flex-wrap gap-x-5">
+              <div className="flex md:w-fit max-md:flex-grow gap-x-2 mb-5">
+                {!isTextArea ? (
+                  <>
+                    <SelectCompInput
+                      disabled={params.id}
+                      className="flex-grow w-full md:w-[327px] "
+                      placeholder="اسم المنتج"
+                      options={getAllPro?.data?.map((product) => ({
+                        value: product.id,
+                        label: product.name,
+                      }))}
+                      label="اسم المنتج"
+                      ref={myInputRef}
+                      onValueChange={(value) =>
+                        handleItemChange(index, 'product_id', value)
+                      }
+                      onInputFieldChange={(value) =>
+                        handleItemChange(index, 'name', value)
+                      }
+                      value={item.product_id}
+                    />
+                    <button
+                      onClick={changeToTextArea}
+                      className="w-fit h-fit mt-8"
+                    >
+                      <GrMenu size={25} />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Textarea
+                      placeholder="وصف المنتج"
+                      defaultValue={
+                        item.name === 'sku-zood-20001'
+                          ? item?.kitchen_notes
+                          : item?.name
+                      }
+                      ref={myInputRef}
+                      onChange={() => handleItemChange(index, 'product_id', '')}
+                      label="اسم المنتج"
+                      className="w-full md:w-[327px] h-min"
+                    />
+                    <button onClick={changeToTextArea} className="h-fit mt-6">
+                      <TbMenuDeep size={25} />
+                    </button>
+                  </>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-x-2">
                 <IconInput
                   disabled={params.id}
                   value={item.quantity}
@@ -211,23 +255,23 @@ const CustomerForm = () => {
                     handleItemChange(index, 'quantity', e.target.value)
                   }
                   label="الكمية"
-                  inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
+                  inputClassName="flex-wrap md:w-[151px] sm:max-w-[151px] min-w-[80px]"
                 />
                 <IconInput
                   type="number"
                   disabled={item.product_id}
-                  defaultValue={Number(Number(item.unit_price).toFixed(2))}
+                  value={Number(Number(item.unit_price).toFixed(2))}
                   onChange={(e) =>
                     handleItemChange(index, 'unit_price', e.target.value)
                   }
                   min={0}
                   label="السعر"
                   iconSrcLeft="SR"
-                  inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
+                  inputClassName="flex-wrap md:w-[151px] sm:max-w-[151px] min-w-[80px]"
                 />
                 <IconInput
                   label="المجموع"
-                  inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
+                  inputClassName="flex-wrap md:w-[151px] sm:max-w-[151px] min-w-[80px]"
                   iconSrcLeft="SR"
                   value={item.unit_price * item.quantity || 0}
                   disabled
@@ -281,7 +325,7 @@ const CustomerForm = () => {
                 name="kitchen_received_at"
                 // className="col-span-10 "
                 label="نوع السيارة"
-                inputClassName="w-[240px] min-w-[120px]"
+                inputClassName="lg:w-[240px] min-w-[120px]"
                 value={orderSchema.kitchen_received_at}
                 onChange={(e) =>
                   dispatch(
@@ -297,7 +341,7 @@ const CustomerForm = () => {
               <IconInput
                 disabled={params.id}
                 name="kitchen_done_at"
-                inputClassName="w-[240px] min-w-[120px] mb-sm "
+                inputClassName="lg:w-[240px] min-w-[120px] mb-sm "
                 label="رقم اللوحة"
                 value={orderSchema.kitchen_done_at}
                 onChange={(e) =>
@@ -321,7 +365,7 @@ const CustomerForm = () => {
                 updateField({ field: 'kitchen_notes', value: e.target.value })
               )
             }
-            className="w-[499px] my-sm"
+            className="lg:w-[499px] my-sm"
             label="ملاحظات"
           />
         </div>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 
 import { CorporateInvoicesProps } from './CorporateInvoices.types';
 
@@ -31,7 +31,7 @@ export const CorporateInvoices: React.FC<CorporateInvoicesProps> = () => {
     // setSelectedRow({});
     setModalType('Add');
     // setIsAddEditOpen(true);
-        // navigate('/individual-invoices/add');
+    // navigate('/individual-invoices/add');
     navigate('add');
   };
   const handleOpenViewModal = (row: any) => {
@@ -54,25 +54,31 @@ export const CorporateInvoices: React.FC<CorporateInvoicesProps> = () => {
     setIsDelModalOpen(false);
 
     dispatch(toggleActionView(false));
-
   };
-  const filterBtn = () => {
-  };
+  const filterBtn = () => {};
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allService = createCrudService<any>('orders?filter[type]=2&filter[status]=4');
+  const allService = createCrudService<any>(
+    'orders?filter[type]=2&filter[status]=4'
+  );
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
 
   const dispatch = useDispatch();
-useEffect(() => {
+  useEffect(() => {
+    dispatch(resetCard());
+    dispatch(resetOrder());
+  }, [dispatch]);
+  const toggleActionData = useSelector((state: any) => state?.toggleAction);
+  const [searchedData, setSearchedData] = useState({});
+  useEffect(() => {
+    setSearchedData(allData);
+  }, [allData]);
 
-  dispatch(resetCard());
-  dispatch(resetOrder());
-}, [dispatch])
-const toggleActionData = useSelector((state: any) => state?.toggleAction);
-
+  const handleSearch = (e: any) => {
+    console.log(e);
+  };
 
   return (
     <>
@@ -97,14 +103,15 @@ const toggleActionData = useSelector((state: any) => state?.toggleAction);
         <DataTable
           handleDel={handleOpenDeleteModal}
           handleRowClick={handleOpenViewModal}
-          data={allData?.data || []}
+          data={searchedData?.data || []}
           columns={columns}
           handleEdit={handleOpenEditModal}
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
-          meta={allData || {}}
+          meta={searchedData || {}}
           actionText={'فاتورة '}
           loading={isLoading}
+          handleSearch={handleSearch}
         />
       </div>
     </>

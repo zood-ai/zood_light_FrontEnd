@@ -189,12 +189,12 @@ export default function SignIn2() {
             />
 
             <div className="flex justify-end">
-              <Link
+              {/* <Link
                 to="/reset-password"
                 className="text-sm text-main cursor-pointer mt-[10px] text-end"
               >
                 هل نسيت كلمة المرور؟
-              </Link>
+              </Link> */}
             </div>
             <div className=" mb-[20px] mt-[40px] ">
               <Button
