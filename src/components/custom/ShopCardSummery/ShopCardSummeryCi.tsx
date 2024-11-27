@@ -50,7 +50,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     },
   ]);
   const [fetchedPaymentMethod, setFetchedPaymentMethod] = useState<any>([]);
-  let params = useParams();
+  const params = useParams();
   useEffect(() => {
     if (params.id && orderSchema?.payments) {
       // alert(params.id)
@@ -59,7 +59,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     }
   }, [params.id, orderSchema.payments]);
 
-  let dispatch = useDispatch();
+  const dispatch = useDispatch();
   const totalCost = cardItemValue.reduce(
     (acc, item) => acc + item.unit_price * item.quantity,
     0
@@ -187,6 +187,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     }
     handleIncludeAndExclude();
   }, [discountAmount, taxAmount, orderSchema, mainTax]);
+  console.log({ fetchedPaymentMethod });
   return (
     <>
       <div className="flex mt-5 flex-col   rounded-none  w-full xl:w-1/2  ">
@@ -209,33 +210,45 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                   <div className="flex flex-col w-full text-sm font-medium text-right whitespace-nowrap max-md:mt-10">
                     <div className="flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {Math.floor(subTotal * 100) / 100}
+                        {(Math.floor(subTotal * 100) / 100).toFixed(2)}
                       </div>
                       <div className="self-start text-zinc-500">SR</div>
                     </div>
                     <IconInput
                       className="flex-grow mt-4"
                       // <IconInput
+                      type="number"
                       placeholder="0.00"
                       onChange={(value) =>
                         setdiscountAmount(
-                          Math.min(value.target.value, Number(totalCost))
+                          Number(
+                            Math.min(
+                              value.target.value,
+                              Number(totalCost)
+                            ).toFixed(2)
+                          )
                         )
                       }
                       inputClassName={'w-full flex-grow '}
                       // label="ضريبة القيمة المضافة"
                       iconSrcLeft={'SR'}
                       value={Number(
-                        params.id
-                          ? orderSchema?.discount_amount
-                          : discountAmount
+                        Number(
+                          params.id
+                            ? orderSchema?.discount_amount
+                            : discountAmount
+                        ).toFixed(2)
                       )}
                       disabled={params.id}
                     />
                     {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {Math.floor(Number(taxAmount) * 100) / 100}
+                        {Number(
+                          (Math.floor(Number(taxAmount) * 100) / 100)?.toFixed(
+                            2
+                          )
+                        )}
                       </div>
                       <div className="text-zinc-500">SR</div>
                     </div>
@@ -257,7 +270,10 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
             <div className=" flex gap-5 justify-between self-stretch mt-3 px-2 w-full text-sm text-right text-zinc-800 max-md:max-w-full">
               <div className="font-medium">المبلغ الإجمالي</div>
               <div className="font-bold">
-                SR {Math.floor(totalAmountIncludeAndExclude * 100) / 100}
+                SR{' '}
+                {(
+                  Math.floor(totalAmountIncludeAndExclude * 100) / 100
+                )?.toFixed(2)}
               </div>
             </div>
             <>
@@ -273,7 +289,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                       if (payment === 'fully') return;
                       handleItemChange(index2, 'payment_method_id', option.id);
                       setPaymentMethod(() => {
-                        return paymentMethod.map((item, i) => {
+                        return paymentMethod?.map((item, i) => {
                           if (i === paymentMethod.length - 1) {
                             return {
                               id: option.id,
@@ -319,13 +335,15 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                     handleItemChange(
                       paymentMethod.length - 1,
                       'amount',
-                      Number(e.target.value)
+                      e.target.value
                     );
                   }}
                   value={
                     payment !== 'fully'
                       ? Number(
-                          paymentMethod[paymentMethod.length - 1]?.amount
+                          Number(
+                            paymentMethod[paymentMethod.length - 1]?.amount
+                          ).toFixed(2)
                         ) || 0
                       : 0
                   }
@@ -342,18 +360,21 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
             </>
             {/* ))} */}
             {fetchedPaymentMethod &&
-              fetchedPaymentMethod.map((option, idx) => (
-                <div className="flex gap-3 items-center" key={idx}>
-                  <p>{option?.amount}</p>
-                  <p>{option?.name || option?.payment_method?.name}</p>
-                </div>
-              ))}
+              fetchedPaymentMethod.map((option, idx) => {
+                if (!option?.amount) return;
+                return (
+                  <div className="flex gap-3 items-center" key={idx}>
+                    <p>{Number(option?.amount).toFixed(2)}</p>
+                    <p>{option?.name || option?.payment_method?.name}</p>
+                  </div>
+                );
+              })}
             {paymentMethod?.map((option1, index1) => {
               if (index1 === paymentMethod?.length - 1 && payment !== 'fully')
                 return;
               return (
                 <div className="flex gap-3 items-center" key={index1}>
-                  <p>{option1?.amount}</p>
+                  <p>{Number(option1?.amount).toFixed(2)}</p>
                   <p>{option1?.name || option1?.payment_method?.name}</p>
                   {paymentMethod?.length > 1 &&
                     payment !== 'fully' &&
@@ -395,7 +416,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                       return;
                     if (!paymentMethod[paymentMethod.length - 1].amount) return;
                     setPaymentMethod(() => {
-                      const holder = paymentMethod.map((el) => ({
+                      const holder = paymentMethod?.map((el) => ({
                         ...el,
                         notadd: false,
                       }));
@@ -435,12 +456,15 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
             المبلغ المتبقي
           </div>
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            {totalAmountIncludeAndExclude -
+            {(
+              totalAmountIncludeAndExclude -
               totalAmount -
-              fetchedPaymentMethod.reduce((acc, item) => acc + item.amount, 0)}
+              fetchedPaymentMethod?.reduce((acc, item) => acc + item.amount, 0)
+            )?.toFixed(2)}
           </div>
         </div>
       </div>
+          
     </>
   );
 };

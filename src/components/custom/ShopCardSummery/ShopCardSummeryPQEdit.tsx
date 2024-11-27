@@ -61,14 +61,16 @@ const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
                   <div className="flex flex-col w-full text-sm font-medium text-right whitespace-nowrap max-md:mt-10">
                     <div className="flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {Math.floor(data?.data?.subtotal_price * 100) / 100 ||
-                          0}
+                        {(
+                          Math.floor(data?.data?.subtotal_price * 100) / 100 ||
+                          0
+                        ).toFixed(2)}
                       </div>
                       <div className="self-start text-zinc-500">SR</div>
                     </div>
                     <div className="mt-4 flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {data?.data?.discount_amount || 0}
+                        {(data?.data?.discount_amount || 0).toFixed(2)}
                       </div>
                       <div className="self-start text-zinc-500">SR</div>
                     </div>
@@ -85,7 +87,9 @@ const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
                     {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {Math.floor(data?.data?.total_taxes * 100) / 100 || 0}
+                        {(
+                          Math.floor(data?.data?.total_taxes * 100) / 100 || 0
+                        ).toFixed(2)}
                       </div>
                       <div className="text-zinc-500">SR</div>
                     </div>
@@ -107,7 +111,10 @@ const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
             <div className="flex-grow flex justify-between self-stretch mt-3 max-md:pl-4 pl-2 w-full text-sm text-right  text-zinc-800 max-md:mr-2.5 max-md:max-w-full">
               <div className="font-medium">المبلغ الإجمالي</div>
               <div className="font-bold">
-                SR {Math.floor(data?.data?.total_price * 100) / 100 || 0}
+                SR{' '}
+                {(Math.floor(data?.data?.total_price * 100) / 100 || 0).toFixed(
+                  2
+                )}
               </div>
             </div>
           </div>
@@ -124,7 +131,8 @@ const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
             المبلغ المتبقي
           </div>
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            SR {Math.floor(data?.data?.total_price * 100) / 100 || 0}
+            SR{' '}
+            {(Math.floor(data?.data?.total_price * 100) / 100 || 0).toFixed(2)}
           </div>
         </div>
       </div>

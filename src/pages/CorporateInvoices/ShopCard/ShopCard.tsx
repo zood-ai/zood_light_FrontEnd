@@ -159,7 +159,7 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
 
   return (
     <>
-      <DetailsHeadWithOutFilter bkAction={handleBkAction} />
+      <DetailsHeadWithOutFilter bkAction={handleBkAction} mainTittle="فاتورة مؤسسة"/>
       {/* <ShopCardTable /> */}
       <CustomerForm />
       <ConfirmBk

@@ -37,18 +37,14 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     },
   ]);
   const orderSchema = useSelector((state: any) => state.orderSchema);
-  let params = useParams();
+  const params = useParams();
   useEffect(() => {
     if (params.id) {
       // alert(params.id)
       setPaymentMethod(orderSchema?.payments || []);
     }
   }, [orderSchema.payments]);
-
-  const handleOptionClick = (option) => {
-    setPaymentMethod(option); // Set the clicked option as active
-  };
-  let dispatch = useDispatch();
+  const dispatch = useDispatch();
   const totalCost = cardItemValue.reduce(
     (acc, item) => acc + item.price * item.qty,
     0
@@ -207,7 +203,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                   <div className="flex flex-col w-full text-sm font-medium text-right whitespace-nowrap max-md:mt-10">
                     <div className="flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {Math.floor(Number(subTotal) * 100) / 100}
+                        {(Math.floor(Number(subTotal) * 100) / 100)?.toFixed(2)}
                       </div>
                       <div className="self-start text-zinc-500">SR</div>
                     </div>
@@ -217,21 +213,33 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                       placeholder="0.00"
                       onChange={(value) =>
                         setdiscountAmount(
-                          Math.min(Number(value.target.value), Number(totalCost))
+                          Number(
+                            Math.min(
+                              Number(value.target.value),
+                              Number(totalCost)
+                            )?.toFixed(2)
+                          )
                         )
                       }
                       inputClassName={'w-full flex-grow '}
+                      type="number"
                       // label="ضريبة القيمة المضافة"
                       iconSrcLeft={'SR'}
                       value={Number(
-                        params.id ? orderSchema?.discount_amount : discountAmount
+                        Number(
+                          params.id
+                            ? orderSchema?.discount_amount
+                            : discountAmount
+                        )?.toFixed(2)
                       )}
                       disabled={params.id}
                     />
                     {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {Math.floor(Number(taxAmount) * 100) / 100}
+                        {(Math.floor(Number(taxAmount) * 100) / 100)?.toFixed(
+                          2
+                        )}
                       </div>
                       <div className="text-zinc-500">SR</div>
                     </div>
@@ -253,7 +261,10 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
             <div className=" flex gap-5 justify-between self-stretch mt-3 px-2 w-full text-sm text-right text-zinc-800 max-md:max-w-full">
               <div className="font-medium">المبلغ الإجمالي</div>
               <div className="font-bold">
-                SR {Math.floor(Number(totalAmountIncludeAndExclude) * 100) / 100}
+                SR{' '}
+                {(
+                  Math.floor(Number(totalAmountIncludeAndExclude) * 100) / 100
+                )?.toFixed(2)}
               </div>
             </div>
             <>
@@ -274,7 +285,10 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                             return {
                               id: option.id,
                               name: option.name,
-                              amount: totalAmountIncludeAndExclude - totalAmount,
+                              amount: Math.max(
+                                totalAmountIncludeAndExclude - totalAmount,
+                                0
+                              ),
                               tendered: 180,
                               tips: 0,
                               notadd: true,
@@ -315,9 +329,11 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                   value={
                     !params.id
                       ? Number(
-                          paymentMethod[paymentMethod.length - 1]?.amount
-                        ) || 'NaN'
-                      : 'NaN'
+                          Number(
+                            paymentMethod[paymentMethod.length - 1]?.amount
+                          )?.toFixed(2)
+                        ) || '0'
+                      : '0'
                   }
                   placeholder="0.00"
                   min={0}
@@ -335,7 +351,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
               if (index1 === paymentMethod?.length - 1 && !params.id) return;
               return (
                 <div className="flex gap-3 items-center" key={index1}>
-                  <p>{option1?.amount}</p>
+                  <p>{Number(option1?.amount)?.toFixed(2)}</p>
                   <p>{option1?.name || option1?.payment_method?.name}</p>
                   {paymentMethod?.length > 1 && !params?.id && (
                     <>
@@ -443,7 +459,9 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
             المبلغ المتبقي
           </div>
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            {Number(totalAmountIncludeAndExclude) - Number(totalAmount)}
+            {(
+              Number(totalAmountIncludeAndExclude) - Number(totalAmount)
+            )?.toFixed(2)}
           </div>
         </div>
       </div>

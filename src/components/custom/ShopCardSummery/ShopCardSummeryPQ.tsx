@@ -149,7 +149,7 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                   <div className="flex flex-col w-full text-sm font-medium text-right whitespace-nowrap max-md:mt-10">
                     <div className="flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {Math.floor(subTotal * 100) / 100 || 0}
+                        {(Math.floor(subTotal * 100) / 100 || 0).toFixed(2)}
                       </div>
                       <div className="self-start text-zinc-500">SR</div>
                     </div>
@@ -162,12 +162,15 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                           Math.min(value.target.value, totalCost)
                         )
                       }
+                      type="number"
                       inputClassName={'w-full   '}
                       // label="ضريبة القيمة المضافة"
                       iconSrcLeft={'SR'}
                       value={
                         orderId
-                          ? orderSchema?.discount_amount
+                          ? Number(
+                              Number(orderSchema?.discount_amount).toFixed(2)
+                            )
                           : discountAmount || 0
                       }
                       disabled={orderId}
@@ -175,7 +178,7 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                     {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {Math.floor(taxAmount * 100) / 100 || 0}
+                        {(Math.floor(taxAmount * 100) / 100 || 0).toFixed(2)}
                       </div>
                       <div className="text-zinc-500">SR</div>
                     </div>
@@ -197,7 +200,10 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
             <div className="flex-grow flex justify-between self-stretch mt-3 max-md:pl-4 pl-2 w-full text-sm text-right  text-zinc-800 max-md:mr-2.5 max-md:max-w-full">
               <div className="font-medium">المبلغ الإجمالي</div>
               <div className="font-bold">
-                SR {Math.floor(totalAmountIncludeAndExclude * 100) / 100 || 0}
+                SR{' '}
+                {(
+                  Math.floor(totalAmountIncludeAndExclude * 100) / 100 || 0
+                ).toFixed(2)}
               </div>
             </div>
           </div>
@@ -214,7 +220,7 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
             المبلغ المتبقي
           </div>
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            SR {totalAmountIncludeAndExclude || 0}
+            SR {(totalAmountIncludeAndExclude || 0).toFixed(2)}
           </div>
         </div>
       </div>
