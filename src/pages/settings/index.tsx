@@ -4,10 +4,17 @@ import { Button } from '@/components/custom/button';
 import { Input } from '@/components/ui/input';
 import axiosInstance from '@/api/interceptors';
 import { set } from 'zod';
+import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
+import Cookies from 'js-cookie';
+
 export default function Settings() {
+  const userId = Cookies.get('userId');
   const [selectedFileName, setSelectedFileName] = useState('');
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
+  const { data: allBusinessTypes } = createCrudService<any>(
+    'manage/business-types'
+  ).useGetAll();
   const { mutate: updateSettings } =
     createCrudService<any>('manage/settings').useUpdate();
   const { data: whoami } = createCrudService<any>('auth/whoami').useGetAll();
@@ -16,6 +23,9 @@ export default function Settings() {
     createCrudService<any>('manage/taxes').useUpdateNoDialog();
   const { mutate: updateBranch } =
     createCrudService<any>('manage/branches').useUpdate();
+  const { mutate: updateBusiness } = createCrudService<any>(
+    `auth/users/${userId}`
+  ).useUpdate();
   const holder = whoami
     ? JSON.parse(whoami?.user?.branches[0]?.registered_address)
     : {};
@@ -33,6 +43,7 @@ export default function Settings() {
     phone: whoami?.user?.branches[0]?.phone || '',
     business_logo: settings?.data?.business_logo || '',
     business_tax_number: settings?.data?.business_tax_number || '',
+    business_type: settings?.data?.business_type || '',
   });
   const [updatedTaxInclusivePricing, setUpdatedTaxInclusivePricing] = useState(
     settings?.data?.tax_inclusive_pricing
@@ -57,6 +68,7 @@ export default function Settings() {
       phone: whoami?.user?.branches[0]?.phone || '',
       business_logo: settings?.data?.business_logo || '',
       business_tax_number: settings?.data?.business_tax_number || '',
+      business_type: whoami?.business?.type || '',
     });
 
     setUpdatedTaxInclusivePricing(settings?.data?.tax_inclusive_pricing);
@@ -66,6 +78,7 @@ export default function Settings() {
   const brancheId = whoami?.user?.branches[0]?.id;
   const [fileBase64, setFileBase64] = useState<any>('');
   // update Branch function
+  console.log({ updateAll, whoami });
 
   const changeTaxType = () => {
     if (settings?.data?.tax_inclusive_pricing === updatedTaxInclusivePricing)
@@ -89,19 +102,13 @@ export default function Settings() {
       },
     });
   };
-
-  useEffect(() => {
-    if (!fileBase64) return;
-    setUpdateAll((prev) => ({
-      ...prev,
-      business_logo: fileBase64,
-    }));
-    updateSettings({
+  const updateBusinessType = () => {
+    if (updateAll.business_type === whoami?.business?.type) return;
+    updateBusiness({
       id: '',
-      data: { business_logo: fileBase64 },
+      data: { business_type_id: updateAll.business_type },
     });
-  }, [fileBase64, updateSettings]);
-
+  };
   const updateBothData = async () => {
     updateSettings({
       id: '',
@@ -130,6 +137,19 @@ export default function Settings() {
       },
     });
   };
+
+  useEffect(() => {
+    if (!fileBase64) return;
+    setUpdateAll((prev) => ({
+      ...prev,
+      business_logo: fileBase64,
+    }));
+    updateSettings({
+      id: '',
+      data: { business_logo: fileBase64 },
+    });
+  }, [fileBase64, updateSettings]);
+
   return (
     <>
       <div className="flex flex-col rounded-none max-w-[805px]">
@@ -374,6 +394,43 @@ export default function Settings() {
               }}
               type="button"
               className="px-6  text-sm py-1.5 mt-8 font-semibold  mr-[12px]  text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5"
+            >
+              حفظ
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start py-4 pr-2.5 pl-20 mt-7 w-full text-sm font-semibold text-left bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
+          <div className="text-base text-zinc-800 max-md:mr-2">نوع الشركة </div>
+          <div className="mt-2 font-medium text-zinc-500 max-md:mr-2">
+            اختر نوع الشركة
+          </div>
+          <div className="relative mt-2">
+            <CustomSearchInbox
+              options={allBusinessTypes?.data?.map((item) => ({
+                value: item.id,
+                label: item.name,
+              }))}
+              placeholder=""
+              onValueChange={(value) => {
+                setUpdateAll((prev) => ({
+                  ...prev,
+                  business_type: value,
+                }));
+              }}
+              // label="اسم العميل"
+              className=" md:col-span-4 min-w-[327px] flex-grow"
+              value={updateAll?.business_type}
+              disabled={false}
+            />
+          </div>
+
+          <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5">
+            <button
+              onClick={() => {
+                updateBusinessType();
+              }}
+              className="gap-3 self-stretch"
             >
               حفظ
             </button>

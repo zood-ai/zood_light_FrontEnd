@@ -247,7 +247,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
       }
     }
   };
-  const allService = createCrudService<any>('menu/categories');
+  const allService = createCrudService<any>('menu/categories?not_default=1');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const [isOpen, setIsOpen] = useState(false);
