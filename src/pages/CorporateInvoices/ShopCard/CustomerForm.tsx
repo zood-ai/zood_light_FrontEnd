@@ -33,8 +33,8 @@ const CustomerForm = () => {
     'menu/products?filter[name]=sku-zood-20001'
   ).useGetAll();
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
-  // const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
-  const ShowCar = true;
+  const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  // const ShowCar = true;
 
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const dispatch = useDispatch();

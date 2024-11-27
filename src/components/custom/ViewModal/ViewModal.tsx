@@ -33,8 +33,8 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
   const Simple = pathname === '/zood-dashboard/corporate-invoices';
   const Another = !Corporate;
-  // const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
-  const ShowCar = true;
+  const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  // const ShowCar = true;
   const Data = OrderData ? { ...OrderData } : { ...purchsingInfo };
   const [size, setSize] = useState('A4');
   const handleSizeChange = (newSize: string) => {

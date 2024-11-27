@@ -26,8 +26,8 @@ const CustomerFormEdit = () => {
   const allServiceOrder = createCrudService<any>('orders');
   const orderPayment = createCrudService<any>('order-payments');
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
-  // const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
-  const ShowCar = true;
+  const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  // const ShowCar = true;
 
   const { mutate, isLoading: loadingOrder } = orderPayment.useCreate();
   const getOrder = allServiceOrder.useGetById(params.id);
