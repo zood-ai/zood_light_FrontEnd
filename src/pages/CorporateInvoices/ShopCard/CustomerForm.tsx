@@ -158,8 +158,8 @@ const CustomerForm = () => {
         i === index
           ? {
               ...item,
-              quantity: parseInt(value) || 1,
-              total_price: (parseInt(value) || 1) * item.unit_price || 0,
+              quantity: Number(value) || 1,
+              total_price: (Number(value) || 1) * item.unit_price || 0,
             }
           : item
       );
@@ -169,8 +169,8 @@ const CustomerForm = () => {
         i === index
           ? {
               ...item,
-              unit_price: parseInt(value) || 1,
-              total_price: (parseInt(value) || 1) * item.quantity || 0,
+              unit_price: Number(value),
+              total_price: Number(value) * item.quantity || 0,
             }
           : item
       );
@@ -214,11 +214,13 @@ const CustomerForm = () => {
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                 />
                 <IconInput
+                  type="number"
                   disabled={item.product_id}
-                  value={item.unit_price || 0}
+                  defaultValue={Number(Number(item.unit_price).toFixed(2))}
                   onChange={(e) =>
                     handleItemChange(index, 'unit_price', e.target.value)
                   }
+                  min={0}
                   label="السعر"
                   iconSrcLeft="SR"
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"

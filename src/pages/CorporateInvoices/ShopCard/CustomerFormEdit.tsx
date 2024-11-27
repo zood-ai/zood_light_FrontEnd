@@ -113,6 +113,17 @@ const CustomerFormEdit = () => {
                 // inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                 inputClassName="md:w-[327px]  "
               />
+              {/* <textarea
+                disabled
+                value={
+                  item.name === 'sku-zood-20001'
+                    ? item?.pivot?.kitchen_notes
+                    : item?.name
+                }
+                // label="اسم المنتج"
+                // inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
+                // inputClassName="md:w-[327px]  "
+              /> */}
               <div className="flex gap-x-md">
                 <IconInput
                   disabled
