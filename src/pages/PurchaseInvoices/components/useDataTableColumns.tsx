@@ -61,22 +61,22 @@ export const useDataTableColumns = () => {
       },
     },
 
-    {
-      accessorKey: 'total_cost',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'المبلغ الكلي'} />
-      ),
-      cell: ({ row }: any) => {
-        return (
-          <div className="flex space-x-2">
-            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('total_cost') || '0'}
-            </span>
-          </div>
-        );
-      },
-    },
+    // {
+    //   accessorKey: 'total_cost',
+    //   header: ({ column }) => (
+    //     <DataTableColumnHeader column={column} title={'المبلغ الكلي'} />
+    //   ),
+    //   cell: ({ row }: any) => {
+    //     return (
+    //       <div className="flex space-x-2">
+    //         {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+    //         <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+    //           {row.getValue('total_cost') || '0'}
+    //         </span>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       accessorKey: 'created_at',
       header: ({ column }) => (

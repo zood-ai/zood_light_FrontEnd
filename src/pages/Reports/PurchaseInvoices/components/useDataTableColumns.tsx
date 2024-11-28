@@ -109,6 +109,26 @@ export const useDataTableColumns = () => {
         );
       },
     },
+    {
+      accessorKey: 'zatca_report_status',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={'Zatca Reporting'} />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2 w-[180px] md:w-auto">
+            {row.getValue('zatca_report_status') === 'pending' ||
+              (row.getValue('zatca_report_status') === null && (
+                <StatusBadge status="pending" text={'click to clearance'} />
+              ))}
+            {row.getValue('zatca_report_status') === 'PASS' && (
+              <StatusBadge status="reported" text={'reported'} />
+            )}
+            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+          </div>
+        );
+      },
+    },
 
     {
       accessorKey: 'id',
