@@ -36,7 +36,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
   // const ShowCar = true;
   const Data = OrderData ? { ...OrderData } : { ...purchsingInfo };
-  const [size, setSize] = useState('A4');
+  const [size, setSize] = useState('80mm');
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);
   };
@@ -61,10 +61,10 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                   margin: 'auto',
                   padding: '20px', // Adds spacing for better readability
                 }}
-                className={`${"size === 'A4' ? 'a4-size' : 'small-receipt'"} print-content flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
+                className={`${"size === 'A4' ? 'a4-size' : 'small-receipt'"} flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
               >
                 {size === 'A4' ? (
-                  <div className="flex flex-col px-3 pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg  text-zinc-800 max-md:mt-10 max-md:max-w-full">
+                  <div className="flex print-content flex-col px-3 pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg  text-zinc-800 max-md:mt-10 max-md:max-w-full">
                     <div className="w-full flex justify-between items-center mb-4">
                       <div>
                         <div className="flex items-center gap-5">
@@ -585,9 +585,10 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                         alt="Barcode"
                         className="w-[381px] h-[57px]"
                       />
-                    </div>
-                    <div className="  my-4 flex justify-center">
-                      <QRCodeComp settings={settings} Data={Data} />
+                      <div className="  my-4 flex justify-center">
+                        <QRCodeComp settings={settings} Data={Data} />
+                      </div>
+                      <div className="w-1 h-1"></div>
                     </div>
                   </div>
                 )}

@@ -32,7 +32,7 @@
     margin-top: -50px;
   }
   .print-content {
-    margin-top: 0 !important;
+    margin-top: 50px !important;
     padding-top: 0 !important;
   }
   .print-content2 {
@@ -43,13 +43,7 @@
   @page {
     size: A4 portrait;
     margin: 10mm;
-    scale: 2;
-  }
-
-  /* If 80mm size is selected */
-  .size-80mm @page {
-    size: 80mm portrait;
-    margin: 10mm;
+    /* scale: 2; */
   }
 
   /* Hide elements that should not appear in the printout */
