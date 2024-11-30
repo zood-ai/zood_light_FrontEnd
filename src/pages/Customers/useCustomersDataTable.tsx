@@ -15,12 +15,12 @@ export const useCustomersDataTable = () => {
       ),
     },
     {
-      accessorKey: 'created_at',
+      accessorKey: 'business_date',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'التاريخ'} />
       ),
       cell: ({ row }) => {
-        const createdAt = row.getValue('created_at');
+        const createdAt = row.getValue('business_date');
         const formattedDate = createdAt ? formatDateTime(createdAt) : '-';
         return (
           <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">

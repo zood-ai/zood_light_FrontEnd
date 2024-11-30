@@ -91,12 +91,12 @@ export function DataTable<TData, TValue>({
     const from = parseISO(fromDate);
     const to = parseISO(endDate);
     return data.filter((item: any) => {
-      const itemDate = parseISO(item.business_date); // Adjust this to match your date field
+      const itemDate = parseISO(item.business_date.split(' ')[0]);
       return itemDate >= from && itemDate <= to;
     });
   }, [data, fromDate, endDate]);
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: {
       pagination,
@@ -121,8 +121,6 @@ export function DataTable<TData, TValue>({
   const navigate = useNavigate();
   const pagePath = window.location.pathname; // Get the current path
   const title = titleMapping(pagePath);
-  console.log('From: ', fromDate);
-  console.log('To: ', endDate);
   const handleDateChange = (dates: any, dateStrings: [string, string]) => {
     setFromData(dateStrings[0]);
     setEndDate(dateStrings[1]);
@@ -178,7 +176,6 @@ export function DataTable<TData, TValue>({
                     <IconInput
                       onChange={(e) => {
                         // e.preventDefault();
-                        // console.log(1234);
                         handleSearch(e.target.value);
                       }}
                       inputClassName="h-[35px]"

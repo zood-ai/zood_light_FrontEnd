@@ -68,7 +68,7 @@ export const useDataTableColumns = () => {
       },
     },
     {
-      accessorKey: 'created_at',
+      accessorKey: 'business_date',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={'التاريخ'} />
       ),
@@ -77,8 +77,8 @@ export const useDataTableColumns = () => {
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {/* {dayjs(row.getValue('created_at')).format('MMMM D, YYYY h:mm A')} */}
-              {formatDateTime(row.getValue('created_at'))}
+              {/* {dayjs(row.getValue('business_date')).format('MMMM D, YYYY h:mm A')} */}
+              {formatDateTime(row.getValue('business_date'))}
             </span>
           </div>
         );

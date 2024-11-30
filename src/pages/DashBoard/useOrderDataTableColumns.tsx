@@ -59,12 +59,12 @@ export const useOrderDataTableColumns = () => {
       },
     },
     {
-      accessorKey: 'created_at',
+      accessorKey: 'business_date',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('التاريخ')} />
       ),
       cell: ({ row }) => (
-        <span>{formatDateTime(row.getValue('created_at')) || '-'}</span>
+        <span>{formatDateTime(row.getValue('business_date')) || '-'}</span>
       ),
     },
     {

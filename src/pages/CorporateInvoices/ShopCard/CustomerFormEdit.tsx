@@ -62,7 +62,7 @@ const CustomerFormEdit = () => {
         holder.pop();
         // if (!holder) return;
 
-        const newHolder = holder.filter((ele) => ele.created_at === undefined);
+        const newHolder = holder.filter((ele) => ele.business_date === undefined);
 
         const holder2 = newHolder.map((ele) => ({
           ...ele,
