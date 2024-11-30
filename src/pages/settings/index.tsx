@@ -15,6 +15,7 @@ export default function Settings() {
   const { data: allBusinessTypes } = createCrudService<any>(
     'manage/business-types'
   ).useGetAll();
+  console.log(`Settings Data : `, settings);
   const { mutate: updateSettings } =
     createCrudService<any>('manage/settings').useUpdate();
   const { data: whoami } = createCrudService<any>('auth/whoami').useGetAll();
@@ -44,6 +45,8 @@ export default function Settings() {
     business_logo: settings?.data?.business_logo || '',
     business_tax_number: settings?.data?.business_tax_number || '',
     business_type: settings?.data?.business_type || '',
+    receipt_header: settings?.data?.receipt_header || '',
+    receipt_footer: settings?.data?.receipt_footer || '',
   });
   const [updatedTaxInclusivePricing, setUpdatedTaxInclusivePricing] = useState(
     settings?.data?.tax_inclusive_pricing
@@ -69,6 +72,8 @@ export default function Settings() {
       business_logo: settings?.data?.business_logo || '',
       business_tax_number: settings?.data?.business_tax_number || '',
       business_type: whoami?.business?.type || '',
+      receipt_header: settings?.data?.receipt_header || '',
+      receipt_footer: settings?.data?.receipt_footer || '',
     });
 
     setUpdatedTaxInclusivePricing(settings?.data?.tax_inclusive_pricing);
@@ -116,6 +121,8 @@ export default function Settings() {
         country: updateAll.country,
         business_name: updateAll.business_name,
         business_tax_number: updateAll.business_tax_number,
+        receipt_header: updateAll.receipt_header,
+        receipt_footer: updateAll.receipt_footer,
       },
     });
 
@@ -436,7 +443,59 @@ export default function Settings() {
             </button>
           </div>
         </div>
+        {/* الفاتورة */}
+        <div className="flex flex-col items-start py-4 pr-2.5 pl-20 mt-7 w-full text-sm font-semibold text-left bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
+          <div className="text-base text-zinc-800 max-md:mr-2">الفاتورة</div>
+          <div className="mt-2 font-medium text-zinc-500 max-md:mr-2">
+            مقدمة الفاتورة
+          </div>
+          <div className="relative">
+            <Input
+              type="text"
+              onChange={(e) => {
+                setUpdateAll((prev) => ({
+                  ...prev,
+                  receipt_header: e.target.value,
+                }));
+              }}
+              defaultValue={updateAll?.receipt_header}
+              className="pr-6"
+            />
+          </div>
 
+          <div className="mt-4 font-medium text-zinc-500 max-md:mr-2">
+            خاتمة الفاتورة
+          </div>
+          <div className="flex gap-5 items-center mt-2 max-w-full text-zinc-800 w-[1c 48px] max-md:mr-2">
+            <div className="relative">
+              <Input
+                type="text"
+                defaultValue={updateAll?.receipt_footer}
+                onChange={(e) => {
+                  setUpdateAll((prev) => ({
+                    ...prev,
+                    receipt_footer: e.target.value,
+                  }));
+                }}
+                className="pr-6"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5">
+            <button
+              onClick={() => {
+                updateBothData();
+              }}
+              className="gap-3 self-stretch"
+            >
+              حفظ
+            </button>
+          </div>
+        </div>
+        {/* v */}
+        {/* v */}
+        {/* v */}
         <div className="flex flex-col items-start py-4 pr-2.5 pl-20 mt-7 w-full text-sm font-semibold text-left bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
           <div className="text-base text-zinc-800 max-md:mr-2">الضريبة</div>
           <div className="mt-2 font-medium text-zinc-500 max-md:mr-2">

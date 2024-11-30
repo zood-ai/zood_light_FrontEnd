@@ -14,6 +14,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const reactToPrintFn = useReactToPrint({ contentRef });
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
+  console.log('Settings Data ', settings);
   const { data: Taxes } = createCrudService<any>('manage/taxes').useGetAll();
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
   const { data: customerInfo } = createCrudService<any>(
@@ -65,6 +66,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
               >
                 {size === 'A4' ? (
                   <div className="flex print-content flex-col px-3 pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg  text-zinc-800 max-md:mt-10 max-md:max-w-full">
+                    <p className="text-center mb-2">
+                      {settings?.data?.receipt_header}
+                    </p>
                     <div className="w-full flex justify-between items-center mb-4">
                       <div>
                         <div className="flex items-center gap-5">
@@ -320,15 +324,22 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                         />
                       </div>
                     </div>
+
                     {data?.kitchen_notes ? (
                       <div className="flex flex-col pt-4 pb-2 bg-white rounded-none  max-md:px-5 justify-between">
                         <div>ملاحظات : {data?.kitchen_notes || ''}</div>
                       </div>
                     ) : null}
+                    <p className="text-center">
+                      {settings?.data?.receipt_footer}
+                    </p>
                   </div>
                 ) : (
                   <div className="flex print-content2 flex-col w-[390px]  mx-auto text-righ text-sm p-1 px-10">
                     {/* الشعار */}
+                    <p className="text-center mb-2">
+                      {settings?.data?.receipt_header}
+                    </p>
                     <img
                       className="mx-auto size-[80px]"
                       src={`${settings?.data?.business_logo}`}
@@ -588,6 +599,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       <div className="  my-4 flex justify-center">
                         <QRCodeComp settings={settings} Data={Data} />
                       </div>
+                      <p className="text-center mt-2">
+                        {settings?.data?.receipt_footer}
+                      </p>
                       <div className="w-1 h-1"></div>
                     </div>
                   </div>
