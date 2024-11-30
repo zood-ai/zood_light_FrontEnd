@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { resetOrder } from '@/store/slices/orderSchema';
 import { resetCard } from '@/store/slices/cardItems';
 import { toggleActionView } from '@/store/slices/toggleAction';
+import axiosInstance from '@/api/interceptors';
 
 export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -85,7 +86,7 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce((searchTerm: string) => {
+    debounce(async (searchTerm: string) => {
       if (!searchTerm) {
         setSearchedData(allData); // Reset if search is cleared
         return;
@@ -101,6 +102,16 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
         return referenceMatch || customerName;
       });
 
+      // fetch data from API and set it to state
+
+      // const res = await axiosInstance.get(
+      //   `orders?filter[type]=2&filter[status]=4&filter[customer.name]=${searchTerm}`
+      // );
+      // const res2 = await axiosInstance.get(
+      //   `orders?filter[type]=2&filter[status]=4&filter[reference]=${searchTerm}`
+      // );
+      //
+      // console.log({ res, res2 });
       setSearchedData({ ...allData, data: holder });
     }, 300), // 300ms debounce delay
     [allData]

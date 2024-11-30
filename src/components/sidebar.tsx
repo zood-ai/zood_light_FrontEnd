@@ -65,7 +65,8 @@ export default function Sidebar({
         {/* Header */}
         <Layout.Header
           sticky
-          className="z-50   flex justify-between px-4 py-3 shadow-0 md:px-4 bg-background  transition-all ease-out duration-500 "
+          style={{ direction }}
+          className="z-50 flex justify-between px-4 py-3 shadow-0 md:px-4 bg-background  transition-all ease-out duration-500 "
         >
           <div
             className={`flex  items-center mt-[40px]  transition-all ease-out duration-500 ${
@@ -82,7 +83,7 @@ export default function Sidebar({
               //     : 'absolute top-[30px] right-[25px] z-[999999] transition-all ease-out duration-500'
               // }`}
               className={`absolute cursor-pointer hover:scale-105
-             ${isRtl ? 'md:left-[13px]' : 'md:-right-5'} 
+             md:left-[13px]
             top-[25%] md:top-[40px] z-50   rounded-ful bg-white border-0 l md:inline-flex`}
             />
             <div

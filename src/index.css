@@ -37,7 +37,7 @@
   }
   .print-content2 {
     margin-top: 40px;
-    scale: 2.5;
+    /* scale: 2.5; */
     transform-origin: top;
   }
   @page {

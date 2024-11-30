@@ -38,6 +38,10 @@ import search from '/icons/search.svg';
 import { LoadingSkeleton } from '../LoadingSkeleton';
 import { useNavigate } from 'react-router-dom';
 import { titleMapping } from '@/constant/constant';
+import { DatePicker } from 'antd';
+import { format, parseISO } from 'date-fns';
+
+const { RangePicker } = DatePicker;
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -53,7 +57,6 @@ interface DataTableProps<TData, TValue> {
   dashBoard: boolean;
   handleSearch: any;
 }
-
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -76,10 +79,22 @@ export function DataTable<TData, TValue>({
   );
   const dispatch = useDispatch();
   const [sorting, setSorting] = React.useState<SortingState>([]);
+
+  const [fromDate, setFromData] = React.useState('');
+  const [endDate, setEndDate] = React.useState('');
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 50, // Set this to the desired page size
   });
+  const filteredData = React.useMemo(() => {
+    if (!fromDate || !endDate) return data;
+    const from = parseISO(fromDate);
+    const to = parseISO(endDate);
+    return data.filter((item: any) => {
+      const itemDate = parseISO(item.business_date); // Adjust this to match your date field
+      return itemDate >= from && itemDate <= to;
+    });
+  }, [data, fromDate, endDate]);
   const table = useReactTable({
     data,
     columns,
@@ -103,11 +118,40 @@ export function DataTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
   const { current_page, last_page, per_page, total } = meta || {};
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const pagePath = window.location.pathname; // Get the current path
   const title = titleMapping(pagePath);
+  console.log('From: ', fromDate);
+  console.log('To: ', endDate);
+  const handleDateChange = (dates: any, dateStrings: [string, string]) => {
+    setFromData(dateStrings[0]);
+    setEndDate(dateStrings[1]);
+  };
+  const customDatePickerClass = ` 
+  .ant-picker-focused {
+    border-color: #7272F6 !important; /* Change border color on focus */
+  }
+  .ant-picker-cell-in-view.ant-picker-cell-range-hover-start,
+  .ant-picker-cell-in-view.ant-picker-cell-range-hover-end {
+    background-color: #7272f633 !important; /* Change this to your desired color */
+  }
+  .ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-in-range:not(.ant-picker-cell-disabled):before,
+  .ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-range-start:not(.ant-picker-cell-disabled):before,
+  .ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-range-end:not(.ant-picker-cell-disabled):before {
+    background-color: #7272f633 !important;
+  } 
+  .ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-range-start:not(.ant-picker-cell-disabled) .ant-picker-cell-inner{
+    background-color: #7272F6 !important;
+  }
+  :where(.css-dev-only-do-not-override-1x0dypw).ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-selected:not(.ant-picker-cell-disabled) .ant-picker-cell-inner,
+  :where(.css-dev-only-do-not-override-1x0dypw).ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-range-start:not(.ant-picker-cell-disabled) .ant-picker-cell-inner,
+  :where(.css-dev-only-do-not-override-1x0dypw).ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-range-end:not(.ant-picker-cell-disabled) .ant-picker-cell-inner {
+    background-color: #7272F6 !important; /* Change this to your desired color */
+  }
+`;
   return (
     <>
+      <style>{customDatePickerClass}</style>
       {!loading ? (
         <>
           <div className="space-y-4 bag-background">
@@ -125,20 +169,26 @@ export function DataTable<TData, TValue>({
           onChange={filterBtn}
           className={`h-8 w-[150px] lg:w-[250px]  `}
         /> */}
-              <div className="h-[68px] ps-[16px]  flex z-10 flex-wrap  py-3 mt-4 text-right bg-background  border border-mainBorder border-solid  border-b-0 items-center rounded-t-[8px]">
-                <div className="my-auto text-base font-semibold text-mainText  ">
+              <div className="h-fit ps-[16px]  flex z-10   py-3 mt-4 text-right bg-background  border border-mainBorder border-solid  border-b-0 items-center rounded-t-[8px]">
+                <div className="my-auto text-base font-semibold text-mainText min-w-fit ">
                   {title?.ar === 'لوحة التحكم' ? 'احدث الفواتير' : title?.ar}
                 </div>
-                <div className="max-w-[303px] ms-[14px]">
-                  <IconInput
-                    onChange={(e) => {
-                      // e.preventDefault();
-                      // console.log(1234);
-                      handleSearch(e.target.value);
-                    }}
-                    inputClassName="h-[35px]"
-                    placeholder="بحث عن فاتورة, عميل, تاريخ"
-                    iconSrc={search}
+                <div className="flex flex-wrap gap-5 flex-grow">
+                  <div className="max-w-[303px] ms-[14px]">
+                    <IconInput
+                      onChange={(e) => {
+                        // e.preventDefault();
+                        // console.log(1234);
+                        handleSearch(e.target.value);
+                      }}
+                      inputClassName="h-[35px]"
+                      placeholder="بحث عن فاتورة, عميل, تاريخ"
+                      iconSrc={search}
+                    />
+                  </div>
+                  <RangePicker
+                    className="max-w-[303px] ms-[14px] text-black"
+                    onChange={handleDateChange}
                   />
                 </div>
               </div>

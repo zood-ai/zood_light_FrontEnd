@@ -59,9 +59,10 @@ export default function Nav({
 
     return <NavLink {...rest} key={key} closeNav={closeNav} />;
   };
+  const isRtl = useDirection();
   return (
     <div
-      dir="ltr"
+      dir={isRtl ? 'rtl' : 'ltr'}
       data-collapsed={isCollapsed}
       className={cn(
         'group border-b  bg-background py-2 transition-[max-height,padding] duration-500 data-[collapsed=true]:py-2 md:border-none ',
@@ -70,7 +71,7 @@ export default function Nav({
     >
       <TooltipProvider delayDuration={0}>
         <nav
-          dir="rtl"
+          dir={isRtl ? 'rtl' : 'ltr'}
           className="grid gap-1 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2"
         >
           {links.map(renderLink)}
@@ -114,7 +115,9 @@ function NavLink({
       aria-current={checkActiveNav(href) ? 'page' : undefined}
     >
       <div className={`${isRtl ? 'ml-2' : 'mr-2'}`}>
-        <span className={`${checkActiveNav(href) ? 'text-main ' : 'text-secText'}`}>
+        <span
+          className={`${checkActiveNav(href) ? 'text-main ' : 'text-secText'}`}
+        >
           <i>{icon}</i>
         </span>
       </div>
@@ -196,7 +199,9 @@ function NavLinkIcon({ title, icon, label, href }: NavLinkProps) {
             } `
           )}
         >
-          <span className={`${checkActiveNav(href) ? 'text-main' : 'text-secText'}`}>
+          <span
+            className={`${checkActiveNav(href) ? 'text-main' : 'text-secText'}`}
+          >
             {icon}
           </span>{' '}
           <span className="sr-only">{title}</span>
