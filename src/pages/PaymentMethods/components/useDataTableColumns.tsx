@@ -26,7 +26,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'name',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'اسم الطريقة'} />
+        <DataTableColumnHeader column={column} title={t('PAYMENT_METHOD_NAME')} />
       ),
       cell: ({ row }) => {
         return (
@@ -42,7 +42,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'type',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'طريقة الدفع'} />
+        <DataTableColumnHeader column={column} title={t('PAYMENT_METHOD')} />
       ),
       cell: ({ row }) => {
         const type = row.getValue('type');
@@ -59,7 +59,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'is_active',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'الحالة'} />
+        <DataTableColumnHeader column={column} title={t('STATUS')} />
       ),
       cell: ({ row }) => {
         const status = row.getValue('is_active');
@@ -77,7 +77,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'id',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'تنفيذ'} />
+        <DataTableColumnHeader column={column} title={t('PAYMENT_METHOD_ACTION')} />
       ),
       cell: ({ row }) => {
         return (

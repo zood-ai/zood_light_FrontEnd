@@ -130,7 +130,7 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
           meta={searchedData || {}}
-          actionText={'فاتورة'}
+          actionText={'ADD_INVOICE'}
           loading={isLoading}
           handleSearch={handleSearch}
         />

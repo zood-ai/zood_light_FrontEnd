@@ -118,7 +118,7 @@ const CustomerForms = () => {
               value: item.id,
               label: item.name,
             }))}
-            placeholder="اسم العميل"
+            placeholder={t('CUSTOMER_NAME')}
             onValueChange={(value) => {
               if (params.id) {
                 return;
@@ -126,7 +126,7 @@ const CustomerForms = () => {
                 handleInputChangex('customer_id', value);
               }
             }}
-            label="اسم العميل"
+            label={t('CUSTOMER_NAME')}
             className="  md:w-[21vw]"
             value={orderSchema?.customer_id}
             disabled={params.id}

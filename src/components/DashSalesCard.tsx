@@ -1,8 +1,10 @@
 import useDirection from '@/hooks/useDirection';
 import createCrudService from '@/api/services/crudService';
+import { useTranslation } from 'react-i18next';
 
 function DashSalesCard({ data }) {
   const isRtl = useDirection();
+  const { t } = useTranslation();
   const { data: data1 } = createCrudService<any>(
     '/reports/overview/light?groupby=month'
   ).useGetAll();
@@ -58,7 +60,7 @@ function DashSalesCard({ data }) {
               } mt-6`}
             >
               <div className="self-start text-base font-semibold text-zinc-800">
-                اجمالي المبيعات
+                {t('INVOICES')}
               </div>
               <div
                 className={`self-start mt-2.5 text-2xl font-bold text-indigo-900 ${
@@ -83,7 +85,7 @@ function DashSalesCard({ data }) {
               <div className="flex gap-5 justify-between self-center w-full max-w-[295px]">
                 <div className="flex gap-3 font-medium whitespace-nowrap">
                   <div className="flex shrink-0 my-auto w-2.5 h-2.5 bg-[var(--main)] rounded-full" />
-                  <div>اليوم</div>
+                  <div>{t('DAY')}</div>
                 </div>
                 <div className="font-semibold">
                   SR {Number(totalDay)?.toFixed(2)}
@@ -95,7 +97,7 @@ function DashSalesCard({ data }) {
               <div className="flex gap-5 justify-between self-center w-full max-w-[295px]">
                 <div className="flex gap-3 font-medium whitespace-nowrap">
                   <div className="flex shrink-0 my-auto w-2.5 h-2.5 bg-[var(--main)] rounded-full" />
-                  <div>الاسبوع</div>
+                  <div>{t('WEEK')}</div>
                 </div>
                 <div className="font-semibold">
                   SR {Number(totalWeek)?.toFixed(2)}
@@ -107,7 +109,7 @@ function DashSalesCard({ data }) {
               <div className="flex gap-5 justify-between self-center w-full max-w-[295px]">
                 <div className="flex gap-3 font-medium whitespace-nowrap">
                   <div className="flex shrink-0 my-auto w-2.5 h-2.5 bg-[var(--main)] rounded-full" />
-                  <div>الشهر</div>
+                  <div>{t('MONTH')}</div>
                 </div>
                 <div className="font-semibold">
                   SR {Number(totalMonth)?.toFixed(2)}

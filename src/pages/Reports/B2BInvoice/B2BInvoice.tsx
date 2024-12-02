@@ -140,7 +140,7 @@ export const B2BInvoice: React.FC<B2BInvoiceProps> = () => {
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
           meta={searchedData || {}}
-          actionText={'فاتورة '}
+          actionText={'ADD_INVOICE'}
           loading={isLoading}
           handleSearch={handleSearch}
         />

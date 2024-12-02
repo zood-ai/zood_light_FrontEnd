@@ -3,9 +3,11 @@ import { AlertDialog, AlertDialogContent } from './ui/alert-dialog';
 import { Button } from './custom/button';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function FastAddActions({ isOpen, onClose }) {
   let navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className=" ">
@@ -43,7 +45,9 @@ export default function FastAddActions({ isOpen, onClose }) {
                             }}
                             className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 w-full  rounded min-h-[39px] max-md:px-5 max-md:mt-10"
                           >
-                            <div className="gap-3 self-stretch">اضافة منتج</div>
+                            <div className="gap-3 self-stretch">
+                              {t('ADD_PRODUCT')}
+                            </div>
                           </Button>
                         </div>
                       </div>
@@ -71,7 +75,9 @@ export default function FastAddActions({ isOpen, onClose }) {
                             }}
                             className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 w-full  rounded min-h-[39px] max-md:px-5 max-md:mt-10"
                           >
-                            <div className="gap-3 self-stretch">اضافة عميل</div>
+                            <div className="gap-3 self-stretch">
+                              {t('ADD_CUSTOMER')}
+                            </div>
                           </Button>
                         </div>
                       </div>
@@ -116,7 +122,7 @@ export default function FastAddActions({ isOpen, onClose }) {
                             className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 w-full  rounded min-h-[39px] max-md:px-5 max-md:mt-10"
                           >
                             <div className="gap-3 self-stretch">
-                              اضافة فاتورة
+                              {t('ADD_INVOICE')}
                             </div>{' '}
                           </Button>
                         </div>

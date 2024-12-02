@@ -32,7 +32,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'name',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'اسم المورد'} />
+        <DataTableColumnHeader column={column} title={t('SUPPLIER_NAME')} />
       ),
       cell: ({ row }) => {
          
@@ -50,7 +50,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'phone',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'رقم الهاتف'} />
+        <DataTableColumnHeader column={column} title={t('PHONE_NUMBER')} />
       ),
       cell: ({ row }) => {
          
@@ -68,7 +68,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'code',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'كود المورد'} />
+        <DataTableColumnHeader column={column} title={t('BARCODE')} />
       ),
       cell: ({ row }) => {
          
@@ -87,7 +87,7 @@ export const useDataTableColumns = () => {
     // {
     //   accessorKey: 'id',
     //   header: ({ column }) => (
-    //     <DataTableColumnHeader column={column} title={'تنفيذ'} />
+    //     <DataTableColumnHeader column={column} title={t('INVOICE')} />
     //   ),
     //   cell: ({ row }) => {
          

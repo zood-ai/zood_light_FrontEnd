@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CardItemProps } from './CardItem.types';
 import './CardItem.css';
 import PlusIcon from '../Icons/PlusIcon';
@@ -17,7 +17,14 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
     state.cardItems.value.find((i: { id: string }) => i.id === item.id)
   );
 
+  const [quantatyState, setQuantatyState] = React.useState(
+    cardItem ? cardItem.qty : 0
+  );
   const qty = cardItem ? cardItem.qty : 0;
+
+  useEffect(() => {
+    setQuantatyState(cardItem ? cardItem.qty : 0);
+  }, [cardItem]);
 
   const updateCardItem = (newItem: {
     id: string;
@@ -36,7 +43,7 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
           if (index === existingItemIndex) {
             return {
               ...item,
-              qty: item.qty + newItem.qty,
+              qty: newItem.qty + item.qty,
             };
           }
           return item;
@@ -119,9 +126,18 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
                   </div>
                 </div>
               </div>
-              <div className="h-[40px] w-[90px] flex justify-center items-center bg-white rounded border border-gray-200 border-solid font-bold">
-                {qty}
-              </div>
+              {/* {quantatyState} */}
+              <input
+                type="number"
+                value={qty}
+                // defaultValue={quantatyState}
+                onChange={(e) => {
+                  setQuantatyState(Number(e.target.value));
+                  // updateCardItemWith
+                }}
+                min={0}
+                className="h-[40px] text-center w-[90px] flex justify-center items-center bg-white rounded border border-gray-200 border-solid font-bold"
+              />
               <div className="object-contain shrink-0 w-10 aspect-square">
                 <div className="flex flex-col max-w-[40px]">
                   <div

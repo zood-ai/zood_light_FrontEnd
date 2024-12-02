@@ -4,21 +4,48 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/custom/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
+import axios from 'axios';
 export default function ResetPassword() {
   const [check, setCheck] = useState(true);
   const [email, setEmail] = useState('');
+  const [businessReference, setBusinessReference] = useState('');
   const [test, setTest] = useState(false);
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const checkPassword = (password, confirmPassword) => {
     setTest(password !== confirmPassword);
     return password === confirmPassword;
   };
-  const handleSubmitEmail = (email) => {
+  const handleSubmitResetPass = async () => {
     if (!email) return;
-    setEmail(email);
-    setCheck(false);
+    if (!businessReference) return;
+    setLoading(true);
+    try {
+      const res = await axios.post(
+        'http://zood.ai/api/v1/auth/password/email',
+        {
+          email,
+          business_reference: businessReference,
+        }
+      );
+
+      if (res.status === 200) {
+        toast({
+          title: 'نجاح',
+          description: 'تم ارسال الرابط بنجاح',
+          duration: 3000,
+          variant: 'default',
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+    setLoading(false);
+    console.log({ res });
+    // setEmail(email);
+    // setCheck(false);
   };
 
   const handleSubmit = () => {
@@ -74,36 +101,45 @@ export default function ResetPassword() {
           </Link>
         </div>
       </div>
-      {check ? (
-        <div className="flex flex-col mb-5 items-center gap-4 mt-16 pb-10">
-          <h2 className="text-[32px] text-[#26262F] font-bold ">
-            هل نسيت كلمة السر
-          </h2>
-          <span
-            className="  text-[#868686] font-[600] w-[382px] leading-7 text-[14px]"
+      {/* {check ? ( */}
+      <div className="flex flex-col mb-5 items-center gap-4 mt-16 pb-10">
+        <h2 className="text-[32px] text-[#26262F] font-bold ">
+          هل نسيت كلمة السر
+        </h2>
+        <span
+          className="  text-[#868686] font-[600] w-[382px] leading-7 text-[14px]"
+          dir="rtl"
+        >
+          أدخل عنوان البريد الإلكتروني و الرقم التعريفي الذي تستخدمه على zood
+          ai. سنرسل إليك رابطًا لإعادة تعيين كلمة المرور الخاصة بك.
+        </span>
+        <div className="w-[419px] h-[56px] flex flex-col gap-4">
+          <Input
             dir="rtl"
+            type="email"
+            defaultValue={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className=" w-full placeholder:text-center placeholder:text-[14px] placeholder:font-[600] placeholder:text-[#868686] px-2 py-4 border border-[#E6E6E6] rounded-sm h-[56px] "
+            placeholder="البريد الاكتورني"
+          />
+          <Input
+            dir="rtl"
+            type="text"
+            defaultValue={businessReference}
+            onChange={(e) => setBusinessReference(e.target.value)}
+            className=" w-full placeholder:text-center placeholder:text-[14px] placeholder:font-[600] placeholder:text-[#868686] px-2 py-4 border border-[#E6E6E6] rounded-sm h-[56px] "
+            placeholder="الرقم التعريفي"
+          />
+          <Button
+            disabled={!email || !businessReference || loading}
+            onClick={() => handleSubmitResetPass()}
+            className="px-2 py-4 text-base font-[600] text-[#FFFFFF] rounded-sm bg-[#7272F6] h-[56px]"
           >
-            أدخل عنوان البريد الإلكتروني الذي تستخدمه على zood ai. سنرسل إليك
-            رابطًا لإعادة تعيين كلمة المرور الخاصة بك.
-          </span>
-          <div className="w-[419px] h-[56px] flex flex-col gap-4">
-            <Input
-              dir="rtl"
-              type="email"
-              defaultValue={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className=" w-full placeholder:text-center placeholder:text-[14px] placeholder:font-[600] placeholder:text-[#868686] px-2 py-4 border border-[#E6E6E6] rounded-sm h-[56px] "
-              placeholder="name@email.com"
-            />
-            <Button
-              onClick={() => handleSubmitEmail(email)}
-              className="px-2 py-4 text-base font-[600] text-[#FFFFFF] rounded-sm bg-[#7272F6] h-[56px]"
-            >
-              إعادة تعيين كلمة المرور
-            </Button>
-          </div>
+            {loading ? 'جاري التحميل...' : 'إرسال'}
+          </Button>
         </div>
-      ) : (
+      </div>
+      {/* ) : (
         <div className="flex justify-center items-start mt-[60px] pb-10">
           <div className="flex flex-col mb-5 items-center gap-4">
             <h2 className="text-[32px] text-[#26262F] font-bold ">
@@ -146,7 +182,7 @@ export default function ResetPassword() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Input } from '../ui/input';
+import useDirection from '@/hooks/useDirection';
 
 interface SearchInputProps {
   placeholder?: string;
@@ -23,6 +24,7 @@ const IconInput: React.FC<any> = ({
   iconSrcLeft,
   ...props
 }) => {
+  const isRtl = useDirection();
   return (
     <div className={`flex gap-2   rounded  border-gray-200 ${className} `}>
       <div className="w-full">
@@ -35,8 +37,11 @@ const IconInput: React.FC<any> = ({
           <Input
             type={type}
             {...props}
+            style={{
+              width: width ? width : '100%',
+            }}
             placeholder={placeholder}
-            className={`w-full text-right text-mainText ${
+            className={`w-full text-mainText ${
               iconSrc && 'ps-10  w-full'
             } ${inputClassName}`}
           />
@@ -45,7 +50,11 @@ const IconInput: React.FC<any> = ({
               loading="lazy"
               src={iconSrc}
               alt=""
-              className={`object-contain  shrink-0 my-auto text-secText aspect-square w-[18px] absolute right-3  ${
+              style={{
+                left: isRtl ? 'unset' : '10px',
+                right: isRtl ? 'unset' : '10px',
+              }}
+              className={`object-contain  shrink-0 my-auto text-secText aspect-square w-[18px] absolute  ${
                 label ? 'top-[25%]' : 'top-[20%]'
               }`}
             />

@@ -34,7 +34,7 @@ export const useDataTableColumns = () => {
     // {
     //   accessorKey: 'last_orders',
     //   header: ({ column }) => (
-    //     <DataTableColumnHeader column={column} title={'رقم الفاتورة'} />
+    //     <DataTableColumnHeader column={column} title={t('INVOICE_NUMBER')} />
     //   ),
     //   cell: ({ row }) => {
     //     const label = labels.find(
@@ -54,7 +54,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'name',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'اسم العميل'} />
+        <DataTableColumnHeader column={column} title={t('CUSTOMER_NAME')} />
       ),
       cell: ({ row }) => {
         return (
@@ -70,7 +70,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'phone',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'رقم الهاتف'} />
+        <DataTableColumnHeader column={column} title={t('PHONE_NUMBER')} />
       ),
       cell: ({ row }) => {
         return (
@@ -89,7 +89,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'total_orders',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'عدد الطلبات'} />
+        <DataTableColumnHeader column={column} title={t('ORDERS_QUANTITY')} />
       ),
       cell: ({ row }) => {
         const id = row?.original?.id;
@@ -111,7 +111,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'last_orders',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'اخر طلب'} />
+        <DataTableColumnHeader column={column} title={t('LATEST_ORDER')} />
       ),
       cell: ({ row }) => {
         const timing = row.getValue('last_orders');

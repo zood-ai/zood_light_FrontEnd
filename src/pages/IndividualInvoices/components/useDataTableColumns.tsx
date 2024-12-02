@@ -23,7 +23,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'رقم الفاتورة'} />
+        <DataTableColumnHeader column={column} title={t('INVOICE_NUMBER')} />
       ),
       cell: ({ row }) => {
         return (
@@ -39,7 +39,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'customer',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'اسم العميل'} />
+        <DataTableColumnHeader column={column} title={t('CUSTOMER_NAME')} />
       ),
       cell: ({ row }: any) => {
         return (
@@ -56,7 +56,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'total_price',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'المبلغ الكلي'} />
+        <DataTableColumnHeader column={column} title={t('TOTAL_PRICE')} />
       ),
       cell: ({ row }: any) => {
         return (
@@ -73,7 +73,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'business_date',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'التاريخ'} />
+        <DataTableColumnHeader column={column} title={t('DATE')} />
       ),
       cell: ({ row }) => {
         return (
@@ -90,7 +90,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'payment_status',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'حالة الدفع'} />
+        <DataTableColumnHeader column={column} title={t('PAYMENT_STATUS')} />
       ),
       cell: ({ row }: any) => {
         return (
@@ -98,11 +98,11 @@ export const useDataTableColumns = () => {
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
               {row.getValue('payment_status') == 'partial' ? (
-                <StatusBadge status="Inactive" text={'مدفوع جزئي'} />
+                <StatusBadge status="Inactive" text={t('PARTIALLY_PAID')} />
               ) : row.getValue('payment_status') == 'unpaid' ? (
-                <StatusBadge status="error" text={'غير مدفوع'} />
+                <StatusBadge status="error" text={t('UNPAID')} />
               ) : (
-                <StatusBadge status="active" text={'مدفوع'} />
+                <StatusBadge status="active" text={t('PAID')} />
               )}
             </span>
           </div>
@@ -117,13 +117,13 @@ export const useDataTableColumns = () => {
       cell: ({ row }) => {
         return (
           <div className="flex space-x-2 w-[180px] md:w-auto">
-            {row.getValue('zatca_report_status') === 'pending' ||
+            {/* {row.getValue('zatca_report_status') === 'pending' ||
               (row.getValue('zatca_report_status') === null && (
                 <StatusBadge status="pending" text={'click to reported'} />
-              ))}
-            {row.getValue('zatca_report_status') === 'PASS' && (
+              ))} */}
+            {/* {row.getValue('zatca_report_status') === 'PASS' && ( */}
               <StatusBadge status="reported" text={'reported'} />
-            )}
+            {/* )} */}
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
           </div>
         );
@@ -132,7 +132,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'id',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'تنفيذ'} />
+        <DataTableColumnHeader column={column} title={t('INVOICE')} />
       ),
       cell: ({ row }) => {
         return (
@@ -150,7 +150,7 @@ export const useDataTableColumns = () => {
                 className="ps-0"
                 variant={'linkHover'}
               >
-                رؤية الفاتورة
+                {t('OPEN_INVOICE')}
               </Button>
             </div>
           </div>

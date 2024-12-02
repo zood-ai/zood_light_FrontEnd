@@ -148,7 +148,7 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
                   meta={searchedData || {}}
                   filterBtn={filterBtn}
                   dashBoard={true}
-                  actionText={'احدث الفواتير'}
+                  actionText={'LATEST_INVOICES'}
                   loading={isLoadingOrder}
                   handleSearch={handleSearch}
                 />

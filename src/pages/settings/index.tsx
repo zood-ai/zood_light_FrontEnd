@@ -6,6 +6,7 @@ import axiosInstance from '@/api/interceptors';
 import { set } from 'zod';
 import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
 import Cookies from 'js-cookie';
+import { useTranslation } from 'react-i18next';
 
 export default function Settings() {
   const userId = Cookies.get('userId');
@@ -156,29 +157,30 @@ export default function Settings() {
       data: { business_logo: fileBase64 },
     });
   }, [fileBase64, updateSettings]);
+  const { t } = useTranslation();
 
   return (
     <>
       <div className="flex flex-col rounded-none max-w-[805px]">
         <div className="self-start text-2xl font-semibold text-left text-zinc-800 max-md:mr-2.5">
-          الاعدادات
+          {t('SETTINGS_TITLE')}
         </div>
 
-        <div className="flex flex-col items-start p-4 mt-4 w-full bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full max-sm:gap-y-5">
+        <div className="flex  flex-col items-start p-4 mt-4 w-full bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full max-sm:gap-y-5">
           <div
             style={{ textAlign: 'right' }}
-            className="align-justify  align-right"
+            className="align-justify align-right"
           >
             <div className="text-base align-rigth font-semibold text-zinc-800">
-              البيانات الاساسية
+              {t('SETTINGS_BASIC_INFORMATION')}
             </div>
           </div>
-          <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full">
+          <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full ">
             <div className="w-full flex max-sm:flex-col gap-y-4 gap-x-4">
               <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
                 <div className="flex flex-col grow text-sm text-left">
                   <div className="self-start font-medium text-zinc-500">
-                    اسم المتجر
+                    {t('SETTINGS_STORE_NAME')}
                   </div>
                   <Input
                     onChange={(e) => {
@@ -195,7 +197,7 @@ export default function Settings() {
               <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
                 <div className="flex flex-col grow text-sm text-left">
                   <div className="self-start font-medium text-zinc-500">
-                    عنوان المتجر
+                    {t('SETTINGS_STORE_ADDRESS')}
                   </div>
                   <Input
                     onChange={(e) => {
@@ -216,7 +218,7 @@ export default function Settings() {
             <div className="w-full flex max-sm:flex-col gap-y-4 gap-x-4">
               <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
                 <div className="self-start font-medium text-zinc-500">
-                  الرقم الاضافي
+                  {t('SETTINGS_ADDITIONAL_NUMBER')}
                 </div>
                 <Input
                   onChange={(e) => {
@@ -231,7 +233,7 @@ export default function Settings() {
               </div>
               <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
                 <div className="self-start font-medium text-zinc-500">
-                  الرمز البريدي
+                  {t('SETTINGS_POSTAL_CODE')}
                 </div>
                 <Input
                   onChange={(e) => {
@@ -241,7 +243,7 @@ export default function Settings() {
                     }));
                   }}
                   value={updateAll?.postalCode}
-                  className="w-full "
+                  className="w-full"
                 />
               </div>
             </div>
@@ -251,7 +253,7 @@ export default function Settings() {
             <div className="w-full flex max-sm:flex-col gap-y-4 gap-x-4">
               <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
                 <div className="self-start text-zinc-500">
-                  رقم السجل التجاري
+                  {t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
                 </div>
                 <Input
                   onChange={(e) => {
@@ -261,11 +263,13 @@ export default function Settings() {
                     }));
                   }}
                   value={updateAll?.commercialRegesterationNumber}
-                  className="w-full "
+                  className="w-full"
                 />
               </div>
               <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
-                <div className="self-start text-zinc-500">رقم المبني</div>
+                <div className="self-start text-zinc-500">
+                  {t('SETTINGS_BUILDING_NUMBER')}
+                </div>
                 <Input
                   onChange={(e) => {
                     setUpdateAll((prev) => ({
@@ -274,14 +278,16 @@ export default function Settings() {
                     }));
                   }}
                   value={updateAll?.buildingNumber}
-                  className="w-full "
+                  className="w-full"
                 />
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full">
+          <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full ">
             <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
-              <div className="self-start text-zinc-500">الرقم الضريبي</div>
+              <div className="self-start text-zinc-500">
+                {t('SETTINGS_TAX_NUMBER')}
+              </div>
               <Input
                 onChange={(e) => {
                   setUpdateAll((prev) => ({
@@ -290,24 +296,25 @@ export default function Settings() {
                   }));
                 }}
                 value={updateAll?.business_tax_number}
-                className="w-full "
+                className="w-full"
               />
             </div>
           </div>
           <div
             style={{ textAlign: 'right' }}
-            className="align-justify  align-right mt-10"
+            className="align-justify align-right mt-10"
           >
             <div className="text-base align-rigth font-semibold text-zinc-800">
-              العنوان والهاتف
+              {t('SETTINGS_ADDRESS_PHONE')}
             </div>
           </div>
-          <div className="flex flex-col items-start  pl-5 w-full text-sm max-md:pl-5 max-md:max-w-full gap-y-4">
+
+          <div className="flex flex-col items-start w-full text-sm max-md:pl-5 max-md:max-w-full gap-y-4">
             <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full">
               <div className="w-full flex max-sm:flex-col gap-y-4 gap-x-4">
                 <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
                   <div className="self-start font-medium text-zinc-500">
-                    الدوله
+                    {t('country')}
                   </div>
                   <Input
                     onChange={(e) => {
@@ -322,7 +329,7 @@ export default function Settings() {
                 </div>
                 <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
                   <div className="self-start font-medium text-zinc-500">
-                    المدينه
+                    {t('city')}
                   </div>
                   <Input
                     onChange={(e) => {
@@ -338,11 +345,11 @@ export default function Settings() {
               </div>
             </div>
 
-            <div className="flex max-sm:flex-col gap-x-4  justify-center w-full text-sm   max-md:max-w-full">
+            <div className="flex max-sm:flex-col gap-x-4 justify-center w-full text-sm max-md:max-w-full">
               <div className="w-full sm:w-[50%]">
-                <div className="flex flex-col grow max-sm:mt-5 text-sm text-left  w-[100%]">
+                <div className="flex flex-col grow max-sm:mt-5 text-sm text-left w-[100%]">
                   <div className="self-start font-medium text-zinc-500">
-                    citySubdivisionName
+                    {t('citySubdivisionName')}
                   </div>
                   <Input
                     onChange={(e) => {
@@ -359,7 +366,7 @@ export default function Settings() {
               <div className="w-full sm:w-[50%]">
                 <div className="flex flex-col grow max-sm:mt-5 text-sm text-left w-[100%]">
                   <div className="self-start font-medium text-zinc-500">
-                    الحي
+                    {t('district')}
                   </div>
                   <Input
                     onChange={(e) => {
@@ -377,7 +384,7 @@ export default function Settings() {
 
             <div className="flex flex-col flex-1 mt-3 w-full">
               <div className="self-start font-medium text-zinc-500">
-                رقم الهاتف
+                {t('phone')}
               </div>
               <Input
                 onChange={(e) => {
@@ -391,63 +398,63 @@ export default function Settings() {
               />
             </div>
           </div>
-          <div
-            // style={{ textAlign: '-webkit-auto' }}
-            className="self-start"
-          >
+          <div className="self-start">
             <button
               onClick={() => {
                 updateBothData();
               }}
               type="button"
-              className="px-6  text-sm py-1.5 mt-8 font-semibold  mr-[12px]  text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5"
+              className="px-6 text-sm py-1.5 mt-8 font-semibold mr-[12px] text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5"
             >
-              حفظ
+              {t('save')}
             </button>
+          </div>
+
+          <div className="flex flex-col items-start py-4  mt-7 w-full text-sm font-semibold text-left  border-solid max-md:pl-5 max-md:max-w-full">
+            <div className="text-base text-zinc-800 max-md:mr-2">
+              {t('companyType')}
+            </div>
+            <div className="mt-2 font-medium text-zinc-500 max-md:mr-2">
+              {t('selectCompanyType')}
+            </div>
+            <div className="relative mt-2 ">
+              <CustomSearchInbox
+                options={allBusinessTypes?.data?.map((item) => ({
+                  value: item.id,
+                  label: item.name,
+                }))}
+                placeholder=""
+                onValueChange={(value) => {
+                  setUpdateAll((prev) => ({
+                    ...prev,
+                    business_type: value,
+                  }));
+                }}
+                className="md:col-span-4 min-w-[327px] flex-grow"
+                value={updateAll?.business_type}
+                disabled={false}
+              />
+            </div>
+            <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5 mr-2.5">
+              <button
+                onClick={() => {
+                  updateBusinessType();
+                }}
+                className="gap-3 self-stretch"
+              >
+                {t('save')}
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col items-start py-4 pr-2.5 pl-20 mt-7 w-full text-sm font-semibold text-left bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
-          <div className="text-base text-zinc-800 max-md:mr-2">نوع الشركة </div>
-          <div className="mt-2 font-medium text-zinc-500 max-md:mr-2">
-            اختر نوع الشركة
-          </div>
-          <div className="relative mt-2">
-            <CustomSearchInbox
-              options={allBusinessTypes?.data?.map((item) => ({
-                value: item.id,
-                label: item.name,
-              }))}
-              placeholder=""
-              onValueChange={(value) => {
-                setUpdateAll((prev) => ({
-                  ...prev,
-                  business_type: value,
-                }));
-              }}
-              // label="اسم العميل"
-              className=" md:col-span-4 min-w-[327px] flex-grow"
-              value={updateAll?.business_type}
-              disabled={false}
-            />
-          </div>
-
-          <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5">
-            <button
-              onClick={() => {
-                updateBusinessType();
-              }}
-              className="gap-3 self-stretch"
-            >
-              حفظ
-            </button>
-          </div>
-        </div>
         {/* الفاتورة */}
-        <div className="flex flex-col items-start py-4 pr-2.5 pl-20 mt-7 w-full text-sm font-semibold text-left bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
-          <div className="text-base text-zinc-800 max-md:mr-2">الفاتورة</div>
+        <div className="flex flex-col items-start py-4 pr-2.5 pl-5 mt-7 w-full text-sm font-semibold text-left bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
+          <div className="text-base text-zinc-800 max-md:mr-2">
+            {t('INVOICE')}
+          </div>
           <div className="mt-2 font-medium text-zinc-500 max-md:mr-2">
-            مقدمة الفاتورة
+            {t('receipt_header')}
           </div>
           <div className="relative">
             <Input
@@ -459,12 +466,11 @@ export default function Settings() {
                 }));
               }}
               defaultValue={updateAll?.receipt_header}
-              className="pr-6"
             />
           </div>
 
           <div className="mt-4 font-medium text-zinc-500 max-md:mr-2">
-            خاتمة الفاتورة
+            {t('receipt_footer')}
           </div>
           <div className="flex gap-5 items-center mt-2 max-w-full text-zinc-800 w-[1c 48px] max-md:mr-2">
             <div className="relative">
@@ -477,29 +483,26 @@ export default function Settings() {
                     receipt_footer: e.target.value,
                   }));
                 }}
-                className="pr-6"
               />
             </div>
           </div>
 
-          <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5">
+          <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] mr-2.5 max-md:px-5">
             <button
               onClick={() => {
                 updateBothData();
               }}
               className="gap-3 self-stretch"
             >
-              حفظ
+              {t('save')}
             </button>
           </div>
         </div>
-        {/* v */}
-        {/* v */}
-        {/* v */}
-        <div className="flex flex-col items-start py-4 pr-2.5 pl-20 mt-7 w-full text-sm font-semibold text-left bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
-          <div className="text-base text-zinc-800 max-md:mr-2">الضريبة</div>
+
+        <div className="flex flex-col items-start py-4 pr-2.5 pl-5 mt-7 w-full text-sm font-semibold text-left bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
+          <div className="text-base text-zinc-800 max-md:mr-2">{t('tax')}</div>
           <div className="mt-2 font-medium text-zinc-500 max-md:mr-2">
-            نسبة الضريبة
+            {t('tax_rate')}
           </div>
           <div className="relative">
             <Input
@@ -516,7 +519,7 @@ export default function Settings() {
           </div>
 
           <div className="mt-4 font-medium text-zinc-500 max-md:mr-2">
-            طريقة حساب الضريبة
+            {t('tax_method')}
           </div>
           <div className="flex gap-5 items-center mt-2 max-w-full text-zinc-800 w-[1c 48px] max-md:mr-2">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -524,14 +527,12 @@ export default function Settings() {
                 type="radio"
                 name="taxOption"
                 value="inclusive"
-                className=" "
                 onClick={() => {
                   setUpdatedTaxInclusivePricing(true);
                 }}
                 defaultChecked={updatedTaxInclusivePricing}
               />
-
-              <span className="text-zinc-800">السعر شامل الضريبة</span>
+              <span className="text-zinc-800">{t('inclusive')}</span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer">
@@ -539,18 +540,16 @@ export default function Settings() {
                 type="radio"
                 name="taxOption"
                 value="exclusive"
-                className=" "
                 onClick={() => {
                   setUpdatedTaxInclusivePricing(false);
                 }}
-                defaultChecked={updatedTaxInclusivePricing ? false : true}
+                defaultChecked={!updatedTaxInclusivePricing}
               />
-
-              <span className="text-zinc-800">السعر غير شامل الضريبة</span>
+              <span className="text-zinc-800">{t('exclusive')}</span>
             </label>
           </div>
 
-          <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5">
+          <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] mr-2.5 max-md:px-5">
             <button
               onClick={() => {
                 changeTaxType();
@@ -558,21 +557,21 @@ export default function Settings() {
               }}
               className="gap-3 self-stretch"
             >
-              حفظ
+              {t('save')}
             </button>
           </div>
         </div>
+
         <div className="flex flex-col items-start self-start mt-4 max-w-full text-sm text-left w-[223px]">
           <img
             className="mb-5 rounded-full aspect-square size-[150px]"
             src={updateAll?.business_logo}
             alt=""
           />
-          <div className="font-medium text-zinc-500 ">Upload logo</div>
-          {/* {fileBase64 && <img src={fileBase64} />} */}
+          <div className="font-medium text-zinc-500 ">{t('upload_logo')}</div>
           <div className="flex gap-2 items-center">
-            <label className="flex flex-1 justify-center items-center  font-semibold bg-gray-200 rounded border border-solid border-zinc-300 w-[117px]  h-[39px] text-mainText cursor-pointer  ">
-              <span className="text-[14px]">اختر الملف</span>
+            <label className="flex flex-1 justify-center items-center font-semibold bg-gray-200 rounded border border-solid border-zinc-300 w-[117px] h-[39px] text-mainText cursor-pointer">
+              <span className="text-[14px]">{t('choose_file')}</span>
               <input
                 type="file"
                 accept="image/*"
@@ -595,16 +594,13 @@ export default function Settings() {
                 }}
               />
             </label>
-            {/* <div className="   bg font-medium text-zinc-500" id="file-name">
-              {selectedFileName}
-            </div> */}
           </div>
 
           <Button
             variant={'outlineDel'}
             className="flex flex-col justify-center items-center px-6 py-1.5 mt-10 font-semibold text-red-500 bg-white rounded border border-red-500 border-solid min-h-[39px] max-md:px-5"
           >
-            <div className="gap-3 self-stretch">حذف الحساب</div>
+            <div className="gap-3 self-stretch">{t('delete_account')}</div>
           </Button>
         </div>
       </div>

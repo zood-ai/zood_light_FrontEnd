@@ -170,6 +170,7 @@ export default function FastAddActions2({ isOpen, onClose }) {
     }
   };
 
+
   return (
     <div className=" ">
       <AlertDialogComp open={isOpen} onOpenChange={onClose}>
@@ -190,7 +191,7 @@ export default function FastAddActions2({ isOpen, onClose }) {
                           <FormControl>
                             <IconInput
                               {...field}
-                              label="اسم العميل"
+                              label={t('CUSTOMER_NAME')}
                               iconSrc={personIcon}
                               inputClassName="w-[278px]"
                             />

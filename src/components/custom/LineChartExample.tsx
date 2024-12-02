@@ -23,11 +23,11 @@ const LineChartExample = ({ data }) => {
   };
 
   return (
-    <div className="col-span-1 md:col-span-2 w-[120%] md:w-[100%] h-[400px]">
+    <div className="col-span-1  md:col-span-2 w-[120%] md:w-[100%] h-[400px]">
       <ResponsiveContainer width={'100%'} height={'100%'}>
         <BarChart
           data={data?.sum_orders}
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
 

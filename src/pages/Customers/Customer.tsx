@@ -130,7 +130,7 @@ const Customer: React.FC<CustomersProps> = () => {
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
           meta={searchedData?.meta || {}}
-          actionText={'عميل'}
+          actionText={'ADD_SUPPLIER'}
           dashBoard={true}
           loading={isLoading}
           handleSearch={handleSearch}

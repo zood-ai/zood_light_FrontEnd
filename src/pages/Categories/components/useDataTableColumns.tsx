@@ -25,7 +25,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'name',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'اسم الفئة'} />
+        <DataTableColumnHeader column={column} title={t('CATEGORY_NAME')} />
       ),
       cell: ({ row }: any) => {
         return (
@@ -47,7 +47,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'products',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'عدد المنتجات'} />
+        <DataTableColumnHeader column={column} title={t('QUANTITY')} />
       ),
       cell: ({ row }) => {
         return (
@@ -63,7 +63,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'رقم الفئة'} />
+        <DataTableColumnHeader column={column} title={t('BARCODE')} />
       ),
       cell: ({ row }) => {
         return (
@@ -79,7 +79,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'business_date',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'التاريخ'} />
+        <DataTableColumnHeader column={column} title={t('DATE')} />
       ),
       cell: ({ row }) => {
         return (

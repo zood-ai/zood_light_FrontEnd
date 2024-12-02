@@ -279,7 +279,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="اسم المنتج"
+                          label={t('PRODUCT_NAME')}
                           inputClassName="w-[278px]"
                           // placeholder="ادخل اسم المورد"
                           // iconSrc={personIcon}

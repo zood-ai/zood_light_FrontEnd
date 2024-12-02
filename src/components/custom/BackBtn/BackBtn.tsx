@@ -6,10 +6,14 @@ import './BackBtn.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { resetOrder } from '@/store/slices/orderSchema';
+import { useTranslation } from 'react-i18next';
+import useDirection from '@/hooks/useDirection';
 
 export const BackBtn: React.FC<BackBtnProps> = ({ bkAction }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
+  const isRtl = useDirection();
 
   const handleBack = () => {
     navigate(-1);
@@ -17,17 +21,20 @@ export const BackBtn: React.FC<BackBtnProps> = ({ bkAction }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div
-      className="mb-2 flex items-center justify-between space-y-2 cursor-pointer w-max"
-    >
+    <div className="mb-2 flex items-center justify-between space-y-2 cursor-pointer w-max">
       <div>
         <p className="text-muted-foreground">
-          <div  onClick={(e) => {
-                    e.stopPropagation();
-                    bkAction ? bkAction() : handleBack();
-                  }} className="flex   gap-1.5 text-base text-right text-black whitespace-nowrap items-center cursor-pointer">
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              bkAction ? bkAction() : handleBack();
+            }}
+            className="flex   gap-1.5 text-base text-right text-black whitespace-nowrap items-center cursor-pointer"
+          >
             <div
-                 
+            style={{
+              rotate: !isRtl ? '180deg' : '0deg',
+            }}
               // className="bg-black p-1.5 rounded-full"
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
@@ -100,7 +107,7 @@ export const BackBtn: React.FC<BackBtnProps> = ({ bkAction }) => {
               )}
             </div>
 
-            <div className="grow">رجوع</div>
+            <div className="grow">{t('RETURN')}</div>
           </div>
         </p>
       </div>

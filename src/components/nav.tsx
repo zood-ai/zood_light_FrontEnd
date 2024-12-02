@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import useCheckActiveNav from '@/hooks/use-check-active-nav';
 import { SideLink } from '@/data/sidelinks';
 import useDirection from '@/hooks/useDirection';
+import { useTranslation } from 'react-i18next';
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed: boolean;
@@ -38,7 +39,7 @@ export default function Nav({
   closeNav,
 }: NavProps) {
   const renderLink = ({ sub, ...rest }: SideLink) => {
-    const key = `${rest.title}-${rest.href}`;
+    const key = `${rest.i18n}-${rest.href}`;
     if (isCollapsed && sub)
       return (
         <NavLinkIconDropdown
@@ -88,6 +89,7 @@ interface NavLinkProps extends SideLink {
 
 function NavLink({
   title,
+  i18n,
   icon,
   label,
   href,
@@ -95,6 +97,7 @@ function NavLink({
   subLink = false,
 }: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav();
+  const { t } = useTranslation();
   const isRtl = useDirection();
   return (
     <Link
@@ -126,7 +129,8 @@ function NavLink({
           checkActiveNav(href) ? 'font-bold text-main' : 'text-secText'
         }`}
       >
-        {title}
+        {/* {title} */}
+        {t(i18n)}
       </span>
       {label && (
         <div className="font-bold ml-2 rounded-lg bg-primary px-1 text-[0.625rem] text-primary-foreground">
@@ -137,9 +141,9 @@ function NavLink({
   );
 }
 
-function NavLinkDropdown({ title, icon, label, sub, closeNav }: NavLinkProps) {
+function NavLinkDropdown({ title, i18n, icon, label, sub, closeNav }: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav();
-
+  const { t } = useTranslation();
   /* Open collapsible by default
    * if one of child element is active */
   const isChildActive = !!sub?.find((s) => checkActiveNav(s.href));
@@ -153,7 +157,7 @@ function NavLinkDropdown({ title, icon, label, sub, closeNav }: NavLinkProps) {
         )}
       >
         <div className={`${isRtl ? 'ml-2' : 'mr-2'}`}>{icon}</div>
-        {title}
+        {t(i18n)}
         {label && (
           <div className="ml-2 rounded-lg bg-primary px-1 text-[0.625rem] text-primary-foreground">
             {label}
@@ -170,7 +174,7 @@ function NavLinkDropdown({ title, icon, label, sub, closeNav }: NavLinkProps) {
       <CollapsibleContent className="collapsibleDropdown" asChild>
         <ul>
           {sub!.map((sublink) => (
-            <li key={sublink.title} className="my-1 ml-8">
+            <li key={sublink.i18n} className="my-1 ml-8">
               <NavLink {...sublink} subLink closeNav={closeNav} />
             </li>
           ))}
@@ -180,8 +184,9 @@ function NavLinkDropdown({ title, icon, label, sub, closeNav }: NavLinkProps) {
   );
 }
 
-function NavLinkIcon({ title, icon, label, href }: NavLinkProps) {
+function NavLinkIcon({ title, i18n, icon, label, href }: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav();
+  const { t } = useTranslation();
   return (
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild>
@@ -204,11 +209,13 @@ function NavLinkIcon({ title, icon, label, href }: NavLinkProps) {
           >
             {icon}
           </span>{' '}
-          <span className="sr-only">{title}</span>
+          {/* <span className="sr-only">{title}</span> */}
+          <span className="sr-only">{t(i18n)}</span>
         </Link>
       </TooltipTrigger>
       <TooltipContent side="right" className="flex items-center gap-4">
-        {title}
+        {/* {title} */}
+        {t(i18n)}
         {label && (
           <span className="ml-auto text-muted-foreground">{label}</span>
         )}
@@ -217,8 +224,9 @@ function NavLinkIcon({ title, icon, label, href }: NavLinkProps) {
   );
 }
 
-function NavLinkIconDropdown({ title, icon, label, sub }: NavLinkProps) {
+function NavLinkIconDropdown({ title, i18n, icon, label, sub }: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav();
+  const { t } = useTranslation();
 
   /* Open collapsible by default
    * if one of child element is active */
@@ -239,7 +247,7 @@ function NavLinkIconDropdown({ title, icon, label, sub }: NavLinkProps) {
           </DropdownMenuTrigger>
         </TooltipTrigger>
         <TooltipContent side="right" className="flex items-center gap-4">
-          {title}{' '}
+          {t(i18n)}{' '}
           {label && (
             <span className="ml-auto text-muted-foreground">{label}</span>
           )}
@@ -251,16 +259,17 @@ function NavLinkIconDropdown({ title, icon, label, sub }: NavLinkProps) {
       </Tooltip>
       <DropdownMenuContent side="right" align="start" sideOffset={4}>
         <DropdownMenuLabel>
-          {title} {label ? `(${label})` : ''}
+          {/* {title} {label ? `(${label})` : ''} */}
+          {t(i18n)} {label ? `(${label})` : ''}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {sub!.map(({ title, icon, label, href }) => (
-          <DropdownMenuItem key={`${title}-${href}`} asChild>
+        {sub!.map(({ title, i18n, icon, label, href }) => (
+          <DropdownMenuItem key={`${t(i18n)}-${href}`} asChild>
             <Link
               to={href}
               className={`${checkActiveNav(href) ? 'bg-secondary' : ''}`}
             >
-              {icon} <span className="ml-2 max-w-52 text-wrap">{title}</span>
+              {icon} <span className="ml-2 max-w-52 text-wrap">{t(i18n)}</span>
               {label && <span className="ml-auto text-xs">{label}</span>}
             </Link>
           </DropdownMenuItem>

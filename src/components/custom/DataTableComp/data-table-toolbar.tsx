@@ -63,7 +63,7 @@ export function DataTableToolbar<TData>({
                 stroke-linejoin="round"
               />
             </svg>
-            <span className="ms-[10px]">{`اضافة ${actionText}`}</span>
+            <span className="ms-[10px]">{`${actionText}`}</span>
           </Button>
           {locations.includes(pathName?.pathname) && (
             <Button

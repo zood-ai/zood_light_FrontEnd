@@ -40,6 +40,8 @@ import { useNavigate } from 'react-router-dom';
 import { titleMapping } from '@/constant/constant';
 import { DatePicker } from 'antd';
 import { format, parseISO } from 'date-fns';
+import { useTranslation } from 'react-i18next';
+import useDirection from '@/hooks/useDirection';
 
 const { RangePicker } = DatePicker;
 
@@ -86,12 +88,16 @@ export function DataTable<TData, TValue>({
     pageIndex: 0,
     pageSize: 50, // Set this to the desired page size
   });
+  const { t } = useTranslation();
+  const isRtl = useDirection();
   const filteredData = React.useMemo(() => {
     if (!fromDate || !endDate) return data;
     const from = parseISO(fromDate);
     const to = parseISO(endDate);
     return data.filter((item: any) => {
-      const itemDate = parseISO(item.business_date.split(' ')[0]);
+      const itemDate = parseISO(
+        item.business_date ? item.business_date.split(' ')[0] : item.created_at
+      );
       return itemDate >= from && itemDate <= to;
     });
   }, [data, fromDate, endDate]);
@@ -155,7 +161,7 @@ export function DataTable<TData, TValue>({
           <div className="space-y-4 bag-background">
             {actionBtn && (
               <DataTableToolbar
-                actionText={actionText}
+                actionText={t(`${actionText}`)}
                 table={table}
                 actionBtn={actionBtn}
               />
@@ -169,7 +175,10 @@ export function DataTable<TData, TValue>({
         /> */}
               <div className="h-fit ps-[16px]  flex z-10   py-3 mt-4 text-right bg-background  border border-mainBorder border-solid  border-b-0 items-center rounded-t-[8px]">
                 <div className="my-auto text-base font-semibold text-mainText min-w-fit ">
-                  {title?.ar === 'لوحة التحكم' ? 'احدث الفواتير' : title?.ar}
+                  {/* {title?.ar === 'لوحة التحكم'
+                    ? t('LATEST_INVOICES')
+                    : title?.ar} */}
+                  {isRtl ? title?.ar : title?.en}
                 </div>
                 <div className="flex flex-wrap gap-5 flex-grow">
                   <div className="max-w-[303px] ms-[14px]">
@@ -179,11 +188,12 @@ export function DataTable<TData, TValue>({
                         handleSearch(e.target.value);
                       }}
                       inputClassName="h-[35px]"
-                      placeholder="بحث عن فاتورة, عميل, تاريخ"
+                      placeholder={t('SEARCH_TABLE_PLACEHOLDER')}
                       iconSrc={search}
                     />
                   </div>
                   <RangePicker
+                    placeholder={[t('START_DATE'), t('END_DATE')]}
                     className="max-w-[303px] ms-[14px] text-black"
                     onChange={handleDateChange}
                   />

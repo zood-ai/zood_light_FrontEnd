@@ -94,7 +94,7 @@ export const Categories: React.FC<CategoriesProps> = () => {
             actionBtn={handleCreateTask}
             filterBtn={filterBtn}
             meta={allData?.meta || {}}
-            actionText={'فئة '}
+            actionText={'ADD_CATEGORY'}
             loading={isLoading}
         />
       </div>

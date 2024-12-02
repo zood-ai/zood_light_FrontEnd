@@ -23,7 +23,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'رقم الفاتورة'} />
+        <DataTableColumnHeader column={column} title={t('INVOICE_NUMBER')} />
       ),
       cell: ({ row }) => {
         return (
@@ -39,7 +39,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'customer',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'اسم العميل'} />
+        <DataTableColumnHeader column={column} title={t('CUSTOMER_NAME')} />
       ),
       cell: ({ row }: any) => {
         return (
@@ -56,7 +56,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'total_price',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'المبلغ الكلي'} />
+        <DataTableColumnHeader column={column} title={t('TOTAL_PRICE')} />
       ),
       cell: ({ row }: any) => {
         return (
@@ -72,7 +72,7 @@ export const useDataTableColumns = () => {
     // {
     //   accessorKey: 'payment_status',
     //   header: ({ column }) => (
-    //     <DataTableColumnHeader column={column} title={'حالة الدفع'} />
+    //     <DataTableColumnHeader column={column} title={t("PAYMENT_STATUS")} />
     //   ),
     //   cell: ({ row }: any) => {
     //     return (
@@ -94,7 +94,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'business_date',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'التاريخ'} />
+        <DataTableColumnHeader column={column} title={t('DATE')} />
       ),
       cell: ({ row }) => {
         return (
@@ -111,7 +111,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'status',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'الحالة'} />
+        <DataTableColumnHeader column={column} title={t('STATUS')} />
       ),
       cell: ({ row }) => {
         return (
@@ -128,7 +128,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'id',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'تنفيذ'} />
+        <DataTableColumnHeader column={column} title={t('INVOICE')} />
       ),
       cell: ({ row }) => {
         return (
@@ -146,7 +146,7 @@ export const useDataTableColumns = () => {
                 className="ps-0"
                 variant={'linkHover'}
               >
-                رؤية الفاتورة
+                {t('OPEN_INVOICE')}
               </Button>
             </div>
           </div>

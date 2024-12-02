@@ -6,12 +6,14 @@ import { Input } from '@/components/ui/input';
 import axiosInstance from '@/api/interceptors';
 import createCrudService from '@/api/services/crudService';
 import Cookies from 'js-cookie';
+import { useTranslation } from 'react-i18next';
 
 export default function UserProfile() {
   const fileInputRef = useRef<any>(null);
   const [personalImage, setPersonalImage] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useTranslation();
 
   const userId = Cookies.get('userId');
   const { data } = createCrudService<any>(`/auth/users/${userId}`).useGetAll();
@@ -103,7 +105,7 @@ export default function UserProfile() {
           <div className="flex flex-col sm:w-2/3 gap-4">
             <div className="flex flex-col">
               <label className="mb-1 text-sm font-medium text-zinc-800">
-                الاسم
+                {t('USER_NAME')}
               </label>
               <Input
                 name="name"
@@ -114,7 +116,7 @@ export default function UserProfile() {
             </div>
             <div className="flex flex-col">
               <label className="mb-1 text-sm font-medium text-zinc-800">
-                الإيميل
+                {t('USER_EMAIL')}
               </label>
               <Input
                 name="email"
@@ -125,7 +127,7 @@ export default function UserProfile() {
             </div>
             <div className="flex flex-col">
               <label className="mb-1 text-sm font-medium text-zinc-800">
-                رقم الموبايل
+                {t('USER_PHONE')}
               </label>
               <Input
                 name="phone"
@@ -134,17 +136,16 @@ export default function UserProfile() {
                 className="w-full"
               />
             </div>
-            {/* ChangePasswordDial */}
             <div>
-              {/* <button
+              <button
                 className="text-blue-800 text-sm"
                 onClick={() => {
                   setIsOpen(true);
                 }}
               >
-                تغير الرقم السري
+                {t('CHANGE_PASSWORD')}
               </button>
-              <ChangePasswordDial isOpen={isOpen} onClose={handleClose} /> */}
+              <ChangePasswordDial userId={userId} isOpen={isOpen} onClose={handleClose} />
             </div>
           </div>
 
@@ -156,7 +157,7 @@ export default function UserProfile() {
               {personalImage ? (
                 <img
                   src={personalImage}
-                  alt="Uploaded preview"
+                  alt={t('PROFILE_IMAGE_ALT')}
                   className="rounded-full h-24 w-24 object-cover"
                 />
               ) : (
@@ -181,7 +182,7 @@ export default function UserProfile() {
               variant={'outlineMain'}
               className="w-full px-6 py-2 text-sm font-semibold"
             >
-              تحميل الصورة
+              {t('UPLOAD_IMAGE')}
             </Button>
             <input
               type="file"
@@ -198,7 +199,7 @@ export default function UserProfile() {
           onClick={handleSubmitData}
           className="mt-6 self-end px-6 py-2 text-sm font-semibold"
         >
-          حفظ
+          {t('SAVE')}
         </Button>
       </div>
     </div>

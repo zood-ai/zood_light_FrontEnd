@@ -109,7 +109,7 @@ export const CorporateInvoices: React.FC<CorporateInvoicesProps> = () => {
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
           meta={searchedData || {}}
-          actionText={'فاتورة '}
+          actionText={'ADD_INVOICE'}
           loading={isLoading}
           handleSearch={handleSearch}
         />

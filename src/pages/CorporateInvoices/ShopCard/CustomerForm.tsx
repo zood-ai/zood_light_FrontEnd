@@ -16,6 +16,7 @@ import CustomerForms from './CustomerForms';
 import { Textarea } from '@/components/ui/textarea';
 import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
 import { useToast } from '@/components/custom/useToastComp';
+import { useTranslation } from 'react-i18next';
 
 import {
   toggleActionView,
@@ -27,6 +28,7 @@ import { GrMenu } from 'react-icons/gr';
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
+  const { t } = useTranslation();
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
   const { useGetAll: fetchAllProducts } = createCrudService<any>(
@@ -205,12 +207,12 @@ const CustomerForm = () => {
                     <SelectCompInput
                       disabled={params.id}
                       className="flex-grow w-full md:w-[327px] "
-                      placeholder="اسم المنتج"
+                      placeholder={t('PRODUCT_NAME')}
                       options={getAllPro?.data?.map((product) => ({
                         value: product.id,
                         label: product.name,
                       }))}
-                      label="اسم المنتج"
+                      label={t('PRODUCT_NAME')}
                       ref={myInputRef}
                       onValueChange={(value) =>
                         handleItemChange(index, 'product_id', value)
@@ -238,7 +240,7 @@ const CustomerForm = () => {
                       }
                       ref={myInputRef}
                       onChange={() => handleItemChange(index, 'product_id', '')}
-                      label="اسم المنتج"
+                      label={t('PRODUCT_NAME')}
                       className="w-full md:w-[327px] h-min"
                     />
                     <button onClick={changeToTextArea} className="h-fit mt-6">
@@ -265,7 +267,7 @@ const CustomerForm = () => {
                     handleItemChange(index, 'unit_price', e.target.value)
                   }
                   min={0}
-                  label="السعر"
+                  label={t('PRICE')}
                   iconSrcLeft="SR"
                   inputClassName="flex-wrap md:w-[151px] sm:max-w-[151px] min-w-[80px]"
                 />

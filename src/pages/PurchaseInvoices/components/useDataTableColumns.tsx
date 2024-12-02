@@ -31,7 +31,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'رقم المرجع'} />
+        <DataTableColumnHeader column={column} title={t('INVOICE_NUMBER')} />
       ),
       cell: ({ row }) => {
         return (
@@ -47,7 +47,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'get_supplier',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'اسم العميل'} />
+        <DataTableColumnHeader column={column} title={t('SUPPLIER_NAME')} />
       ),
       cell: ({ row }: any) => {
         return (
@@ -64,7 +64,7 @@ export const useDataTableColumns = () => {
     // {
     //   accessorKey: 'total_cost',
     //   header: ({ column }) => (
-    //     <DataTableColumnHeader column={column} title={'المبلغ الكلي'} />
+    //     <DataTableColumnHeader column={column} title={t('TOTAL_PRICE')} />
     //   ),
     //   cell: ({ row }: any) => {
     //     return (
@@ -80,14 +80,16 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'business_date',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'التاريخ'} />
+        <DataTableColumnHeader column={column} title={t('DATE')} />
       ),
       cell: ({ row }) => {
         return (
           <div className="flex space-x-2 ">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('business_date') ? formatDateTime(row.getValue('business_date')) : '-'}
+              {row.getValue('business_date')
+                ? formatDateTime(row.getValue('business_date'))
+                : '-'}
             </span>
           </div>
         );
@@ -96,7 +98,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'status',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'الحالة'} />
+        <DataTableColumnHeader column={column} title={t('STATUS')} />
       ),
       cell: ({ row }: any) => {
         return (
@@ -117,7 +119,7 @@ export const useDataTableColumns = () => {
     // {
     //   accessorKey: 'invoice_number',
     //   header: ({ column }) => (
-    //     <DataTableColumnHeader column={column} title={'رقم الفاتورة'} />
+    //     <DataTableColumnHeader column={column} title={t('INVOICE_NUMBER')} />
     //   ),
     //   cell: ({ row }) => {
     //     return (
@@ -133,7 +135,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'id',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'تنفيذ'} />
+        <DataTableColumnHeader column={column} title={t('INVOICE')} />
       ),
       cell: ({ row }) => {
         return (
@@ -151,7 +153,7 @@ export const useDataTableColumns = () => {
                 className="ps-0"
                 variant={'linkHover'}
               >
-                رؤية الفاتورة
+                {t('OPEN_INVOICE')}
               </Button>
             </div>
           </div>

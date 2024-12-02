@@ -168,7 +168,7 @@ export default function FastAddActionsCustomerPQ({
                               <FormControl>
                                 <IconInput
                                   {...field}
-                                  label="اسم العميل"
+                                  label={t('CUSTOMER_NAME')}
                                   iconSrc={personIcon}
                                   inputClassName="w-[278px]"
                                 />

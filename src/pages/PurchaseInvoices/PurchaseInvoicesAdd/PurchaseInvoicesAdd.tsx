@@ -287,7 +287,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     onChange={(e) =>
                       handleItemChange(index, 'total', e.target.value)
                     }
-                    label="السعر"
+                    label={t('PRICE')}
                     inputClassName="w-[138px]"
                     iconSrcLeft={'SR'}
                   />

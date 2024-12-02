@@ -27,9 +27,10 @@ interface WelcomeMessageProps {
 }
 
 export const WelcomeMessage: React.FC<WelcomeMessageProps> = ({ name }) => {
+  const { t } = useTranslation();
   return (
     <section className="text-base font-thian text-right  text-neutral-500">
-      <span>مرحبا بعودتك</span> <span className="font-bold">{name}</span>
+      <span>{t('WELCOME_BACK')}</span> <span className="font-bold">{name}</span>
     </section>
   );
 };
@@ -59,7 +60,6 @@ const AppShell = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: branchData } =
     createCrudService<any>('manage/branches').useGetAll();
-    
 
   useEffect(() => {
     dispatch(

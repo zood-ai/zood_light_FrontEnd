@@ -93,7 +93,7 @@ export const Resources: React.FC<ResourcesProps> = () => {
            actionBtn={handleCreateTask}
            filterBtn={filterBtn}
            meta={allData || {}}
-           actionText={'مورد'}
+           actionText={'ADD_SUPPLIER'}
            loading={isLoading}
         />
       </div>

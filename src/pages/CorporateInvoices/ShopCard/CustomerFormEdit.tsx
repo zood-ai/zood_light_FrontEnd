@@ -16,6 +16,7 @@ import CustomerForms from './CustomerForms';
 import { Textarea } from '@/components/ui/textarea';
 import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
 import { useToast } from '@/components/custom/useToastComp';
+import { useTranslation } from 'react-i18next';
 import {
   toggleActionView,
   toggleActionViewData,
@@ -24,6 +25,7 @@ import { TbMenuDeep } from 'react-icons/tb';
 import { GrMenu } from 'react-icons/gr';
 
 const CustomerFormEdit = () => {
+  const { t } = useTranslation();
   const params = useParams();
   const allServiceOrder = createCrudService<any>('orders');
   const orderPayment = createCrudService<any>('order-payments');
@@ -114,8 +116,8 @@ const CustomerFormEdit = () => {
                     <IconInput
                       disabled={params.id}
                       className="flex-grow w-full md:w-[327px] "
-                      placeholder="اسم المنتج"
-                      label="اسم المنتج"
+                      placeholder={t('PRODUCT_NAME')}
+                      label={t('PRODUCT_NAME')}
                       value={
                         item.name === 'sku-zood-20001'
                           ? item?.pivot?.kitchen_notes
@@ -139,7 +141,7 @@ const CustomerFormEdit = () => {
                           ? item?.pivot?.kitchen_notes
                           : item?.name
                       }
-                      label="اسم المنتج"
+                      label={t('PRODUCT_NAME')}
                       className="w-full md:w-[327px] h-min"
                     />
                     <button onClick={changeToTextArea} className="h-fit mt-6">
@@ -158,7 +160,7 @@ const CustomerFormEdit = () => {
                 <IconInput
                   disabled
                   value={item?.pivot?.unit_price || 0}
-                  label="السعر"
+                  label={t('PRICE')}
                   iconSrcLeft="SR"
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                 />

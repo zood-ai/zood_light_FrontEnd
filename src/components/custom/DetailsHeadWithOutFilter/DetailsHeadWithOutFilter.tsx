@@ -5,6 +5,7 @@ import { DetailsHeadWithOutFilterProps } from './DetailsHeadWithOutFilter.types'
 import './DetailsHeadWithOutFilter.css';
 import { BackBtn } from '../BackBtn';
 import { titleMapping } from '@/constant/constant';
+import useDirection from '@/hooks/useDirection';
 // titleMapping.ts
 
 export default titleMapping;
@@ -16,7 +17,7 @@ export const DetailsHeadWithOutFilter: React.FC<any> = ({
 }) => {
   const pagePath = window.location.pathname; // Get the current path
   const title = titleMapping(pagePath); // Get the title object based on the path
-  const isArabic = true; // Set this based on your app's localization logic
+  const isArabic = useDirection(); // Set this based on your app's localization logic
   return (
     <>
       <div className="grid grid-cols-1">

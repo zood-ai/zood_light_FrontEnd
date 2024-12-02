@@ -127,7 +127,7 @@ export const Categories: React.FC<CategoriesProps> = () => {
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
           meta={searchedData?.meta || {}}
-          actionText={'فئة '}
+          actionText={'ADD_CATEGORY'}
           loading={isLoading}
           handleSearch={handleSearch}
         />

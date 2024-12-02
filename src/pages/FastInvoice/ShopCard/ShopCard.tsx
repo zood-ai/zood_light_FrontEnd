@@ -134,7 +134,7 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
             onValueChange={(value) =>
               handleInputChangex('customerCategory', value)
             }
-            label="اسم العميل"
+            label={t('CUSTOMER_NAME')}
             className="col-span-10 md:col-span-4 w-[327px]"
           />
           <IconInput

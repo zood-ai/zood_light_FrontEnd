@@ -14,10 +14,12 @@ import { ShopCardSummery } from '@/components/custom/ShopCardSummery/ShopCardSum
 import CustomerForms from './CustomerForms';
 import { Textarea } from '@/components/ui/textarea';
 import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
+import { useTranslation } from 'react-i18next';
 
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
+  const { t } = useTranslation();
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
   const { useGetAll: fetchAllProducts } = createCrudService<any>(
@@ -170,12 +172,12 @@ const CustomerForm = () => {
               <SelectCompInput
                 disabled={params.id}
                 className="md:w-[327px]  "
-                placeholder="اسم المنتج"
+                placeholder={t('PRODUCT_NAME')}
                 options={getAllPro?.data?.map((product) => ({
                   value: product.id,
                   label: product.name,
                 }))}
-                label="اسم المنتج"
+                label={t('PRODUCT_NAME')}
                 ref={myInputRef}
                 onValueChange={(value) =>
                   handleItemChange(index, 'product_id', value)
@@ -201,7 +203,7 @@ const CustomerForm = () => {
                   onChange={(e) =>
                     handleItemChange(index, 'unit_price', e.target.value)
                   }
-                  label="السعر"
+                  label={t('PRICE')}
                   iconSrcLeft="SR"
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                 />

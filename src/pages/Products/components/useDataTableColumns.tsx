@@ -30,7 +30,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'name',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'اسم المنتج'} />
+        <DataTableColumnHeader column={column} title={t('PRODUCT_NAME')} />
       ),
       cell: ({ row }: any) => {
         return (
@@ -51,7 +51,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'price',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'السعر'} />
+        <DataTableColumnHeader column={column} title={t('PRICE')} />
       ),
       cell: ({ row }) => {
         return (
@@ -67,7 +67,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'quantity',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'كمية'} />
+        <DataTableColumnHeader column={column} title={t('QUANTITY')} />
       ),
       cell: ({ row }) => {
         return (
@@ -83,7 +83,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'sku',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'الباركود'} />
+        <DataTableColumnHeader column={column} title={t('BARCODE')} />
       ),
       cell: ({ row }) => {
         return (
@@ -100,7 +100,7 @@ export const useDataTableColumns = () => {
     // {
     //   accessorKey: 'id',
     //   header: ({ column }) => (
-    //     <DataTableColumnHeader column={column} title={'تنفيذ'} />
+    //     <DataTableColumnHeader column={column} title={t('INVOICE')} />
     //   ),
     //   cell: ({ row }) => {
     //     return (
@@ -113,7 +113,7 @@ export const useDataTableColumns = () => {
     //             onClick={(e) => {
     //               e.stopPropagation();
     //               dispatch(toggleActionView(true));
-                  // dispatch(toggleActionViewData(row.original));
+    // dispatch(toggleActionViewData(row.original));
     //             }}
     //             className="ps-0"
     //             variant={'linkHover'}

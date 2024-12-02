@@ -13,7 +13,7 @@ export const useOrderDataTableColumns = () => {
     {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('رقم الفاتورة')} />
+        <DataTableColumnHeader column={column} title={t('INVOICE_NUMBER')} />
       ),
       cell: ({ row }) => (
         <span className="font-medium">{row.getValue('reference')}</span>
@@ -22,15 +22,15 @@ export const useOrderDataTableColumns = () => {
     {
       accessorKey: 'type',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('نوع الفاتورة')} />
+        <DataTableColumnHeader column={column} title={t('INVOICE_TYPE')} />
       ),
       cell: ({ row }) => {
         return (
           <div className="flex space-x-2 w-[180px] md:w-auto">
             {row.getValue('type') == 2 ? (
-              <StatusBadge type={2} status="Inactive" text={'مؤسسة'} />
+              <StatusBadge type={2} status="Inactive" text={t('CORPORATE')} />
             ) : (
-              <StatusBadge type={1} status="active" text={'افراد'} />
+              <StatusBadge type={1} status="active" text={t('INDIVIDUAL')} />
             )}
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
           </div>
@@ -40,7 +40,7 @@ export const useOrderDataTableColumns = () => {
     {
       accessorKey: 'total_price',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('المبلغ الاجمالي')} />
+        <DataTableColumnHeader column={column} title={t('TOTAL_PRICE')} />
       ),
       cell: ({ row }) => (
         <span className="font-medium">
@@ -51,7 +51,7 @@ export const useOrderDataTableColumns = () => {
     {
       accessorKey: 'customer', // Access the entire 'customer' object
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('اسم العميل')} />
+        <DataTableColumnHeader column={column} title={t('CUSTOMER_NAME')} />
       ),
       cell: ({ row }) => {
         const customerName = row.getValue('customer')?.name; // Access 'name' from the 'customer' object
@@ -61,7 +61,7 @@ export const useOrderDataTableColumns = () => {
     {
       accessorKey: 'business_date',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('التاريخ')} />
+        <DataTableColumnHeader column={column} title={t('DATE')} />
       ),
       cell: ({ row }) => (
         <span>{formatDateTime(row.getValue('business_date')) || '-'}</span>
@@ -70,7 +70,7 @@ export const useOrderDataTableColumns = () => {
     {
       accessorKey: 'payment_status',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('حالة الدفع')} />
+        <DataTableColumnHeader column={column} title={t('PAYMENT_STATUS')} />
       ),
       cell: ({ row }) => {
         return (
@@ -78,11 +78,11 @@ export const useOrderDataTableColumns = () => {
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
               {row.getValue('payment_status') == 'partial' ? (
-                <StatusBadge status="Inactive" text={'مدفوع جزئي'} />
+                <StatusBadge status="Inactive" text={t('PARTIALLY_PAID')} />
               ) : row.getValue('payment_status') == 'unpaid' ? (
-                <StatusBadge status="error" text={'غير مدفوع'} />
+                <StatusBadge status="error" text={t('UNPAID')} />
               ) : (
-                <StatusBadge status="active" text={'مدفوع'} />
+                <StatusBadge status="active" text={t('PAID')} />
               )}
             </span>
           </div>

@@ -14,8 +14,10 @@ import ShopCardSummeryPQEdit from '@/components/custom/ShopCardSummery/ShopCardS
 import ShopCardSummeryPQ from '@/components/custom/ShopCardSummery/ShopCardSummeryPQ';
 import axiosInstance from '@/api/interceptors';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
+import { useTranslation } from 'react-i18next';
 
 const CustomerFormEdit = () => {
+  const { t } = useTranslation();
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
@@ -72,7 +74,7 @@ const CustomerFormEdit = () => {
             <div key={index} className="flex flex-wrap gap-md">
               <SelectComp
                 className="flex-grow"
-                placeholder="اسم المنتج"
+                placeholder={t('PRODUCT_NAME')}
                 options={[
                   {
                     value: item.id,
@@ -82,7 +84,7 @@ const CustomerFormEdit = () => {
                         : item.pivot.kitchen_notes,
                   },
                 ]}
-                label="اسم المنتج"
+                label={t('PRODUCT_NAME')}
                 value={item.id}
                 disabled
               />
@@ -93,7 +95,7 @@ const CustomerFormEdit = () => {
                 disabled
               />
               <IconInput
-                label="السعر"
+                label={t('PRICE')}
                 inputClassName="max-sm:flex-grow sm:w-[138px] sm:max-w-[138px] sm:min-w-[80px]"
                 iconSrcLeft="SR"
                 defaultValue={

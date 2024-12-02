@@ -17,7 +17,7 @@ export const IndividualInvoicesAdd: React.FC<
 > = () => {
   const { i18n, t } = useTranslation();
 
-  const allServiceUser = createCrudService<any>('menu/products?not_default=1');
+  const allServiceUser = createCrudService<any>('menu/products?not_default=1&sort=-created_at');
   const { useGetAll } = allServiceUser;
   const { data: allUserData } = useGetAll();
   const [isOpen, setIsOpen] = useState(false);

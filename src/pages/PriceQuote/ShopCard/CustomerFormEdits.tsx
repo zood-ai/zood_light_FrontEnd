@@ -95,7 +95,7 @@ const CustomerFormEdits = () => {
             handleInputChangex('customer_id', value);
           }
         }}
-        label="اسم العميل"
+        label={t('CUSTOMER_NAME')}
         className="flex-grow"
         value={orderSchema?.customer_id}
         disabled={params.id}

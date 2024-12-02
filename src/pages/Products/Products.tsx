@@ -56,7 +56,7 @@ export const Products: React.FC<ProductsProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allService = createCrudService<any>('menu/products?not_default=1');
+  const allService = createCrudService<any>('menu/products?not_default=1&sort=-created_at');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
@@ -123,7 +123,7 @@ export const Products: React.FC<ProductsProps> = () => {
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
           meta={searchedData?.meta || {}}
-          actionText={'منتج'}
+          actionText={'ADD_PRODUCT'}
           loading={isLoading}
           handleSearch={handleSearch}
         />

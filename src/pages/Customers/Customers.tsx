@@ -124,7 +124,7 @@ export const Customers: React.FC<CustomersProps> = () => {
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
           meta={searchedData?.meta || {}}
-          actionText={'عميل'}
+          actionText={'ADD_SUPPLIER'}
           loading={isLoading}
           handleSearch={handleSearch}
         />

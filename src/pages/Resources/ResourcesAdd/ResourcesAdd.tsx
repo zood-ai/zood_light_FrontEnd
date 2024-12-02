@@ -140,7 +140,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label={t('اسم المورد')}
+                          label={t('SUPPLIER_NAME')}
                           iconSrc={personIcon}
                           inputClassName="w-[100%] md:col-span-2"
                         />
@@ -174,7 +174,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label={t('كود المورد')}
+                          label={t('BARCODE')}
                           // iconSrc={callIcon}
                           inputClassName="w-[100%]"
                         />

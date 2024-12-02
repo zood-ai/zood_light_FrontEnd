@@ -277,7 +277,7 @@ const CustomerForm = () => {
               handleInputChangex('customer_id', value);
             }
           }}
-          label="اسم العميل"
+          label={t('CUSTOMER_NAME')}
           className=" md:col-span-4 min-w-[327px] flex-grow"
           value={orderSchema?.customer_id}
           disabled={params.id}

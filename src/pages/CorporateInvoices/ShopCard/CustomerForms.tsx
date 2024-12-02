@@ -12,8 +12,10 @@ import FastAddActionsCustomer from '@/components/FastAddActionsCustomer';
 import PlusIcon from '@/components/Icons/PlusIcon';
 import FastAddActionsCustomerPQ from '@/components/FastAddActionsCustomerPQ';
 import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
+import { useTranslation } from 'react-i18next';
 
 const CustomerForms = () => {
+  const { t } = useTranslation();
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
   const allServiceOrderPay =
@@ -89,6 +91,7 @@ const CustomerForms = () => {
     'menu/products?not_default=1'
   );
 
+
   return (
     <>
       <div className="flex-wrap flex gap-md mb-md ">
@@ -98,7 +101,7 @@ const CustomerForms = () => {
               value: item.id,
               label: item.name,
             }))}
-            placeholder="اسم العميل"
+            placeholder={t('CUSTOMER_NAME')}
             onValueChange={(value) => {
               if (params.id) {
                 return;
@@ -106,7 +109,7 @@ const CustomerForms = () => {
                 handleInputChangex('customer_id', value);
               }
             }}
-            label="اسم العميل"
+            label={t('CUSTOMER_NAME')}
             className=" w-full  md:w-[21vw]"
             value={orderSchema?.customer_id}
             disabled={params.id}
