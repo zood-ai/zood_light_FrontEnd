@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { CardItemProps } from './CardItem.types';
 import './CardItem.css';
 import PlusIcon from '../Icons/PlusIcon';
@@ -13,52 +13,65 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
   const dispatch = useDispatch();
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
 
-  const cardItem = useSelector((state: any) =>
-    state.cardItems.value.find((i: { id: string }) => i.id === item.id)
+  const cardItem = useMemo(
+    () => cardItemValue.find((i: { id: string }) => i.id === item.id),
+    [cardItemValue, item.id]
   );
 
-  const [quantatyState, setQuantatyState] = React.useState(
-    cardItem ? cardItem.qty : 0
-  );
   const qty = cardItem ? cardItem.qty : 0;
+  const [inputQty, setInputQty] = useState(qty);
 
-  useEffect(() => {
-    setQuantatyState(cardItem ? cardItem.qty : 0);
-  }, [cardItem]);
+  const updateCardItem = useCallback(
+    (newItem: {
+      id: string;
+      qty: number;
+      name: string;
+      image: any;
+      price: number;
+    }) => {
+      const existingItemIndex = cardItemValue.findIndex(
+        (i: { id: string }) => i.id === newItem.id
+      );
 
-  const updateCardItem = (newItem: {
-    id: string;
-    qty: number;
-    name: string;
-    image: any;
-    price: number;
-  }) => {
-    const existingItemIndex = cardItemValue.findIndex(
-      (i: { id: string }) => i.id === newItem.id
-    );
-
-    if (existingItemIndex >= 0) {
-      const updatedItems = cardItemValue.map(
-        (item: { id: string; qty: number; name: string }, index: number) => {
-          if (index === existingItemIndex) {
-            return {
-              ...item,
-              qty: newItem.qty + item.qty,
-            };
+      if (existingItemIndex >= 0) {
+        const updatedItems = cardItemValue.map(
+          (item: { id: string; qty: number; name: string }, index: number) => {
+            if (index === existingItemIndex) {
+              return {
+                ...item,
+                qty: item.qty + newItem.qty,
+              };
+            }
+            return item;
           }
-          return item;
-        }
-      );
-      dispatch(setCardItem(updatedItems));
-    } else {
-      dispatch(
-        setCardItem([...cardItemValue, { ...newItem, qty: newItem.qty }])
-      );
-    }
-  };
+        );
+        dispatch(setCardItem(updatedItems));
+      } else {
+        dispatch(
+          setCardItem([...cardItemValue, { ...newItem, qty: newItem.qty }])
+        );
+      }
+    },
+    [cardItemValue, dispatch]
+  );
 
-  const incrementCount = () => {
-    // setShopCardCount(qty + 1, 'plus');
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = Math.max(0, Number(e.target.value));
+      setInputQty(value);
+      updateCardItem({
+        id: item.id,
+        qty: value - qty,
+        name: item.name,
+        image: item.image,
+        price: item.price,
+      });
+    },
+    [item, qty, updateCardItem]
+  );
+
+  const incrementCount = useCallback(() => {
+    setInputQty(qty + 1);
     updateCardItem({
       id: item.id,
       qty: 1,
@@ -66,26 +79,25 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
       image: item.image,
       price: item.price,
     });
-  };
+  }, [item, qty, updateCardItem]);
 
-  const decrementCount = () => {
+  const decrementCount = useCallback(() => {
     if (qty === 1) {
       const updatedItems = cardItemValue.filter(
         (item) => item.id !== cardItem.id
       );
       dispatch(setCardItem(updatedItems));
-      // setShopCardCount(qty - 1, 'minus');
     } else if (qty > 1) {
-      // setShopCardCount(qty - 1, 'minus');
+      setInputQty(qty - 1);
       updateCardItem({
         id: item.id,
         qty: -1,
         name: item.name,
-        image: item.images,
+        image: item.image,
         price: item.price,
       });
     }
-  };
+  }, [cardItem, cardItemValue, dispatch, item, qty, updateCardItem]);
 
   return (
     <div className="flex flex-col rounded-none h-[290px] w-[194px] flex-grow">
@@ -126,18 +138,15 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
                   </div>
                 </div>
               </div>
-              {/* {quantatyState} */}
-              <input
-                type="number"
-                value={qty}
-                // defaultValue={quantatyState}
-                onChange={(e) => {
-                  setQuantatyState(Number(e.target.value));
-                  // updateCardItemWith
-                }}
-                min={0}
-                className="h-[40px] text-center w-[90px] flex justify-center items-center bg-white rounded border border-gray-200 border-solid font-bold"
-              />
+              <div className="h-[40px] w-[90px] flex justify-center items-center bg-white rounded border border-gray-200 border-solid font-bold">
+                <input
+                  type="number"
+                  dir="rtl"
+                  value={inputQty}
+                  onChange={handleInputChange}
+                  className="w-full text-center"
+                />
+              </div>
               <div className="object-contain shrink-0 w-10 aspect-square">
                 <div className="flex flex-col max-w-[40px]">
                   <div

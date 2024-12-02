@@ -29,6 +29,7 @@ import {
 import { useToast } from '@/components/custom/useToastComp';
 import PlusIcon from '@/components/Icons/PlusIcon';
 import FastAddActionsCustomerPQ from '@/components/FastAddActionsCustomerPQ';
+import { useTranslation } from 'react-i18next';
 
 function usePrompt(message, { beforeUnload } = {}) {
   const blocker = useBlocker(
@@ -68,6 +69,7 @@ function Prompt({ when, message, ...props }) {
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
+  const { t } = useTranslation();
   const allServiceOrderPay =
     createCrudService<any>('order-payments').useCreate();
   const orderSchema = useSelector((state: any) => state.orderSchema);

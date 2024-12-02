@@ -140,12 +140,10 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
             }
           );
 
-        // Success actions
         openDialog('updated');
         setLoading(false);
         navigate('/zood-dashboard/customers');
       } catch (err) {
-        // Error handling
         form.reset({});
         setLoading(false);
       }
@@ -213,7 +211,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label={t('CUSTOMER_NAME')}
+                          label="اسم العميل"
                           iconSrc={personIcon}
                           inputClassName="w-[278px]"
                         />
