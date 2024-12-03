@@ -140,7 +140,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label={t('اسم طريقة الدفع')}
+                          label={t('PAYMENT_METHOD_NAME')}
                           inputClassName="w-[100%]"
                         />
                       </FormControl>
@@ -155,10 +155,10 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                     <FormItem>
                       <FormControl>
                         <SelectComp
-                          label={t('نوع طريقة الدفع')}
+                          label={t('PAYMENT_METHOD')}
                           value={field.value}
                           options={paymentmethod}
-                          placeholder={t('اختر نوع طريقة الدفع')}
+                          placeholder={t("SELECT_PAYMENT_METHOD")}
                           onValueChange={field.onChange}
                         />
                       </FormControl>
@@ -174,7 +174,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                       <FormControl>
                         <CheckboxWithText
                           {...field}
-                          label={t('تفعيل')}
+                          label={t("ACTIVE")}
                           checked={field.value ? true : false}
                           onChange={(value) => field.onChange(value)}
                         />
@@ -192,7 +192,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                   disabled={loading}
                   className="mt-4 h-[39px] w-[163px]"
                 >
-                  {isEditMode ? t('تعديل الدفع') : t('اضافة طريقة الدفع')}
+                  {isEditMode ? t("UPDATE_PAYMENT_METHOD") : t("ADD_PAYMENT_METHOD")}
                 </Button>
                 <DelConfirm route={'manage/payment_methods'} />
               </div>

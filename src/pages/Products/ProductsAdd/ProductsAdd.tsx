@@ -73,15 +73,13 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
   // Reset form when data changes
   useEffect(() => {
     if (isEditMode) {
-
       form.reset({
         ...getDataById?.data,
         category_id: getDataById?.data?.category?.id,
         quantity: String(getDataById?.data?.quantity),
         price: String(getDataById?.data?.price),
       });
-     const timer = setTimeout(() => {
-        
+      const timer = setTimeout(() => {
         form.setValue('category_id', getDataById?.data?.category?.id);
       }, 500);
       setfile(getDataById?.data?.image);
@@ -102,7 +100,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
       })();
     }
   }, [getDataById, form, isEditMode]);
- 
+
   const { data: branchData } =
     createCrudService<any>('manage/branches').useGetAll();
 
@@ -111,12 +109,13 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
     setLoading(true);
 
     const onError = () => setLoading(false);
-    
+
     const requestData = {
       id: params.objId,
       data: {
         ...values,
-        image: file,},
+        image: file,
+      },
     };
 
     if (isEditMode) {
@@ -255,7 +254,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter
-        mainTittle={isEditMode ? form.getValues('name') : 'اضافة منتج'}
+        mainTittle={isEditMode ? form.getValues('name') : t('ADD_PRODUCT')}
         bkAction={() => {
           setIsOpen(true);
         }}
@@ -297,7 +296,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="اسم المنتج باللغة الإنجليزية"
+                          label={t('PRODUCT_NAME_EN')}
                           inputClassName="w-[278px]"
 
                           // placeholder="ادخل اسم المورد"
@@ -321,7 +320,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                             label: item.name,
                           }))}
                           onValueChange={field.onChange}
-                          label="التصنيف"
+                          label={t('CATEGORY_NAME')}
                           className="col-span-1 md:col-span-2 w-[278px]"
                           // placeholder="ادخل اسم المورد"
                         />
@@ -338,8 +337,8 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                       <FormControl>
                         <Textarea
                           {...field}
-                          placeholder="ادخل الوصف"
-                          label="الوصف"
+                          placeholder={t('DESCRIPTION')}
+                          label={t('DESCRIPTION')}
                           className="w-[499px]"
                         />
                       </FormControl>
@@ -356,7 +355,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                         <IconInput
                           {...field}
                           inputClassName=" w-[253px]"
-                          label="رقم الباركود"
+                          label={t('BARCODE')}
                           disabled
                           // placeholder="ادخل اسم المورد"
                           // iconSrc={personIcon}
@@ -375,7 +374,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                         <IconInput
                           {...field}
                           inputClassName=" w-[253px]"
-                          label="كمية المخزون"
+                          label={t('QUANTITY')}
                           // placeholder="ادخل اسم المورد"
                           // iconSrc={personIcon}
                         />
@@ -393,7 +392,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                         <IconInput
                           {...field}
                           inputClassName=" w-[218px]"
-                          label="سعر البيع"
+                          label={t('PRICE')}
                           // placeholder="ادخل اسم المورد"
                           iconSrcLeft={'SR'}
                         />
@@ -421,7 +420,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
               className="mt-[32px] h-[39px] w-[163px]"
               type="submit"
             >
-              {isEditMode ? 'تعديل المنتج' : 'اضافة المنتج'}
+              {isEditMode ? t('UPDATE_PRODUCT') : t('ADD_PRODUCT')}
             </Button>
             <DelConfirm route={'menu/products'} />
           </form>

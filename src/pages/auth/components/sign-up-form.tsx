@@ -221,7 +221,7 @@ export default function SignUpForm({
           </div>
           <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
             <Label className="align-right" htmlFor="streetName">
-              اسم الشارع
+             {t('STREAT_NAME')} 
             </Label>
             <Input
               className="w-full border-[#DCDBDB]"

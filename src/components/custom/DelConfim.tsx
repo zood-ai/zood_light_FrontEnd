@@ -3,17 +3,13 @@ import { Button } from './button';
 import { AlertDialog } from '../ui/alert-dialog';
 import { AlertDialogContent } from '@radix-ui/react-alert-dialog';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
+import { useTranslation } from 'react-i18next';
 
-const DelConfirm = ({
-
-  route,
-}: {
-
-  route: any;
-}) => {
+const DelConfirm = ({ route }: { route: any }) => {
+  const { t } = useTranslation();
   let params = useParams();
   const { openDialog, delRoute } = useGlobalDialog();
-    let navigate = useNavigate();
+  let navigate = useNavigate();
   return (
     <>
       {params.id == 'edit' && (
@@ -28,10 +24,9 @@ const DelConfirm = ({
             onClick={() => {
               delRoute(route);
               openDialog('del');
-              
             }}
           >
-            {'حذف'}
+            {t('DELETE')}
           </Button>
         </>
       )}

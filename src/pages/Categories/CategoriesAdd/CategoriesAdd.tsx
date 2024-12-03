@@ -101,8 +101,7 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
 
       const requestMethod = isEditMode ? 'put' : 'post';
 
- 
-      await axiosInstance[requestMethod](apiUrl, {...values, image: file});
+      await axiosInstance[requestMethod](apiUrl, { ...values, image: file });
 
       openDialog('added');
       resetFormAndNavigate();
@@ -122,7 +121,7 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
 
       <>
         <DetailsHeadWithOutFilter
-          mainTittle={isEditMode ? form.getValues('name') : 'اضافة فئه'}
+          mainTittle={isEditMode ? form.getValues('name') : t('ADD_CATEGORY')}
           bkAction={() => {
             setIsOpen(true);
           }}
@@ -150,7 +149,7 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
                           <FormControl>
                             <IconInput
                               {...field}
-                              label="اسم الفئه"
+                              label={t('CATEGORY_NAME')}
                               // placeholder="ادخل اسم المورد"
                               // iconSrc={personIcon}
                             />
@@ -167,7 +166,7 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
                           <FormControl>
                             <IconInput
                               {...field}
-                              label="اسم الفئه"
+                              label={t('CATEGORY_NAME_EN')}
                               // placeholder="ادخل اسم المورد"
                               // iconSrc={personIcon}
                             />
@@ -183,7 +182,7 @@ export const CategoriesAdd: React.FC<CategoriesAddProps> = () => {
                       className="mt-4 h-[39px] w-[163px]"
                       type="submit"
                     >
-                      {isEditMode ? 'تعديل الفئه' : 'اضافة فئه'}
+                      {isEditMode ? t('UPDATE_CATEGORY') : t('ADD_CATEGORY')}
                     </Button>
                     <DelConfirm route={'menu/categories'} />
                   </form>

@@ -19,6 +19,7 @@ import createCrudService from '@/api/services/crudService';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 
 // Define the zod schema for form validation
 const formSchema = z.object({
@@ -34,6 +35,7 @@ const formSchema = z.object({
 type AuthFormValues = z.infer<typeof formSchema>;
 
 export const AuthForm: React.FC<AuthFormProps> = () => {
+  const { t } = useTranslation();
   // Use react-hook-form and zod for form handling
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
@@ -95,7 +97,7 @@ export const AuthForm: React.FC<AuthFormProps> = () => {
                         {/* <FormLabel>email</FormLabel> */}
                         <FormControl>
                           <IconInput
-                            placeholder="الايميل"
+                            placeholder={t('EMAIL')}
                             className="ps-5 py-3.5 text-base rounded  w-[418px] "
                             width="418px"
                             inputClassName="h-[56px]"

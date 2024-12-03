@@ -16,6 +16,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { setCardItem } from '@/store/slices/cardItems';
 import CustomerForm from './CustomerForm';
 import CustomerFormEdit from './CustomerFormEdit';
+import { useTranslation } from 'react-i18next';
 
 export const ShopCardEditCo: React.FC<ShopCardProps> = () => {
   const isRtl = useDirection();
@@ -26,6 +27,7 @@ export const ShopCardEditCo: React.FC<ShopCardProps> = () => {
   const getOrdersById = createCrudService<any>('orders').useGetById(
     params.id || ''
   );
+  const { t } = useTranslation();
 
   const totalCost = useMemo(
     () => cardItemValue?.reduce((acc, item) => acc + item.price * item.qty, 0),
@@ -115,7 +117,7 @@ export const ShopCardEditCo: React.FC<ShopCardProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter
-        mainTittle={'فاتورة مؤسسة'}
+        mainTittle={t('CORPORATE_INVOICE')}
         bkAction={handleBkAction}
       />
       {/* <ShopCardTable /> */}

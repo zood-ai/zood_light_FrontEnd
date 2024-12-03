@@ -19,6 +19,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import IconInput from '@/components/custom/InputWithIcon';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -32,6 +33,7 @@ const formSchema = z.object({
 
 type AuthFormValues = z.infer<typeof formSchema>;
 export default function SignIn2() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
@@ -111,7 +113,7 @@ export default function SignIn2() {
           </svg>
         </Link>
       </div>
-      <div className="flex flex-col items-center justify-center mt-10">
+      <div dir='rtl' className="flex flex-col items-center justify-center mt-10">
         <div className=" font-bold leading-[60px] text-[46px] text-center w-full sm:w-[326px]   text-black mb-16">
           تسجيل الدخول
         </div>
@@ -125,7 +127,7 @@ export default function SignIn2() {
                   {/* <FormLabel>email</FormLabel> */}
                   <FormControl>
                     <IconInput
-                      placeholder="الايميل"
+                      placeholder={t('EMAIL')}
                       className=""
                       inputClassName="w-full sm:w-[418px] h-[56px]"
                       {...field}
@@ -144,7 +146,7 @@ export default function SignIn2() {
                   <FormControl>
                     <IconInput
                       placeholder="الرقم التعريفي"
-                      className=" my-md"
+                      className="my-md"
                       inputClassName="w-full sm:w-[418px] h-[56px]"
                       {...field}
                     />
@@ -153,14 +155,14 @@ export default function SignIn2() {
                 </FormItem>
               )}
             />
-            <FormField
+            <FormField 
               control={form.control}
               name="password"
               render={({ field }) => (
                 <FormItem>
                   {/* <FormLabel>password</FormLabel> */}
                   <FormControl>
-                    <div className="relative">
+                    <div  className="relative">
                       <IconInput
                         placeholder="كلمة المرور"
                         className=""
@@ -172,7 +174,7 @@ export default function SignIn2() {
                         type="button"
                         size="icon"
                         variant="ghost"
-                        className="absolute right-1 top-[50%] bottom-[50%] left-[16px] h-6 w-6 -translate-y-1/2 rounded-md text-muted-foreground"
+                        className="absolute left-1 top-[50%] bottom-[50%] h-6 w-6 -translate-y-1/2 rounded-md text-muted-foreground"
                         onClick={() => setShowPassword((prev) => !prev)}
                       >
                         {showPassword ? (
@@ -188,7 +190,7 @@ export default function SignIn2() {
               )}
             />
 
-            <div className="flex justify-end">
+            <div dir='ltr' className="flex justify-end">
               <Link
                 to="/reset-password"
                 className="text-sm text-main cursor-pointer mt-[10px] text-end"

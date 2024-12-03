@@ -19,9 +19,13 @@ import { SelectComp } from '../SelectItem';
 import axios from 'axios';
 import axiosInstance from '@/api/interceptors';
 import { paymentmethod } from '@/constant/constant';
+import { useTranslation } from 'react-i18next';
+import useDirection from '@/hooks/useDirection';
 
 export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   const [totalShopCardCount, setTotalShopCardCount] = useState(0);
+  const { t } = useTranslation();
+  const isRtl = useDirection();
 
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const [paymentMethod, setPaymentMethod] = useState<any>([
@@ -190,12 +194,12 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
               <div className="flex gap-5 max-md:flex-col ">
                 <div className="flex flex-col ml-5 w-[55%] max-md:ml-0 max-md:w-full">
                   <div className="flex flex-col self-stretch my-auto text-sm font-medium text-start text-zinc-500 max-md:mt-10">
-                    <div className="flex flex-col items-start pl-8 max-md:pl-5">
-                      <div>المجموع الفرعي</div>
-                      <div className="mt-7">خصم</div>
+                    <div className="flex flex-col items-start ">
+                      <div>{t('SUBTOTAL')}</div>
+                      <div className="mt-7">{t('DISCOUNT')}</div>
                     </div>
                     <div className="mt-7">
-                      ضريبة القيمة المضافة {mainTax?.rate}%
+                      {t('TAX')} {mainTax?.rate}%
                     </div>
                   </div>
                 </div>
@@ -259,7 +263,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
             />
 
             <div className=" flex gap-5 justify-between self-stretch mt-3 px-2 w-full text-sm text-right text-zinc-800 max-md:max-w-full">
-              <div className="font-medium">المبلغ الإجمالي</div>
+              <div className="font-medium">{t('TOTAL_AMOUNT')}</div>
               <div className="font-bold">
                 SR{' '}
                 {(
@@ -269,7 +273,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
             </div>
             <>
               <div className="mt-6 text-sm font-bold text-right text-black max-md:mr-2.5">
-                طريقة الدفع
+                {t('PAYMENT_METHOD')}
               </div>
               <div className="flex flex-wrap gap-1.5 mt-3 text-sm text-right text-zinc-500 max-md:mr-2.5">
                 {paymentMethods?.data?.map((option, index2) => (
@@ -337,7 +341,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                   }
                   placeholder="0.00"
                   min={0}
-                  label="المبلغ"
+                  label={t('AMOUNT')}
                   width="150px"
                   disabled={
                     params.id && paymentMethodinit[paymentMethod.length - 1]
@@ -441,7 +445,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                   variant="link"
                   className="mb-5  text-xl"
                 >
-                  <PlusIcon /> اضف
+                  <PlusIcon /> {t('ADD')}
                 </Button>
               </div>
             )}
@@ -456,7 +460,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
             }}
           />
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            المبلغ المتبقي
+            {t('REMAINING_AMOUNT')}
           </div>
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
             {(

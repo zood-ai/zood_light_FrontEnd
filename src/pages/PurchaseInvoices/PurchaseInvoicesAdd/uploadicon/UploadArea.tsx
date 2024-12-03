@@ -1,11 +1,13 @@
 import React from 'react';
 import UploadIcon from './UploadIcon';
+import { useTranslation } from 'react-i18next';
 
 interface UploadAreaProps {
   onFileSelect: (file: File) => void;
 }
 
 const UploadArea: React.FC<UploadAreaProps> = ({ onFileSelect }) => {
+  const { t } = useTranslation();
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
   };
@@ -31,11 +33,10 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFileSelect }) => {
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      <div className="flex flex-col max-w-full w-[214px]">
+      <div className="flex flex-col max-w-full w-fit">
         <UploadIcon />
         <label htmlFor="fileInput" className="mt-5 cursor-pointer">
-          <span className="text-zinc-800">اسحب وضع ملفك هنا</span>
-          <span className="text-zinc-800"> او</span> اختر ملف
+          <span className="text-zinc-800">{t('DRAG_AND_DROP')}</span>
         </label>
         <input
           id="fileInput"

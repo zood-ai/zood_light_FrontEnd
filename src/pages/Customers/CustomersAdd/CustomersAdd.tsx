@@ -184,7 +184,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter
-        mainTittle={isEditMode ? form.getValues('name') : 'اضافة عميل'}
+        mainTittle={isEditMode ? form.getValues('name') : t('ADD_CUSTOMER')}
         bkAction={() => {
           setIsOpen(true);
         }}
@@ -202,7 +202,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
               onSubmit={form.handleSubmit(handleFormSubmit)}
               className="px-s4 my-5"
             >
-              <div className=" grid grid-cols-1 md:grid-cols-2 max-w-[580px] ">
+              <div className=" grid grid-cols-1 md:grid-cols-2 gap-x-4 max-w-[580px] ">
                 <FormField
                   control={form.control}
                   name="name"
@@ -211,7 +211,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="اسم العميل"
+                          label={t('CUSTOMER_NAME')}
                           iconSrc={personIcon}
                           inputClassName="w-[278px]"
                         />
@@ -228,7 +228,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="هاتف العميل"
+                          label={t('PHONE')}
                           iconSrc={callIcon}
                           inputClassName="w-[278px]"
                         />
@@ -245,7 +245,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="عنوان العميل"
+                          label={t('ADDRESS')}
                           inputClassName="w-[278px]"
                         />
                       </FormControl>
@@ -261,7 +261,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="الايميل"
+                          label={t('EMAIL')}
                           inputClassName="w-[278px]"
                         />
                       </FormControl>
@@ -277,7 +277,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="رقم تسجيل ضريبة القيمة المضافة"
+                          label={t('TAX_REGISTRATION_NUMBER')}
                           inputClassName="w-[278px]"
                         />
                       </FormControl>
@@ -293,7 +293,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="رقم السجل التجاري"
+                          label={t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
                           inputClassName="w-[278px]"
                         />
                       </FormControl>
@@ -310,7 +310,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
                 disabled={loading}
                 className="mt-4 h-[39px] w-[163px]"
               >
-                {isEditMode ? 'تعديل عميل' : 'اضافة عميل'}
+                {isEditMode ? t('UPDATE_CUSTOMER') : t('ADD_CUSTOMER')}
               </Button>
               <DelConfirm route={'manage/customers'} />
             </form>

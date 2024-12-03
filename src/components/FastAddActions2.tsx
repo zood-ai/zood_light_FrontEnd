@@ -225,7 +225,7 @@ export default function FastAddActions2({ isOpen, onClose }) {
                           <FormControl>
                             <IconInput
                               {...field}
-                              label="عنوان العميل"
+                              label={t('ADDRESS')}
                               inputClassName="w-[278px]"
                             />
                           </FormControl>
@@ -274,7 +274,7 @@ export default function FastAddActions2({ isOpen, onClose }) {
                     disabled={loading}
                     className="mt-4 h-[39px] w-[163px]"
                   >
-                    {isEditMode ? 'تعديل عميل' : 'اضافة عميل'}
+                    {isEditMode ? t('UPDATE_CUSTOMER') : t('ADD_CUSTOMER')}
                   </Button>
                   <DelConfirm route={'manage/customers'} />
                 </form>

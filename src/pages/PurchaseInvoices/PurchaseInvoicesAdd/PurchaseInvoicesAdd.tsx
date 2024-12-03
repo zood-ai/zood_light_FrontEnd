@@ -193,7 +193,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             <div className="grid grid-cols-1 md:grid-cols-2">
               <div>
                 <CustomSearchInbox
-                  placeholder={'اختر المورد'}
+                  placeholder={t('SUPPLIER_NAME')}
                   options={allData?.data?.map((item) => ({
                     value: item.id,
                     label: item.name,
@@ -202,7 +202,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     setInvoice({ ...invoice, supplier_id: value })
                   }
                   value={invoice.supplier_id}
-                  label={'اختر المورد'}
+                  label={t('SUPPLIER_NAME')}
                   className="w-[327px]"
                 />
               </div>
@@ -219,7 +219,9 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     <span>
                       <PlusIcon />
                     </span>
-                    <span className="font-semibold">اضافة مورد جديد</span>
+                    <span className="font-semibold">
+                      {t('ADD_NEW_SUPPLIER')}
+                    </span>
                   </div>
                 </Button>
               </div>
@@ -229,7 +231,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 name="invoice_number"
                 defaultValue={invoice.invoice_number}
                 onChange={handleInputChange}
-                label="ادخل الرقم المرجعي للفاتورة أو رقم الفاتورة"
+                label={t('ENTER_INVOICE_NUMBER')}
                 inputClassName="w-[274px]"
               />
             </div>
@@ -243,7 +245,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 })
               }
               className="w-[499px]"
-              label="وصف المشتريات"
+              label={t('PURCHASES_DESCRIPTION')}
             />
             {items?.map((item, index) => (
               <>
@@ -263,7 +265,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   /> */}
                   <CustomSearchInbox
                     className="w-[220px]"
-                    placeholder="اسم الصنف"
+                    placeholder={t('CATEGORY_NAME')}
                     options={getAllPro?.data?.map((item) => ({
                       value: item.item_id,
                       label: item.name,
@@ -271,7 +273,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     onValueChange={(value) =>
                       handleItemChange(index, 'item', value)
                     }
-                    label="اسم الصنف"
+                    label={t('CATEGORY_NAME')}
                     value={items[index]?.item}
                   />
                   <IconInput
@@ -279,7 +281,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     onChange={(e) =>
                       handleItemChange(index, 'qty', e.target.value)
                     }
-                    label="الكمية"
+                    label={t('QUANTITY')}
                     inputClassName="w-[117px]"
                   />
                   <IconInput
@@ -323,7 +325,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     handleItemChange(index, 'itemDescription', e.target.value)
                   }
                   className="w-[499px]"
-                  label=" وصف الصنف"
+                  label={t('DESCRIPTION')}
                 />
               </>
             ))}
@@ -349,7 +351,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 <span>
                   <PlusIcon />
                 </span>
-                <span className="font-semibold">اضافة صنف جديد</span>
+                <span className="font-semibold">{t('ADD_NEW_ITEM')}</span>
               </div>
             </Button>
             <FileUpload
@@ -386,7 +388,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 type="submit"
                 className="px-6 py-1.5 mta-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
               >
-                {isEditMode ? 'تحديث الفاتورة' : 'اضافة الفاتورة'}
+                {isEditMode ? t('UPDATE_INVOICE') : t('ADD_INVOICE')}
               </Button>
               {allDataId &&
                 isEditMode &&
@@ -394,9 +396,9 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   <Button
                     type="button"
                     onClick={handleConfirmation}
-                    className="px-6 py-1.5 mta-8 mr-4 text-sm font-semibold rounded min-h-[39px] w-[144px]"
+                    className="px-6 py-1.5 mx-4 text-sm font-semibold rounded min-h-[39px] w-[144px]"
                   >
-                    تأكيد فاتورة الشراء
+                    {t('CONFIRM')}
                   </Button>
                 )}
               <DelConfirm route={'inventory/purchasing'} />

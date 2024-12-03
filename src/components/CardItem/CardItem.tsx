@@ -8,8 +8,10 @@ import XIcons from '../Icons/XIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCardItem } from '@/store/slices/cardItems';
 import imagePLaceHolder from '/icons/imagePLaceHolder.svg';
+import { useTranslation } from 'react-i18next';
 
 export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
 
@@ -124,7 +126,7 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
               className="w-full mt-3 flex"
               onClick={() => incrementCount()}
             >
-              اضف
+              {t('ADD')}
             </Button>
           ) : (
             <div className="flex gap-2 mt-3 w-full font-bold whitespace-nowrap max-w-[100%] text-mainText justify-between">

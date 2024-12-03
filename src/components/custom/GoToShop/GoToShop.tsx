@@ -5,8 +5,10 @@ import { GoToShopProps } from './GoToShop.types';
 import './GoToShop.css';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 export const GoToShop: React.FC<GoToShopProps> = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const totalQty = cardItemValue.reduce((sum, item) => sum + item.qty, 0);
@@ -62,7 +64,7 @@ export const GoToShop: React.FC<GoToShopProps> = () => {
           </div>
         </div>
 
-        <div className="">اذهب للعربة</div>
+        <div className="">{t('GO_TO_CART')}</div>
       </div>
     </>
   );

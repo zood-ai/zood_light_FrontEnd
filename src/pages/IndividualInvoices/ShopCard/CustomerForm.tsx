@@ -138,7 +138,7 @@ const CustomerForm = () => {
         console.error('Failed to fetch customer data', err);
       });
   };
-
+  const [orderSubmited, setOrderSubmited] = useState<any>(false);
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const holder = useSelector(
     (state: any) => state.orderSchema.tax_exclusive_discount_amount
@@ -206,6 +206,7 @@ const CustomerForm = () => {
       } else {
         const res = await mutate(orderSchema, {
           onSuccess: async (data) => {
+            setOrderSubmited(true);
             setLoading(false);
             const res = await axiosInstance.get(
               `/orders?filter[id]=${data.data.id}`
@@ -259,7 +260,7 @@ const CustomerForm = () => {
   }, [reload]);
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4">
-      {!params.id && (
+      {!params.id && !orderSubmited && (
         <Prompt
           when={true}
           message="هل أنت متأكد أنك تريد الخروج؟ لن تحفظ البيانات"
@@ -294,7 +295,7 @@ const CustomerForm = () => {
               variant={'link'}
             >
               <div className="flex gap-2">
-                <span className="font-semibold">اضافة عميل جديد</span>
+                <span className="font-semibold">{t('ADD_NEW_CUSTOMER')}</span>
                 <span>
                   <PlusIcon />
                 </span>
@@ -305,8 +306,8 @@ const CustomerForm = () => {
         <IconInput
           disabled
           name="name"
-          className=" md:col-span-4 min-w-full flex-grow"
-          label="رقم العميل"
+          className="md:col-span-4 min-w-full flex-grow"
+          label={t('PHONE')}
           iconSrc={callIcon}
           value={formState.phone}
           onChange={null}
@@ -315,28 +316,28 @@ const CustomerForm = () => {
           disabled
           name={formState.name}
           className=" md:col-span-4 min-w-full flex-grow"
-          label="اسم الشارع"
+          label={t('STREAT_NAME')}
           value={formState.address}
           onChange={null}
         />
         <IconInput
           disabled
           className=" md:col-span-4 min-w-full flex-grow"
-          label="رقم تسجيل ضريبة القيمة المضافة"
+          label={t('TAX_REGISTRATION_NUMBER')}
           value={formState.tax_registration_number}
           onChange={null}
         />
         <IconInput
           disabled
           className=" md:col-span-4 min-w-full flex-grow"
-          label="معرف اخر"
+          label={t('ANOTHER_ID')}
           value={formState.vat_registration_number}
           onChange={null}
         />
 
         <div className=" mt-5 max-xl:hidden w-full">
           <CheckboxWithText
-            label="اضافة التقرير الي Zatca"
+            label={t('ADD_TO_ZATCA')}
             checked={formState.addToZatca}
             onChange={(e) => handleInputChange('addToZatca', e.target.checked)}
           />
@@ -355,7 +356,7 @@ const CustomerForm = () => {
       </div>
       <div className=" mt-5 xl:hidden">
         <CheckboxWithText
-          label="اضافة التقرير الي Zatca"
+          label={t('ADD_TO_ZATCA')}
           checked={formState.addToZatca}
           onChange={(e) => handleInputChange('addToZatca', e.target.checked)}
         />
@@ -377,13 +378,13 @@ const CustomerForm = () => {
         isOpen={fastActionBtn}
         onClose={() => setFastActionBtn(false)}
       />
-      {showAlert && (
+      {/* {showAlert && (
         <div className="alert">
           <p>Data is not saved. Are you sure you want to leave?</p>
           <button onClick={handleCancel}>Cancel</button>
           <button onClick={handleOk}>OK</button>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

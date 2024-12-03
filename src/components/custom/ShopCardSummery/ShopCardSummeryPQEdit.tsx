@@ -10,8 +10,10 @@ import { addTax, updateField } from '@/store/slices/orderSchema';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '@/api/interceptors';
 import Cookies from 'js-cookie';
+import { useTranslation } from 'react-i18next';
 
 const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
+  const { t } = useTranslation();
   // const { data: settings } =
   //   createCrudService<any>('manage/settings').useGetAll();
   const { data: getTaxes } = createCrudService<any>('manage/taxes').useGetAll();
@@ -48,12 +50,12 @@ const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
               <div className="flex gap-5 max-md:flex-col ">
                 <div className="flex flex-col ml-5 w-[55%] max-md:ml-0 max-md:w-full">
                   <div className="flex flex-col self-stretch my-auto text-sm font-medium text-start text-zinc-500 max-md:mt-10">
-                    <div className="flex flex-col items-start pl-8 max-md:pl-5">
-                      <div>المجموع الفرعي</div>
-                      <div className="mt-7">خصم</div>
+                    <div className="flex flex-col items-start  ">
+                      <div>{t('SUBTOTAL')}</div>
+                      <div className="mt-7">{t('DISCOUNT')}</div>
                     </div>
                     <div className="mt-7">
-                      ضريبة القيمة المضافة {mainTax?.rate}%
+                      {t('TAX')} {mainTax?.rate}%
                     </div>
                   </div>
                 </div>
@@ -109,7 +111,7 @@ const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
             />
 
             <div className="flex-grow flex justify-between self-stretch mt-3 max-md:pl-4 pl-2 w-full text-sm text-right  text-zinc-800 max-md:mr-2.5 max-md:max-w-full">
-              <div className="font-medium">المبلغ الإجمالي</div>
+            <div className="font-medium">{t('TOTAL_AMOUNT')}</div>
               <div className="font-bold">
                 SR{' '}
                 {(Math.floor(data?.data?.total_price * 100) / 100 || 0).toFixed(
@@ -128,7 +130,7 @@ const ShopCardSummeryPQEdit: React.FC<ShopCardSummeryProps> = () => {
             }}
           />
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            المبلغ المتبقي
+          {t('REMAINING_AMOUNT')}
           </div>
           <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
             SR{' '}

@@ -138,7 +138,7 @@ export default function FastAddActionsCustomer({
             </button>
 
             <div className="grow shrink text-2xl col-span-1 font-semibold w-fit mt-[50px]">
-              اضافة مورد
+              {t('ADD_SUPPLIER')}
             </div>
 
             <Form {...form}>
@@ -227,7 +227,7 @@ export default function FastAddActionsCustomer({
                         <FormControl>
                           <IconInput
                             {...field}
-                            label={t('رقم تسجيل ضريبة القيمة المضافة')}
+                            label={t('TAX_REGISTRATION_NUMBER')}
                             inputClassName="w-[105%] rounded-md mb-2 border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </FormControl>
@@ -246,7 +246,7 @@ export default function FastAddActionsCustomer({
                     onClick={handleClickSubmit}
                     className="h-[39px] w-[163px]"
                   >
-                    {isEditMode ? t('تعديل المورد') : t('اضافة المورد')}
+                    {isEditMode ? t('UPDATE_SUPPLIER') : t('ADD_SUPPLIER')}
                   </Button>
                   <DelConfirm route={'inventory/suppliers'} />
                 </div>

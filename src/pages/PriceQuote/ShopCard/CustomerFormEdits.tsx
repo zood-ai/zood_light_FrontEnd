@@ -8,8 +8,10 @@ import axiosInstance from '@/api/interceptors';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateField } from '@/store/slices/orderSchema';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const CustomerFormEdits = () => {
+  const { t } = useTranslation();
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
   const allServiceOrderPay =
@@ -79,7 +81,6 @@ const CustomerFormEdits = () => {
     }
   }, [orderSchema?.customer_id]);
 
-
   return (
     <div className="space-y-4 ">
       <SelectComp
@@ -105,7 +106,7 @@ const CustomerFormEdits = () => {
         name="name"
         className="flex-grow"
         inputClassName="w-full"
-        label="رقم العميل"
+        label={t('PHONE')}
         iconSrc={callIcon}
         value={formState.phone}
         onChange={null}
@@ -114,7 +115,7 @@ const CustomerFormEdits = () => {
         disabled
         name={formState.name}
         className="flex-grow"
-        label="اسم الشارع"
+        label={t('STREAT_NAME')}
         value={formState.address}
         onChange={null}
       />
@@ -122,7 +123,7 @@ const CustomerFormEdits = () => {
         disabled
         className="flex-grow"
         inputClassName="w-full"
-        label="رقم تسجيل ضريبة القيمة المضافة"
+        label={t('TAX_REGISTRATION_NUMBER')}
         value={formState.tax_registration_number}
         onChange={null}
       />
@@ -130,7 +131,7 @@ const CustomerFormEdits = () => {
         disabled
         className="flex-grow"
         inputClassName="w-full"
-        label="معرف اخر"
+        label={t('ANOTHER_ID')}
         value={formState.vat_registration_number}
         onChange={null}
       /> */}

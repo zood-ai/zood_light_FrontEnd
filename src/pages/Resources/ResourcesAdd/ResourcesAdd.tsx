@@ -119,7 +119,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter
-        mainTittle={isEditMode ? form.getValues('name') : 'اضافة مورد'}
+        mainTittle={isEditMode ? form.getValues('name') : t('ADD_SUPPLIER')}
         bkAction={() => {
           setIsOpen(true);
         }}
@@ -157,7 +157,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label={t('اسم للتواصل')}
+                          label={t('communication_name')}
                           iconSrc={personIcon}
                           inputClassName="w-[100%] md:col-span-2"
                         />
@@ -191,7 +191,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label={t('هاتف المورد')}
+                          label={t('PHONE')}
                           iconSrc={callIcon}
                           inputClassName="w-[100%]"
                         />
@@ -208,7 +208,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="البريد الإلكتروني"
+                          label={t('EMAIL_ADDRESS')}
                           inputClassName="w-[278px]"
                         />
                       </FormControl>
@@ -224,7 +224,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="رقم تسجيل ضريبة القيمة المضافة"
+                          label={t('TAX_REGISTRATION_NUMBER')}
                           inputClassName="w-[278px]"
                         />
                       </FormControl>
@@ -236,11 +236,11 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                   control={form.control}
                   name="tax_registration_number"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-1 mt-md">
+                    <FormItem className="md:col-span-2 mt-md">
                       <FormControl>
                         <IconInput
                           {...field}
-                          label="رقم السجل التجاري"
+                          label={t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
                           inputClassName="w-[278px]"
                         />
                       </FormControl>
@@ -257,7 +257,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                   disabled={loading}
                   className="mt-4 h-[39px] w-[163px]"
                 >
-                  {isEditMode ? t('تعديل المورد') : t('اضافة المورد')}
+                  {isEditMode ? t('UPDATE_SUPPLIER') : t('ADD_SUPPLIER')}
                 </Button>
                 <DelConfirm route={'inventory/suppliers'} />
               </div>

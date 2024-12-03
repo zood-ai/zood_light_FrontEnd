@@ -194,7 +194,7 @@ const CustomerForm = () => {
                   onChange={(e) =>
                     handleItemChange(index, 'quantity', e.target.value)
                   }
-                  label="الكمية"
+                  label={t('QUANTITY')}
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                 />
                 <IconInput
@@ -208,7 +208,7 @@ const CustomerForm = () => {
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                 />
                 <IconInput
-                  label="المجموع"
+                  label={t('TOTAL')}
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                   iconSrcLeft="SR"
                   value={item.unit_price * item.quantity || 0}
@@ -251,7 +251,7 @@ const CustomerForm = () => {
               variant="link"
             >
               <div className="flex gap-2">
-                <span className="font-semibold">اضافة منتج</span>
+                <span className="font-semibold">{t('ADD_PRODUCT')}</span>
                 <PlusIcon />
               </div>
             </Button>
@@ -262,7 +262,7 @@ const CustomerForm = () => {
                 disabled={params.id}
                 name="kitchen_received_at"
                 // className="col-span-10 "
-                label="نوع السيارة"
+                label={t('CAR_TYPE')}
                 inputClassName="w-[240px] min-w-[120px]"
                 value={orderSchema.kitchen_received_at}
                 onChange={(e) =>
@@ -280,7 +280,7 @@ const CustomerForm = () => {
                 disabled={params.id}
                 name="kitchen_done_at"
                 inputClassName="w-[240px] min-w-[120px] mb-sm "
-                label="رقم اللوحة"
+                label={t('CAR_PLATE')}
                 value={orderSchema.kitchen_done_at}
                 onChange={(e) =>
                   dispatch(
@@ -304,7 +304,7 @@ const CustomerForm = () => {
               )
             }
             className="w-[499px] my-sm"
-            label="ملاحظات"
+            label={t('NOTES')}
           />
         </div>
         <div className="col-span-10">
@@ -314,7 +314,7 @@ const CustomerForm = () => {
             onClick={handleSubmitOrder}
             className="w-[144px] mt-md"
           >
-            {params.id ? 'تأكيد' : 'حفظ'}
+            {params.id ? t('CONFIRM') : t('SAVE')}
           </Button>
         </div>
       </div>

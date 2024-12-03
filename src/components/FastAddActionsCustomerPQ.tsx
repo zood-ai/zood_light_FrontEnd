@@ -150,7 +150,7 @@ export default function FastAddActionsCustomerPQ({
                 </button>
               </div>
               <div className="grow shrink text-2xl col-span-1 font-semibold w-auto  mt-[35px]">
-                {t('اضافة عميل')}
+                {t('ADD_CUSTOMER')}
               </div>
               <div className="min-h-[70vh]">
                 <div className="grid grid-cols-1  items-start">
@@ -202,7 +202,7 @@ export default function FastAddActionsCustomerPQ({
                               <FormControl>
                                 <IconInput
                                   {...field}
-                                  label="عنوان العميل"
+                                  label={t('ADDRESS')}
                                   inputClassName="w-[278px]"
                                 />
                               </FormControl>
@@ -218,7 +218,7 @@ export default function FastAddActionsCustomerPQ({
                               <FormControl>
                                 <IconInput
                                   {...field}
-                                  label="الايميل"
+                                  label={t('EMAIL')}
                                   inputClassName="w-[278px]"
                                 />
                               </FormControl>
@@ -234,7 +234,7 @@ export default function FastAddActionsCustomerPQ({
                               <FormControl>
                                 <IconInput
                                   {...field}
-                                  label="رقم تسجيل ضريبة القيمة المضافة"
+                                  label={t('TAX_REGISTRATION_NUMBER')}
                                   inputClassName="w-[278px]"
                                 />
                               </FormControl>
@@ -250,7 +250,7 @@ export default function FastAddActionsCustomerPQ({
                               <FormControl>
                                 <IconInput
                                   {...field}
-                                  label="رقم السجل التجاري"
+                                  label={t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
                                   inputClassName="w-[278px]"
                                 />
                               </FormControl>
@@ -267,7 +267,7 @@ export default function FastAddActionsCustomerPQ({
                         disabled={loading}
                         className="mt-4 h-[39px] w-[163px]"
                       >
-                        {'اضافة عميل'}
+                        {t('ADD_CUSTOMER')}
                       </Button>
                       <DelConfirm route={'manage/customers'} />
                     </form>

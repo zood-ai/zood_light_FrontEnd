@@ -27,13 +27,13 @@ const IconInput: React.FC<any> = ({
   const isRtl = useDirection();
   return (
     <div className={`flex gap-2   rounded  border-gray-200 ${className} `}>
-      <div className="w-full">
+      <div dir="" className="w-full flex flex-col">
         {label && (
           <div className="self-start text-sm font-medium text-right text-secText mb-xs">
             {label}
           </div>
         )}
-        <div className="relative  flex items-end">
+        <div className="relative flex items-end">
           <Input
             type={type}
             {...props}
@@ -63,7 +63,11 @@ const IconInput: React.FC<any> = ({
           <div className="relative">
             {iconSrcLeft && (
               <div
-                className={`absolute inset-y-0 left-3 flex items-center text-gray-400 ${
+              style={{
+                left: !isRtl ? 'unset' : '10px',
+                right: !isRtl ? '10px' : 'unset',
+              }}
+                className={`absolute inset-y-0 flex items-center text-gray-400 ${
                   label ? 'top-[-36px]' : 'top-[-36px]'
                 }`}
               >

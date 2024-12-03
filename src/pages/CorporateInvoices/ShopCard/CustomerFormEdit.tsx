@@ -154,7 +154,7 @@ const CustomerFormEdit = () => {
                 <IconInput
                   disabled
                   value={item?.pivot?.quantity}
-                  label="الكمية"
+                  label={t('QUANTITY')}
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                 />
                 <IconInput
@@ -165,7 +165,7 @@ const CustomerFormEdit = () => {
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                 />
                 <IconInput
-                  label="المجموع"
+                  label={t('TOTAL')}
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                   iconSrcLeft="SR"
                   value={item?.pivot?.unit_price * item?.pivot?.quantity || 0}
@@ -180,7 +180,7 @@ const CustomerFormEdit = () => {
                 disabled={params.id}
                 name="kitchen_received_at"
                 // className="col-span-10 "
-                label="نوع السيارة"
+                label={t('CAR_TYPE')}
                 inputClassName="w-[240px] min-w-[120px]"
                 value={getOrder?.data?.data?.kitchen_received_at || ''}
                 // value={formState.address}
@@ -190,7 +190,7 @@ const CustomerFormEdit = () => {
                 disabled={params.id}
                 name="kitchen_done_at"
                 inputClassName="w-[240px] min-w-[120px] mb-sm "
-                label="رقم اللوحة"
+                label={t('CAR_PLATE')}
                 value={getOrder?.data?.data?.kitchen_done_at || ''}
               />
             </div>
@@ -200,7 +200,7 @@ const CustomerFormEdit = () => {
             name="kitchen_notes"
             value={getOrder?.data?.data?.kitchen_notes || ''}
             className="w-[499px] my-sm"
-            label="ملاحظات"
+            label={t('NOTES')}
           />
         </div>
         {payment !== 'fully' && (

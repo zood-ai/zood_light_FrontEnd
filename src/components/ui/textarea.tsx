@@ -10,7 +10,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, any>(
     return (
       <div>
         {label && (
-          <div className="self-start text-sm font-medium text-right text-secText mb-0">
+          <div className="self-start text-sm font-medium text-secText mb-0">
             {label}
           </div>
         )}

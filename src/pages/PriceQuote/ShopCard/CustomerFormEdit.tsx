@@ -90,7 +90,7 @@ const CustomerFormEdit = () => {
               />
               <IconInput
                 value={item?.pivot?.quantity}
-                label="الكمية"
+                label={t('QUANTITY')}
                 inputClassName="max-sm:flex-grow sm:w-[117px] sm:max-w-[117px] sm:min-w-[80px]"
                 disabled
               />
@@ -113,7 +113,7 @@ const CustomerFormEdit = () => {
               disabled
               name="kitchen_received_at"
               value={getOrdersById?.data?.kitchen_received_at}
-              label="نوع السيارة"
+              label={t('CAR_TYPE')}
               inputClassName="w-[240px] min-w-[120px]"
               onChange={null}
             />
@@ -122,7 +122,7 @@ const CustomerFormEdit = () => {
               name="kitchen_done_at"
               value={getOrdersById?.data?.kitchen_done_at}
               inputClassName="w-[240px] min-w-[120px] mb-sm "
-              label="رقم اللوحة"
+              label={t('CAR_PLATE')}
               onChange={null}
             />
           </div>
@@ -132,7 +132,7 @@ const CustomerFormEdit = () => {
           name="kitchen_notes"
           value={getOrdersById?.data?.kitchen_notes}
           className="w-[499px] my-sm"
-          label="ملاحظات"
+          label={t('NOTES')}
         />
 
         <div className="col-span-10 pb-5">
@@ -142,7 +142,7 @@ const CustomerFormEdit = () => {
             onClick={handleSubmitOrder}
             className="w-[144px] mt-md"
           >
-            تأكيد
+            {t('CONFIRM')}
           </Button>
         </div>
       </div>

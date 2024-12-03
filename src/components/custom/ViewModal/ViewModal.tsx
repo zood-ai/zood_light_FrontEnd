@@ -33,6 +33,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
   const Simple = pathname === '/zood-dashboard/corporate-invoices';
+  const PriceQuote = pathname === '/zood-dashboard/price-quote';
   const Another = !Corporate;
   const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
   // const ShowCar = true;
@@ -91,8 +92,11 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       <QRCodeComp settings={settings} Data={Data} />
                     </div>
                     <div className="self-center ml-4 font-semibold text-right">
+                      {PriceQuote && 'فاتورة عرض سعر '}
                       {Corporate && 'فاتورة شراء'}
-                      {Another && `فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`}
+                      {!PriceQuote &&
+                        Another &&
+                        ` فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`}
                     </div>
                     <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-500 border-solid max-md:mr-1 max-md:max-w-full">
                       <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
@@ -359,8 +363,11 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
 
                     {/* عنوان الفاتورة */}
                     <div className="text-center font-semibold text-lg my-6">
+                      {PriceQuote && 'فاتورة عرض سعر '}
                       {Corporate && 'فاتورة شراء'}
-                      {Another && `فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`}
+                      {!PriceQuote &&
+                        Another &&
+                        ` فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`}
                     </div>
 
                     {/* معلومات الفاتورة */}

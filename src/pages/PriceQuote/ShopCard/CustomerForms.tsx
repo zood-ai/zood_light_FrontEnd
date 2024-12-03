@@ -145,7 +145,7 @@ const CustomerForms = () => {
               variant={'link'}
             >
               <div className="flex gap-2">
-                <span className="font-semibold">اضافة عميل جديد</span>
+                <span className="font-semibold">{t('ADD_NEW_CUSTOMER')}</span>
                 <span>
                   <PlusIcon />
                 </span>

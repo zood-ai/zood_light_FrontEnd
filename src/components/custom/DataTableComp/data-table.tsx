@@ -155,7 +155,7 @@ export function DataTable<TData, TValue>({
 `;
   return (
     <>
-      <style>{customDatePickerClass}</style>
+      {/* <style>{customDatePickerClass}</style> */}
       {!loading ? (
         <>
           <div className="space-y-4 bag-background">

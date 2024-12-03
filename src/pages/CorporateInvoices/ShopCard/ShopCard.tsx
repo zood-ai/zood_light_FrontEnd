@@ -15,8 +15,10 @@ import ConfirmBk from '@/components/custom/ConfimBk';
 import { useNavigate, useParams } from 'react-router-dom';
 import { setCardItem } from '@/store/slices/cardItems';
 import CustomerForm from './CustomerForm';
+import { useTranslation } from 'react-i18next';
 
 export const ShopCard: React.FC<ShopCardProps> = () => {
+  const { t } = useTranslation();
   const isRtl = useDirection();
   const dispatch = useDispatch();
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
@@ -159,7 +161,7 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
 
   return (
     <>
-      <DetailsHeadWithOutFilter bkAction={handleBkAction} mainTittle="فاتورة مؤسسة"/>
+      <DetailsHeadWithOutFilter bkAction={handleBkAction} mainTittle={t('CORPORATE_INVOICE')}/>
       {/* <ShopCardTable /> */}
       <CustomerForm />
       <ConfirmBk

@@ -16,18 +16,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useTranslation } from 'react-i18next';
 
 export default function CustomSearchInbox({
   options,
   value,
   onValueChange,
-  placeholder = 'اختر خيارًا...',
-  label,
+  placeholder = 'CHOOSE_A_CHOOSE',
+  label,  
   className,
   disabled = false,
 }: any) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState(''); // For managing search input
+  const { t } = useTranslation();
 
   // Filter options based on the search input
   const filteredOptions = React.useMemo(() => {
@@ -60,15 +62,15 @@ export default function CustomSearchInbox({
           >
             {value
               ? options?.find((option) => option?.value === value)?.label
-              : placeholder}
-            <ChevronsUpDown className="opacity-50 mr-auto" />
+              : t(placeholder)}
+            <ChevronsUpDown className="opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
+        <PopoverContent className="w-full flex-grow p-0">
           <Command>
             {/* Search input */}
             <CommandInput
-              placeholder="ابحث عن خيار..."
+              placeholder={t(placeholder)}
               className="h-9"
               value={search}
               onValueChange={setSearch} // Update search value

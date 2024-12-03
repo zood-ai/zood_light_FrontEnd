@@ -22,9 +22,10 @@ import axiosInstance from '@/api/interceptors';
 import { useDispatch, useSelector } from 'react-redux';
 import createCrudService from '@/api/services/crudService';
 import { Button } from '@/components/custom/button';
-
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 export const ShopCardCo: React.FC<ShopCardProps> = () => {
+  const { t } = useTranslation();
   const isRtl = useDirection();
   const params = useParams();
 
@@ -141,7 +142,7 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
             disabled
             name="name"
             className="col-span-10 md:col-span-4"
-            label="رقم العميل"
+            label={t('PHONE')}
             iconSrc={callIcon}
             value={formState.phone}
             onChange={null}
@@ -150,28 +151,28 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
             disabled
             name={formState.name}
             className="col-span-10 md:col-span-10"
-            label="اسم الشارع"
+            label={t('STREAT_NAME')}
             value={formState.address}
             onChange={null}
           />
           <IconInput
             disabled
             className="col-span-10 md:col-span-4"
-            label="رقم تسجيل ضريبة القيمة المضافة"
+            label={t('TAX_REGISTRATION_NUMBER')}
             value={formState.tax_registration_number}
             onChange={null}
           />
           <IconInput
             disabled
             className="col-span-10 md:col-span-6"
-            label="معرف اخر"
+            label={t('ANOTHER_ID')}
             value={formState.vat_registration_number}
             onChange={null}
           />
           <div className="col-span-10">
             <CheckboxWithText
               className=""
-              label="اضافة التقرير الي Zatca"
+              label={t('ADD_TO_ZATCA')}
               checked={formState.addToZatca}
               onChange={(e) =>
                 handleInputChange('addToZatca', e.target.checked)
