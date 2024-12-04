@@ -15,83 +15,121 @@ import {
   IconUserEdit,
   IconCreditCardFilled,
 } from '@tabler/icons-react';
-import { useTranslation } from 'react-i18next';
+import Dashboard from './icons/Dashboard';
+import DashboardActive from './icons/DashboardActive';
+import PriceQuote from './icons/PriceQuote';
+import PriceQuoteActive from './icons/PriceQuoteActive';
+import Customers from './icons/Customers';
+import CustomersActive from './icons/CustomersActive';
+import Products from './icons/Products';
+import ProductsActive from './icons/ProductsActive';
+import Settings from './icons/Settings';
+import SettingsActive from './icons/SettingsActive';
+import Plan from './icons/Plan';
+import PlanActive from './icons/PlanActive';
+import PaymentMethods from './icons/PaymentMethods';
+import PaymentMethodsActive from './icons/PaymentMethodsActive';
+import Organization from './icons/Organization';
+import OrganizationActive from './icons/OrganizationActive';
+import Categories from './icons/Catogories';
+import CategoriesActive from './icons/CategoriesActive';
 
 export interface NavLink {
   title: string;
-  i18n: string;
+  i18n: string; // Added this key to support i18n
   label?: string;
   href: string;
   icon: JSX.Element;
+  icon1?: JSX.Element;
+  icon2?: JSX.Element;
 }
 
 export interface SideLink extends NavLink {
   sub?: NavLink[];
 }
 
+//  Add i18n keys without altering the title field
 export const sidelinks: SideLink[] = [
   {
     title: 'لوحة التحكم', // Dashboard
     i18n: 'DASHBOARD',
     label: '',
     href: '/zood-dashboard',
-    icon: <IconLayoutGridFilled size={18} />,
+    icon: <Dashboard />,
+    icon1: <Dashboard />,
+    icon2: <DashboardActive />,
   },
   {
     title: 'نقطة البيع', // Individual Invoices
     i18n: 'INDIVIDUAL_INVOICES',
     label: '',
     href: '/zood-dashboard/individual-invoices',
-    icon: <IconReceiptFilled size={18} />,
+    icon: <PriceQuote />,
+    icon1: <PriceQuote />,
+    icon2: <PriceQuoteActive />,
   },
   {
     title: 'فاتورة المؤسسة', // Corporate Invoice
     i18n: 'CORPORATE_INVOICES',
     label: '',
     href: '/zood-dashboard/corporate-invoices',
-    icon: <IconBuildingSkyscraper size={18} />,
+    icon: <Organization />,
+    icon1: <Organization />,
+    icon2: <OrganizationActive />,
   },
   {
     title: 'فاتورة الشراء', // Purchase Invoice
     i18n: 'PURCHASE_INVOICES',
     label: '',
     href: '/zood-dashboard/purchase-invoices',
-    icon: <IconReceiptFilled size={18} />,
+    icon: <PriceQuote />,
+    icon1: <PriceQuote />,
+    icon2: <PriceQuoteActive />,
   },
   {
     title: 'عرض السعر', // Price Quote
     i18n: 'PRICE_QUOTE',
     label: '',
     href: '/zood-dashboard/price-quote',
-    icon: <IconReceiptFilled size={18} />,
+    icon: <PriceQuote />,
+    icon1: <PriceQuote />,
+    icon2: <PriceQuoteActive />,
   },
   {
     title: 'المنتجات', // Products
     i18n: 'PRODUCTS',
     label: '',
     href: '/zood-dashboard/products',
-    icon: <IconBoxSeam size={18} />,
+    icon: <Products />,
+    icon1: <Products />,
+    icon2: <ProductsActive />,
   },
   {
     title: 'الفئات', // Categories
     i18n: 'CATEGORIES',
     label: '',
     href: '/zood-dashboard/categories',
-    icon: <IconLayout2Filled size={18} />,
+    icon: <Categories />,
+    icon1: <Categories />,
+    icon2: <CategoriesActive />,
   },
   {
     title: 'العملاء', // Customers
     i18n: 'CUSTOMERS',
     label: '',
     href: '/zood-dashboard/customers',
-    icon: <IconUserFilled size={18} />,
+    icon: <Customers />,
+    icon1: <Customers />,
+    icon2: <CustomersActive />,
   },
   {
     title: 'الموردين', // Resources
     i18n: 'RESOURCES',
     label: '',
     href: '/zood-dashboard/resources',
-    icon: <IconTruck size={18} />,
+    icon: <Customers />,
+    icon1: <Customers />,
+    icon2: <CustomersActive />,
   },
   {
     title: 'التقارير', // Reports
@@ -101,25 +139,31 @@ export const sidelinks: SideLink[] = [
     icon: <IconChartHistogram size={18} />,
     sub: [
       {
-        title: 'فاتورة عاديه', // My Plan
+        title: 'فاتورة عاديه', // Normal Report
         i18n: 'NORMAL_REPORT',
         label: '',
         href: '/zood-dashboard/normal-report',
-        icon: <IconReceipt size={18} />,
+        icon: <PriceQuote />,
+        icon1: <PriceQuote />,
+        icon2: <PriceQuoteActive />,
       },
       {
-        title: 'فاتورة B2B', // My Plan
+        title: 'فاتورة B2B', // B2B Report
         i18n: 'B2B_REPORT',
         label: '',
         href: '/zood-dashboard/b2b-report',
-        icon: <IconReceipt size={18} />,
+        icon: <PriceQuote />,
+        icon1: <PriceQuote />,
+        icon2: <PriceQuoteActive />,
       },
       {
-        title: 'فاتورة الشراء', // My Plan
+        title: 'فاتورة الشراء', // Purchase Report
         i18n: 'PURCHASE_REPORT',
         label: '',
         href: '/zood-dashboard/purchase-report',
-        icon: <IconReceipt size={18} />,
+        icon: <PriceQuote />,
+        icon1: <PriceQuote />,
+        icon2: <PriceQuoteActive />,
       },
     ],
   },
@@ -128,41 +172,26 @@ export const sidelinks: SideLink[] = [
     i18n: 'MY_PLAN',
     label: '',
     href: '/zood-dashboard/my-plan',
-    icon: <IconTargetArrow size={18} />,
+    icon: <Plan />,
+    icon1: <Plan />,
+    icon2: <PlanActive />,
   },
   {
     title: 'طرق الدفع', // Payment Methods
     i18n: 'PAYMENT_METHODS',
     label: '',
     href: '/zood-dashboard/payment-methods',
-    icon: <IconCreditCardFilled size={18} />,
+    icon: <PaymentMethods />,
+    icon1: <PaymentMethods />,
+    icon2: <PaymentMethodsActive />,
   },
   {
     title: 'الاعدادات', // Settings
     i18n: 'SETTINGS',
     label: '',
     href: '/zood-dashboard/settings',
-    icon: <IconSettings size={18} />,
-  },
-  {
-    title: 'الملف الشخصي', // Profile
-    i18n: 'PROFILE',
-    label: '',
-    href: '/zood-dashboard/profile',
-    icon: <IconUserEdit size={18} />,
-  },
-  {
-    title: 'تواصل عبر الواتساب', // Contact via WhatsApp
-    i18n: 'CONTACT_VIA_WHATSAPP',
-    label: '',
-    href: '/zood-dashboard/contact-whatsapp',
-    icon: <IconBrandWhatsapp size={18} />,
-  },
-  {
-    title: 'تسجيل الخروج', // Logout
-    i18n: 'LOGOUT',
-    label: '',
-    href: '/',
-    icon: <IconLock size={18} />,
+    icon: <Settings />,
+    icon1: <Settings />,
+    icon2: <SettingsActive />,
   },
 ];

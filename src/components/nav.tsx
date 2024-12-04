@@ -91,6 +91,8 @@ function NavLink({
   title,
   i18n,
   icon,
+  icon1,
+  icon2,
   label,
   href,
   closeNav,
@@ -121,7 +123,12 @@ function NavLink({
         <span
           className={`${checkActiveNav(href) ? 'text-main ' : 'text-secText'}`}
         >
-          <i>{icon}</i>
+          <i>
+            {/* {false?icon1:icon2} */}
+            {!(icon1 && icon2) && icon}
+            {checkActiveNav(href) ? icon2 : icon1}
+            {/* {icon}  */}
+          </i>
         </span>
       </div>
       <span
@@ -141,7 +148,14 @@ function NavLink({
   );
 }
 
-function NavLinkDropdown({ title, i18n, icon, label, sub, closeNav }: NavLinkProps) {
+function NavLinkDropdown({
+  title,
+  i18n,
+  icon,
+  label,
+  sub,
+  closeNav,
+}: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav();
   const { t } = useTranslation();
   /* Open collapsible by default

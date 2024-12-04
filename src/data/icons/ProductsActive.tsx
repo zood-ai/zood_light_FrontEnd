@@ -1,0 +1,10 @@
+export default function Products(){
+    return( 
+        <svg width="22" height="16" viewBox="0 0 22 16" fill="#7272F6" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M11.3203 0.597789L14.4719 6.73405L21.9876 4.78827L20.2946 0.0527344L11.3203 0.597789Z" fill="#7272F6"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M10.6672 0.550916L7.51569 6.68132L0 4.74139L1.69293 0L10.6672 0.550916Z" fill="#7272F6"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M2.54297 6.92161V13.8549L11.0194 16L19.941 13.556L19.8941 6.76922L13.4621 8.21684L11.0194 3.5282L7.72722 8.51574L2.54297 6.92161Z" fill="#7272F6"/>
+</svg>
+
+    )
+}

@@ -143,6 +143,26 @@ const AppShell = () => {
 
             <Layout.Body className="bg-mainBg mb-14">
               <Outlet />
+              <div
+                style={{
+                  right: !isRtl ? '1.5rem' : 'auto',
+                  left: isRtl ? '1.5rem' : 'auto',
+                }}
+                className="fixed bottom-[1.5rem] left-[1.5rem]"
+              >
+                <a
+                  href={`https://wa.me/+201080925119`}
+                  target="_blank"
+                  className="flex gap-2 cursor-pointer justify-center  w-[51px] h-[51px] rounded-full bg-green-500 "
+                >
+                  <img
+                    loading="lazy"
+                    src="https://cdn.builder.io/api/v1/image/assets/TEMP/3769057990693e0194a9bacc9caa2588cf42c25f2fe1a813eeab42095ea7745e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
+                    className="object-contain   rounded-full shrink-0 w-[28px] aspect-square"
+                    title="تواصل عبر الواتس اب"
+                  />
+                </a>
+              </div>
             </Layout.Body>
           </Layout>
         </main>
