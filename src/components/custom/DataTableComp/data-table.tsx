@@ -180,7 +180,7 @@ export function DataTable<TData, TValue>({
                     : title?.ar} */}
                   {isRtl ? title?.ar : title?.en}
                 </div>
-                <div className="flex flex-wrap gap-5 flex-grow">
+                <div className="flex flex-wrap gap-y-2 flex-grow">
                   <div className="max-w-[303px] ms-[14px]">
                     <IconInput
                       onChange={(e) => {

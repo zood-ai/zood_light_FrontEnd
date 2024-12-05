@@ -115,6 +115,9 @@
   "SUBSCRIPTION_PLAN": "Plan",
   "SUBSCRIPTION_END_DATE": "Subscription end date",
   "SUBSCRIPTION_DETAILS": "Subscription details",
+  "DRAFT": "Draft",
+  "CLOSED": "Closed",
+  "REPORTED": "Reported",
 
   "PAYMENT_METHOD_NAME": "Name",
   "ACTIVE": "Active",

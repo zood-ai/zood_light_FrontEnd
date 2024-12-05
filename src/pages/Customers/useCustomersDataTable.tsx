@@ -53,10 +53,10 @@ export const useCustomersDataTable = () => {
         return (
           <div className="flex space-x-2 w-[180px] md:w-auto">
             {row.getValue('status') == '8' && (
-              <StatusBadge status="Inactive" text={'draft'} />
+              <StatusBadge status="Inactive" text={t('DRAFT')} />
             )}
             {row.getValue('status') == '4' && (
-              <StatusBadge status="active" text={'closed'} />
+              <StatusBadge status="active" text={t('CLOSED')} />
             )}
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
           </div>

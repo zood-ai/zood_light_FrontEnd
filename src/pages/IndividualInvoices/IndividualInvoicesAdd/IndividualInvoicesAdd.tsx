@@ -17,7 +17,9 @@ export const IndividualInvoicesAdd: React.FC<
 > = () => {
   const { i18n, t } = useTranslation();
 
-  const allServiceUser = createCrudService<any>('menu/products?not_default=1&sort=-created_at');
+  const allServiceUser = createCrudService<any>(
+    'menu/products?not_default=1&sort=-created_at'
+  );
   const { useGetAll } = allServiceUser;
   const { data: allUserData } = useGetAll();
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +37,7 @@ export const IndividualInvoicesAdd: React.FC<
           setIsOpen(true);
         }}
       />
-      <div className="flex flex-wrap flex-grow gap-4">
+      <div className="flex flex-wrap w-fit mx-auto gap-x-4 gap-y-6">
         {allUserData?.data?.map((item, index) => (
           <CardItem key={item.id} index={index} item={item} />
         ))}

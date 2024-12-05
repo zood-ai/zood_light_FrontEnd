@@ -67,7 +67,7 @@ export const ShopCardPQ: React.FC<ShopCardProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter
-        subTitle={<StatusBadge status="Inactive" text={'draft'} />}
+        subTitle={<StatusBadge status="Inactive" text={t('DRAFT')} />}
         bkAction={handleBkAction}
       />
 

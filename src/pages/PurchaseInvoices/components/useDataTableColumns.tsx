@@ -106,10 +106,10 @@ export const useDataTableColumns = () => {
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
               {row.getValue('status') == 'Closed' && (
-                <StatusBadge status="active" text={'Closed'} />
+                <StatusBadge status="active" text={t('CLOSED')} />
               )}
               {row.getValue('status') == 'Draft' && (
-                <StatusBadge status="Inactive" text={'Draft'} />
+                <StatusBadge status="Inactive" text={t('DRAFT')} />
               )}
             </span>
           </div>

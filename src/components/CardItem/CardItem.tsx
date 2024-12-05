@@ -102,7 +102,7 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
   }, [cardItem, cardItemValue, dispatch, item, qty, updateCardItem]);
 
   return (
-    <div className="flex flex-col rounded-none h-[290px] w-[194px] flex-grow">
+    <div className="flex flex-col rounded-none h-[290px] w-[210px] ">
       <div className="flex flex-col pb-2 w-full bg-white rounded border border-gray-200 border-solid ">
         <div className="flex justify-center self-stretch px-5 pt-4 w-full bg-white rounded border border-gray-200 border-solid">
           <img

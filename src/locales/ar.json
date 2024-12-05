@@ -113,6 +113,9 @@
   "PROFILE": "الملف الشخصي",
   "CONTACT_VIA_WHATSAPP": "تواصل عبر الواتساب",
   "LOGOUT": "تسجيل الخروج",
+  "DRAFT": "مسودة",
+  "CLOSED": "مغلق",
+  "REPORTED": "تم الابلاغ",
 
   "SEARCH_TABLE_PLACEHOLDER": "بحث عن فاتورة, عميل, تاريخ",
   "START_DATE": "تاريخ البداية",
