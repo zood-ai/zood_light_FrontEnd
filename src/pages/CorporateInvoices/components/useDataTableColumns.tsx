@@ -24,7 +24,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('INVOICE_NUMBER')} />
+        <DataTableColumnHeader remove={true} column={column} title={t('INVOICE_NUMBER')} />
       ),
       cell: ({ row }) => {
         return (
@@ -123,7 +123,7 @@ export const useDataTableColumns = () => {
                 <StatusBadge status="pending" text={'click to clearance'} />
               ))} */}
             {/* {row.getValue('zatca_report_status') === 'PASS' && ( */}
-              <StatusBadge status="reported" text={t('REPORTED')} />
+            <StatusBadge status="reported" text={t('REPORTED')} />
             {/* )} */}
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
           </div>

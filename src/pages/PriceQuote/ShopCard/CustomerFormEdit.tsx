@@ -131,7 +131,7 @@ const CustomerFormEdit = () => {
           disabled
           name="kitchen_notes"
           value={getOrdersById?.data?.kitchen_notes}
-          className="w-[499px] my-sm"
+          className="w-full my-sm"
           label={t('NOTES')}
         />
 

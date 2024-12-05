@@ -23,10 +23,11 @@ export default function App() {
         userAgent
       );
 
-    const isTouchDevice =
-      'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    // Feature detection: Check if touch is supported
+    // const isTouchDevice =
+    //   'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-    if (isMobileUA || isTouchDevice) {
+    if (isMobileUA) {
       window.location.href = 'https://zood-e-invoice-flutter.vercel.app/';
     }
   }, []);

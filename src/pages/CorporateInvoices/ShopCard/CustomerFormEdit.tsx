@@ -64,7 +64,9 @@ const CustomerFormEdit = () => {
         holder.pop();
         // if (!holder) return;
 
-        const newHolder = holder.filter((ele) => ele.business_date === undefined);
+        const newHolder = holder.filter(
+          (ele) => ele.business_date === undefined
+        );
 
         const holder2 = newHolder.map((ele) => ({
           ...ele,
@@ -105,13 +107,24 @@ const CustomerFormEdit = () => {
   };
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
-      <div className=" w-full xl:w-1/2">
+      <div className=" w-full xl:w-[500px]">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
           {getOrder?.data?.data?.products.map((item, index) => (
             <div key={index} className="flex flex-wrap">
               <div className="flex md:w-fit max-md:flex-grow gap-x-2 mb-5">
-                {!isTextArea ? (
+                <IconInput
+                  disabled={params.id}
+                  className="flex-grow w-full md:w-[327px] "
+                  placeholder={t('PRODUCT_NAME')}
+                  label={t('PRODUCT_NAME')}
+                  value={
+                    item.name === 'sku-zood-20001'
+                      ? item?.pivot?.kitchen_notes
+                      : item?.name
+                  }
+                />
+                {/* {!isTextArea ? (
                   <>
                     <IconInput
                       disabled={params.id}
@@ -131,7 +144,7 @@ const CustomerFormEdit = () => {
                       <GrMenu size={25} />
                     </button>
                   </>
-                ) : (
+                 ) : (
                   <>
                     <Textarea
                       disabled={params.id}
@@ -148,7 +161,7 @@ const CustomerFormEdit = () => {
                       <TbMenuDeep size={25} />
                     </button>
                   </>
-                )}
+                )} */}
               </div>
               <div className="flex gap-x-md">
                 <IconInput
@@ -199,7 +212,7 @@ const CustomerFormEdit = () => {
             disabled={params.id}
             name="kitchen_notes"
             value={getOrder?.data?.data?.kitchen_notes || ''}
-            className="w-[499px] my-sm"
+            className="w-full my-sm"
             label={t('NOTES')}
           />
         </div>

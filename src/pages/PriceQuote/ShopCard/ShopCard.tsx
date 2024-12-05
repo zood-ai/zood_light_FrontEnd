@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import CustomerForm from './CustomerForm';
 import Cookies from 'js-cookie';
 import { StatusBadge } from '@/components/custom/StatusBadge';
+import { useTranslation } from 'react-i18next';
 
 export const ShopCardPQ: React.FC<ShopCardProps> = () => {
   const isRtl = useDirection();
@@ -18,6 +19,7 @@ export const ShopCardPQ: React.FC<ShopCardProps> = () => {
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const [isOpen, setIsOpen] = useState(false);
   const params = useParams();
+  const { t } = useTranslation();
 
   const totalCost = useMemo(
     () =>

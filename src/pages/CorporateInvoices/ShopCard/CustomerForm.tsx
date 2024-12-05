@@ -196,7 +196,7 @@ const CustomerForm = () => {
 
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-10 space-y-5">
-      <div className="w-full xl:w-1/2">
+      <div className="w-full xl:w-[500px]">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
           {orderSchema.products.map((item, index) => (
@@ -367,7 +367,7 @@ const CustomerForm = () => {
                 updateField({ field: 'kitchen_notes', value: e.target.value })
               )
             }
-            className="lg:w-[499px] my-sm"
+            className="lg:w-full my-sm"
             label={t('NOTES')}
           />
         </div>

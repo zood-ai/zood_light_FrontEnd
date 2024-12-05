@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import UploadIcon from './UploadIcon';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +7,7 @@ interface UploadAreaProps {
 }
 
 const UploadArea: React.FC<UploadAreaProps> = ({ onFileSelect }) => {
+  const ref = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -29,7 +30,8 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFileSelect }) => {
 
   return (
     <div
-      className="flex flex-col justify-center items-center px-20 py-6 w-full bg-violet-50 rounded border-2 border-dashed border-neutral-200 max-md:px-5 max-md:max-w-full"
+      onClick={() => ref.current?.click()}
+      className="cursor-pointer flex flex-col justify-center items-center px-20 py-6 w-full bg-violet-50 rounded border-2 border-dashed border-neutral-200 max-md:px-5 max-md:max-w-full"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
@@ -44,6 +46,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onFileSelect }) => {
           accept="image/*"
           className="sr-only hidden"
           onChange={handleFileInput}
+          ref={ref}
           aria-label="اختر ملف للتحميل"
         />
       </div>

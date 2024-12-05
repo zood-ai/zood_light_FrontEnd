@@ -31,7 +31,7 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('INVOICE_NUMBER')} />
+        <DataTableColumnHeader remove={true} column={column} title={t('INVOICE_NUMBER')} />
       ),
       cell: ({ row }) => {
         return (
@@ -47,7 +47,7 @@ export const useDataTableColumns = () => {
     // {
     //   accessorKey: 'invoice_number',
     //   header: ({ column }) => (
-    //     <DataTableColumnHeader column={column} title={t('INVOICE_NUMBER')} />
+    //     <DataTableColumnHeader remove={true} column={column} title={t('INVOICE_NUMBER')} />
     //   ),
     //   cell: ({ row }) => {
     //     return (

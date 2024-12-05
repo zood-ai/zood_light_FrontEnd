@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from 'react';
 import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/custom/button';
 import { use } from 'i18next';
@@ -86,7 +92,6 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
   let pagePath = window.location.pathname; // Get the current path
   pagePath = pagePath.replace(/\/edit\/[^/]+$/, '/edit');
-
 
   const title = titleMapping(pagePath); // Get the title object based on the path
   const isArabic = true;
@@ -212,7 +217,7 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
                       <Button
                         onClick={() => setIsOpen(false)}
                         variant={'outline'}
-                        className="px-16 py-2"
+                        className="px-16 py-2 mt-5"
                       >
                         الغاء{' '}
                       </Button>

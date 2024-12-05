@@ -94,7 +94,7 @@ export const Categories: React.FC<CategoriesProps> = () => {
             actionBtn={handleCreateTask}
             filterBtn={filterBtn}
             meta={allData?.meta || {}}
-            actionText={'ADD_CATEGORY'}
+            actionText={'ADD_PAYMENT_METHOD'}
             loading={isLoading}
         />
       </div>

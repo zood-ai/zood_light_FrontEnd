@@ -28,7 +28,7 @@ export default function Settings() {
   const { mutate: updateBusiness } = createCrudService<any>(
     `auth/users/${userId}`
   ).useUpdate();
-  const holder = whoami
+  let holder = whoami
     ? JSON.parse(whoami?.user?.branches[0]?.registered_address)
     : {};
   const [updateAll, setUpdateAll] = useState({
@@ -108,40 +108,76 @@ export default function Settings() {
       },
     });
   };
-  const updateBusinessType = () => {
-    if (updateAll.business_type === whoami?.business?.type) return;
-    updateBusiness({
+  const updateTop = async () => {
+    updateSettings({
       id: '',
-      data: { business_type_id: updateAll.business_type },
+      data: {
+        business_name: updateAll.business_name,
+        business_tax_number: updateAll.business_tax_number,
+      },
     });
+    if (updateAll.business_type !== whoami?.business?.type) {
+      updateBusiness({
+        id: '',
+        data: { business_type_id: updateAll.business_type },
+      });
+    }
+
+    updateBranch({
+      id: brancheId,
+      data: {
+        registered_address: JSON.stringify({
+          ...holder,
+          streetName: updateAll.streetName,
+          postalCode: updateAll.postalCode,
+          additionalNumber: updateAll.additionalNumber,
+          buildingNumber: updateAll.buildingNumber,
+          commercialRegesterationNumber:
+            updateAll.commercialRegesterationNumber,
+        }),
+      },
+    });
+    holder = {
+      ...holder,
+      streetName: updateAll.streetName,
+      postalCode: updateAll.postalCode,
+      additionalNumber: updateAll.additionalNumber,
+      buildingNumber: updateAll.buildingNumber,
+      commercialRegesterationNumber: updateAll.commercialRegesterationNumber,
+    };
   };
-  const updateBothData = async () => {
+  const updateBottom = async () => {
     updateSettings({
       id: '',
       data: {
         country: updateAll.country,
-        business_name: updateAll.business_name,
-        business_tax_number: updateAll.business_tax_number,
-        receipt_header: updateAll.receipt_header,
-        receipt_footer: updateAll.receipt_footer,
       },
     });
-
     updateBranch({
       id: brancheId,
       data: {
         phone: updateAll.phone,
         registered_address: JSON.stringify({
-          buildingNumber: updateAll.buildingNumber,
-          additionalNumber: updateAll.additionalNumber,
-          commercialRegesterationNumber:
-            updateAll.commercialRegesterationNumber,
-          postalCode: updateAll.postalCode,
-          streetName: updateAll.streetName,
-          district: updateAll.district,
-          citySubdivisionName: updateAll.citySubdivisionName,
+          ...holder,
           city: updateAll.city,
+          citySubdivisionName: updateAll.citySubdivisionName,
+          district: updateAll.district,
         }),
+      },
+    });
+    holder = {
+      ...holder,
+      city: updateAll.city,
+      citySubdivisionName: updateAll.citySubdivisionName,
+      district: updateAll.district,
+    };
+  };
+  const updateReceipt = async () => {
+    updateSettings({
+      id: '',
+      data: {
+        receipt_header: updateAll.receipt_header,
+        receipt_footer: updateAll.receipt_footer,
       },
     });
   };
@@ -173,6 +209,29 @@ export default function Settings() {
           >
             <div className="text-base align-rigth font-semibold text-zinc-800">
               {t('SETTINGS_BASIC_INFORMATION')}
+            </div>
+          </div>
+          <div className="flex flex-col items-start pt-4 w-full text-sm font-semibold text-left  border-solid max-md:pl-5 max-md:max-w-full">
+            <div className="self-start font-medium text-zinc-500">
+              {t('companyType')}
+            </div>
+            <div className="relative mt-2 w-full text-sm">
+              <CustomSearchInbox
+                options={allBusinessTypes?.data?.map((item) => ({
+                  value: item.id,
+                  label: item.name,
+                }))}
+                placeholder=""
+                onValueChange={(value) => {
+                  setUpdateAll((prev) => ({
+                    ...prev,
+                    business_type: value,
+                  }));
+                }}
+                className="md:col-span-4 min-w-[327px] w-full flex-grow"
+                value={updateAll?.business_type}
+                disabled={false}
+              />
             </div>
           </div>
           <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full ">
@@ -248,7 +307,6 @@ export default function Settings() {
               </div>
             </div>
           </div>
-          {/* Part We Need To Start */}
           <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full">
             <div className="w-full flex max-sm:flex-col gap-y-4 gap-x-4">
               <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
@@ -299,7 +357,21 @@ export default function Settings() {
                 className="w-full"
               />
             </div>
+            <div className="w-full">
+              <button
+                onClick={() => {
+                  updateTop();
+                }}
+                type="button"
+                className="px-6 text-sm py-1.5  font-semibold mr-[12px] text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5"
+              >
+                {t('save')}
+              </button>
+            </div>
           </div>
+          {/* Part We Need To Start */}
+        </div>
+        <div className="flex flex-col items-start py-4 pr-2.5 pl-5 mt-7 w-full text-sm font-semibold text-left bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
           <div
             style={{ textAlign: 'right' }}
             className="align-justify align-right mt-10"
@@ -401,50 +473,13 @@ export default function Settings() {
           <div className="self-start">
             <button
               onClick={() => {
-                updateBothData();
+                updateBottom();
               }}
               type="button"
               className="px-6 text-sm py-1.5 mt-8 font-semibold mr-[12px] text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5"
             >
               {t('save')}
             </button>
-          </div>
-
-          <div className="flex flex-col items-start py-4  mt-7 w-full text-sm font-semibold text-left  border-solid max-md:pl-5 max-md:max-w-full">
-            <div className="text-base text-zinc-800 max-md:mr-2">
-              {t('companyType')}
-            </div>
-            <div className="mt-2 font-medium text-zinc-500 max-md:mr-2">
-              {t('selectCompanyType')}
-            </div>
-            <div className="relative mt-2 ">
-              <CustomSearchInbox
-                options={allBusinessTypes?.data?.map((item) => ({
-                  value: item.id,
-                  label: item.name,
-                }))}
-                placeholder=""
-                onValueChange={(value) => {
-                  setUpdateAll((prev) => ({
-                    ...prev,
-                    business_type: value,
-                  }));
-                }}
-                className="md:col-span-4 min-w-[327px] flex-grow"
-                value={updateAll?.business_type}
-                disabled={false}
-              />
-            </div>
-            <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5 mr-2.5">
-              <button
-                onClick={() => {
-                  updateBusinessType();
-                }}
-                className="gap-3 self-stretch"
-              >
-                {t('save')}
-              </button>
-            </div>
           </div>
         </div>
 
@@ -490,7 +525,7 @@ export default function Settings() {
           <div className="flex flex-col justify-center items-center px-6 py-1.5 mt-8 text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] mr-2.5 max-md:px-5">
             <button
               onClick={() => {
-                updateBothData();
+                updateReceipt();
               }}
               className="gap-3 self-stretch"
             >

@@ -6,6 +6,7 @@ import Nav from './nav';
 import logo from '/images/SH_LOGO.svg';
 import { cn } from '@/lib/utils';
 import { sidelinks } from '@/data/sidelinks';
+import { Link } from 'react-router-dom';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed: boolean;
@@ -73,19 +74,21 @@ export default function Sidebar({
               !isCollapsed ? 'gap-2' : ''
             }`}
           >
-            <img
-              src={logo || ''}
-              alt=""
-              width={isCollapsed ? 24 : 32}
-              // className={`${
-              //   isCollapsed
-              //     ? 'absolute top-[79px] right-[17px] z-[999999] transition-all ease-out duration-500'
-              //     : 'absolute top-[30px] right-[25px] z-[999999] transition-all ease-out duration-500'
-              // }`}
-              className={`absolute cursor-pointer hover:scale-105
+            <Link to="/">
+              <img
+                src={logo || ''}
+                alt=""
+                width={isCollapsed ? 24 : 32}
+                // className={`${
+                //   isCollapsed
+                //     ? 'absolute top-[79px] right-[17px] z-[999999] transition-all ease-out duration-500'
+                //     : 'absolute top-[30px] right-[25px] z-[999999] transition-all ease-out duration-500'
+                // }`}
+                className={`absolute cursor-pointer hover:scale-105
              md:left-[13px]
             top-[25%] md:top-[40px] z-50   rounded-ful bg-white border-0 l md:inline-flex`}
-            />
+              />
+            </Link>
             <div
               className={`flex flex-col justify-end truncate ${
                 isCollapsed ? 'invisible w-0' : 'visible w-auto'

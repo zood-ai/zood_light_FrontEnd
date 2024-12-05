@@ -20,6 +20,7 @@ import { useForm } from 'react-hook-form';
 import DelConfirm from '@/components/custom/DelConfim';
 import IconInput from './custom/InputWithIcon';
 import { useQueryClient } from '@tanstack/react-query';
+import XIcons from '@/components/Icons/XIcons';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -125,16 +126,20 @@ export default function FastAddActionsCustomer({
   return (
     <div onClick={onClose}>
       <AlertDialogComp open={isOpen} onOpenChange={onClose}>
-        <AlertDialogContentComp>
+        <AlertDialogContentComp className="-left-7">
           <div
             onClick={(e) => e.stopPropagation()}
             className="bg-mainBg h-[100vh] w-[326px] relative px-4"
           >
             <button
               onClick={onClose}
-              className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-100 transition"
+              style={{
+                left: !isRtl ? 'unset' : '-48px',
+                right: !isRtl ? '-48px' : 'unset',
+              }}
+              className="absolute top-4 left-4 w-9 h-9 flex items-center justify-center border border-gray-300 rounded-full transition z-[100] bg-white"
             >
-              X
+              <XIcons />
             </button>
 
             <div className="grow shrink text-2xl col-span-1 font-semibold w-fit mt-[50px]">
@@ -155,7 +160,7 @@ export default function FastAddActionsCustomer({
                         <FormControl>
                           <IconInput
                             {...field}
-                            label={t('اسم المورد')}
+                            label={t('SUPPLIER_NAME')}
                             iconSrc={personIcon}
                             inputClassName="w-[105%] rounded-md mb-2 border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
@@ -174,7 +179,7 @@ export default function FastAddActionsCustomer({
                         <FormControl>
                           <IconInput
                             {...field}
-                            label={t('هاتف المورد')}
+                            label={t('phoneNumber')}
                             iconSrc={callIcon}
                             inputClassName="w-[105%] rounded-md mb-2 border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
@@ -193,7 +198,7 @@ export default function FastAddActionsCustomer({
                           <IconInput
                             {...field}
                             type="email"
-                            label={t('البريد الإلكتروني')}
+                            label={t('EMAIL_ADDRESS')}
                             inputClassName="w-[105%] rounded-md mb-2 border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </FormControl>
@@ -210,7 +215,7 @@ export default function FastAddActionsCustomer({
                         <FormControl>
                           <IconInput
                             {...field}
-                            label={t('رقم التسجيل الضريبي')}
+                            label={t('TAX_REGISTRATION_NUMBER')}
                             inputClassName="w-[105%] rounded-md mb-2 border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </FormControl>
@@ -244,7 +249,7 @@ export default function FastAddActionsCustomer({
                     loading={loading}
                     disabled={loading}
                     onClick={handleClickSubmit}
-                    className="h-[39px] w-[163px]"
+                    className="h-[39px] w-full"
                   >
                     {isEditMode ? t('UPDATE_SUPPLIER') : t('ADD_SUPPLIER')}
                   </Button>

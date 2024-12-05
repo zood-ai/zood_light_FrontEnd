@@ -266,7 +266,7 @@ const CustomerForm = () => {
           message="هل أنت متأكد أنك تريد الخروج؟ لن تحفظ البيانات"
         />
       )}
-      <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit w-full xl:w-1/2">
+      <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit w-full xl:w-[500px]">
         <CustomSearchInbox
           options={allData?.data?.map((item) => ({
             value: item.id,

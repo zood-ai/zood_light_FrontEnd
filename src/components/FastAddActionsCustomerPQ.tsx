@@ -24,6 +24,7 @@ import IconInput from './custom/InputWithIcon';
 import { useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/api/interceptors';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
+import XIcons from '@/components/Icons/XIcons';
 
 const formSchema = z.object({
   name: z.string(),
@@ -137,144 +138,150 @@ export default function FastAddActionsCustomerPQ({
   return (
     <div onClick={onClose} className="relative ">
       <AlertDialogComp open={isOpen} onOpenChange={onClose}>
-        <AlertDialogContentComp className="    ">
+        <AlertDialogContentComp className="-left-7 w-fit">
           {/* SET WIDTH TO FIT CONTENT AND GIVE PADDING */}
+          <button
+            onClick={onClose}
+            style={{
+              left: !isRtl ? 'unset' : '-32px',
+              right: !isRtl ? '-32px' : 'unset',
+            }}
+            className="absolute top-[40px] w-9 h-9 flex items-center justify-center border border-gray-300 rounded-full transition z-[100] bg-white"
+          >
+            <XIcons />
+          </button>
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-mainBg h-screen overflow-y-scroll w-fit p-4   relative ps-[24px]"
+            className="bg-mainBg h-screen overflow-y-scroll w-fit p-4  max-w-[326px] relative ps-[24px]"
           >
-            <>
-              <div className="absolute flex items-center justify-center w-[25px] h-[25px] border-2 rounded-full  left-[20px]">
-                <button className="" onClick={onClose}>
-                  X
-                </button>
-              </div>
-              <div className="grow shrink text-2xl col-span-1 font-semibold w-auto  mt-[35px]">
-                {t('ADD_CUSTOMER')}
-              </div>
-              <div className="min-h-[70vh]">
-                <div className="grid grid-cols-1  items-start">
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit(handleFormSubmit)}
-                      className="px-s4 my-5"
-                    >
-                      <div className=" grid grid-cols-1   max-w-[580px] ">
-                        <FormField
-                          control={form.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem className="col-span-1 mt-md">
-                              <FormControl>
-                                <IconInput
-                                  {...field}
-                                  label={t('CUSTOMER_NAME')}
-                                  iconSrc={personIcon}
-                                  inputClassName="w-[278px]"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="phone"
-                          render={({ field }) => (
-                            <FormItem className="col-span-1 mt-md">
-                              <FormControl>
-                                <IconInput
-                                  {...field}
-                                  label="هاتف العميل"
-                                  iconSrc={callIcon}
-                                  inputClassName="w-[278px]"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="address"
-                          render={({ field }) => (
-                            <FormItem className="md:col-span-1 mt-md">
-                              <FormControl>
-                                <IconInput
-                                  {...field}
-                                  label={t('ADDRESS')}
-                                  inputClassName="w-[278px]"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem className="md:col-span-1 mt-md">
-                              <FormControl>
-                                <IconInput
-                                  {...field}
-                                  label={t('EMAIL')}
-                                  inputClassName="w-[278px]"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="taxNum"
-                          render={({ field }) => (
-                            <FormItem className="md:col-span-1 mt-md">
-                              <FormControl>
-                                <IconInput
-                                  {...field}
-                                  label={t('TAX_REGISTRATION_NUMBER')}
-                                  inputClassName="w-[278px]"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="coTax"
-                          render={({ field }) => (
-                            <FormItem className="md:col-span-1 mt-md">
-                              <FormControl>
-                                <IconInput
-                                  {...field}
-                                  label={t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
-                                  inputClassName="w-[278px]"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+            <div className="grow shrink text-2xl col-span-1 font-semibold w-auto  mt-[35px]">
+              {t('ADD_CUSTOMER')}
+            </div>
+            <div className="min-h-[70vh]">
+              <div className="grid grid-cols-1  items-start">
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(handleFormSubmit)}
+                    className="px-s4 my-5"
+                  >
+                    <div className=" grid grid-cols-1   max-w-[580px] ">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem className="col-span-1 mt-md">
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t('CUSTOMER_NAME')}
+                                iconSrc={personIcon}
+                                inputClassName="w-[278px]"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem className="col-span-1 mt-md">
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label="هاتف العميل"
+                                iconSrc={callIcon}
+                                inputClassName="w-[278px]"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                          <FormItem className="md:col-span-1 mt-md">
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t('ADDRESS')}
+                                inputClassName="w-[278px]"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem className="md:col-span-1 mt-md">
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t('EMAIL')}
+                                inputClassName="w-[278px]"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="taxNum"
+                        render={({ field }) => (
+                          <FormItem className="md:col-span-1 mt-md">
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t('TAX_REGISTRATION_NUMBER')}
+                                inputClassName="w-[278px]"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="coTax"
+                        render={({ field }) => (
+                          <FormItem className="md:col-span-1 mt-md">
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t(
+                                  'SETTINGS_COMMERCIAL_REGISTRATION_NUMBER'
+                                )}
+                                inputClassName="w-[278px]"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                      <Button
-                        dir="ltr"
-                        type="submit"
-                        loading={loading}
-                        disabled={loading}
-                        className="mt-4 h-[39px] w-[163px]"
-                      >
-                        {t('ADD_CUSTOMER')}
-                      </Button>
-                      <DelConfirm route={'manage/customers'} />
-                    </form>
-                  </Form>
-                </div>
+                    <Button
+                      dir="ltr"
+                      type="submit"
+                      loading={loading}
+                      disabled={loading}
+                      className="mt-4 h-[39px] w-full"
+                    >
+                      {t('ADD_CUSTOMER')}
+                    </Button>
+                    <DelConfirm route={'manage/customers'} />
+                  </form>
+                </Form>
               </div>
-            </>
+            </div>
+
             <img
               onClick={onClose}
               loading="lazy"

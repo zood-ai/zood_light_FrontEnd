@@ -188,7 +188,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
       <form onSubmit={handleFormSubmit}>
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-start w-[500px]">
           <div className="grid grid-cols-1 gap-y-[16px]">
             <div className="grid grid-cols-1 md:grid-cols-2">
               <div>
@@ -203,7 +203,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   }
                   value={invoice.supplier_id}
                   label={t('SUPPLIER_NAME')}
-                  className="w-[327px]"
+                  className="w-full"
                 />
               </div>
               <div className="translate-y-[32px]">
@@ -264,10 +264,10 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     value={items[index]?.item}
                   /> */}
                   <CustomSearchInbox
-                    className="w-[220px]"
+                    className="w-full"
                     placeholder={t('CATEGORY_NAME')}
                     options={getAllPro?.data?.map((item) => ({
-                      value: item.item_id,
+                      value: item.id,
                       label: item.name,
                     }))}
                     onValueChange={(value) =>

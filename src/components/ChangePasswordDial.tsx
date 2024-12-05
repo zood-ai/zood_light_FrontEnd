@@ -66,7 +66,11 @@ export default function ChangePasswordDial({ isOpen, onClose, userId }) {
       <AlertDialog open={isOpen} onOpenChange={onClose}>
         <AlertDialogContent className="max-w-[1107px] bg-transparent border-none border">
           <div className="flex flex-col text-sm font-semibold text-right rounded max-w-[401px]">
-            <div className="flex flex-col pt-6 pb-4 w-full bg-white rounded border border-gray-200 border-solid">
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              autoComplete="off"
+              className="flex flex-col pt-6 pb-4 w-full bg-white rounded border border-gray-200 border-solid"
+            >
               <div className="self-center mb-4 text-xl text-black">
                 {t('CHANGE_PASSWORD_TITLE')}
               </div>
@@ -111,7 +115,7 @@ export default function ChangePasswordDial({ isOpen, onClose, userId }) {
                   {t('CHANGE_PASSWORD_BUTTON')}
                 </div>
               </Button>
-            </div>
+            </form>
           </div>
           <img
             onClick={onClose}

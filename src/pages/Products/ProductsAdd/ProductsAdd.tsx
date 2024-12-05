@@ -339,7 +339,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                           {...field}
                           placeholder={t('DESCRIPTION')}
                           label={t('DESCRIPTION')}
-                          className="w-[499px]"
+                          className="w-full"
                         />
                       </FormControl>
                       <FormMessage />
