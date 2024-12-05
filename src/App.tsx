@@ -18,10 +18,7 @@ export default function App() {
   useEffect(() => {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
-    const isMobileUA =
-      /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone|Opera Mini|IEMobile/i.test(
-        userAgent
-      );
+    const isMobileUA = /iPhone|iPad|iPod|Android/i.test(userAgent);
 
     // Feature detection: Check if touch is supported
     // const isTouchDevice =
