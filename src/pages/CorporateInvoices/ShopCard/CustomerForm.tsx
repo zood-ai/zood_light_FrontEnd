@@ -51,7 +51,7 @@ const CustomerForm = () => {
   const [loading, setLoading] = useState(false);
   const { data: getAllPro } = fetchAllProducts();
   dispatch(updateField({ field: 'is_sales_order', value: 0 }));
-  const { showToast } = useToast();
+  const { showToast } = useToast(); 
   const handleSubmitOrder = async () => {
     // setLoading(true);
     const totalPrice = orderSchema.total_price;

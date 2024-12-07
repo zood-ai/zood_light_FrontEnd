@@ -67,12 +67,16 @@ const CustomerFormEdit = () => {
         const newHolder = holder.filter(
           (ele) => ele.business_date === undefined
         );
+        const newHolder2 = holder.filter(
+          (ele) => ele.business_date
+        );
 
         const holder2 = newHolder.map((ele) => ({
           ...ele,
           business_date: ele.business_date || new Date().toISOString(),
           added_at: ele.added_at || new Date().toISOString(),
         }));
+        holder2.push(...newHolder2);
         if (holder2.length === 0) return;
         await mutate(
           {

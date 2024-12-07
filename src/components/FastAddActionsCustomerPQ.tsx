@@ -44,6 +44,7 @@ export default function FastAddActionsCustomerPQ({
   isOpen,
   onClose,
   setInvoice,
+  onNewCustomerAdded,
 }) {
   const { t } = useTranslation();
   const isRtl = useDirection();
@@ -120,7 +121,7 @@ export default function FastAddActionsCustomerPQ({
             description: '-',
           }
         );
-
+      if (onNewCustomerAdded) onNewCustomerAdded(res?.data?.data);
       // Success actions
       openDialog('added');
       form.reset({});
