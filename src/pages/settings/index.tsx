@@ -172,6 +172,49 @@ export default function Settings() {
       district: updateAll.district,
     };
   };
+  const updateBoth = async () => {
+    updateSettings({
+      id: '',
+      data: {
+        business_name: updateAll.business_name,
+        business_tax_number: updateAll.business_tax_number,
+        country: updateAll.country,
+      },
+    });
+    if (updateAll.business_type !== whoami?.business?.type) {
+      updateBusiness({
+        id: '',
+        data: { business_type_id: updateAll.business_type },
+      });
+    }
+    updateBranch({
+      id: brancheId,
+      data: {
+        phone: updateAll.phone,
+        registered_address: JSON.stringify({
+          streetName: updateAll.streetName,
+          postalCode: updateAll.postalCode,
+          additionalNumber: updateAll.additionalNumber,
+          buildingNumber: updateAll.buildingNumber,
+          commercialRegesterationNumber:
+            updateAll.commercialRegesterationNumber,
+          city: updateAll.city,
+          citySubdivisionName: updateAll.citySubdivisionName,
+          district: updateAll.district,
+        }),
+      },
+    });
+    holder = {
+      streetName: updateAll.streetName,
+      postalCode: updateAll.postalCode,
+      additionalNumber: updateAll.additionalNumber,
+      buildingNumber: updateAll.buildingNumber,
+      commercialRegesterationNumber: updateAll.commercialRegesterationNumber,
+      city: updateAll.city,
+      citySubdivisionName: updateAll.citySubdivisionName,
+      district: updateAll.district,
+    };
+  };
   const updateReceipt = async () => {
     updateSettings({
       id: '',
@@ -357,7 +400,7 @@ export default function Settings() {
                 className="w-full"
               />
             </div>
-            <div className="w-full">
+            {/* <div className="w-full">
               <button
                 onClick={() => {
                   updateTop();
@@ -367,119 +410,120 @@ export default function Settings() {
               >
                 {t('save')}
               </button>
-            </div>
+            </div> */}
           </div>
           {/* Part We Need To Start */}
-        </div>
-        <div className="flex flex-col items-start py-4 pr-2.5 pl-5 mt-7 w-full text-sm font-semibold text-left bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
-          <div
-            style={{ textAlign: 'right' }}
-            className="align-justify align-right mt-10"
-          >
-            <div className="text-base align-rigth font-semibold text-zinc-800">
-              {t('SETTINGS_ADDRESS_PHONE')}
-            </div>
-          </div>
-
-          <div className="flex flex-col items-start w-full text-sm max-md:pl-5 max-md:max-w-full gap-y-4">
-            <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full">
-              <div className="w-full flex max-sm:flex-col gap-y-4 gap-x-4">
-                <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
-                  <div className="self-start font-medium text-zinc-500">
-                    {t('country')}
-                  </div>
-                  <Input
-                    onChange={(e) => {
-                      setUpdateAll((prev) => ({
-                        ...prev,
-                        country: e.target.value,
-                      }));
-                    }}
-                    defaultValue={updateAll?.country}
-                    className="w-full"
-                  />
-                </div>
-                <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
-                  <div className="self-start font-medium text-zinc-500">
-                    {t('city')}
-                  </div>
-                  <Input
-                    onChange={(e) => {
-                      setUpdateAll((prev) => ({
-                        ...prev,
-                        city: e.target.value,
-                      }));
-                    }}
-                    value={updateAll?.city}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex max-sm:flex-col gap-x-4 justify-center w-full text-sm max-md:max-w-full">
-              <div className="w-full sm:w-[50%]">
-                <div className="flex flex-col grow max-sm:mt-5 text-sm text-left w-[100%]">
-                  <div className="self-start font-medium text-zinc-500">
-                    {t('citySubdivisionName')}
-                  </div>
-                  <Input
-                    onChange={(e) => {
-                      setUpdateAll((prev) => ({
-                        ...prev,
-                        citySubdivisionName: e.target.value,
-                      }));
-                    }}
-                    value={updateAll?.citySubdivisionName}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-              <div className="w-full sm:w-[50%]">
-                <div className="flex flex-col grow max-sm:mt-5 text-sm text-left w-[100%]">
-                  <div className="self-start font-medium text-zinc-500">
-                    {t('district')}
-                  </div>
-                  <Input
-                    onChange={(e) => {
-                      setUpdateAll((prev) => ({
-                        ...prev,
-                        district: e.target.value,
-                      }));
-                    }}
-                    value={updateAll?.district}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col flex-1 mt-3 w-full">
-              <div className="self-start font-medium text-zinc-500">
-                {t('phone')}
-              </div>
-              <Input
-                onChange={(e) => {
-                  setUpdateAll((prev) => ({
-                    ...prev,
-                    phone: e.target.value,
-                  }));
-                }}
-                defaultValue={updateAll?.phone}
-                className="w-full"
-              />
-            </div>
-          </div>
-          <div className="self-start">
-            <button
-              onClick={() => {
-                updateBottom();
-              }}
-              type="button"
-              className="px-6 text-sm py-1.5 mt-8 font-semibold mr-[12px] text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5"
+          <div className="flex flex-col items-start w-full text-sm font-semibold text-left max-md:pl-5 max-md:max-w-full">
+            <div
+              style={{ textAlign: 'right' }}
+              className="align-justify align-right mt-10"
             >
-              {t('save')}
-            </button>
+              <div className="text-base align-rigth font-semibold text-zinc-800">
+                {t('SETTINGS_ADDRESS_PHONE')}
+              </div>
+            </div>
+
+            <div className="flex flex-col items-start w-full text-sm max-md:pl-5 max-md:max-w-full gap-y-4">
+              <div className="flex flex-wrap gap-6 self-start w-full text-zinc-500 max-md:max-w-full">
+                <div className="w-full flex max-sm:flex-col gap-y-4 gap-x-4">
+                  <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
+                    <div className="self-start font-medium text-zinc-500">
+                      {t('country')}
+                    </div>
+                    <Input
+                      onChange={(e) => {
+                        setUpdateAll((prev) => ({
+                          ...prev,
+                          country: e.target.value,
+                        }));
+                      }}
+                      defaultValue={updateAll?.country}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="flex flex-col grow sm:mt-5 text-sm text-left w-full sm:w-[40%]">
+                    <div className="self-start font-medium text-zinc-500">
+                      {t('city')}
+                    </div>
+                    <Input
+                      onChange={(e) => {
+                        setUpdateAll((prev) => ({
+                          ...prev,
+                          city: e.target.value,
+                        }));
+                      }}
+                      value={updateAll?.city}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex max-sm:flex-col gap-x-4 justify-center w-full text-sm max-md:max-w-full">
+                <div className="w-full sm:w-[50%]">
+                  <div className="flex flex-col grow max-sm:mt-5 text-sm text-left w-[100%]">
+                    <div className="self-start font-medium text-zinc-500">
+                      {t('citySubdivisionName')}
+                    </div>
+                    <Input
+                      onChange={(e) => {
+                        setUpdateAll((prev) => ({
+                          ...prev,
+                          citySubdivisionName: e.target.value,
+                        }));
+                      }}
+                      value={updateAll?.citySubdivisionName}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+                <div className="w-full sm:w-[50%]">
+                  <div className="flex flex-col grow max-sm:mt-5 text-sm text-left w-[100%]">
+                    <div className="self-start font-medium text-zinc-500">
+                      {t('district')}
+                    </div>
+                    <Input
+                      onChange={(e) => {
+                        setUpdateAll((prev) => ({
+                          ...prev,
+                          district: e.target.value,
+                        }));
+                      }}
+                      value={updateAll?.district}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col flex-1 mt-3 w-full">
+                <div className="self-start font-medium text-zinc-500">
+                  {t('phone')}
+                </div>
+                <Input
+                  onChange={(e) => {
+                    setUpdateAll((prev) => ({
+                      ...prev,
+                      phone: e.target.value,
+                    }));
+                  }}
+                  defaultValue={updateAll?.phone}
+                  className="w-full"
+                />
+              </div>
+            </div>
+            <div className="self-start">
+              <button
+                onClick={() => {
+                  // updateBottom();
+                  updateBoth();
+                }}
+                type="button"
+                className="px-6 text-sm py-1.5 mt-8 font-semibold mr-[6px] text-white whitespace-nowrap bg-[var(--main)] rounded min-h-[39px] max-md:px-5"
+              >
+                {t('save')}
+              </button>
+            </div>
           </div>
         </div>
 

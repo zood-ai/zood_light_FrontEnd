@@ -113,7 +113,10 @@ export default function SignIn2() {
           </svg>
         </Link>
       </div>
-      <div dir='rtl' className="flex flex-col items-center justify-center mt-10">
+      <div
+        dir="rtl"
+        className="flex flex-col items-center justify-center mt-10"
+      >
         <div className=" font-bold leading-[60px] text-[46px] text-center w-full sm:w-[326px]   text-black mb-16">
           تسجيل الدخول
         </div>
@@ -155,14 +158,14 @@ export default function SignIn2() {
                 </FormItem>
               )}
             />
-            <FormField 
+            <FormField
               control={form.control}
               name="password"
               render={({ field }) => (
                 <FormItem>
                   {/* <FormLabel>password</FormLabel> */}
                   <FormControl>
-                    <div  className="relative">
+                    <div className="relative">
                       <IconInput
                         placeholder="كلمة المرور"
                         className=""
@@ -190,7 +193,7 @@ export default function SignIn2() {
               )}
             />
 
-            <div dir='ltr' className="flex justify-end">
+            <div dir="ltr" className="flex justify-end">
               <Link
                 to="/reset-password"
                 className="text-sm text-main cursor-pointer mt-[10px] text-end"
