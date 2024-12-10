@@ -60,6 +60,7 @@ export const Resources: React.FC<ResourcesProps> = () => {
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
   const allService = createCrudService<any>('inventory/suppliers');
+  const [allUrl, setAllUrl] = useState('inventory/suppliers');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
@@ -85,6 +86,7 @@ export const Resources: React.FC<ResourcesProps> = () => {
 
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
+          allUrl={allUrl}
            handleDel={handleOpenDeleteModal}
            handleRowClick={handleOpenViewModal}
            data={allData?.data || []}

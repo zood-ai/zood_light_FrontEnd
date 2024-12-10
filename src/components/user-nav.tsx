@@ -31,9 +31,7 @@ export function UserNav() {
   const isRtl = useDirection();
   const userId = Cookies.get('userId');
   const { data } = createCrudService<any>(`/auth/users/${userId}`).useGetAll();
-  console.log('Data made by Abdelrahman: ', data?.data?.image);
   const userImage = data?.data?.image;
-  console.log('User Id made by Abdelrahman: ', { userId });
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

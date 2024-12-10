@@ -33,8 +33,6 @@ const CustomerForms = () => {
   const [lastCustomerName, setLastCustomerName] = useState(
     allData?.data[0]?.name
   );
-  console.log('AllDataHere: ', allData?.data[0]?.name);
-  console.log('LastCustomerName: ', lastCustomerName);
   const initialValue = {
     name: '',
     phone: '',
@@ -92,7 +90,6 @@ const CustomerForms = () => {
   };
 
   const handleNewCustomerAdded = (newCustomer) => {
-    // console.log({ newCustomer });
     // handleInputChange('customer_id', newCustomer.id);
     dispatch(
       updateField({

@@ -21,6 +21,7 @@ import {
 import { ConfirmDelModal } from '../../pages/tasks/Modal/ConfirmDelModal';
 import AddEditModal from '../../pages/tasks/Modal/AddEditModal';
 import { DetailsModal } from './Modal/DetailsModal';
+import axiosInstance from '@/api/interceptors';
 
 export const DashBoard: React.FC<DashBoardProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -62,13 +63,13 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
   const filterBtn = () => {};
   const { columns } = useOrderDataTableColumns();
   const allService = createCrudService<any>('/orders?sort=-status');
+  const [allUrl, setAllUrl] = useState('/orders?sort=-status');
   const { useGetAll } = allService;
   const { data: lastOrderData, isLoading: isLoadingOrder } = useGetAll();
   const [searchedData, setSearchedData] = useState<any>(lastOrderData);
   useEffect(() => {
     setSearchedData(lastOrderData);
   }, [lastOrderData]);
-  console.log({ lastOrderData, searchedData });
 
   const debounce = (func: Function, delay: number) => {
     let timer: NodeJS.Timeout;
@@ -78,30 +79,35 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce((searchTerm: string) => {
+    debounce(async (searchTerm: string) => {
       if (!searchTerm) {
         setSearchedData(lastOrderData); // Reset if search is cleared
         return;
       }
 
-      const holder = lastOrderData?.data.filter((item: any) => {
-        const referenceMatch = item?.reference
-          ?.toLowerCase()
-          ?.includes(searchTerm.toLowerCase());
-        const customerName = item?.customer?.name
-          ?.toLowerCase()
-          ?.includes(searchTerm.toLowerCase());
-        return referenceMatch || customerName;
-      });
-      console.log({ holder });
+      // const holder = lastOrderData?.data.filter((item: any) => {
+      //   const referenceMatch = item?.reference
+      //     ?.toLowerCase()
+      //     ?.includes(searchTerm.toLowerCase());
+      //   const customerName = item?.customer?.name
+      //     ?.toLowerCase()
+      //     ?.includes(searchTerm.toLowerCase());
+      //   return referenceMatch || customerName;
+      // });
+      setAllUrl(`/orders?sort=-status&filter[customer.name]=${searchTerm}`);
+      const res = await axiosInstance.get(
+        `/orders?sort=-status&filter[customer.name]=${searchTerm}`
+      );
 
-      setSearchedData({ ...lastOrderData, data: holder });
+      // setSearchedData({ ...allData, data: holder });
+      setSearchedData(res.data);
+
+      // setSearchedData({ ...lastOrderData, data: holder });
     }, 300), // 300ms debounce delay
     [lastOrderData]
   );
 
   const handleSearch = (e: string) => {
-    console.log(e, searchedData);
     handleDebounce(e);
   };
   return (
@@ -140,6 +146,7 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
 
               <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
                 <DataTable
+                  allUrl={allUrl}
                   handleDel={handleOpenDeleteModal}
                   handleRowClick={handleOpenViewModal}
                   data={searchedData?.data || []}

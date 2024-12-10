@@ -22,7 +22,6 @@ export default function Plans() {
   const { t } = useTranslation();
   const isRtl = useDirection();
   const { data } = createCrudService<any>('auth/whoami').useGetAll();
-  console.log({ data });
   return (
     <>
       <DetailsHeadWithOutFilter />

@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { resetOrder } from '@/store/slices/orderSchema';
 import { resetCard } from '@/store/slices/cardItems';
 import { toggleActionView } from '@/store/slices/toggleAction';
+import axiosInstance from '@/api/interceptors';
 
 export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -63,6 +64,7 @@ export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
   const allService = createCrudService<any>('orders?filter[type]=1');
+  const [allUrl, setAllUrl] = useState('orders?filter[type]=1');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const [searchedData, setSearchedData] = useState({});
@@ -84,30 +86,36 @@ export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce((searchTerm: string) => {
+    debounce(async (searchTerm: string) => {
       if (!searchTerm) {
         setSearchedData(allData); // Reset if search is cleared
         return;
       }
 
-      const holder = allData?.data.filter((item: any) => {
-        const referenceMatch = item?.reference
-          ?.toLowerCase()
-          ?.includes(searchTerm.toLowerCase());
-        const customerName = item?.customer?.name
-          ?.toLowerCase()
-          ?.includes(searchTerm.toLowerCase());
-        return referenceMatch || customerName;
-      });
-      console.log({ holder });
+      // const holder = allData?.data.filter((item: any) => {
+      //   const referenceMatch = item?.reference
+      //     ?.toLowerCase()
+      //     ?.includes(searchTerm.toLowerCase());
+      //   const customerName = item?.customer?.name
+      //     ?.toLowerCase()
+      //     ?.includes(searchTerm.toLowerCase());
+      //   return referenceMatch || customerName;
+      // });
+      
+      setAllUrl(`orders?filter[type]=1&filter[customer.name]=${searchTerm}`);
+      const res = await axiosInstance.get(
+        `/orders?filter[type]=1&filter[customer.name]=${searchTerm}`
+      );
 
-      setSearchedData({ ...allData, data: holder });
+      // setSearchedData({ ...allData, data: holder });
+      setSearchedData(res.data);
+
+      // setSearchedData({ ...allData, data: holder });
     }, 300), // 300ms debounce delay
     [allData]
   );
 
   const handleSearch = (e: string) => {
-    console.log(e, searchedData);
     handleDebounce(e);
   };
   return (
@@ -131,6 +139,7 @@ export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
 
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
+          allUrl={allUrl}
           handleDel={handleOpenDeleteModal}
           handleRowClick={handleOpenViewModal}
           data={searchedData?.data || []}

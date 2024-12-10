@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleActionView } from '@/store/slices/toggleAction';
+import axiosInstance from '@/api/interceptors';
 
 export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -57,6 +58,7 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
   const allService = createCrudService<any>('inventory/purchasing');
+  const [allUrl, setAllUrl] = useState('inventory/purchasing');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
@@ -76,29 +78,35 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce((searchTerm: string) => {
+    debounce(async (searchTerm: string) => {
       if (!searchTerm) {
         setSearchedData(allData); // Reset if search is cleared
         return;
       }
 
-      const holder = allData?.data.filter((item: any) => {
-        const referenceMatch = item?.reference
-          ?.toLowerCase()
-          ?.includes(searchTerm.toLowerCase());
-        const customerName = item?.get_supplier?.name
-          ?.toLowerCase()
-          ?.includes(searchTerm.toLowerCase());
-        return referenceMatch || customerName;
-      });
+      // const holder = allData?.data.filter((item: any) => {
+      //   const referenceMatch = item?.reference
+      //     ?.toLowerCase()
+      //     ?.includes(searchTerm.toLowerCase());
+      //   const customerName = item?.get_supplier?.name
+      //     ?.toLowerCase()
+      //     ?.includes(searchTerm.toLowerCase());
+      //   return referenceMatch || customerName;
+      // });
 
-      setSearchedData({ ...allData, data: holder });
+      // setSearchedData({ ...allData, data: holder });
+      setAllUrl(`inventory/purchasing&filter[supplier.name]=${searchTerm}`);
+      const res = await axiosInstance.get(
+        `/inventory/purchasing&filter[supplier.name]=${searchTerm}`
+      );
+
+      // setSearchedData({ ...allData, data: holder });
+      setSearchedData(res.data);
     }, 300), // 300ms debounce delay
     [allData]
   );
 
   const handleSearch = (e: string) => {
-    console.log(e, allData);
     handleDebounce(e);
   };
   return (
@@ -122,6 +130,7 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
 
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
+          allUrl={allUrl}
           handleDel={handleOpenDeleteModal}
           handleRowClick={handleOpenViewModal}
           data={searchedData?.data || []}

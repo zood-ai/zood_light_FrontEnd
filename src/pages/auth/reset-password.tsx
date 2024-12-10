@@ -43,7 +43,6 @@ export default function ResetPassword() {
       setLoading(false);
     }
     setLoading(false);
-    console.log({ res });
     // setEmail(email);
     // setCheck(false);
   };

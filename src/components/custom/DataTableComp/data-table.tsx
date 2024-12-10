@@ -58,10 +58,12 @@ interface DataTableProps<TData, TValue> {
   actionText?: string;
   dashBoard: boolean;
   handleSearch: any;
+  allUrl: string;
 }
 export function DataTable<TData, TValue>({
   columns,
   data,
+  allUrl = '',
   actionBtn,
   handleRowClick,
   handleEdit,
@@ -161,6 +163,7 @@ export function DataTable<TData, TValue>({
           <div className="space-y-4 bag-background">
             {actionBtn && (
               <DataTableToolbar
+                allUrl={allUrl}
                 actionText={t(`${actionText}`)}
                 table={table}
                 actionBtn={actionBtn}

@@ -14,7 +14,6 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const reactToPrintFn = useReactToPrint({ contentRef });
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
-  console.log('Settings Data ', settings);
   const { data: Taxes } = createCrudService<any>('manage/taxes').useGetAll();
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
   const { data: customerInfo } = createCrudService<any>(

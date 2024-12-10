@@ -68,6 +68,8 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const [searchedData, setSearchedData] = useState({});
+  const [allUrl, setAllUrl] = useState(`orders?filter[type]=2&filter[status]=4`);
+
   useEffect(() => {
     setSearchedData(allData);
   }, [allData]);
@@ -92,15 +94,23 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
         return;
       }
 
-      const holder = allData?.data.filter((item: any) => {
-        const referenceMatch = item?.reference
-          ?.toLowerCase()
-          ?.includes(searchTerm.toLowerCase());
-        const customerName = item?.customer?.name
-          ?.toLowerCase()
-          ?.includes(searchTerm.toLowerCase());
-        return referenceMatch || customerName;
-      });
+      // const holder = allData?.data.filter((item: any) => {
+      //   const referenceMatch = item?.reference
+      //     ?.toLowerCase()
+      //     ?.includes(searchTerm.toLowerCase());
+      //   const customerName = item?.customer?.name
+      //     ?.toLowerCase()
+      //     ?.includes(searchTerm.toLowerCase());
+      //   return referenceMatch || customerName;
+      // });
+
+      setAllUrl(`orders?filter[type]=2&filter[status]=4&filter[customer.name]=${searchTerm}`)
+      const res = await axiosInstance.get(
+        `orders?filter[type]=2&filter[status]=4&filter[customer.name]=${searchTerm}`
+      );
+
+      // setSearchedData({ ...allData, data: holder });
+      setSearchedData(res.data);
 
       // fetch data from API and set it to state
 
@@ -111,14 +121,12 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
       //   `orders?filter[type]=2&filter[status]=4&filter[reference]=${searchTerm}`
       // );
       //
-      // console.log({ res, res2 });
-      setSearchedData({ ...allData, data: holder });
+      // setSearchedData({ ...allData, data: holder });
     }, 300), // 300ms debounce delay
     [allData]
   );
 
   const handleSearch = (e: string) => {
-    console.log(e, allData);
     handleDebounce(e);
   };
 
@@ -143,6 +151,7 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
 
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
+          allUrl={allUrl}
           handleDel={handleOpenDeleteModal}
           handleRowClick={handleOpenViewModal}
           data={searchedData?.data || []}
@@ -152,7 +161,7 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
           filterBtn={filterBtn}
           meta={searchedData || {}}
           actionText={'ADD_INVOICE'}
-          // 
+          //
           loading={isLoading}
           handleSearch={handleSearch}
         />

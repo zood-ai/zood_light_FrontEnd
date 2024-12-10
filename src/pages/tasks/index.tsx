@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 import { useDataTableColumns } from './components/useDataTableColumns';
 import useDirection from '@/hooks/useDirection';
 
-
 function Tasks() {
   // debugger
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -41,16 +40,13 @@ function Tasks() {
     setIsDelModalOpen(false);
 
     // dispatch(toggleActionView(false));
-
   };
-  const filterBtn = () => {
-  };
+  const filterBtn = () => {};
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
 
   const handleSearch = (e: any) => {
-    console.log(e);
   };
   const [searchedData, setSearchedData] = useState({});
   useEffect(() => {

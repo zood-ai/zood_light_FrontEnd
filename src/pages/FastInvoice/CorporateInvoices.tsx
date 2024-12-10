@@ -62,6 +62,7 @@ export const CorporateInvoices: React.FC<CorporateInvoicesProps> = () => {
   const allService = createCrudService<any>(
     'orders?filter[type]=2&filter[status]=4'
   );
+  const [allUrl, setAllUrl] = useState('orders?filter[type]=2&filter[status]=4');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
 
@@ -77,7 +78,6 @@ export const CorporateInvoices: React.FC<CorporateInvoicesProps> = () => {
   }, [allData]);
 
   const handleSearch = (e: any) => {
-    console.log(e);
   };
 
   return (
@@ -101,6 +101,7 @@ export const CorporateInvoices: React.FC<CorporateInvoicesProps> = () => {
 
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
+          allUrl={allUrl}
           handleDel={handleOpenDeleteModal}
           handleRowClick={handleOpenViewModal}
           data={searchedData?.data || []}

@@ -1,38 +1,44 @@
-import { Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
+import { Cross2Icon } from '@radix-ui/react-icons';
 import { Table } from '@tanstack/react-table';
+import { replace, useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/custom/button';
-import { Input } from '@/components/ui/input';
-import { useLocation } from 'react-router-dom';
-import { DataTableFacetedFilter } from './data-table-faceted-filter';
-import { priorities, statuses } from '@/pages/tasks/data/data';
-import { DataTableViewOptions } from './data-table-view-options';
 import { useTranslation } from 'react-i18next';
 import useDirection from '@/hooks/useDirection';
-import { IconFileExport } from '@tabler/icons-react';
-import { useNavigate } from 'react-router-dom';
+import axiosInstance from '@/api/interceptors';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   actionBtn: any;
   actionText?: string;
+  allUrl: string;
 }
 
 export function DataTableToolbar<TData>({
   table,
   actionBtn,
   actionText,
+  allUrl,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
   const { t } = useTranslation();
   const isRtl = useDirection();
-  const navigate = useNavigate();
-  const pathName = useLocation();
-  const locations = [
-    '/zood-dashboard/corporate-invoices',
-    '/zood-dashboard/individual-invoices',
-    '/zood-dashboard/purchase-invoices',
-  ];
+  const exportExcel = async () => {
+    const lastUrl = allUrl.includes('?')
+      ? allUrl[allUrl.length - 1] === '?'
+        ? `${allUrl}is_exporting_excel=1`
+        : `${allUrl}&is_exporting_excel=1`
+      : `${allUrl}?is_exporting_excel=1`;
+    const res = await axiosInstance.get(lastUrl);
+    console.log(lastUrl);
+    const a = document.createElement('a');
+    document.body.appendChild(a);
+    a.href = res.data;
+    a.download = 'file.xlsx';
+    a.click();
+    document.body.removeChild(a);
+    // navigate(`/${res.data}`, { replace: true });
+  };
 
   return (
     <div className="flex items-center justify-between">
@@ -74,7 +80,7 @@ export function DataTableToolbar<TData>({
             style={{
               flexDirection: isRtl ? 'row-reverse' : 'row',
             }}
-            // onClick={() => table.resetColumnFilters()}
+            onClick={() => exportExcel()}
             className="h-[39px] w-[103px] gap-x-[10px]"
           >
             <span className="">

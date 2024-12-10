@@ -18,7 +18,6 @@ export default function ChangePasswordDial({ isOpen, onClose, userId }) {
   const [loading, setLoading] = useState(false);
 
   const handleChangePass = async () => {
-    console.log(data);
     if (data.newPassword.length < 6) {
       toast({
         title: 'خطأ',
@@ -59,7 +58,6 @@ export default function ChangePasswordDial({ isOpen, onClose, userId }) {
         variant: 'destructive',
       });
     }
-    console.log({ res });
   };
   return (
     <div>

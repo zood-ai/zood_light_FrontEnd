@@ -16,6 +16,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
 import { toggleActionView } from '@/store/slices/toggleAction';
 import { useDispatch, useSelector } from 'react-redux';
+import axiosInstance from '@/api/interceptors';
 
 const Customer: React.FC<CustomersProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -54,11 +55,11 @@ const Customer: React.FC<CustomersProps> = () => {
     dispatch(toggleActionView(false));
   };
   const filterBtn = () => {
-    console.log('filterBtn');
   };
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useCustomersDataTable();
+  const [allUrl, setAllUrl] = useState(`orders?filter[customer]=${customerId}`);
   const allService = createCrudService<any>(
     `orders?filter[customer]=${customerId}`
   );
@@ -79,28 +80,34 @@ const Customer: React.FC<CustomersProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce((searchTerm: string) => {
+    debounce(async (searchTerm: string) => {
       if (!searchTerm) {
         setSearchedData(ordersData); // Reset if search is cleared
         return;
       }
 
-      const holder = ordersData?.data.filter((item: any) => {
-        const referenceMatch = item?.reference?.includes(searchTerm);
-        return referenceMatch;
-      });
-      console.log({ holder });
+      // const holder = ordersData?.data.filter((item: any) => {
+      //   const referenceMatch = item?.reference?.includes(searchTerm);
+      //   return referenceMatch;
+      // });
 
-      setSearchedData({ ...ordersData, data: holder });
+
+      setAllUrl(`orders?filter[customer]=${searchTerm}`);
+      const res = await axiosInstance.get(
+        `orders?filter[customer]=${searchTerm}`
+      );
+
+      // setSearchedData({ ...allData, data: holder });
+      setSearchedData(res.data);
+
+      // setSearchedData({ ...ordersData, data: holder });
     }, 300), // 300ms debounce delay
     [ordersData]
   );
 
   const handleSearch = (e: string) => {
-    console.log(e, searchedData);
     handleDebounce(e);
   };
-  console.log({ searchedData });
   return (
     <>
       <AddEditModal
@@ -122,6 +129,7 @@ const Customer: React.FC<CustomersProps> = () => {
 
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
+          allUrl={allUrl}
           handleDel={handleOpenDeleteModal}
           handleRowClick={handleOpenViewModal}
           data={searchedData?.data || []}

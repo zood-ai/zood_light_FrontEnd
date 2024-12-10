@@ -16,7 +16,6 @@ export default function Settings() {
   const { data: allBusinessTypes } = createCrudService<any>(
     'manage/business-types'
   ).useGetAll();
-  console.log(`Settings Data : `, settings);
   const { mutate: updateSettings } =
     createCrudService<any>('manage/settings').useUpdate();
   const { data: whoami } = createCrudService<any>('auth/whoami').useGetAll();
@@ -84,7 +83,6 @@ export default function Settings() {
   const brancheId = whoami?.user?.branches[0]?.id;
   const [fileBase64, setFileBase64] = useState<any>('');
   // update Branch function
-  console.log({ updateAll, whoami });
 
   const changeTaxType = () => {
     if (settings?.data?.tax_inclusive_pricing === updatedTaxInclusivePricing)

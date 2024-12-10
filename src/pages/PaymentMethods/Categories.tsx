@@ -60,6 +60,7 @@ export const Categories: React.FC<CategoriesProps> = () => {
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
   const allService = createCrudService<any>('manage/payment_methods');
+  const [allUrl, setAllUrl] = useState('manage/payment_methods');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
@@ -86,6 +87,7 @@ export const Categories: React.FC<CategoriesProps> = () => {
  
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
+            allUrl={allUrl}
             handleDel={handleOpenDeleteModal}
             handleRowClick={handleOpenViewModal}
             data={allData?.data || []}

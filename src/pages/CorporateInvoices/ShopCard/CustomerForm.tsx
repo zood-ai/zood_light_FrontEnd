@@ -128,11 +128,6 @@ const CustomerForm = () => {
     field: string,
     value: string
   ) => {
-    console.log({
-      index,
-      field,
-      value,
-    });
     // if (params.id) return;
     if (field === 'product_id') {
       if (!value) {
@@ -192,7 +187,6 @@ const CustomerForm = () => {
   const changeToTextArea = () => {
     setIsTextArea(!isTextArea);
   };
-  console.log({ orderSchema });
 
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-10 space-y-5">

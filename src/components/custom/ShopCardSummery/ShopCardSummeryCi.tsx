@@ -189,7 +189,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     }
     handleIncludeAndExclude();
   }, [discountAmount, taxAmount, orderSchema, mainTax]);
-  console.log({ fetchedPaymentMethod });
   return (
     <>
       <div className="flex mt-5 flex-col   rounded-none  w-full xl:w-1/2 ">
