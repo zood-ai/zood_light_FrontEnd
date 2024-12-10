@@ -3,7 +3,9 @@ import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 import { resetOrder } from '@/store/slices/orderSchema';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 const ConfirmBk = ({ isOpen, setIsOpen, closeDialog, getStatusMessage }) => {
+  const { t } = useTranslation();
   let navigate = useNavigate();
 
   const handleBack = () => {
@@ -41,29 +43,28 @@ const ConfirmBk = ({ isOpen, setIsOpen, closeDialog, getStatusMessage }) => {
 
               <div className="flex flex-col  mt-sm w-full items-center">
                 <div className="  text-mainText">
-                  هل أنت متأكد أنك تريد التوقف عن التعديل؟
+                  {t('ARE_YOU_SURE_YOU_WANT_TO_STOP_EDITING')}
                 </div>
                 <div className="text-sm text-secText">
-                  لديك تغييرات غير محفوظة. إذا خرجت الآن، فسوف تفقد تغييراتك
+                  {t('UNCHANGE_MESSAGE')}
                 </div>
                 <div className="flex flex-col mt-6 w-full text-sm font-semibold text-right text-white whitespace-nowrap rounded">
                   <Button
                     onClick={() => {
-
                       handleBack();
                       //   closeDialog();
                     }}
                     variant={'fail'}
                     className="px-16 py-2"
                   >
-                    نعم, اريد ان اتوقف عن التعديل!
+                    {t('YES_STOP_EDITING')}
                   </Button>
                   <Button
                     onClick={closeDialog}
                     variant={'outline'}
                     className="px-16 py-2 mt-sm text-mainText"
                   >
-                    الغاء!
+                    {t('CANCEL')}
                   </Button>
                 </div>
               </div>

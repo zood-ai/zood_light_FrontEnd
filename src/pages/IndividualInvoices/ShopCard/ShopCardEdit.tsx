@@ -114,9 +114,14 @@ export const ShopCardEdit: React.FC<ShopCardProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
-      <ShopCardTable />
-
-      <CustomerForm />
+      <div className="flex gap-5 max-xl:flex-col">
+        <div className="w-[55%] max-xl:w-full">
+          <ShopCardTable />
+        </div>
+        <div className="w-[45%] max-xl:w-full">
+          <CustomerForm />
+        </div>
+      </div>
       <ConfirmBk
         isOpen={isOpen}
         setIsOpen={undefined}

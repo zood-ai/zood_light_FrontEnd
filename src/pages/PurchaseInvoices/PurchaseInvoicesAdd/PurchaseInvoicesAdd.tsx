@@ -188,7 +188,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
       <form onSubmit={handleFormSubmit}>
-        <div className="flex flex-col items-start w-[500px]">
+        <div className="flex flex-col items-start w-[550px]">
           <div className="grid grid-cols-1 gap-y-[16px]">
             <div className="grid grid-cols-1 md:grid-cols-2">
               <div>

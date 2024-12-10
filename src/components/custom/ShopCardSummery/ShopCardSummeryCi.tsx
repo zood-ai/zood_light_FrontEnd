@@ -316,7 +316,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                         });
                       });
                     }}
-                    className={`h-[40px] w-[93px] whitespace-nowrap min-w-fit  px-md  flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointe flex-grow ${
+                    className={`h-[40px] w-[93px] whitespace-nowrap min-w-fit  px-md  flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointe ${
                       payment === 'fully' ? 'opacity-50' : ''
                     } ${
                       paymentMethod[paymentMethod.length - 1]

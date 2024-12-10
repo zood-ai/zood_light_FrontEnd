@@ -1,4 +1,7 @@
 {
+  "ADDED_SUCCESSFULLY": "Added successfully",
+  "UPDATED_SUCCESSFULLY": "Updated successfully",
+  "DELETED_SUCCESSFULLY": "Deleted successfully",
   "welcome": "Welcome to our website!",
   "DESCRIPTION": "Description",
   "PURCHASES_DESCRIPTION": "Purchases Description",
@@ -29,6 +32,7 @@
   "CHOOSE_A_CHOOSE": "Choose a choice.....",
   "ADD_NEW_ITEM": "Add new item",
   "ENTER_INVOICE_NUMBER": "Enter the reference number or invoice number",
+  "CANCEL_ADD": "Cancel add",
 
   "INDIVIDUAL": "Individual",
   "CORPORATE": "Corporate",
@@ -102,6 +106,15 @@
   "CATEGORY_NAME_EN": "Category name (EN)",
   "communication_name": "Communication Name",
   "EMAIL_ADDRESS": "Email Address",
+  "CANCEL": "Cancel",
+  "OK": "Ok!",
+  "ARE_YOU_SURE_YOU_WANT_TO_STOP_EDITING": "Are you sure you want to stop editing?",
+  "UNCHANGE_MESSAGE": "You have unsaved changes. If you leave now, you will lose your changes.",
+  "YES_STOP_EDITING": "Yes, I want to stop editing!",
+  "ARE_YOU_SURE_YOU_WANT_TO_DELETE": "Are you sure you want to delete",
+  "YOU_HAVE_UNSAVED_CHANGES_IF_DELETE": "You have unsaved changes. If you delete",
+  "NOW_YOU_WILL_LOSE_THEM": "now, you will lose them.",
+  "YES_DELETE": "Yes, I want to delete!",
 
   "SEARCH_TABLE_PLACEHOLDER": "Search for invoice, customer, date",
   "START_DATE": "Start Date",

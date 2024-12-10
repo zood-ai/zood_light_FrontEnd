@@ -136,7 +136,7 @@ const CustomerForms = () => {
         </div>
 
         {!params.id && (
-          <div className="translate-y-[32px]">
+          <div className="flex items-end">
             <Button
               onClick={() => {
                 setFastActionBtn(true);

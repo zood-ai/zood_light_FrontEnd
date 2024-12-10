@@ -54,8 +54,8 @@ const IconInput: React.FC<any> = ({
                 left: isRtl ? 'unset' : '10px',
                 right: !isRtl ? 'unset' : '10px',
               }}
-              className={`object-contain  shrink-0 my-auto text-secText aspect-square w-[18px] absolute  ${
-                label ? 'top-[25%]' : 'top-[20%]'
+              className={`object-contain  shrink-0 my-auto text-secText aspect-square w-[14px] absolute  ${
+                label ? 'top-[25%]' : 'top-[30%]'
               }`}
             />
           )}

@@ -187,7 +187,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   }, [discountAmount, taxAmount, orderSchema, mainTax]);
   return (
     <>
-      <div className="flex mt-5 flex-col  flex-grow rounded-none w-full xl:w-1/2">
+      <div className="flex mt-5 flex-col  rounded-none w-full">
         <div className="flex flex-col pt-6 pb-12 w-full bg-white rounded border border-solid border-zinc-300 max-md:max-w-full">
           <div className="flex flex-col items-start px-3 w-full max-md:max-w-full">
             <div className="self-stretch max-md:mr-2.5 max-md:max-w-full">
@@ -306,7 +306,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                         });
                       });
                     }}
-                    className={`h-[40px] w-[93px] whitespace-nowrap min-w-fit  px-md  flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointe flex-grow ${
+                    className={`h-[40px] w-[93px] whitespace-nowrap min-w-fit  px-md  flex items-center justify-center rounded border border-gray-200 border-solid cursor-pointe ${
                       params.id ? 'opacity-50' : ''
                     } ${
                       paymentMethod[paymentMethod.length - 1]

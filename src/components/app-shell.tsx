@@ -130,11 +130,14 @@ const AppShell = () => {
                 } flex items-center space-x-4`}
               >
                 <Button
-                  className="pe-[24px] ps-[16px] pt-[8px] pb-[6px]"
+                style={{
+                  flexDirection: isRtl ? 'row-reverse' : 'row',
+                }}
+                  className="pe-[24px] gap-2 ps-[16px] pt-[8px] pb-[6px] flex"
                   variant={'default'}
                   onClick={() => {}}
                 >
-                  <PlusIcon /> <span className="ms-1">{t('FAST_CREATE')}</span>
+                  <PlusIcon /> <span>{t('FAST_CREATE')}</span>
                 </Button>
                 {/* <ThemeSwitch /> */}
               </div>

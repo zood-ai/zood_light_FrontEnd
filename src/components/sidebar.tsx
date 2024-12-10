@@ -74,7 +74,7 @@ export default function Sidebar({
               !isCollapsed ? 'gap-2' : ''
             }`}
           >
-            <Link to="/">
+            <Link to="/zood-dashboard">
               <img
                 src={logo || ''}
                 alt=""

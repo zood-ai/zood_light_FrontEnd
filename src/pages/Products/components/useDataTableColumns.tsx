@@ -34,7 +34,7 @@ export const useDataTableColumns = () => {
       ),
       cell: ({ row }: any) => {
         return (
-          <div className="  flex justify-start items-center py-[11.5px] w-[500px]  ">
+          <div className="  flex justify-start items-center py-[11.5px] w-[550px]  ">
             <div className="flex justify-start items-center max-w-[79px]">
               <img
                 loading="lazy"

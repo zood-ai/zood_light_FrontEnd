@@ -1,4 +1,7 @@
 {
+  "ADDED_SUCCESSFULLY": "تمت الاضافة بنجاح",
+  "UPDATED_SUCCESSFULLY": "تم التحديث بنجاح",
+  "DELETED_SUCCESSFULLY": "تم الحذف بنجاح",
   "welcome": "مرحبا بكم في موقعنا!",
   "DESCRIPTION": "الوصف",
   "PURCHASES_DESCRIPTION": "وصف المشتريات",
@@ -32,6 +35,7 @@
   "DISCOUNT": "خصم",
   "TOTAL_AMOUNT": "المبلغ الاجمالي",
   "NOTES": "ملاحظات",
+  "CANCEL_ADD": "الغاء الاضافة",
 
   "REMAINING_AMOUNT": "المبلغ المتبقي",
   "TAX": "ضريبة القيمة المضافة",
@@ -94,6 +98,15 @@
   "CORPORATE_INVOICES": "فواتير المؤسسة",
   "PURCHASE_INVOICES": "فواتير الشراء",
   "CHOOSE_A_CHOOSE": "اختر خيار.....",
+  "CANCEL": "الغاء",
+  "OK": "حسنا!",
+  "ARE_YOU_SURE_YOU_WANT_TO_STOP_EDITING": "هل أنت متأكد أنك تريد التوقف عن التعديل؟",
+  "UNCHANGE_MESSAGE": "لديك تغييرات غير محفوظة. إذا خرجت الآن، فسوف تفقد تغييراتك",
+  "YES_STOP_EDITING": "نعم, اريد ان اتوقف عن التعديل!",
+  "ARE_YOU_SURE_YOU_WANT_TO_DELETE": "هل أنت متأكد أنك تريد حذف",
+  "YOU_HAVE_UNSAVED_CHANGES_IF_DELETE": "لديك تغييرات غير محفوظة. إذا حذفت",
+  "NOW_YOU_WILL_LOSE_THEM": "الآن، فسوف تفقد تغييراتك",
+  "YES_DELETE": "نعم, اريد ان احذف!",
 
   "INDIVIDUAL_INVOICE": "فاتورة افراد",
   "CORPORATE_INVOICE": "فاتورة المؤسسة",

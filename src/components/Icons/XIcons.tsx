@@ -1,5 +1,5 @@
 import React from 'react';
-const XIcons = () => {
+const XIcons = ({color = "#363088"}) => {
   return (
     <>
       <svg
@@ -11,14 +11,14 @@ const XIcons = () => {
       >
         <path
           d="M1.5 1.5L13.5 13.5"
-          stroke="#363088"
+          stroke={color}
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
         />
         <path
           d="M1.5 13.5L13.5 1.5"
-          stroke="#363088"
+          stroke={color}
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"

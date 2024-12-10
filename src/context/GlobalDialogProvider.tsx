@@ -14,6 +14,8 @@ import { useDispatch } from 'react-redux';
 import { toggleUserNavigate, userNavigate } from '@/store/slices/usrNavSlice';
 import { useToast } from '@/components/custom/useToastComp';
 import { titleMapping } from '@/constant/constant';
+import { useTranslation } from 'react-i18next';
+import useDirection from '@/hooks/useDirection';
 
 interface GlobalDialogContextType {
   openDialog: (status: 'deleted' | 'updated' | 'added' | 'del') => void;
@@ -37,6 +39,7 @@ export const useGlobalDialog = () => {
 
 export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useTranslation();
   const [delRoutedelRoute, setdelRoutedelRoute] = useState('');
   const [status, setStatus] = useState<
     'deleted' | 'updated' | 'added' | 'del' | null
@@ -45,11 +48,11 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
   const getStatusMessage = (status1: any) => {
     switch (status1) {
       case 'deleted':
-        return 'تم حذف العنصر بنجاح';
+        return t('DELETED_SUCCESSFULLY');
       case 'updated':
-        return 'تم تحديث العنصر بنجاح';
+        return t('UPDATED_SUCCESSFULLY');
       case 'added':
-        return 'تم إضافة العنصر بنجاح';
+        return t('ADDED_SUCCESSFULLY');
       default:
         return '';
     }
@@ -92,6 +95,7 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
   let pagePath = window.location.pathname; // Get the current path
   pagePath = pagePath.replace(/\/edit\/[^/]+$/, '/edit');
+  const isRtl = useDirection();
 
   const title = titleMapping(pagePath); // Get the title object based on the path
   const isArabic = true;
@@ -133,7 +137,7 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
                         variant={'success'}
                         className="px-16 py-2"
                       >
-                        حسنا!
+                        {t('OK')}
                       </Button>
                     </div>
                   </div>
@@ -174,13 +178,17 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
 
                   <div className="flex flex-col mt-5 w-full ">
                     <div className="  text-mainText">
-                      هل أنت متأكد أنك تريد حذف{' '}
-                      <span className="mx-1">{title?.ar}</span>
+                      {t('ARE_YOU_SURE_YOU_WANT_TO_DELETE')}{' '}
+                      <span className="mx-1">
+                        {isRtl ? title?.ar : title?.en}
+                      </span>
                     </div>
                     <div className="text-sm text-secText">
-                      لديك تغييرات غير محفوظة. إذا حذفت{' '}
-                      <span className="mx-1">{title?.ar} </span>
-                      الآن، فسوف تفقد تغييراتك{' '}
+                      {t('YOU_HAVE_UNSAVED_CHANGES_IF_DELETE')}{' '}
+                      <span className="mx-1">
+                        {isRtl ? title?.ar : title?.en}{' '}
+                      </span>
+                      {t('NOW_YOU_WILL_LOSE_THEM')}{' '}
                     </div>
                     <div className="flex flex-col mt-6 w-full text-sm font-semibold text-right text-white whitespace-nowrap rounded">
                       <Button
@@ -212,14 +220,14 @@ export const GlobalDialogProvider = ({ children }: { children: ReactNode }) => {
                         variant={'fail'}
                         className="px-16 py-2"
                       >
-                        نعم, اريد الحذف{' '}
+                        {t('YES_DELETE')}{' '}
                       </Button>
                       <Button
                         onClick={() => setIsOpen(false)}
                         variant={'outline'}
                         className="px-16 py-2 mt-5"
                       >
-                        الغاء{' '}
+                        {t('CANCEL')}{' '}
                       </Button>
                     </div>
                   </div>

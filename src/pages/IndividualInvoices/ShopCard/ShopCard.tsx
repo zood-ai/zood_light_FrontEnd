@@ -27,7 +27,7 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
     () => cardItemValue?.reduce((acc, item) => acc + item.price * item.qty, 0),
     [cardItemValue]
   );
-  
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -156,14 +156,14 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
-      {/* <div className="grid grid-cols-2"> */}
-        <div>
+      <div className="flex gap-5 max-xl:flex-col">
+        <div className="w-[55%] max-xl:w-full">
           <ShopCardTable />
         </div>
-        <div>
-           <CustomerForm />
+        <div className="w-[45%] max-xl:w-full">
+          <CustomerForm />
         </div>
-      {/* </div> */}
+      </div>
 
       <ConfirmBk
         isOpen={isOpen}

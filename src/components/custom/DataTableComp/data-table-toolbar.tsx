@@ -44,7 +44,10 @@ export function DataTableToolbar<TData>({
         {/* <DataTableViewOptions table={table} /> */}
         <div className="flex gap-x-[16px] ">
           <Button
-            className="rounded-[4px] w-[146px] h-[39px] "
+            style={{
+              flexDirection: isRtl ? 'row-reverse' : 'row',
+            }}
+            className="rounded-[4px]  gap-x-[10px] w-fit h-[39px] "
             variant={'default'}
             onClick={actionBtn}
           >
@@ -63,34 +66,37 @@ export function DataTableToolbar<TData>({
                 stroke-linejoin="round"
               />
             </svg>
-            <span className="ms-[10px]">{`${actionText}`}</span>
+            <span>{`${actionText}`}</span>
           </Button>
-          {locations.includes(pathName?.pathname) && (
-            <Button
-              variant="outline"
-              // onClick={() => table.resetColumnFilters()}
-              className="h-[39px] w-[103px]"
-            >
-              <span className="me-1">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 18 19"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M17 12.1667V15.7222C17 16.1937 16.8127 16.6459 16.4793 16.9793C16.1459 17.3127 15.6937 17.5 15.2222 17.5H2.77778C2.30628 17.5 1.8541 17.3127 1.5207 16.9793C1.1873 16.6459 1 16.1937 1 15.7222V12.1667M4.55556 7.72222L9 12.1667M9 12.1667L13.4444 7.72222M9 12.1667V1.5"
-                    stroke="#363088"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </span>
-              {t('EXPORT')}
-            </Button>
-          )}
+          {/* {locations.includes(pathName?.pathname) && ( */}
+          <Button
+            variant="outline"
+            style={{
+              flexDirection: isRtl ? 'row-reverse' : 'row',
+            }}
+            // onClick={() => table.resetColumnFilters()}
+            className="h-[39px] w-[103px] gap-x-[10px]"
+          >
+            <span className="">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 18 19"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17 12.1667V15.7222C17 16.1937 16.8127 16.6459 16.4793 16.9793C16.1459 17.3127 15.6937 17.5 15.2222 17.5H2.77778C2.30628 17.5 1.8541 17.3127 1.5207 16.9793C1.1873 16.6459 1 16.1937 1 15.7222V12.1667M4.55556 7.72222L9 12.1667M9 12.1667L13.4444 7.72222M9 12.1667V1.5"
+                  stroke="#363088"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            {t('EXPORT')}
+          </Button>
+          {/* )} */}
         </div>
         {isFiltered && (
           <Button

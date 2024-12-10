@@ -20,8 +20,8 @@ export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
     <>
       <div className="flex bg-[#EAEBF5] border border-gray-200 border-solid w-full">
         <div className="py-3.5 px-10 w-1/3">{t('PRODUCTS')}</div>
-        <div className="py-3.5 text-center w-1/3">{t('QUANTITY')}</div>
-        <div className="py-3.5 text-center w-1/3">{t('PRICE')}</div>
+        <div className="py-3.5 w-1/3">{t('QUANTITY')}</div>
+        <div className="py-3.5 w-1/3">{t('PRICE')}</div>
       </div>
       <table className="table-auto text-base font-medium text-right text-black w-full">
         {/* Body */}
@@ -55,20 +55,22 @@ export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
                 <td className="py-7 w-1/3">
                   <div className="flex justify-center">
                     SR {Number(item.price) * Number(item.qty)}
-                    <button
-                      onClick={() => {
-                        if (!params.id) {
-                          const updatedItems = cardItemValue.filter(
-                            (i: { id: string }) => i.id !== item.id
-                          );
-                          dispatch(setCardItem(updatedItems));
-                        }
-                      }}
-                      className="rounded-br-lg cursor-pointer hover:scale-105 "
-                    >
-                      <TrashIcon />
-                    </button>
                   </div>
+                </td>
+                <td>
+                  <button
+                    onClick={() => {
+                      if (!params.id) {
+                        const updatedItems = cardItemValue.filter(
+                          (i: { id: string }) => i.id !== item.id
+                        );
+                        dispatch(setCardItem(updatedItems));
+                      }
+                    }}
+                    className="rounded-br-lg px-10 cursor-pointer hover:scale-105 "
+                  >
+                    <TrashIcon />
+                  </button>
                 </td>
                 {/* {!params.id && ( */}
                 {/* )} */}

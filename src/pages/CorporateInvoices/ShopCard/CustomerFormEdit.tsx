@@ -111,7 +111,7 @@ const CustomerFormEdit = () => {
   };
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
-      <div className=" w-full xl:w-[500px]">
+      <div className=" w-full xl:w-[550px]">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
           {getOrder?.data?.data?.products.map((item, index) => (

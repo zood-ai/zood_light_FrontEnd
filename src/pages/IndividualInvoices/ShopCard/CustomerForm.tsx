@@ -28,6 +28,7 @@ import {
 } from '@/store/slices/toggleAction';
 import { useToast } from '@/components/custom/useToastComp';
 import PlusIcon from '@/components/Icons/PlusIcon';
+import XIcons from '@/components/Icons/XIcons';
 import FastAddActionsCustomerPQ from '@/components/FastAddActionsCustomerPQ';
 import { useTranslation } from 'react-i18next';
 
@@ -69,6 +70,7 @@ function Prompt({ when, message, ...props }) {
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
+  const params = useParams();
   const { t } = useTranslation();
   const allServiceOrderPay =
     createCrudService<any>('order-payments').useCreate();
@@ -78,6 +80,7 @@ const CustomerForm = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [nextPath, setNextPath] = useState<string | null>(null);
   const [reload, setReload] = useState(false);
+  const [showCustomer, setShowCustomer] = useState(params.id ? false : true);
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
   const { mutate: mutateOrderPay } = allServiceOrderPay;
@@ -97,7 +100,6 @@ const CustomerForm = () => {
   };
   const [formState, setFormState] = useState(initialValue);
   const dispatch = useDispatch();
-  const params = useParams();
   const [fastActionBtn, setFastActionBtn] = useState(false);
 
   const handleInputChange = (field: string, value: any) => {
@@ -259,132 +261,137 @@ const CustomerForm = () => {
     }
   }, [reload]);
   return (
-    <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4">
+    <div className="mt-5 flex xl:justify-between flex-col gap-x-4">
       {!params.id && !orderSubmited && (
         <Prompt
           when={true}
           message="هل أنت متأكد أنك تريد الخروج؟ لن تحفظ البيانات"
         />
       )}
-      <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit w-full xl:w-[500px]">
-        <CustomSearchInbox
-          options={allData?.data?.map((item) => ({
-            value: item.id,
-            label: item.name,
-          }))}
-          placeholder="Select Customer"
-          onValueChange={(value) => {
-            if (params.id) {
-              return;
-            } else {
-              handleInputChangex('customer_id', value);
-            }
-          }}
-          label={t('CUSTOMER_NAME')}
-          className=" md:col-span-4 min-w-[327px] flex-grow"
-          value={orderSchema?.customer_id}
-          disabled={params.id}
-        />
-        {!params.id && (
-          <div className="flex-grow mt-auto">
-            <Button
+      {!params.id && (
+        <div className="w-full">
+          {showCustomer ? (
+            <button
+              className="text-main flex"
               onClick={() => {
-                setFastActionBtn(true);
+                setShowCustomer(false);
               }}
-              type="button"
-              variant={'link'}
             >
-              <div className="flex gap-2">
-                <span className="font-semibold">{t('ADD_NEW_CUSTOMER')}</span>
-                <span>
-                  <PlusIcon />
-                </span>
+              <span>{t('ADD_CUSTOMER')}</span>
+            </button>
+          ) : (
+            <button
+              className="text-destructive flex items-center gap-2"
+              onClick={() => {
+                setShowCustomer(true);
+              }}
+            >
+              <XIcons color="#EF4444" /> <span>{t('CANCEL_ADD')}</span>
+            </button>
+          )}
+        </div>
+      )}
+      {((params.id && orderSchema?.customer_id) || !params.id) &&
+        !showCustomer && (
+          <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit w-full xl:w-[550px]">
+            <CustomSearchInbox
+              options={allData?.data?.map((item) => ({
+                value: item.id,
+                label: item.name,
+              }))}
+              placeholder="Select Customer"
+              onValueChange={(value) => {
+                if (params.id) {
+                  return;
+                } else {
+                  handleInputChangex('customer_id', value);
+                }
+              }}
+              label={t('CUSTOMER_NAME')}
+              className=" md:col-span-4 min-w-[327px] flex-grow"
+              value={orderSchema?.customer_id}
+              disabled={params.id}
+            />
+            {!params.id && (
+              <div className="flex items-end">
+                <Button
+                  onClick={() => {
+                    setFastActionBtn(true);
+                  }}
+                  type="button"
+                  variant={'link'}
+                >
+                  <div className="flex gap-2">
+                    <span className="font-semibold">
+                      {t('ADD_NEW_CUSTOMER')}
+                    </span>
+                    <span>
+                      <PlusIcon />
+                    </span>
+                  </div>
+                </Button>
               </div>
-            </Button>
+            )}
+            <IconInput
+              disabled
+              name="name"
+              className="md:col-span-4 min-w-full flex-grow"
+              label={t('PHONE')}
+              iconSrc={callIcon}
+              value={formState.phone}
+              onChange={null}
+            />
+            <IconInput
+              disabled
+              name={formState.name}
+              className=" md:col-span-4 min-w-full flex-grow"
+              label={t('STREAT_NAME')}
+              value={formState.address}
+              onChange={null}
+            />
+            <IconInput
+              disabled
+              className=" md:col-span-4 min-w-full flex-grow"
+              label={t('TAX_REGISTRATION_NUMBER')}
+              value={formState.tax_registration_number}
+              onChange={null}
+            />
+            <IconInput
+              disabled
+              className=" md:col-span-4 min-w-full flex-grow"
+              label={t('ANOTHER_ID')}
+              value={formState.vat_registration_number}
+              onChange={null}
+            />
+
+            <div className=" mt-5 w-full">
+              <CheckboxWithText
+                label={t('ADD_TO_ZATCA')}
+                checked={formState.addToZatca}
+                onChange={(e) =>
+                  handleInputChange('addToZatca', e.target.checked)
+                }
+              />
+            </div>
+            <div className=" mt-5">
+              <Button
+                dir="ltr"
+                loading={loading}
+                disabled={loading || (params.id ? true : false)}
+                onClick={submitOrder}
+                className="w-[144px]"
+              >
+                حفظ
+              </Button>
+            </div>
           </div>
         )}
-        <IconInput
-          disabled
-          name="name"
-          className="md:col-span-4 min-w-full flex-grow"
-          label={t('PHONE')}
-          iconSrc={callIcon}
-          value={formState.phone}
-          onChange={null}
-        />
-        <IconInput
-          disabled
-          name={formState.name}
-          className=" md:col-span-4 min-w-full flex-grow"
-          label={t('STREAT_NAME')}
-          value={formState.address}
-          onChange={null}
-        />
-        <IconInput
-          disabled
-          className=" md:col-span-4 min-w-full flex-grow"
-          label={t('TAX_REGISTRATION_NUMBER')}
-          value={formState.tax_registration_number}
-          onChange={null}
-        />
-        <IconInput
-          disabled
-          className=" md:col-span-4 min-w-full flex-grow"
-          label={t('ANOTHER_ID')}
-          value={formState.vat_registration_number}
-          onChange={null}
-        />
-
-        <div className=" mt-5 max-xl:hidden w-full">
-          <CheckboxWithText
-            label={t('ADD_TO_ZATCA')}
-            checked={formState.addToZatca}
-            onChange={(e) => handleInputChange('addToZatca', e.target.checked)}
-          />
-        </div>
-        <div className=" mt-5 max-xl:hidden">
-          <Button
-            dir="ltr"
-            loading={loading}
-            disabled={loading || (params.id ? true : false)}
-            onClick={submitOrder}
-            className="w-[144px]"
-          >
-            حفظ
-          </Button>
-        </div>
-      </div>
-      <div className=" mt-5 xl:hidden">
-        <CheckboxWithText
-          label={t('ADD_TO_ZATCA')}
-          checked={formState.addToZatca}
-          onChange={(e) => handleInputChange('addToZatca', e.target.checked)}
-        />
-      </div>
-      <div className=" mt-5 xl:hidden">
-        <Button
-          dir="ltr"
-          loading={loading}
-          disabled={loading || (params.id ? true : false)}
-          onClick={submitOrder}
-          className="w-[144px]"
-        >
-          حفظ
-        </Button>
-      </div>
       <ShopCardSummery />
       <FastAddActionsCustomerPQ
         setInvoice={() => {}}
         isOpen={fastActionBtn}
         onClose={() => setFastActionBtn(false)}
       />
-      {/* {showAlert && (
-        <div className="alert">
-          <p>Data is not saved. Are you sure you want to leave?</p>
-          <button onClick={handleCancel}>Cancel</button>
-          <button onClick={handleOk}>OK</button>
-        </div>
-      )} */}
     </div>
   );
 };
