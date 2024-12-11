@@ -43,7 +43,7 @@ const CustomerForm = () => {
 
   dispatch(updateField({ field: 'is_sales_order', value: 1 }));
   const handleSubmitOrder = async () => {
-    // setLoading(true);
+    setLoading(true);
 
     try {
       if (!params.id) {

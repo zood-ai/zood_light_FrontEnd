@@ -51,9 +51,9 @@ const CustomerForm = () => {
   const [loading, setLoading] = useState(false);
   const { data: getAllPro } = fetchAllProducts();
   dispatch(updateField({ field: 'is_sales_order', value: 0 }));
-  const { showToast } = useToast(); 
+  const { showToast } = useToast();
   const handleSubmitOrder = async () => {
-    // setLoading(true);
+    setLoading(true);
     const totalPrice = orderSchema.total_price;
     if (totalPrice == 0) {
       showToast({
@@ -84,10 +84,10 @@ const CustomerForm = () => {
 
         await mutate(updatedOrderSchema, {
           onSuccess: async (data) => {
-            setLoading(false);
             const res = await axiosInstance.get(
               `/orders?filter[id]=${data.data.id}`
             );
+            setLoading(false);
             const orderData = res?.data?.data;
             navigate('/zood-dashboard/corporate-invoices');
             dispatch(toggleActionView(true));
@@ -99,10 +99,9 @@ const CustomerForm = () => {
     } catch (error) {
       setLoading(false);
       console.error('Failed to submit order', error);
-    } finally {
-      setLoading(false);
     }
   };
+  console.log({ loading });
 
   const updateCardItem = (newItem: {
     product_id?: string;
