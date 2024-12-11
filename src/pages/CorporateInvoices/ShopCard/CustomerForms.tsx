@@ -149,9 +149,10 @@ const CustomerForms = () => {
             label={t('CUSTOMER_NAME')}
             className="w-full md:w-[21vw]"
             value={
-              allData?.data?.[0]?.name !== lastCustomerName
-                ? allData?.data?.[0]?.id
-                : orderSchema?.customer_id
+              // allData?.data?.[0]?.name !== lastCustomerName
+              //   ? allData?.data?.[0]?.id
+              //   : orderSchema?.customer_id
+              orderSchema?.customer_id
             }
             disabled={params.id}
           />
