@@ -101,6 +101,8 @@ export function DataTable<TData, TValue>({
     '/zood-dashboard/normal-report',
     '/zood-dashboard/b2b-report',
     '/zood-dashboard/purchase-report',
+    '/zood-dashboard/categories',
+    '/zood-dashboard/products',
   ];
   const url = locations.find((location) =>
     window.location.pathname.includes(location)

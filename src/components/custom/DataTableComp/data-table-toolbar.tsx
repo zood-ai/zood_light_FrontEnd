@@ -40,6 +40,11 @@ export function DataTableToolbar<TData>({
     '/zood-dashboard/individual-invoices',
     '/zood-dashboard/purchase-invoices',
     '/zood-dashboard/price-quote',
+    '/zood-dashboard/categories',
+    '/zood-dashboard/products',
+    '/zood-dashboard/customers',
+    '/zood-dashboard/resources',
+    '/zood-dashboard/payment-methods'
   ];
 
   const exportExcel = async () => {
