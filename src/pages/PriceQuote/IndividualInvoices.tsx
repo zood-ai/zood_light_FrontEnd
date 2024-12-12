@@ -99,7 +99,9 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
           setSearchedData(allData); // Reset if search is cleared
           return;
         }
-
+        setAllUrl(
+          `orders?filter[type]=2&filter[status]=8${date}`
+        );
         const res = await axiosInstance.get(
           `/orders?filter[type]=2&filter[status]=8${date}`
         );

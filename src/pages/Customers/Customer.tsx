@@ -86,7 +86,9 @@ const Customer: React.FC<CustomersProps> = () => {
           setSearchedData(ordersData); // Reset if search is cleared
           return;
         }
-
+        setAllUrl(
+          `orders?${date}`
+        );
         const res = await axiosInstance.get(
           `orders?${date}`
         );

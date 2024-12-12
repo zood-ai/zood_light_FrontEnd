@@ -85,7 +85,9 @@ export const Products: React.FC<ProductsProps> = () => {
           setSearchedData(allData); // Reset if search is cleared
           return;
         }
-
+        setAllUrl(
+          `menu/products?not_default=1&sort=-created_at${date}`
+        );
         const res = await axiosInstance.get(
           `/menu/products?not_default=1&sort=-created_at${date}`
         );

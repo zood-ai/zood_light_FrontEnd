@@ -85,7 +85,9 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
           setSearchedData(lastOrderData); // Reset if search is cleared
           return;
         }
-
+        setAllUrl(
+          `orders?sort=-status${date}`
+        );
         const res = await axiosInstance.get(
           `/orders?sort=-status${date}`
         );

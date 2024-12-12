@@ -82,7 +82,9 @@ export const Customers: React.FC<CustomersProps> = () => {
           setSearchedData(allData); // Reset if search is cleared
           return;
         }
-
+        setAllUrl(
+          `manage/customers${date}`
+        );
         const res = await axiosInstance.get(
           `manage/customers${date}`
         );

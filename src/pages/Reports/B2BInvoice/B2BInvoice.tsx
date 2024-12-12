@@ -94,7 +94,9 @@ export const B2BInvoice: React.FC<B2BInvoiceProps> = () => {
           setSearchedData(allData); // Reset if search is cleared
           return;
         }
-
+        setAllUrl(
+          `orders?filter[type]=2&filter[status]=4${date}`
+        );
         const res = await axiosInstance.get(
           `/orders?filter[type]=2&filter[status]=4${date}`
         );

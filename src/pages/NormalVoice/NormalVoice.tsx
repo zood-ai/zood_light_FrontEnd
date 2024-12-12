@@ -92,7 +92,9 @@ export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
           setSearchedData(allData); // Reset if search is cleared
           return;
         }
-
+        setAllUrl(
+          `orders?filter[type]=1${date}`
+        );
         const res = await axiosInstance.get(`/orders?filter[type]=1${date}`);
 
         setSearchedData(res.data);

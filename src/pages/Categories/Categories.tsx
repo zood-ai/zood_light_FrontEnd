@@ -86,6 +86,7 @@ export const Categories: React.FC<CategoriesProps> = () => {
           return;
         }
 
+        setAllUrl(`menu/categories?not_default=1${date}`);
         const res = await axiosInstance.get(
           `menu/categories?not_default=1${date}`
         );
