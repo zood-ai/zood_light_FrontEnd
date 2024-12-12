@@ -37,6 +37,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       total: '',
       item: '',
       itemDescription: '',
+      name: '',
     },
   ]);
   const [fileBase64, setFileBase64] = useState<any>('');
@@ -49,6 +50,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const token = getToken();
   const crudService = createCrudService<any>('inventory/purchasing');
   const whoIam = createCrudService<any>(`auth/whoami?${token}`).useGetAll();
+  const [loading, setLoading] = useState(false);
 
   const { useGetById, useUpdate, useCreate } = crudService;
   const { useGetAll: useGetAllPro } = createCrudService<any>(
@@ -82,10 +84,12 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           total: item?.pivot?.total_cost,
           item: item?.pivot?.item_id,
           itemDescription: item?.product?.description,
+          name: item?.name,
         }))
       );
     }
   }, [allDataId]);
+  console.log({ allDataId });
   const { openDialog } = useGlobalDialog();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +106,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       if (isEditMode) {
@@ -157,8 +162,10 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       }
       openDialog(isEditMode ? 'updated' : 'added');
       navigate('/zood-dashboard/purchase-invoices');
+      setLoading(false);
     } catch (error) {
       console.error(error);
+      setLoading(false);
     }
   };
   const [isOpen, setIsOpen] = useState(false);
@@ -167,6 +174,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     setIsOpen(true);
   };
   const handleConfirmation = async () => {
+    setLoading(true);
     try {
       await axiosInstance.get(
         `inventory/purchasing/receiver_items/${params.objId}`
@@ -175,6 +183,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       console.error(e);
     } finally {
       navigate('/zood-dashboard/purchase-invoices');
+      setLoading(false);
     }
   };
 
@@ -182,6 +191,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const setSuppId = (value: string) => {
     setInvoice({ ...invoice, supplier_id: value });
   };
+  console.log({ items, getAllPro });
 
   // Ensure DetailsHeadWithOutFilter is rendered correctly
   return (
@@ -206,7 +216,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   className="w-full"
                 />
               </div>
-              <div className="translate-y-[32px]">
+              <div className="flex items-end">
                 <Button
                   onClick={(e) => {
                     e.preventDefault();
@@ -247,50 +257,62 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
               className="w-[499px]"
               label={t('PURCHASES_DESCRIPTION')}
             />
-            {items?.map((item, index) => (
+            {items?.map((currentItem, index) => (
               <>
                 <div className="flex gap-md">
-                  {/* <SelectComp
-                    className="w-[220px] "
-                    placeholder="اسم الصنف"
-                    options={getAllPro?.data?.map((item) => ({
-                      value: item.item_id,
-                      label: item.name,
-                    }))}
-                    onValueChange={(value) =>
-                      handleItemChange(index, 'item', value)
-                    }
-                    label="اسم الصنف"
-                    value={items[index]?.item}
-                  /> */}
                   <CustomSearchInbox
                     className="w-full"
-                    placeholder={t('CATEGORY_NAME')}
-                    options={getAllPro?.data?.map((item) => ({
-                      value: item.id,
-                      label: item.name,
-                    }))}
+                    placeholder={t('PRODUCT_NAME')}
+                    options={getAllPro?.data
+                      ?.filter(
+                        (item) => !items.some((obj) => obj.item === item.id)
+                      ) // Check if `item.id` is not in `items`
+                      ?.map((item) => ({
+                        value: item.id,
+                        label: item.name,
+                      }))}
                     onValueChange={(value) =>
                       handleItemChange(index, 'item', value)
                     }
-                    label={t('CATEGORY_NAME')}
-                    value={items[index]?.item}
+                    label={t('PRODUCT_NAME')}
+                    value={currentItem?.item}
+                    directValue={
+                      currentItem.name ||
+                      getAllPro?.data
+                        ?.map((item) => ({
+                          value: item.id,
+                          label: item.name,
+                        }))
+                        .find((option) => option?.value === items[index]?.item)
+                        ?.label
+                    }
                   />
                   <IconInput
-                    value={items[index].qty}
+                    value={currentItem.qty}
                     onChange={(e) =>
-                      handleItemChange(index, 'qty', e.target.value)
+                      handleItemChange(
+                        index,
+                        'qty',
+                        e.target.value.replace(/^0+(?=\d)/, '')
+                      )
                     }
                     label={t('QUANTITY')}
+                    type="number"
                     inputClassName="w-[117px]"
                   />
                   <IconInput
-                    value={items[index].total}
+                    value={currentItem.total}
                     onChange={(e) =>
-                      handleItemChange(index, 'total', e.target.value)
+                      handleItemChange(
+                        index,
+                        'total',
+                        e.target.value.replace(/^0+(?=\d)/, '')
+                      )
                     }
+                    type="number"
+                    min="0"
                     label={t('PRICE')}
-                    inputClassName="w-[138px]"
+                    inputClassName="w-[117px]"
                     iconSrcLeft={'SR'}
                   />
                   {items.length > 1 && (
@@ -320,7 +342,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 <Textarea
                   rows={2}
                   name="itemDescription"
-                  value={items[index].itemDescription}
+                  value={currentItem.itemDescription}
                   onChange={(e) =>
                     handleItemChange(index, 'itemDescription', e.target.value)
                   }
@@ -339,6 +361,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                       qty: '',
                       total: '',
                       itemDescription: '',
+                      name: '',
                     },
                   ];
                 });
@@ -379,7 +402,9 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             )}
             <div className="flex flex-wrap gap-y-5">
               <Button
+                loading={loading}
                 disabled={
+                  loading ||
                   cantClick ||
                   !(allDataId && allDataId?.data?.status !== 'Closed')
                     ? true
@@ -394,6 +419,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 isEditMode &&
                 allDataId?.data?.status !== 'Closed' && (
                   <Button
+                    loading={loading}
                     type="button"
                     onClick={handleConfirmation}
                     className="px-6 py-1.5 mx-4 text-sm font-semibold rounded min-h-[39px] w-[144px]"

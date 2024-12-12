@@ -101,9 +101,9 @@ const Customer: React.FC<CustomersProps> = () => {
       // });
 
 
-      setAllUrl(`orders?filter[customer]=${searchTerm}${date}`);
+      setAllUrl(`orders?search=${searchTerm}${date}`);
       const res = await axiosInstance.get(
-        `orders?filter[customer]=${searchTerm}${date}`
+        `orders?search=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });

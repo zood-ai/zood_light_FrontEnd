@@ -161,10 +161,11 @@ const CustomerForm = () => {
     //   dispatch(addProduct(updatedProducts));
     // }
   };
+  console.log({ orderSchema });
 
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
-      <div className="w-full xl:w-[550px]">
+      <div className="w-full xl:w-[550px] max-w-full">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
           {orderSchema.products.map((item, index) => (
@@ -218,8 +219,9 @@ const CustomerForm = () => {
                   <TrashIcon
                     onClick={() => {
                       const updatedItems = orderSchema.products.filter(
-                        (_, i) => i !== index
+                        (el) => el.index !== index
                       );
+                      console.log({ updatedItems });
                       dispatch(addProduct(updatedItems));
                     }}
                     className="translate-y-[34px] cursor-pointer hover:scale-105"

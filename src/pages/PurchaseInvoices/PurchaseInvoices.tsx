@@ -104,9 +104,9 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
       // });
 
       // setSearchedData({ ...allData, data: holder });
-      setAllUrl(`inventory/purchasing&filter[supplier.name]=${searchTerm}${date}`);
+      setAllUrl(`inventory/purchasing?search=${searchTerm}${date}`);
       const res = await axiosInstance.get(
-        `/inventory/purchasing&filter[supplier.name]=${searchTerm}${date}`
+        `/inventory/purchasing?search=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });

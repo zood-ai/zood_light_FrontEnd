@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { DeatilsHeaderWithFilterProps } from './DeatilsHeaderWithFilter.types';
 
@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 export const DeatilsHeaderWithFilter: React.FC<
   DeatilsHeaderWithFilterProps
-> = ({ bkAction }) => {
+> = ({ bkAction, setSearchInput = '' }) => {
   const navigate = useNavigate();
   const isRtl = useDirection();
   const { t } = useTranslation();
@@ -26,9 +26,13 @@ export const DeatilsHeaderWithFilter: React.FC<
         <BackBtn bkAction={bkAction ? bkAction : () => {}} />
         <div className="col-span-4 md:col-span-3 flex flex-col md:flex-row md:items-center gap-md">
           <IconInput
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+            }}
+            defaultValue=""
             placeholder={t('SEARCH_TABLE_PLACEHOLDER')}
             iconSrc={search}
-          /> 
+          />
           <div className={`w-[250px]`} dir={isRtl ? 'rtl' : 'ltr'}>
             <SelectComp
               placeholder={t('SORT_BY')}

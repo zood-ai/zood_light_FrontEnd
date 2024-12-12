@@ -29,13 +29,14 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
       onInputFieldChange,
       className,
       label,
+      value,
       ...props
     },
     ref
   ) => {
     const [isInputActive, setIsInputActive] = useState(false);
     const [inputValue, setInputValue] = useState('');
-    const [dropDownValue, setDropDownValue] = useState('');
+    const [dropDownValue, setDropDownValue] = useState(value);
     const isRtl = useDirection();
     const params = useParams();
 
@@ -68,6 +69,10 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
       onInputFieldChange(inputValue);
       onValueChange('');
     }, [inputValue]);
+
+    useEffect(() => {
+      setDropDownValue(value);
+    }, [value]);
 
     return (
       <div className={className} style={{ position: 'relative' }}>
@@ -113,7 +118,7 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
         </Select> */}
 
         {/* Transparent Input Overlay */}
-        {!params.id && (
+        {!params.id ? (
           <input
             ref={ref}
             type="text"
@@ -121,12 +126,10 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
             onFocus={handleInputFocus}
             onChange={handleInputChange}
             // placeholder={placeholder}
-            className="absolute translate-y-3 inset-0 w-[80%] h-full bg-transparent border-none focus:outline-none"
-            style={{
-              zIndex: 10, // Ensures input stays above the dropdown
-              paddingRight: '1rem', // Adjust padding to align text with dropdown (modify as needed)
-            }}
+            className="absolute translate-y-3 inset-0 w-[80%] h-full bg-transparent border-none focus:outline-none ps-4 z-[10]"
           />
+        ) : (
+          ''
         )}
       </div>
     );

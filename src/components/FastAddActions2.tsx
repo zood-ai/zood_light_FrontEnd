@@ -170,7 +170,6 @@ export default function FastAddActions2({ isOpen, onClose }) {
     }
   };
 
-
   return (
     <div className=" ">
       <AlertDialogComp open={isOpen} onOpenChange={onClose}>

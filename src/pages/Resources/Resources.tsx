@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 
 import { ResourcesProps } from './Resources.types';
 
@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
 import { toggleActionView } from '@/store/slices/toggleAction';
 import { useDispatch, useSelector } from 'react-redux';
+import axiosInstance from '@/api/interceptors';
 
 export const Resources: React.FC<ResourcesProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -30,7 +31,7 @@ export const Resources: React.FC<ResourcesProps> = () => {
     // setSelectedRow({});
     setModalType('Add');
     // setIsAddEditOpen(true);
-        // navigate('/individual-invoices/add');
+    // navigate('/individual-invoices/add');
     navigate('add');
   };
   const handleOpenViewModal = (row: any) => {
@@ -52,10 +53,8 @@ export const Resources: React.FC<ResourcesProps> = () => {
     setIsDelModalOpen(false);
 
     dispatch(toggleActionView(false));
-
   };
-  const filterBtn = () => {
-  };
+  const filterBtn = () => {};
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
@@ -64,7 +63,60 @@ export const Resources: React.FC<ResourcesProps> = () => {
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
+  const [searchedData, setSearchedData] = useState({});
+  useEffect(() => {
+    setSearchedData(allData);
+  }, [allData]);
 
+  const debounce = (func: Function, delay: number) => {
+    let timer: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => func(...args), delay);
+    };
+  };
+  const handleDebounce = useCallback(
+    debounce(async (searchTerm: string, date: string) => {
+      if (!searchTerm) {
+        if (!date) {
+          setSearchedData(allData); // Reset if search is cleared
+          return;
+        }
+
+        const res = await axiosInstance.get(`/inventory/purchasing${date}`);
+
+        setSearchedData(res.data);
+        return;
+      }
+
+      // const holder = allData?.data.filter((item: any) => {
+      //   const referenceMatch = item?.reference
+      //     ?.toLowerCase()
+      //     ?.includes(searchTerm.toLowerCase());
+      //   const customerName = item?.get_supplier?.name
+      //     ?.toLowerCase()
+      //     ?.includes(searchTerm.toLowerCase());
+      //   return referenceMatch || customerName;
+      // });
+
+      setAllUrl(
+        `inventory/suppliers?filter[supplier.name]=${searchTerm}${date}`
+      );
+      const res = await axiosInstance.get(
+        `/inventory/suppliers?filter[supplier.name]=${searchTerm}${date}`
+      );
+
+      // setSearchedData({ ...allData, data: holder });
+      setSearchedData(res.data);
+
+      // setSearchedData({ ...allData, data: holder });
+    }, 300), // 300ms debounce delay
+    [allData]
+  );
+
+  const handleSearch = (e: string, date: string) => {
+    handleDebounce(e, date);
+  };
   return (
     <>
       <AddEditModal
@@ -87,16 +139,17 @@ export const Resources: React.FC<ResourcesProps> = () => {
       <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
         <DataTable
           allUrl={allUrl}
-           handleDel={handleOpenDeleteModal}
-           handleRowClick={handleOpenViewModal}
-           data={allData?.data || []}
-           columns={columns}
-           handleEdit={handleOpenEditModal}
-           actionBtn={handleCreateTask}
-           filterBtn={filterBtn}
-           meta={allData || {}}
-           actionText={'ADD_SUPPLIER'}
-           loading={isLoading}
+          handleDel={handleOpenDeleteModal}
+          handleRowClick={handleOpenViewModal}
+          data={searchedData?.data || []}
+          columns={columns}
+          handleEdit={handleOpenEditModal}
+          actionBtn={handleCreateTask}
+          filterBtn={filterBtn}
+          meta={searchedData || {}}
+          actionText={'ADD_SUPPLIER'}
+          handleSearch={handleSearch}
+          loading={isLoading}
         />
       </div>
     </>

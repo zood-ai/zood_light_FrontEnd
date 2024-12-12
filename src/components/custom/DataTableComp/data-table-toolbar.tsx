@@ -26,7 +26,16 @@ export function DataTableToolbar<TData>({
   const isRtl = useDirection();
   const navigate = useNavigate();
   const pathName = useLocation();
-  const locations = [
+  const locationsExport = [
+    '/zood-dashboard/corporate-invoices',
+    '/zood-dashboard/individual-invoices',
+    '/zood-dashboard/purchase-invoices',
+    '/zood-dashboard/price-quote',
+    '/zood-dashboard/normal-report',
+    '/zood-dashboard/b2b-report',
+    '/zood-dashboard/purchase-report',
+  ];
+  const locationsAdd = [
     '/zood-dashboard/corporate-invoices',
     '/zood-dashboard/individual-invoices',
     '/zood-dashboard/purchase-invoices',
@@ -65,32 +74,34 @@ export function DataTableToolbar<TData>({
 
         {/* <DataTableViewOptions table={table} /> */}
         <div className="flex gap-x-[16px] ">
-          <Button
-            style={{
-              flexDirection: isRtl ? 'row-reverse' : 'row',
-            }}
-            className="rounded-[4px]  gap-x-[10px] w-fit h-[39px] "
-            variant={'default'}
-            onClick={actionBtn}
-          >
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 15 15"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          {locationsAdd.includes(pathName?.pathname) && (
+            <Button
+              style={{
+                flexDirection: isRtl ? 'row-reverse' : 'row',
+              }}
+              className="rounded-[4px]  gap-x-[10px] w-fit h-[39px] "
+              variant={'default'}
+              onClick={actionBtn}
             >
-              <path
-                d="M7.5 1V14M1 7.5H14"
-                stroke="white"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-            <span>{`${actionText}`}</span>
-          </Button>
-          {locations.includes(pathName?.pathname) && (
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 15 15"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.5 1V14M1 7.5H14"
+                  stroke="white"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span>{`${actionText}`}</span>
+            </Button>
+          )}
+          {locationsExport.includes(pathName?.pathname) && (
             <Button
               variant="outline"
               style={{

@@ -23,6 +23,8 @@ export const IndividualInvoicesAdd: React.FC<
   const { useGetAll } = allServiceUser;
   const { data: allUserData } = useGetAll();
   const [isOpen, setIsOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const [myData, setMyData] = useState(allUserData);
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -30,15 +32,31 @@ export const IndividualInvoicesAdd: React.FC<
     dispatch(resetOrder());
   }, [dispatch]);
 
+  useEffect(() => {
+    if (!searchInput) {
+      setMyData(allUserData);
+      return;
+    }
+    const myData = allUserData?.data?.filter((item: any) => {
+      return item.name.toLowerCase().includes(searchInput.toLowerCase());
+    });
+    setMyData({
+      ...allUserData,
+      data: myData,
+    });
+    console.log({ searchInput, myData });
+  }, [searchInput, allUserData]);
+
   return (
     <>
       <DeatilsHeaderWithFilter
         bkAction={() => {
           setIsOpen(true);
         }}
+        setSearchInput={setSearchInput}
       />
       <div className="flex flex-wrap w-fit mx-auto gap-x-4 gap-y-6">
-        {allUserData?.data?.map((item, index) => (
+        {myData?.data?.map((item, index) => (
           <CardItem key={item.id} index={index} item={item} />
         ))}
       </div>

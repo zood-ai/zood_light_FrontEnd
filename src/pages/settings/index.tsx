@@ -641,7 +641,7 @@ export default function Settings() {
 
         <div className="flex flex-col items-start self-start mt-4 max-w-full text-sm text-left w-[223px]">
           <img
-            className="mb-5 rounded-full aspect-square size-[150px]"
+            className="mb-5 rounded-full aspect-square object-contain size-[150px]"
             src={updateAll?.business_logo}
             alt=""
           />

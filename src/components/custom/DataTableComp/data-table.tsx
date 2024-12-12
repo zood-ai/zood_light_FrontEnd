@@ -61,6 +61,7 @@ interface DataTableProps<TData, TValue> {
   handleSearch: any;
   allUrl: string;
 }
+
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -91,12 +92,26 @@ export function DataTable<TData, TValue>({
     pageIndex: 0,
     pageSize: 50, // Set this to the desired page size
   });
+
+  const locations = [
+    '/zood-dashboard/corporate-invoices',
+    '/zood-dashboard/individual-invoices',
+    '/zood-dashboard/purchase-invoices',
+    '/zood-dashboard/price-quote',
+    '/zood-dashboard/normal-report',
+    '/zood-dashboard/b2b-report',
+    '/zood-dashboard/purchase-report',
+  ];
+  const url = locations.find((location) =>
+    window.location.pathname.includes(location)
+  );
+
   const { t } = useTranslation();
   const isRtl = useDirection();
-  React.useEffect(() => {
-    if(!fromDate || !endDate) return;
-    handleSearch('', `&business_date=${fromDate} - ${endDate}`);
-  }, [fromDate, endDate, handleSearch]);
+  // React.useEffect(() => {
+  //   if (!fromDate || !endDate) return;
+  //   handleSearch('', `&business_date=${fromDate} - ${endDate}`);
+  // }, [fromDate, endDate]);
   // const filteredData = React.useMemo(async () => {
   //   if (!fromDate || !endDate) return data;
   //   const from = parseISO(fromDate);
@@ -140,6 +155,7 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
+
   const { current_page, last_page, per_page, total } = meta || {};
   const navigate = useNavigate();
   const pagePath = window.location.pathname; // Get the current path
@@ -147,6 +163,8 @@ export function DataTable<TData, TValue>({
   const handleDateChange = (dates: any, dateStrings: [string, string]) => {
     setFromData(dateStrings[0]);
     setEndDate(dateStrings[1]);
+    if (!dateStrings[0] || !dateStrings[1]) return;
+    handleSearch('', `&business_date=${dateStrings[0]} - ${dateStrings[1]}`);
   };
   const customDatePickerClass = ` 
   .ant-picker-focused {
@@ -210,11 +228,15 @@ export function DataTable<TData, TValue>({
                       iconSrc={search}
                     />
                   </div>
-                  <RangePicker
-                    placeholder={[t('START_DATE'), t('END_DATE')]}
-                    className="max-w-[303px] ms-[14px] text-black"
-                    onChange={handleDateChange}
-                  />
+                  {url ? (
+                    <RangePicker
+                      placeholder={[t('START_DATE'), t('END_DATE')]}
+                      className="max-w-[303px] ms-[14px] text-black"
+                      onChange={handleDateChange}
+                    />
+                  ) : (
+                    ''
+                  )}
                 </div>
               </div>
 

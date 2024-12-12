@@ -1,4 +1,11 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import callIcon from '/icons/call.svg';
 import { SelectComp } from '@/components/custom/SelectItem';
 import IconInput from '@/components/custom/InputWithIcon';
@@ -67,7 +74,7 @@ function Prompt({ when, message, ...props }) {
   return null;
 }
 
-const CustomerForm = () => {
+const CustomerForm = forwardRef(({ setLoading, loading }: any, ref) => {
   const allService = createCrudService<any>('manage/customers');
   const allServiceOrder = createCrudService<any>('orders');
   const params = useParams();
@@ -86,7 +93,6 @@ const CustomerForm = () => {
   const { mutate: mutateOrderPay } = allServiceOrderPay;
 
   const { useGetAll } = allService;
-  const [loading, setLoading] = useState(false);
 
   const { data: allData, isLoading } = useGetAll();
   const initialValue = {
@@ -146,6 +152,9 @@ const CustomerForm = () => {
     (state: any) => state.orderSchema.tax_exclusive_discount_amount
   );
   const { showToast } = useToast();
+  useImperativeHandle(ref, () => ({
+    submitOrder,
+  }));
 
   const submitOrder = async () => {
     setLoading(true);
@@ -209,7 +218,6 @@ const CustomerForm = () => {
         const res = await mutate(orderSchema, {
           onSuccess: async (data) => {
             setOrderSubmited(true);
-            setLoading(false);
             const res = await axiosInstance.get(
               `/orders?filter[id]=${data.data.id}`
             );
@@ -217,6 +225,7 @@ const CustomerForm = () => {
             navigate(`/zood-dashboard/individual-invoices`);
             dispatch(toggleActionView(true));
             dispatch(toggleActionViewData(orderData[0]));
+            setLoading(false);
           },
           onError: (error) => {
             setLoading(false);
@@ -281,7 +290,7 @@ const CustomerForm = () => {
             </button>
           ) : (
             <button
-              className="text-destructive flex items-center gap-2"
+              className="text-destructive mb-3 flex items-center gap-2"
               onClick={() => {
                 setShowCustomer(true);
               }}
@@ -293,26 +302,38 @@ const CustomerForm = () => {
       )}
       {((params.id && orderSchema?.customer_id) || !params.id) &&
         !showCustomer && (
-          <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit w-full xl:w-[550px]">
-            <CustomSearchInbox
-              options={allData?.data?.map((item) => ({
-                value: item.id,
-                label: item.name,
-              }))}
-              placeholder="Select Customer"
-              onValueChange={(value) => {
-                if (params.id) {
-                  return;
-                } else {
-                  handleInputChangex('customer_id', value);
-                }
-              }}
-              label={t('CUSTOMER_NAME')}
-              className=" md:col-span-4 min-w-[327px] flex-grow"
-              value={orderSchema?.customer_id}
-              disabled={params.id}
-            />
-            {!params.id && (
+          <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit w-full xl:w-[550px] max-w-full">
+            <div className="flex gap-3 w-full">
+              <CustomSearchInbox
+                options={allData?.data?.map((item) => ({
+                  value: item.id,
+                  label: item.name,
+                }))}
+                placeholder="Select Customer"
+                onValueChange={(value) => {
+                  if (params.id) {
+                    return;
+                  } else {
+                    handleInputChangex('customer_id', value);
+                  }
+                }}
+                label={t('CUSTOMER_NAME')}
+                className="w-1/2 flex-grow h-[40px]"
+                value={orderSchema?.customer_id}
+                disabled={params.id}
+              />
+
+              <IconInput
+                disabled
+                name="name"
+                className="w-1/2 flex-grow"
+                label={t('PHONE')}
+                iconSrc={callIcon}
+                value={formState.phone}
+                onChange={null}
+              />
+            </div>
+            {/* {!params.id && (
               <div className="flex items-end">
                 <Button
                   onClick={() => {
@@ -331,16 +352,7 @@ const CustomerForm = () => {
                   </div>
                 </Button>
               </div>
-            )}
-            <IconInput
-              disabled
-              name="name"
-              className="md:col-span-4 min-w-full flex-grow"
-              label={t('PHONE')}
-              iconSrc={callIcon}
-              value={formState.phone}
-              onChange={null}
-            />
+            )} */}
             <IconInput
               disabled
               name={formState.name}
@@ -349,22 +361,24 @@ const CustomerForm = () => {
               value={formState.address}
               onChange={null}
             />
-            <IconInput
-              disabled
-              className=" md:col-span-4 min-w-full flex-grow"
-              label={t('TAX_REGISTRATION_NUMBER')}
-              value={formState.tax_registration_number}
-              onChange={null}
-            />
-            <IconInput
-              disabled
-              className=" md:col-span-4 min-w-full flex-grow"
-              label={t('ANOTHER_ID')}
-              value={formState.vat_registration_number}
-              onChange={null}
-            />
+            <div className="flex gap-3 w-full">
+              <IconInput
+                disabled
+                className="w-1/2"
+                label={t('TAX_REGISTRATION_NUMBER')}
+                value={formState.tax_registration_number}
+                onChange={null}
+              />
+              <IconInput
+                disabled
+                className="w-1/2"
+                label={t('ANOTHER_ID')}
+                value={formState.vat_registration_number}
+                onChange={null}
+              />
+            </div>
 
-            <div className=" mt-5 w-full">
+            {/* <div className=" mt-5 w-full">
               <CheckboxWithText
                 label={t('ADD_TO_ZATCA')}
                 checked={formState.addToZatca}
@@ -383,7 +397,7 @@ const CustomerForm = () => {
               >
                 حفظ
               </Button>
-            </div>
+            </div> */}
           </div>
         )}
       <ShopCardSummery />
@@ -394,6 +408,6 @@ const CustomerForm = () => {
       />
     </div>
   );
-};
+});
 
 export default CustomerForm;

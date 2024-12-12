@@ -116,10 +116,10 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
       // });
 
       setAllUrl(
-        `orders?filter[type]=2&filter[status]=4&filter[customer.name]=${searchTerm}${date}`
+        `orders?filter[type]=2&filter[status]=4&search=${searchTerm}${date}`
       );
       const res = await axiosInstance.get(
-        `orders?filter[type]=2&filter[status]=4&filter[customer.name]=${searchTerm}${date}`
+        `orders?filter[type]=2&filter[status]=4&search=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });

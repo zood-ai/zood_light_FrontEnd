@@ -1,17 +1,21 @@
-import React from 'react'
+import React from 'react';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
   DialogHeader,
-} from '@/components/ui/dialog'
-import { z } from 'zod'
+} from '@/components/ui/dialog';
+import { z } from 'zod';
+import { ViewModal } from '@/components/custom/ViewModal';
+import { useDispatch } from 'react-redux';
+import { toggleActionView } from '@/store/slices/toggleAction';
+import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 
 interface SellerDetailsModalProps {
-  isOpen: boolean
-  onClose: () => void
-  initialData?: any
+  isOpen: boolean;
+  onClose: () => void;
+  initialData?: any;
 }
 
 export const DetailsModal: React.FC<SellerDetailsModalProps> = ({
@@ -19,43 +23,23 @@ export const DetailsModal: React.FC<SellerDetailsModalProps> = ({
   onClose,
   initialData = {},
 }) => {
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='max-w-2xl'>
-        <DialogHeader>
-          <DialogTitle>Details Data Modal</DialogTitle>
-          <DialogDescription>All the details Data below.</DialogDescription>
-        </DialogHeader>
-        <div className=''>
-          <div className='grid grid-cols-1 px-4 py-5 sm:p-6 md:grid-cols-2'>
-            <div className='mb-6 flex flex-col'>
-              <span className=' text-lg font-medium'>Cardholder Name</span>
-              <span className='text-lg font-medium text-muted-foreground'>
-                {initialData?.label}
-              </span>
-            </div>
-            <div className='mb-6 flex flex-col'>
-              <span className='text-lg font-medium'>Card Number</span>
-              <span className='text-lg font-medium text-muted-foreground'>
-                {initialData?.priority}
-              </span>
-            </div>
-            <div className='mb-6 flex flex-col'>
-              <span className=' text-lg font-medium'>Cardholder Name</span>
+  let dispatch = useDispatch();
 
-              <span className='text-lg font-medium text-muted-foreground '>
-                {initialData?.status}
-              </span>
-            </div>
-            <div className='mb-6 flex flex-col'>
-              <span className=' text-lg font-medium'>Cardholder Name</span>
-              <span className='a text-lg font-medium text-muted-foreground '>
-                {initialData?.title}
-              </span>
-            </div>
+  return (
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent className="max-w-[1107px] bg-transparent border-none border     ">
+        <div className="">
+          <div className="relative">
+            <ViewModal />
+            <img
+              onClick={onClose}
+              loading="lazy"
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/86098466758eefea48c424850dc7f8dc58fa0a42b1b3b43e6d08b5eb236f964e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
+              className="object-contain shrink-0 self-start mt-4 w-11 aspect-square absolute right-[-70px] no-print  top-0 cursor-pointer hover:scale-110"
+            />
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};

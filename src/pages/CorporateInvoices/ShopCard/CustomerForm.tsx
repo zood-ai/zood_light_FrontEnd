@@ -87,11 +87,11 @@ const CustomerForm = () => {
             const res = await axiosInstance.get(
               `/orders?filter[id]=${data.data.id}`
             );
-            setLoading(false);
             const orderData = res?.data?.data;
             navigate('/zood-dashboard/corporate-invoices');
             dispatch(toggleActionView(true));
             dispatch(toggleActionViewData(orderData[0]));
+            setLoading(false);
           },
           onError: () => setLoading(false),
         });
@@ -189,7 +189,7 @@ const CustomerForm = () => {
 
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-10 space-y-5">
-      <div className="w-full xl:w-[550px]">
+      <div className="w-full xl:w-[550px] max-w-full">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
           {orderSchema.products.map((item, index) => (
@@ -255,11 +255,10 @@ const CustomerForm = () => {
                 <IconInput
                   type="number"
                   disabled={item.product_id}
-                  value={Number(Number(item.unit_price).toFixed(2))}
+                  value={item.unit_price}
                   onChange={(e) =>
                     handleItemChange(index, 'unit_price', e.target.value)
                   }
-                  min={0}
                   label={t('PRICE')}
                   iconSrcLeft="SR"
                   inputClassName="flex-wrap md:w-[151px] sm:max-w-[151px] min-w-[80px]"

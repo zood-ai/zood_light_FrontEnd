@@ -107,11 +107,9 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
       //     ?.includes(searchTerm.toLowerCase());
       //   return referenceMatch || customerName;
       // });
-      setAllUrl(
-        `orders?filter[type]=1&filter[customer.name]=${searchTerm}${date}`
-      );
+      setAllUrl(`orders?filter[type]=1&search=${searchTerm}${date}`);
       const res = await axiosInstance.get(
-        `/orders?filter[type]=1&filter[customer.name]=${searchTerm}${date}`
+        `/orders?filter[type]=1&search=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });

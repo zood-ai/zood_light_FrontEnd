@@ -33,7 +33,7 @@ const IconInput: React.FC<any> = ({
             {label}
           </div>
         )}
-        <div className="relative flex items-end">
+        <div className="relative pt-1 flex items-end">
           <Input
             type={type}
             {...props}
@@ -41,7 +41,7 @@ const IconInput: React.FC<any> = ({
               width: width ? width : '100%',
             }}
             placeholder={placeholder}
-            className={`w-full text-mainText ${
+            className={`w-full h-[36px] text-mainText ${
               iconSrc && 'ps-10  w-full'
             } ${inputClassName}`}
           />
@@ -55,7 +55,7 @@ const IconInput: React.FC<any> = ({
                 right: !isRtl ? 'unset' : '10px',
               }}
               className={`object-contain  shrink-0 my-auto text-secText aspect-square w-[14px] absolute  ${
-                label ? 'top-[25%]' : 'top-[30%]'
+                label ? 'top-[35%]' : 'top-[40%]'
               }`}
             />
           )}
@@ -63,10 +63,10 @@ const IconInput: React.FC<any> = ({
           <div className="relative">
             {iconSrcLeft && (
               <div
-              style={{
-                left: !isRtl ? 'unset' : '10px',
-                right: !isRtl ? '10px' : 'unset',
-              }}
+                style={{
+                  left: !isRtl ? 'unset' : '10px',
+                  right: !isRtl ? '10px' : 'unset',
+                }}
                 className={`absolute inset-y-0 flex items-center text-gray-400 ${
                   label ? 'top-[-36px]' : 'top-[-36px]'
                 }`}

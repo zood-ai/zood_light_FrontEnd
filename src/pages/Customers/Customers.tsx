@@ -84,7 +84,7 @@ export const Customers: React.FC<CustomersProps> = () => {
         }
 
         const res = await axiosInstance.get(
-          `menu/categories?not_default=1${date}`
+          `manage/customers${date}`
         );
 
         setSearchedData(res.data);

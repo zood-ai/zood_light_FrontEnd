@@ -103,9 +103,9 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
       //     ?.includes(searchTerm.toLowerCase());
       //   return referenceMatch || customerName;
       // });
-      setAllUrl(`/orders?sort=-status&filter[customer.name]=${searchTerm}${date}`);
+      setAllUrl(`/orders?sort=-status&search=${searchTerm}${date}`);
       const res = await axiosInstance.get(
-        `/orders?sort=-status&filter[customer.name]=${searchTerm}${date}`
+        `/orders?sort=-status&search=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });

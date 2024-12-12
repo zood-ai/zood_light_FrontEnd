@@ -114,10 +114,10 @@ export const B2BInvoice: React.FC<B2BInvoiceProps> = () => {
       // });
 
       setAllUrl(
-        `orders?filter[type]=2&filter[status]=4&filter[customer.name]=${searchTerm}${date}`
+        `orders?filter[type]=2&filter[status]=4&search=${searchTerm}${date}`
       );
       const res = await axiosInstance.get(
-        `/orders?filter[type]=2&filter[status]=4&filter[customer.name]=${searchTerm}${date}`
+        `/orders?filter[type]=2&filter[status]=4&search=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });
@@ -162,6 +162,7 @@ export const B2BInvoice: React.FC<B2BInvoiceProps> = () => {
           actionBtn={handleCreateTask}
           filterBtn={filterBtn}
           meta={searchedData || {}}
+          dashBoard={true}
           actionText={'ADD_INVOICE'}
           loading={isLoading}
           handleSearch={handleSearch}

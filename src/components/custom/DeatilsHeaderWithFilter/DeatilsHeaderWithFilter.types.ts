@@ -1,3 +1,4 @@
 export type DeatilsHeaderWithFilterProps = {
-    bkAction?: any;
+  bkAction?: any;
+  setSearchInput?: any;
 };

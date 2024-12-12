@@ -329,7 +329,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                 ))}
               </div>
 
-              <div className="flex  my-md items-center  gap-x-2  ">
+              <div className="flex  my-md items-center  ">
                 <IconInput
                   type="number"
                   onChange={(e) => {
@@ -357,6 +357,45 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                     paymentMethodinit[paymentMethod.length - 1]
                   }
                 />
+                {payment !== 'fully' && (
+                  <div className="flex">
+                    <Button
+                      onClick={() => {
+                        if (
+                          !paymentMethod[paymentMethod.length - 1]
+                            .payment_method_id
+                        )
+                          return;
+                        if (!paymentMethod[paymentMethod.length - 1].amount)
+                          return;
+                        setPaymentMethod(() => {
+                          const holder = paymentMethod.map((el) => ({
+                            ...el,
+                            notadd: false,
+                          }));
+                          return [
+                            ...holder,
+                            {
+                              amount:
+                                totalAmountIncludeAndExclude - totalAmount,
+                              payment_method_id: '',
+                              tendered: 180,
+                              tips: 0,
+                              notadd: true,
+                              meta: {
+                                external_additional_payment_info: 'some info',
+                              },
+                            },
+                          ];
+                        });
+                      }}
+                      variant="link"
+                      className="mt-7  text-md"
+                    >
+                      {t('ADD')} <PlusIcon />
+                    </Button>
+                  </div>
+                )}
               </div>
             </>
             {/* ))} */}
@@ -407,42 +446,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                 </div>
               );
             })}
-            {payment !== 'fully' && (
-              <div className="flex">
-                <Button
-                  onClick={() => {
-                    if (
-                      !paymentMethod[paymentMethod.length - 1].payment_method_id
-                    )
-                      return;
-                    if (!paymentMethod[paymentMethod.length - 1].amount) return;
-                    setPaymentMethod(() => {
-                      const holder = paymentMethod?.map((el) => ({
-                        ...el,
-                        notadd: false,
-                      }));
-                      return [
-                        ...holder,
-                        {
-                          amount: 0,
-                          payment_method_id: '',
-                          tendered: 180,
-                          tips: 0,
-                          notadd: true,
-                          business_date: new Date().toISOString(),
-                          meta: 'well done',
-                          added_at: new Date().toISOString(),
-                        },
-                      ];
-                    });
-                  }}
-                  variant="link"
-                  className="mb-5  text-xl"
-                >
-                  <PlusIcon /> {t('ADD')}
-                </Button>
-              </div>
-            )}
           </div>
           <hr
             style={{

@@ -21,9 +21,10 @@ import { useTranslation } from 'react-i18next';
 export default function CustomSearchInbox({
   options,
   value,
+  directValue = null,
   onValueChange,
   placeholder = 'CHOOSE_A_CHOOSE',
-  label,  
+  label,
   className,
   disabled = false,
 }: any) {
@@ -60,10 +61,14 @@ export default function CustomSearchInbox({
             aria-expanded={open}
             className="w-full justify-between"
           >
-            {value
+            {directValue
+              ? directValue
+              : value
               ? options?.find((option) => option?.value === value)?.label
-              : t(placeholder)}
-            <ChevronsUpDown className="opacity-50" />
+              : placeholder
+              ? t(placeholder)
+              : ''}
+            <ChevronsUpDown className="opacity-50 ms-auto" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full flex-grow p-0">

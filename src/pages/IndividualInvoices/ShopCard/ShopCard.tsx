@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { ShopCardProps } from './ShopCard.types';
 import './ShopCard.css';
 import useDirection from '@/hooks/useDirection';
@@ -15,6 +15,8 @@ import ConfirmBk from '@/components/custom/ConfimBk';
 import { useNavigate, useParams } from 'react-router-dom';
 import { setCardItem } from '@/store/slices/cardItems';
 import CustomerForm from './CustomerForm';
+import { Button } from '@/components/custom/button';
+import { useTranslation } from 'react-i18next';
 
 export const ShopCard: React.FC<ShopCardProps> = () => {
   const isRtl = useDirection();
@@ -22,6 +24,9 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const [isOpen, setIsOpen] = useState(false);
   const params = useParams();
+  const { t } = useTranslation();
+  const ref = useRef<{ submitOrder: () => void }>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const totalCost = useMemo(
     () => cardItemValue?.reduce((acc, item) => acc + item.price * item.qty, 0),
@@ -52,21 +57,6 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
       dispatch(addProduct(products));
     }
   }, [cardItemValue, dispatch]);
-  // Load products to Redux on mount or cardItemValue update
-  // useEffect(() => {
-  //   if (params.id !== 'add' && cardItemValue.length > 0) {
-  //     const products = cardItemValue.map((item: any) => ({
-  //       product_id: item.id || '',
-  //       quantity: item.qty || 0,
-  //       unit_price: item.price || 0,
-  //       total_price: item.price * item.qty || 0,
-  //       discount_amount: 0,
-  //       discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
-  //       discount_type: 2,
-  //     }));
-  //     dispatch(addProduct(products));
-  //   }
-  // }, [cardItemValue, dispatch]);
 
   // Set default type on mount
   useEffect(() => {
@@ -152,16 +142,30 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
   }, [totalCost, taxAmount]);
 
   const handleBkAction = () => setIsOpen(true);
-
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
       <div className="flex gap-5 max-xl:flex-col">
         <div className="w-[55%] max-xl:w-full">
           <ShopCardTable />
+
+          <Button
+            dir="ltr"
+            loading={loading}
+            disabled={loading || (params.id ? true : false)}
+            onClick={() => {
+              if (ref.current) {
+                ref.current.submitOrder(); // Call the child's function
+              }
+              console.log(loading);
+            }}
+            className="w-[144px] mt-10"
+          >
+            {!params.id ? t('ADD_INVOICE') : t('SAVE')}
+          </Button>
         </div>
-        <div className="w-[45%] max-xl:w-full">
-          <CustomerForm />
+        <div className="w-[45%] max-xl:w-full xl:mt-[-70px]">
+          <CustomerForm setLoading={setLoading} loading={loading} ref={ref} />
         </div>
       </div>
 
