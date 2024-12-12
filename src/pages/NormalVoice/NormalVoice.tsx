@@ -86,9 +86,16 @@ export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce(async (searchTerm: string) => {
+    debounce(async (searchTerm: string, date: string) => {
       if (!searchTerm) {
-        setSearchedData(allData); // Reset if search is cleared
+        if (!date) {
+          setSearchedData(allData); // Reset if search is cleared
+          return;
+        }
+
+        const res = await axiosInstance.get(`/orders?filter[type]=1${date}`);
+
+        setSearchedData(res.data);
         return;
       }
 
@@ -102,9 +109,9 @@ export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
       //   return referenceMatch || customerName;
       // });
       
-      setAllUrl(`orders?filter[type]=1&filter[customer.name]=${searchTerm}`);
+      setAllUrl(`orders?filter[type]=1&filter[customer.name]=${searchTerm}${date}`);
       const res = await axiosInstance.get(
-        `/orders?filter[type]=1&filter[customer.name]=${searchTerm}`
+        `/orders?filter[type]=1&filter[customer.name]=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });
@@ -115,8 +122,8 @@ export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
     [allData]
   );
 
-  const handleSearch = (e: string) => {
-    handleDebounce(e);
+  const handleSearch = (e: string, date: string) => {
+    handleDebounce(e, date);
   };
   return (
     <>

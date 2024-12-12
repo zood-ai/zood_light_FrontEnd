@@ -78,9 +78,18 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce(async (searchTerm: string) => {
+    debounce(async (searchTerm: string, date: string) => {
       if (!searchTerm) {
-        setSearchedData(allData); // Reset if search is cleared
+        if (!date) {
+          setSearchedData(allData); // Reset if search is cleared
+          return;
+        }
+
+        const res = await axiosInstance.get(
+          `/inventory/purchasing${date}`
+        );
+
+        setSearchedData(res.data);
         return;
       }
 
@@ -95,9 +104,9 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
       // });
 
       // setSearchedData({ ...allData, data: holder });
-      setAllUrl(`inventory/purchasing&filter[supplier.name]=${searchTerm}`);
+      setAllUrl(`inventory/purchasing&filter[supplier.name]=${searchTerm}${date}`);
       const res = await axiosInstance.get(
-        `/inventory/purchasing&filter[supplier.name]=${searchTerm}`
+        `/inventory/purchasing&filter[supplier.name]=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });
@@ -106,8 +115,8 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
     [allData]
   );
 
-  const handleSearch = (e: string) => {
-    handleDebounce(e);
+  const handleSearch = (e: string, date: string) => {
+    handleDebounce(e, date);
   };
   return (
     <>

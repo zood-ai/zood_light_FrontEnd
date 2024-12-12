@@ -76,9 +76,18 @@ export const Customers: React.FC<CustomersProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce(async (searchTerm: string) => {
+    debounce(async (searchTerm: string, date: string) => {
       if (!searchTerm) {
-        setSearchedData(allData); // Reset if search is cleared
+        if (!date) {
+          setSearchedData(allData); // Reset if search is cleared
+          return;
+        }
+
+        const res = await axiosInstance.get(
+          `menu/categories?not_default=1${date}`
+        );
+
+        setSearchedData(res.data);
         return;
       }
 
@@ -88,9 +97,9 @@ export const Customers: React.FC<CustomersProps> = () => {
       //   return referenceMatch || customerMatch;
       // });
 
-      setAllUrl(`manage/customers?filter[name]=${searchTerm}`);
+      setAllUrl(`manage/customers?filter[name]=${searchTerm}${date}`);
       const res = await axiosInstance.get(
-        `manage/customers?filter[name]=${searchTerm}`
+        `manage/customers?filter[name]=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });
@@ -100,8 +109,8 @@ export const Customers: React.FC<CustomersProps> = () => {
     [allData]
   );
 
-  const handleSearch = (e: string) => {
-    handleDebounce(e);
+  const handleSearch = (e: string, date: string) => {
+    handleDebounce(e, date);
   };
   return (
     <>

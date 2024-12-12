@@ -79,9 +79,18 @@ export const Products: React.FC<ProductsProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce(async (searchTerm: string) => {
+    debounce(async (searchTerm: string, date: string) => {
       if (!searchTerm) {
-        setSearchedData(allData); // Reset if search is cleared
+        if (!date) {
+          setSearchedData(allData); // Reset if search is cleared
+          return;
+        }
+
+        const res = await axiosInstance.get(
+          `/menu/products?not_default=1&sort=-created_at${date}`
+        );
+
+        setSearchedData(res.data);
         return;
       }
 
@@ -91,10 +100,10 @@ export const Products: React.FC<ProductsProps> = () => {
       //   return referenceMatch || customerMatch;
       // });
       setAllUrl(
-        `menu/products?not_default=1&sort=-created_at&filter[name]=${searchTerm}`
+        `menu/products?not_default=1&sort=-created_at&filter[name]=${searchTerm}${date}`
       );
       const res = await axiosInstance.get(
-        `/menu/products?not_default=1&sort=-created_at&filter[name]=${searchTerm}`
+        `/menu/products?not_default=1&sort=-created_at&filter[name]=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });
@@ -104,8 +113,8 @@ export const Products: React.FC<ProductsProps> = () => {
     [allData]
   );
 
-  const handleSearch = (e: string) => {
-    handleDebounce(e);
+  const handleSearch = (e: string, date: string) => {
+    handleDebounce(e, date);
   };
   return (
     <>

@@ -79,9 +79,18 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce(async (searchTerm: string) => {
+    debounce(async (searchTerm: string, date: string) => {
       if (!searchTerm) {
-        setSearchedData(lastOrderData); // Reset if search is cleared
+        if (!date) {
+          setSearchedData(lastOrderData); // Reset if search is cleared
+          return;
+        }
+
+        const res = await axiosInstance.get(
+          `/orders?sort=-status${date}`
+        );
+
+        setSearchedData(res.data);
         return;
       }
 
@@ -94,9 +103,9 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
       //     ?.includes(searchTerm.toLowerCase());
       //   return referenceMatch || customerName;
       // });
-      setAllUrl(`/orders?sort=-status&filter[customer.name]=${searchTerm}`);
+      setAllUrl(`/orders?sort=-status&filter[customer.name]=${searchTerm}${date}`);
       const res = await axiosInstance.get(
-        `/orders?sort=-status&filter[customer.name]=${searchTerm}`
+        `/orders?sort=-status&filter[customer.name]=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });
@@ -107,8 +116,8 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
     [lastOrderData]
   );
 
-  const handleSearch = (e: string) => {
-    handleDebounce(e);
+  const handleSearch = (e: string, date: string) => {
+    handleDebounce(e, date);
   };
   return (
     <>

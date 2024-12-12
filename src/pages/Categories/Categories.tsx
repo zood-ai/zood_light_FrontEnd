@@ -79,9 +79,18 @@ export const Categories: React.FC<CategoriesProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce(async (searchTerm: string) => {
+    debounce(async (searchTerm: string, date: string) => {
       if (!searchTerm) {
-        setSearchedData(allData); // Reset if search is cleared
+        if (!date) {
+          setSearchedData(allData); // Reset if search is cleared
+          return;
+        }
+
+        const res = await axiosInstance.get(
+          `menu/categories?not_default=1${date}`
+        );
+
+        setSearchedData(res.data);
         return;
       }
 
@@ -90,11 +99,12 @@ export const Categories: React.FC<CategoriesProps> = () => {
       //   const customerMatch = item?.name?.includes(searchTerm);
       //   return referenceMatch || customerMatch;
       // });
-      setAllUrl(`menu/categories?not_default=1&filter[name]=${searchTerm}`);
-      const res = await axiosInstance.get(
-        `menu/categories?not_default=1&filter[name]=${searchTerm}`
+      setAllUrl(
+        `menu/categories?not_default=1&filter[name]=${searchTerm}${date}`
       );
-
+      const res = await axiosInstance.get(
+        `menu/categories?not_default=1&filter[name]=${searchTerm}${date}`
+      );
 
       // setSearchedData({ ...allData, data: holder });
       setSearchedData(res.data);
@@ -102,8 +112,8 @@ export const Categories: React.FC<CategoriesProps> = () => {
     [allData]
   );
 
-  const handleSearch = (e: string) => {
-    handleDebounce(e);
+  const handleSearch = (e: string, date: string) => {
+    handleDebounce(e, date);
   };
 
   return (

@@ -42,6 +42,7 @@ import { DatePicker } from 'antd';
 import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import useDirection from '@/hooks/useDirection';
+import axiosInstance from '@/api/interceptors';
 
 const { RangePicker } = DatePicker;
 
@@ -92,19 +93,33 @@ export function DataTable<TData, TValue>({
   });
   const { t } = useTranslation();
   const isRtl = useDirection();
-  const filteredData = React.useMemo(() => {
-    if (!fromDate || !endDate) return data;
-    const from = parseISO(fromDate);
-    const to = parseISO(endDate);
-    return data.filter((item: any) => {
-      const itemDate = parseISO(
-        item.business_date ? item.business_date.split(' ')[0] : item.created_at
-      );
-      return itemDate >= from && itemDate <= to;
-    });
-  }, [data, fromDate, endDate]);
+  React.useEffect(() => {
+    if(!fromDate || !endDate) return;
+    handleSearch('', `&business_date=${fromDate} - ${endDate}`);
+  }, [fromDate, endDate, handleSearch]);
+  // const filteredData = React.useMemo(async () => {
+  //   if (!fromDate || !endDate) return data;
+  //   const from = parseISO(fromDate);
+  //   const to = parseISO(endDate);
+
+  //   const lastUrl = allUrl.includes('?')
+  //     ? allUrl[allUrl.length - 1] === '?'
+  //       ? `${allUrl}business_date=${fromDate} - ${endDate}`
+  //       : `${allUrl}&business_date=${fromDate} - ${endDate}`
+  //     : `${allUrl}?business_date=${fromDate} - ${endDate}`;
+  //   const res = await axiosInstance.get(lastUrl);
+  //   console.log({ res, lastUrl });
+
+  //   return res.data;
+  //   // return data.filter((item: any) => {
+  //   //   const itemDate = parseISO(
+  //   //     item.business_date ? item.business_date.split(' ')[0] : item.created_at
+  //   //   );
+  //   //   return itemDate >= from && itemDate <= to;
+  //   // });
+  // }, [data, fromDate, endDate, allUrl]);
   const table = useReactTable({
-    data: filteredData,
+    data,
     columns,
     state: {
       pagination,
@@ -188,7 +203,7 @@ export function DataTable<TData, TValue>({
                     <IconInput
                       onChange={(e) => {
                         // e.preventDefault();
-                        handleSearch(e.target.value);
+                        handleSearch(e.target.value, '');
                       }}
                       inputClassName="h-[35px]"
                       placeholder={t('SEARCH_TABLE_PLACEHOLDER')}

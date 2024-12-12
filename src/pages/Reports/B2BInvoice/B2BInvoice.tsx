@@ -88,9 +88,18 @@ export const B2BInvoice: React.FC<B2BInvoiceProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce(async (searchTerm: string) => {
+    debounce(async (searchTerm: string, date: string) => {
       if (!searchTerm) {
-        setSearchedData(allData); // Reset if search is cleared
+        if (!date) {
+          setSearchedData(allData); // Reset if search is cleared
+          return;
+        }
+
+        const res = await axiosInstance.get(
+          `/orders?filter[type]=2&filter[status]=4${date}`
+        );
+
+        setSearchedData(res.data);
         return;
       }
 
@@ -105,10 +114,10 @@ export const B2BInvoice: React.FC<B2BInvoiceProps> = () => {
       // });
 
       setAllUrl(
-        `orders?filter[type]=2&filter[status]=4&filter[customer.name]=${searchTerm}`
+        `orders?filter[type]=2&filter[status]=4&filter[customer.name]=${searchTerm}${date}`
       );
       const res = await axiosInstance.get(
-        `/orders?filter[type]=2&filter[status]=4&filter[customer.name]=${searchTerm}`
+        `/orders?filter[type]=2&filter[status]=4&filter[customer.name]=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });
@@ -119,8 +128,8 @@ export const B2BInvoice: React.FC<B2BInvoiceProps> = () => {
     [allData]
   );
 
-  const handleSearch = (e: string) => {
-    handleDebounce(e);
+  const handleSearch = (e: string, date: string) => {
+    handleDebounce(e, date);
   };
 
   return (

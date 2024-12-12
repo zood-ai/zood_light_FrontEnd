@@ -69,7 +69,9 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const allService = createCrudService<any>('orders', {
     filter,
   });
-  const [allUrl, setAllUrl] = useState('orders?filter[type]=2&filter[status]=8');
+  const [allUrl, setAllUrl] = useState(
+    'orders?filter[type]=2&filter[status]=8'
+  );
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const [searchedData, setSearchedData] = useState({});
@@ -91,9 +93,18 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
     };
   };
   const handleDebounce = useCallback(
-    debounce(async (searchTerm: string) => {
+    debounce(async (searchTerm: string, date: string) => {
       if (!searchTerm) {
-        setSearchedData(allData); // Reset if search is cleared
+        if (!date) {
+          setSearchedData(allData); // Reset if search is cleared
+          return;
+        }
+
+        const res = await axiosInstance.get(
+          `/orders?filter[type]=2&filter[status]=8${date}`
+        );
+
+        setSearchedData(res.data);
         return;
       }
 
@@ -108,10 +119,10 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
       // });
 
       setAllUrl(
-        `orders?filter[type]=2&filter[status]=8&filter[customer.name]=${searchTerm}`
+        `orders?filter[type]=2&filter[status]=8&filter[customer.name]=${searchTerm}${date}`
       );
       const res = await axiosInstance.get(
-        `/orders?filter[type]=2&filter[status]=8&filter[customer.name]=${searchTerm}`
+        `/orders?filter[type]=2&filter[status]=8&filter[customer.name]=${searchTerm}${date}`
       );
 
       // setSearchedData({ ...allData, data: holder });
@@ -122,8 +133,8 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
     [allData]
   );
 
-  const handleSearch = (e: string) => {
-    handleDebounce(e);
+  const handleSearch = (e: string, date: string) => {
+    handleDebounce(e, date);
   };
   return (
     <>
