@@ -1,7 +1,7 @@
 import useDirection from '@/hooks/useDirection';
 import createCrudService from '@/api/services/crudService';
 import { useTranslation } from 'react-i18next';
-
+import {currencyFormated} from '../utils/currencyFormated';
 function DashSalesCard({ data }) {
   const isRtl = useDirection();
   const { t } = useTranslation();
@@ -31,7 +31,12 @@ function DashSalesCard({ data }) {
   const totalRevent = data?.sum_orders.reduce(
     (sum, item) => sum + item.value,
     0
-  );
+  );   
+  const newTotalDay = currencyFormated(Number(totalDay));
+  const newTotalWeek = currencyFormated(Number(totalWeek)); 
+  const newTotalMonth = currencyFormated(Number(totalMonth))
+  const newTotalRevent = currencyFormated(Number(totalRevent)); 
+  console.log(typeof +newTotalRevent)
   return (
     <>
       <div className={`flex flex-col rounded-none `}>
@@ -67,7 +72,7 @@ function DashSalesCard({ data }) {
                   isRtl ? 'text-left' : 'text-right'
                 }`}
               >
-                SR {totalRevent?.toFixed(2)}
+                   SR {newTotalRevent}
               </div>
             </div>
           </div>
@@ -88,7 +93,8 @@ function DashSalesCard({ data }) {
                   <div>{t('DAY')}</div>
                 </div>
                 <div className="font-semibold">
-                  SR {Number(totalDay)?.toFixed(2)}
+                  {/* SR {Number(totalDay)?.toFixed(2)} */}
+                SR {newTotalDay}
                 </div>
               </div>
               <div className="object-contain mt-5 w-full aspect-[333.33] bg-slate-200 " />
@@ -100,7 +106,8 @@ function DashSalesCard({ data }) {
                   <div>{t('WEEK')}</div>
                 </div>
                 <div className="font-semibold">
-                  SR {Number(totalWeek)?.toFixed(2)}
+                  {/* SR {Number(totalWeek)?.toFixed(2)} */}
+                 SR {newTotalWeek}
                 </div>
               </div>
               <div className="object-contain mt-5 w-full aspect-[333.33] bg-slate-200 " />
@@ -112,7 +119,8 @@ function DashSalesCard({ data }) {
                   <div>{t('MONTH')}</div>
                 </div>
                 <div className="font-semibold">
-                  SR {Number(totalMonth)?.toFixed(2)}
+                  {/* SR {Number(totalMonth)?.toFixed(2)} */}
+                   SR {newTotalMonth}
                 </div>
               </div>
               <div className="object-contain mt-5 w-full aspect-[333.33] bg-slate-200 " />
