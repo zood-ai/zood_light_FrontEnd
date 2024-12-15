@@ -7,6 +7,7 @@ import './ViewModal.css';
 import { useLocation } from 'react-router-dom';
 import { QRCodeComp } from '@/components/custom/QRCodeComp';
 import Loading from '@/components/loader';
+import { currencyFormated } from '@/utils/currencyFormated';
 
 export const ViewModal: React.FC<ViewModalProps> = () => {
   const data = useSelector((state: any) => state.toggleAction.data);
@@ -181,15 +182,18 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                               : e?.name}
                           </div>
                           <div className="flex-grow flex justify-center items-center">
-                            {e?.pivot?.quantity}
+                            {/* {e?.pivot?.quantity}  */}
+                            {currencyFormated(e?.pivot?.quantity)}
                           </div>
                           <div className="flex-grow flex justify-center items-center">
-                            {e?.pivot?.unit_price?.toFixed(2)}
+                            {/* {e?.pivot?.unit_price?.toFixed(2)} */} 
+                            {currencyFormated(e?.pivot?.unit_price)}
                           </div>
                           <div className="flex-grow flex justify-center items-center">
-                            {(
+                            {/* {(
                               e?.pivot?.quantity * e?.pivot?.unit_price
-                            )?.toFixed(2)}
+                            )?.toFixed(2)}  */}
+                            {currencyFormated(e?.pivot?.quantity * e?.pivot?.unit_price)}
                           </div>
                         </div>
                       ))}
@@ -217,7 +221,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {Data?.data?.subtotal_price ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>الإجمالي الفرعي</div>
-                          <div>SR {Data?.data?.subtotal_price?.toFixed(2)}</div>
+                          <div>SR {currencyFormated(Data?.data?.subtotal_price)}</div>
                         </div>
                       ) : null}
                       {Data?.data?.discount_amount ? (
@@ -231,19 +235,19 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       {Data?.data?.total_taxes ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>مجموع ضريبة القيمة المضافة</div>
-                          <div>SR {Data.data.total_taxes?.toFixed(2)}</div>
+                          <div>SR {currencyFormated(Data.data.total_taxes)}</div>
                         </div>
                       ) : null}
                       {Data?.data?.total_price ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>المبلغ الإجمالي</div>
-                          <div>SR {Data?.data?.total_price?.toFixed(2)}</div>
+                          <div>SR {currencyFormated(Data?.data?.total_price)}</div>
                         </div>
                       ) : null}
                       {Data?.data?.total_cost ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>المبلغ الإجمالي</div>
-                          <div>SR {Data?.data?.total_cost?.toFixed(2)}</div>
+                          <div>SR {currencyFormated(Data?.data?.total_cost)}</div>
                         </div>
                       ) : null}
                       {Data?.data?.payments?.map((e) => {
@@ -261,9 +265,9 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           <div>المبلغ الإجمالي المدفوع</div>
                           <div>
                             SR{' '}
-                            {Data?.data?.payments
-                              .reduce((sum, item) => sum + item?.amount, 0)
-                              ?.toFixed(2)}
+                            { currencyFormated(Data?.data?.payments
+                              .reduce((sum, item) => sum + item?.amount, 0))
+                              }
                           </div>
                         </div>
                       ) : null}
@@ -292,7 +296,8 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           <div>إجمالي المبلغ المتبقي</div>
                           <div>
                             SR{' '}
-                            {((Data?.data?.payments?.reduce(
+                            { 
+                            currencyFormated(((Data?.data?.payments?.reduce(
                               (sum, item) => sum + item.amount,
                               0
                             ) || 0) <= Data.data.total_price
@@ -302,8 +307,8 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                                     (sum, item) => sum + item.amount,
                                     0
                                   )
-                                )?.toFixed(2)
-                              : 0) || 0}
+                                )
+                              : 0))|| 0}
                           </div>
                         </div>
                       ) : null}
