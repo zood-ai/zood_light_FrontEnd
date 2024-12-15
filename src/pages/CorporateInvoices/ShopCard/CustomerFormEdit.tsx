@@ -23,7 +23,7 @@ import {
 } from '@/store/slices/toggleAction';
 import { TbMenuDeep } from 'react-icons/tb';
 import { GrMenu } from 'react-icons/gr';
-
+import {currencyFormated} from '../../../utils/currencyFormated'
 const CustomerFormEdit = () => {
   const { t } = useTranslation();
   const params = useParams();
@@ -108,7 +108,8 @@ const CustomerFormEdit = () => {
 
   const changeToTextArea = () => {
     setIsTextArea(!isTextArea);
-  };
+  }; 
+ // const n = item?.pivot?.unit_price * item?.pivot?.quantity || 0;
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
       <div className=" w-full xl:w-[550px] max-w-full">
@@ -170,13 +171,16 @@ const CustomerFormEdit = () => {
               <div className="flex gap-x-md">
                 <IconInput
                   disabled
-                  value={item?.pivot?.quantity}
+           //       value={item?.pivot?.quantity}
+                  value={currencyFormated(item?.pivot?.quantity)}
+                  
                   label={t('QUANTITY')}
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
-                />
+                  />
                 <IconInput
                   disabled
-                  value={item?.pivot?.unit_price || 0}
+                   value={currencyFormated(item?.pivot?.unit_price||0)}
+                  // value={item?.pivot?.unit_price || 0}
                   label={t('PRICE')}
                   iconSrcLeft="SR"
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
@@ -185,7 +189,8 @@ const CustomerFormEdit = () => {
                   label={t('TOTAL')}
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                   iconSrcLeft="SR"
-                  value={item?.pivot?.unit_price * item?.pivot?.quantity || 0}
+                  // value={item?.pivot?.unit_price * item?.pivot?.quantity || 0}
+                  value={currencyFormated(item?.pivot?.unit_price * item?.pivot?.quantity || 0)}
                   disabled
                 />
               </div>
