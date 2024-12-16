@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-table-column-header';
 import { formatDateTime } from '@/utils/formatDateTime';
 import { StatusBadge } from '@/components/custom/StatusBadge';
-
+import {currencyFormated} from "@/utils/currencyFormated"
 export const useOrderDataTableColumns = () => {
   const { t } = useTranslation();
 
@@ -44,7 +44,7 @@ export const useOrderDataTableColumns = () => {
       ),
       cell: ({ row }) => (
         <span className="font-medium">
-          {row.getValue('total_price').toFixed(2)}
+          {currencyFormated(row.getValue('total_price'))}
         </span>
       ),
     },

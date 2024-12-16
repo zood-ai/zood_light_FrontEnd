@@ -107,6 +107,8 @@
   "YOU_HAVE_UNSAVED_CHANGES_IF_DELETE": "لديك تغييرات غير محفوظة. إذا حذفت",
   "NOW_YOU_WILL_LOSE_THEM": "الآن، فسوف تفقد تغييراتك",
   "YES_DELETE": "نعم, اريد ان احذف!",
+  "Inactive": "غير نشط",
+  "Active": "نشط",
 
   "INDIVIDUAL_INVOICE": "فاتورة افراد",
   "CORPORATE_INVOICE": "فاتورة المؤسسة",
