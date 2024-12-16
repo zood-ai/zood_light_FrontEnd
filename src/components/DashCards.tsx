@@ -1,5 +1,7 @@
 import { DashHoverIcon } from './Icons/DashHoverIcon.tsx';
 import { useTranslation } from 'react-i18next';
+import {currencyFormated} from '../utils/currencyFormated';
+
 function DashCards({ data, activeFilter, setActiveFilter }) {
   const { t } = useTranslation();
   const handleFilterClick = (filter) => {
@@ -45,7 +47,8 @@ function DashCards({ data, activeFilter, setActiveFilter }) {
                 {t('INVOICES')}
               </div>
               <div className="mt-2 text-3xl font-semibold">
-                {data?.count_orders}
+                {/* {data?.count_orders} */}
+                {currencyFormated(data?.count_orders)}
               </div>
             </div>
             <DashHoverIcon />
@@ -58,7 +61,8 @@ function DashCards({ data, activeFilter, setActiveFilter }) {
                 {t('PURCHASES')}
               </div>
               <div className="mt-2 text-3xl font-semibold">
-                {data?.count_purchases}
+                {/* {data?.count_purchases}  */}
+                {currencyFormated(data?.count_purchases)}
               </div>
             </div>
             <DashHoverIcon />

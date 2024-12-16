@@ -15,6 +15,7 @@ import {
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
 import axiosInstance from '@/api/interceptors';
+import {currencyFormated} from '../../../utils/currencyFormated'
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
@@ -63,7 +64,7 @@ export const useDataTableColumns = () => {
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('total_price').toFixed(2) || '-'}
+              {currencyFormated(row.getValue('total_price')) || '-'}
             </span>
           </div>
         );

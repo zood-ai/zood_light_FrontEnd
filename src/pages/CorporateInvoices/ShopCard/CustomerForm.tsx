@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
 import { useToast } from '@/components/custom/useToastComp';
 import { useTranslation } from 'react-i18next';
+import {currencyFormated} from '../../../utils/currencyFormated'
 
 import {
   toggleActionView,
@@ -253,11 +254,17 @@ const CustomerForm = () => {
                   inputClassName="flex-wrap md:w-[151px] sm:max-w-[151px] min-w-[80px]"
                 />
                 <IconInput
-                  type="number"
+                  type="text"
                   disabled={item.product_id}
-                  value={item.unit_price}
-                  onChange={(e) =>
-                    handleItemChange(index, 'unit_price', e.target.value)
+                   // value={item.unit_price}
+                  value={currencyFormated(item.unit_price)||0}
+                  onChange={(e) =>{ 
+                    const rawValue = e.target.value.replace(/,/g, '');
+                    const numericValue = parseFloat(rawValue) || 0;
+                    console.log("numricValue: ",numericValue);
+                    console.log("TYPEOF numricValue: ",typeof numericValue);
+                    handleItemChange(index, 'unit_price', numericValue);
+                  }
                   }
                   label={t('PRICE')}
                   iconSrcLeft="SR"
@@ -267,7 +274,7 @@ const CustomerForm = () => {
                   label={t('TOTAL')}
                   inputClassName="flex-wrap md:w-[151px] sm:max-w-[151px] min-w-[80px]"
                   iconSrcLeft="SR"
-                  value={item.unit_price * item.quantity || 0}
+                  value={currencyFormated(item.unit_price * item.quantity || 0)}
                   disabled
                 />
                 {!params.id && orderSchema.products.length > 1 && (
