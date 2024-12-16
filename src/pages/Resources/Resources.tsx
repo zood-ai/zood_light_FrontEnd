@@ -83,9 +83,9 @@ export const Resources: React.FC<ResourcesProps> = () => {
           return;
         }
         setAllUrl(
-          `inventory/purchasing${date}`
+          `inventory/purchasing?${date}`
         );
-        const res = await axiosInstance.get(`/inventory/purchasing${date}`);
+        const res = await axiosInstance.get(`/inventory/purchasing?${date}`);
 
         setSearchedData(res.data);
         return;

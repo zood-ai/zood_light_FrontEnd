@@ -72,6 +72,7 @@ function DashSalesCard({ data }) {
                   isRtl ? 'text-left' : 'text-right'
                 }`}
               >
+                {/* SR {totalRevent?.toFixed(2)} */}
                    SR {newTotalRevent}
               </div>
             </div>

@@ -7,7 +7,7 @@ interface FileUploadProps {
 
 const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect }) => {
   return (
-    <section className="flex flex-col text-sm font-medium text-right text-indigo-900 rounded-none max-w-[499px]">
+    <section className="flex flex-col text-sm font-medium text-right text-indigo-900 rounded-none max-w-full">
       <UploadArea onFileSelect={onFileSelect} />
     </section>
   );
