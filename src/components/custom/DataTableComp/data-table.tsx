@@ -125,7 +125,6 @@ export function DataTable<TData, TValue>({
   //       : `${allUrl}&business_date=${fromDate} - ${endDate}`
   //     : `${allUrl}?business_date=${fromDate} - ${endDate}`;
   //   const res = await axiosInstance.get(lastUrl);
-  //   console.log({ res, lastUrl });
 
   //   return res.data;
   //   // return data.filter((item: any) => {

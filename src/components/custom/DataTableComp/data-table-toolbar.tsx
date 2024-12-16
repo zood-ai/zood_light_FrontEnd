@@ -62,7 +62,6 @@ export function DataTableToolbar<TData>({
         : `${holder}&is_exporting_excel=1`
       : `${holder}?is_exporting_excel=1`;
     const res = await axiosInstance.get(lastUrl);
-    console.log(lastUrl);
     const a = Object.assign(document.createElement('a'), {
       href: res.data,
       download: 'file.xlsx',

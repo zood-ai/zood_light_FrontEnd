@@ -93,7 +93,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       );
     }
   }, [allDataId]);
-  console.log({ allDataId, items });
   const { openDialog } = useGlobalDialog();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,7 +197,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const setSuppId = (value: string) => {
     setInvoice({ ...invoice, supplier_id: value });
   };
-  console.log({ items, getAllPro });
 
   // Ensure DetailsHeadWithOutFilter is rendered correctly
   return (

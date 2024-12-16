@@ -13,35 +13,22 @@ interface ViewModalAttribute {
 }
 export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) => {
   const data = useSelector((state: any) => state.toggleAction.data);
+  const allSettings = useSelector((state: any) => state.allSettings.value);
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
-  const { data: settings } =
-    createCrudService<any>('manage/settings').useGetAll();
-  const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
-
-  const { data: customerInfo } = createCrudService<any>(
-    'manage/customers'
-  ).useGetById(`${data?.customer?.id || data?.get_supplier?.id}`);
-  const { data: supplierInfo } = createCrudService<any>(
-    `inventory/suppliers`
-  ).useGetById(`${data?.get_supplier?.id}`);
-  const { data: OrderData } = createCrudService<any>('orders').useGetById(
-    `${data?.id}`
-  );
-  const { data: purchsingInfo } = createCrudService<any>(
-    'inventory/purchasing'
-  ).useGetById(`${data?.id}`); 
-  
- 
+  // const { data: settings } =
+  //   createCrudService<any>('manage/settings').useGetAll();
+  // const { data: allSettings.WhoAmI } = createCrudService<any>('auth/allSettings.whoami').useGetAll();
+  const customerInfo = { data: data.customer };
+  const supplierInfo = { data: data?.supplier };
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
   const Simple = pathname === '/zood-dashboard/corporate-invoices';
   const PriceQuote = pathname === '/zood-dashboard/price-quote';
   const Another = !Corporate;
-  const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
-  // const ShowCar = true;
-  const Data = OrderData ? { ...OrderData } : { ...purchsingInfo };
-  console.log({Data})
+  const ShowCar =
+    allSettings.WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  const Data = { data };
   const [size, setSize] = useState('A4');
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);
@@ -72,28 +59,30 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                 {size === 'A4' ? (
                   <div className="flex print-content flex-col px-3 pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg  text-zinc-800 max-md:mt-10 max-md:max-w-full">
                     <p className="text-center mb-2">
-                      {settings?.data?.receipt_header}
+                      {allSettings.settings?.data?.receipt_header}
                     </p>
                     <div className="w-full flex justify-between items-center mb-4">
                       <div>
                         <div className="flex items-center gap-5">
                           <img
                             className="size-[80px]"
-                            src={`${settings?.data?.business_logo}`}
+                            src={`${allSettings.settings?.data?.business_logo}`}
                             alt="Logo"
                           />
                           <p className="font-semibold text-2xl">
-                            {WhoAmI?.business?.name}
+                            {allSettings.WhoAmI?.business?.name}
                           </p>
                         </div>
                         <p className="mt-4 w-[277px] leading-[30.18px]">
-                          {WhoAmI?.user?.branches[0]?.registered_address &&
+                          {allSettings.WhoAmI?.user?.branches[0]
+                            ?.registered_address &&
                             JSON.parse(
-                              WhoAmI?.user?.branches[0]?.registered_address
+                              allSettings.WhoAmI?.user?.branches[0]
+                                ?.registered_address
                             )?.streetName}
                         </p>
                       </div>
-                      <QRCodeComp settings={settings} Data={Data} />
+                      <QRCodeComp settings={allSettings.settings} Data={Data} />
                     </div>
                     <div className="self-center ml-4 font-semibold text-right"> 
                   {title}
@@ -191,14 +180,16 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                             {currencyFormated(e?.pivot?.quantity)}
                           </div>
                           <div className="flex-grow flex justify-center items-center">
-                            {/* {e?.pivot?.unit_price?.toFixed(2)} */} 
+                            {/* {e?.pivot?.unit_price?.toFixed(2)} */}
                             {currencyFormated(e?.pivot?.unit_price)}
                           </div>
                           <div className="flex-grow flex justify-center items-center">
                             {/* {(
                               e?.pivot?.quantity * e?.pivot?.unit_price
                             )?.toFixed(2)}  */}
-                            {currencyFormated(e?.pivot?.quantity * e?.pivot?.unit_price)}
+                            {currencyFormated(
+                              e?.pivot?.quantity * e?.pivot?.unit_price
+                            )}
                           </div>
                         </div>
                       ))}
@@ -216,7 +207,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                             {currencyFormated(e?.pivot?.cost)}
                           </div>
                           <div className="w-1/3 flex justify-center items-center">
-                            {currencyFormated(e?.pivot?.quantity * e?.pivot?.cost)}
+                            {currencyFormated(
+                              e?.pivot?.quantity * e?.pivot?.cost
+                            )}
                           </div>
                         </div>
                       ))}
@@ -226,7 +219,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                       {Data?.data?.subtotal_price ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>الإجمالي الفرعي</div>
-                          <div>SR {currencyFormated(Data?.data?.subtotal_price)}</div>
+                          <div>
+                            SR {currencyFormated(Data?.data?.subtotal_price)}
+                          </div>
                         </div>
                       ) : null}
                       {Data?.data?.discount_amount ? (
@@ -240,19 +235,25 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                       {Data?.data?.total_taxes ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>مجموع ضريبة القيمة المضافة</div>
-                          <div>SR {currencyFormated(Data.data.total_taxes)}</div>
+                          <div>
+                            SR {currencyFormated(Data.data.total_taxes)}
+                          </div>
                         </div>
                       ) : null}
                       {Data?.data?.total_price ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>المبلغ الإجمالي</div>
-                          <div>SR {currencyFormated(Data?.data?.total_price)}</div>
+                          <div>
+                            SR {currencyFormated(Data?.data?.total_price)}
+                          </div>
                         </div>
                       ) : null}
                       {Data?.data?.total_cost ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>المبلغ الإجمالي</div>
-                          <div>SR {currencyFormated(Data?.data?.total_cost)}</div>
+                          <div>
+                            SR {currencyFormated(Data?.data?.total_cost)}
+                          </div>
                         </div>
                       ) : null}
                       {Data?.data?.payments?.map((e) => {
@@ -270,9 +271,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                           <div>المبلغ الإجمالي المدفوع</div>
                           <div>
                             SR{' '}
-                            { currencyFormated(Data?.data?.payments
-                              .reduce((sum, item) => sum + item?.amount, 0))
-                              }
+                            {currencyFormated(
+                              Data?.data?.payments.reduce(
+                                (sum, item) => sum + item?.amount,
+                                0
+                              )
+                            )}
                           </div>
                         </div>
                       ) : null}
@@ -301,19 +305,18 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                           <div>إجمالي المبلغ المتبقي</div>
                           <div>
                             SR{' '}
-                            { 
-                             (((Data?.data?.payments?.reduce(
+                            {((Data?.data?.payments?.reduce(
                               (sum, item) => sum + item.amount,
                               0
                             ) || 0) <= Data.data.total_price
-                              ? (
-                                  currencyFormated(Data.data.total_price -
-                                  Data?.data?.payments?.reduce(
-                                    (sum, item) => sum + item.amount,
-                                    0
-                                  ))
+                              ? currencyFormated(
+                                  Data.data.total_price -
+                                    Data?.data?.payments?.reduce(
+                                      (sum, item) => sum + item.amount,
+                                      0
+                                    )
                                 )
-                              : 0))|| 0}
+                              : 0) || 0}
                           </div>
                         </div>
                       ) : null}
@@ -344,29 +347,31 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                       </div>
                     ) : null}
                     <p className="text-center">
-                      {settings?.data?.receipt_footer}
+                      {allSettings.settings?.data?.receipt_footer}
                     </p>
                   </div>
                 ) : (
                   <div className="flex print-content2 flex-col w-[390px]  mx-auto text-righ text-sm p-1 px-10">
                     {/* الشعار */}
                     <p className="text-center mb-2">
-                      {settings?.data?.receipt_header}
+                      {allSettings.settings?.data?.receipt_header}
                     </p>
                     <img
                       className="mx-auto size-[80px]"
-                      src={`${settings?.data?.business_logo}`}
+                      src={`${allSettings.settings?.data?.business_logo}`}
                       alt="Logo"
                     />
                     <p className="font-semibold text-sm text-center pt-2 pb-5">
-                      {WhoAmI?.business?.name}
+                      {allSettings.WhoAmI?.business?.name}
                     </p>
 
                     {/* معلومات الشركة */}
                     <div className="text-center text-sm leading-6 mb-4">
-                      {WhoAmI?.user?.branches[0]?.registered_address &&
+                      {allSettings.WhoAmI?.user?.branches[0]
+                        ?.registered_address &&
                         JSON.parse(
-                          WhoAmI?.user?.branches[0]?.registered_address
+                          allSettings.WhoAmI?.user?.branches[0]
+                            ?.registered_address
                         )?.streetName}
                     </div>
 
@@ -460,16 +465,20 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                                 : product?.name}
                             </div>
                             <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
-                              <p>{ currencyFormated( product?.pivot?.quantity)}</p>
+                              <p>
+                                {currencyFormated(product?.pivot?.quantity)}
+                              </p>
                             </div>
                             <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
-                              <p>{ currencyFormated( product?.pivot?.unit_price)}</p>
+                              <p>
+                                {currencyFormated(product?.pivot?.unit_price)}
+                              </p>
                             </div>
                             <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
                               <p>
                                 {currencyFormated(
                                   product?.pivot?.quantity *
-                                  product?.pivot?.unit_price
+                                    product?.pivot?.unit_price
                                 )}
                               </p>
                             </div>
@@ -489,7 +498,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                                 : product?.name}
                             </div>
                             <div className="flex-grow items-center flex justify-center text-[12px]">
-                              <p>{currencyFormated(product?.pivot?.quantity)}</p>
+                              <p>
+                                {currencyFormated(product?.pivot?.quantity)}
+                              </p>
                             </div>
                             <div className="flex-grow items-center flex justify-center text-[12px]">
                               <p>{currencyFormated(product?.pivot?.cost)}</p>
@@ -498,7 +509,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                               <p>
                                 {currencyFormated(
                                   product?.pivot?.quantity *
-                                  product?.pivot?.cost
+                                    product?.pivot?.cost
                                 )}
                               </p>
                             </div>
@@ -514,7 +525,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                         {Data?.data?.subtotal_price ? (
                           <div className="flex justify-between items-center">
                             <p className="w-[50%]">الإجمالي الفرعي</p>
-                            <p>SR {currencyFormated(Data?.data?.subtotal_price)}</p>
+                            <p>
+                              SR {currencyFormated(Data?.data?.subtotal_price)}
+                            </p>
                           </div>
                         ) : null}
                         {Data?.data?.total_cost ? (
@@ -526,13 +539,17 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                         {Data?.data?.discount_amount ? (
                           <div className="flex justify-between items-center">
                             <div>خصم</div>
-                            <p>SR {currencyFormated(Data?.data?.discount_amount)}</p>
+                            <p>
+                              SR {currencyFormated(Data?.data?.discount_amount)}
+                            </p>
                           </div>
                         ) : null}
                         {Data?.data?.total_taxes ? (
                           <div className="flex justify-between items-center">
                             <p>مجموع ضريبة القيمة المضافة</p>
-                            <p>SR {currencyFormated(Data?.data?.total_taxes)}</p>
+                            <p>
+                              SR {currencyFormated(Data?.data?.total_taxes)}
+                            </p>
                           </div>
                         ) : null}
                       </div>
@@ -542,7 +559,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                         {Data?.data?.total_price ? (
                           <div className="flex justify-between items-center">
                             <p>المبلغ الإجمالي</p>
-                            <p>SR {currencyFormated(Data?.data?.total_price)}</p>
+                            <p>
+                              SR {currencyFormated(Data?.data?.total_price)}
+                            </p>
                           </div>
                         ) : null}
                         {Data?.data?.payments?.length > 0 ? (
@@ -550,10 +569,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                             <p>المبلغ الإجمالي المدفوع</p>
                             <p>
                               SR{' '}
-                              {
-                              currencyFormated(Data?.data?.payments
-                                .reduce((sum, item) => sum + item?.amount, 0))
-                              }
+                              {currencyFormated(
+                                Data?.data?.payments.reduce(
+                                  (sum, item) => sum + item?.amount,
+                                  0
+                                )
+                              )}
                             </p>
                           </div>
                         ) : null}
@@ -590,10 +611,10 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                             ) <= Data?.data?.total_price
                               ? currencyFormated(
                                   Data?.data?.total_price -
-                                  Data?.data?.payments?.reduce(
-                                    (sum, item) => sum + item?.amount,
-                                    0
-                                  )
+                                    Data?.data?.payments?.reduce(
+                                      (sum, item) => sum + item?.amount,
+                                      0
+                                    )
                                 )
                               : 0) || 0}
                           </div>
@@ -615,10 +636,13 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                         className="w-[381px] h-[57px]"
                       />
                       <div className="  my-4 flex justify-center">
-                        <QRCodeComp settings={settings} Data={Data} />
+                        <QRCodeComp
+                          settings={allSettings.settings}
+                          Data={Data}
+                        />
                       </div>
                       <p className="text-center mt-2">
-                        {settings?.data?.receipt_footer}
+                        {allSettings.settings?.data?.receipt_footer}
                       </p>
                       <div className="w-1 h-1"></div>
                     </div>

@@ -36,7 +36,6 @@ function DashSalesCard({ data }) {
   const newTotalWeek = currencyFormated(Number(totalWeek)); 
   const newTotalMonth = currencyFormated(Number(totalMonth))
   const newTotalRevent = currencyFormated(Number(totalRevent)); 
-  console.log(typeof +newTotalRevent)
   return (
     <>
       <div className={`flex flex-col rounded-none `}>

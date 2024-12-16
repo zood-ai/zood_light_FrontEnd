@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import createCrudService from '@/api/services/crudService';
+import { useDispatch } from 'react-redux';
 import { Button } from '@/components/custom/button';
 import { Input } from '@/components/ui/input';
-import axiosInstance from '@/api/interceptors';
-import { set } from 'zod';
 import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
 import Cookies from 'js-cookie';
 import { useTranslation } from 'react-i18next';
+import { setSettings } from '@/store/slices/allSettings';
 
 export default function Settings() {
+  const dispatch = useDispatch();
   const userId = Cookies.get('userId');
   const [selectedFileName, setSelectedFileName] = useState('');
   const { data: settings } =
@@ -24,6 +25,16 @@ export default function Settings() {
     createCrudService<any>('manage/taxes').useUpdateNoDialog();
   const { mutate: updateBranch } =
     createCrudService<any>('manage/branches').useUpdate();
+
+  useEffect(() => {
+    dispatch(
+      setSettings({
+        settings: settings,
+        WhoAmI: whoami,
+      })
+    );
+  }, [settings, whoami]);
+
   const { mutate: updateBusiness } = createCrudService<any>(
     `auth/users/${userId}`
   ).useUpdate();
@@ -93,10 +104,10 @@ export default function Settings() {
       data: { tax_inclusive_pricing: updatedTaxInclusivePricing },
     });
   };
-  const updateTexes = () => {
+  const updateTexes = async () => {
     if (!taxesData) return;
     if (taxesData.rate === taxesValue) return;
-    updateTax({
+    await updateTax({
       id: taxesData.id,
       data: {
         name: `vat ${taxesValue}%`,
@@ -105,70 +116,6 @@ export default function Settings() {
         name_localized: `vat ${taxesValue}%`,
       },
     });
-  };
-  const updateTop = async () => {
-    updateSettings({
-      id: '',
-      data: {
-        business_name: updateAll.business_name,
-        business_tax_number: updateAll.business_tax_number,
-      },
-    });
-    if (updateAll.business_type !== whoami?.business?.type) {
-      updateBusiness({
-        id: '',
-        data: { business_type_id: updateAll.business_type },
-      });
-    }
-
-    updateBranch({
-      id: brancheId,
-      data: {
-        registered_address: JSON.stringify({
-          ...holder,
-          streetName: updateAll.streetName,
-          postalCode: updateAll.postalCode,
-          additionalNumber: updateAll.additionalNumber,
-          buildingNumber: updateAll.buildingNumber,
-          commercialRegesterationNumber:
-            updateAll.commercialRegesterationNumber,
-        }),
-      },
-    });
-    holder = {
-      ...holder,
-      streetName: updateAll.streetName,
-      postalCode: updateAll.postalCode,
-      additionalNumber: updateAll.additionalNumber,
-      buildingNumber: updateAll.buildingNumber,
-      commercialRegesterationNumber: updateAll.commercialRegesterationNumber,
-    };
-  };
-  const updateBottom = async () => {
-    updateSettings({
-      id: '',
-      data: {
-        country: updateAll.country,
-      },
-    });
-    updateBranch({
-      id: brancheId,
-      data: {
-        phone: updateAll.phone,
-        registered_address: JSON.stringify({
-          ...holder,
-          city: updateAll.city,
-          citySubdivisionName: updateAll.citySubdivisionName,
-          district: updateAll.district,
-        }),
-      },
-    });
-    holder = {
-      ...holder,
-      city: updateAll.city,
-      citySubdivisionName: updateAll.citySubdivisionName,
-      district: updateAll.district,
-    };
   };
   const updateBoth = async () => {
     updateSettings({
@@ -185,7 +132,7 @@ export default function Settings() {
         data: { business_type_id: updateAll.business_type },
       });
     }
-    updateBranch({
+    await updateBranch({
       id: brancheId,
       data: {
         phone: updateAll.phone,
@@ -214,7 +161,7 @@ export default function Settings() {
     };
   };
   const updateReceipt = async () => {
-    updateSettings({
+    await updateSettings({
       id: '',
       data: {
         receipt_header: updateAll.receipt_header,
@@ -224,15 +171,18 @@ export default function Settings() {
   };
 
   useEffect(() => {
-    if (!fileBase64) return;
-    setUpdateAll((prev) => ({
-      ...prev,
-      business_logo: fileBase64,
-    }));
-    updateSettings({
-      id: '',
-      data: { business_logo: fileBase64 },
-    });
+    const fun = async () => {
+      if (!fileBase64) return;
+      setUpdateAll((prev) => ({
+        ...prev,
+        business_logo: fileBase64,
+      }));
+      await updateSettings({
+        id: '',
+        data: { business_logo: fileBase64 },
+      });
+    };
+    fun();
   }, [fileBase64, updateSettings]);
   const { t } = useTranslation();
 

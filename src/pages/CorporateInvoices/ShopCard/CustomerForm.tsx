@@ -102,7 +102,6 @@ const CustomerForm = () => {
       console.error('Failed to submit order', error);
     }
   };
-  console.log({ loading });
 
   const updateCardItem = (newItem: {
     product_id?: string;
@@ -126,7 +125,7 @@ const CustomerForm = () => {
   const handleItemChange = async (
     index: number,
     field: string,
-    value: string
+    value: any
   ) => {
     // if (params.id) return;
     if (field === 'product_id') {
@@ -261,8 +260,6 @@ const CustomerForm = () => {
                   onChange={(e) =>{ 
                     const rawValue = e.target.value.replace(/,/g, '');
                     const numericValue = parseFloat(rawValue) || 0;
-                    console.log("numricValue: ",numericValue);
-                    console.log("TYPEOF numricValue: ",typeof numericValue);
                     handleItemChange(index, 'unit_price', numericValue);
                   }
                   }
