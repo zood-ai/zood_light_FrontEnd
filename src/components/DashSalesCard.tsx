@@ -32,6 +32,7 @@ function DashSalesCard({ data }) {
     (sum, item) => sum + item.value,
     0
   );
+  const newTotalRevent = new Intl.NumberFormat('en-GB').format(totalRevent);
   return (
     <>
       <div className={`flex flex-col rounded-none `}>
@@ -67,7 +68,8 @@ function DashSalesCard({ data }) {
                   isRtl ? 'text-left' : 'text-right'
                 }`}
               >
-                SR {totalRevent?.toFixed(2)}
+                {/* SR {totalRevent?.toFixed(2)} */}
+                SR {newTotalRevent}
               </div>
             </div>
           </div>

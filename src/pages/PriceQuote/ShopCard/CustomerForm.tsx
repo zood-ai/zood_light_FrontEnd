@@ -23,7 +23,7 @@ const CustomerForm = () => {
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
   const { useGetAll: fetchAllProducts } = createCrudService<any>(
-    'menu/products?not_default=1'
+    'menu/products?not_default=1&per_page=1000'
   );
   const { data: defaultProduct } = createCrudService<any>(
     'menu/products?filter[name]=sku-zood-20001'

@@ -106,7 +106,7 @@ const CustomerForms = () => {
   }, [orderSchema?.customer_id]);
 
   const { useGetAll: useGetAllPro } = createCrudService<any>(
-    'menu/products?not_default=1'
+    'menu/products?not_default=1&per_page=1000'
   );
 
   return (

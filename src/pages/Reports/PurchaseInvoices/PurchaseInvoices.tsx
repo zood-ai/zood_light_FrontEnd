@@ -82,9 +82,9 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
           return;
         }
         setAllUrl(
-          `inventory/purchasing${date}`
+          `inventory/purchasing?${date}`
         );
-        const res = await axiosInstance.get(`/inventory/purchasing${date}`);
+        const res = await axiosInstance.get(`/inventory/purchasing?${date}`);
 
         setSearchedData(res.data);
         return;

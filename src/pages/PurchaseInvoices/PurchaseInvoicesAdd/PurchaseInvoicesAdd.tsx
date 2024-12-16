@@ -33,11 +33,13 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   });
   const [items, setItems] = useState([
     {
-      qty: '',
-      total: '',
+      qty: 1,
+      total: 0,
       item: '',
       itemDescription: '',
       name: '',
+      id: '',
+      price: 0,
     },
   ]);
   const [fileBase64, setFileBase64] = useState<any>('');
@@ -54,7 +56,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
   const { useGetById, useUpdate, useCreate } = crudService;
   const { useGetAll: useGetAllPro } = createCrudService<any>(
-    'menu/products?not_default=1'
+    'menu/products?not_default=1&per_page=1000&sort=-created_at'
   );
   const { data: getAllPro } = useGetAllPro();
   const { data: allData } = createCrudService<any>(
@@ -65,7 +67,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   ).useGetAll();
 
   const cantClick = items?.find((item) => {
-    if (!(item.item && item.qty)) {
+    if (!(item.id && item.qty)) {
       return item;
     }
   });
@@ -83,20 +85,22 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           qty: item?.pivot?.quantity,
           total: item?.pivot?.total_cost,
           item: item?.pivot?.item_id,
+          id: item?.product_id,
           itemDescription: item?.product?.description,
           name: item?.name,
+          price: item?.pivot?.cost,
         }))
       );
     }
   }, [allDataId]);
-  console.log({ allDataId });
+  console.log({ allDataId, items });
   const { openDialog } = useGlobalDialog();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInvoice({ ...invoice, [e.target.name]: e.target.value });
   };
 
-  const handleItemChange = (index: number, field: string, value: string) => {
+  const handleItemChange = (index: number, field: string, value: any) => {
     const updatedItems = [...items];
     updatedItems[index][field] = value;
     setItems(updatedItems);
@@ -135,10 +139,11 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
             id: item.item,
             quantity: item.qty,
-            total_cost: Number(item.total) * Number(item.qty),
+            total_cost: Number(item.price) * Number(item.qty),
           }))
         );
       } else {
+        // const product = await axiosInstance.post(`menu/product/${}`)
         const { data } = await axiosInstance.post('inventory/purchasing', {
           branch_id: branchData?.data?.[0]?.id,
           supplier_id: invoice.supplier_id,
@@ -146,7 +151,9 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           notes: invoice.purchaseDescription,
           attached_file: fileBase64,
           items: items.map((item) => item.item),
-          invoice_number: Math.floor(Math.random() * 100000),
+          invoice_number:
+            Number(invoice.invoice_number) ||
+            Math.floor(Math.random() * 100000),
         });
         // const res =  await axiosInstance.get(
         //   `inventory/purchasing/${data?.data?.id}`
@@ -156,7 +163,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           items.map((item) => ({
             id: item.item,
             quantity: item.qty,
-            total_cost: Number(item.total) * Number(item.qty),
+            total_cost: Number(item.price) * Number(item.qty),
           }))
         );
       }
@@ -254,7 +261,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   purchaseDescription: e.target.value,
                 })
               }
-              className="w-[499px]"
+              className="w-full"
               label={t('PURCHASES_DESCRIPTION')}
             />
             {items?.map((currentItem, index) => (
@@ -265,17 +272,33 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     placeholder={t('PRODUCT_NAME')}
                     options={getAllPro?.data
                       ?.filter(
-                        (item) => !items.some((obj) => obj.item === item.id)
+                        (item) => !items.some((obj) => obj.id === item.id)
                       ) // Check if `item.id` is not in `items`
                       ?.map((item) => ({
                         value: item.id,
                         label: item.name,
                       }))}
-                    onValueChange={(value) =>
-                      handleItemChange(index, 'item', value)
-                    }
+                    onValueChange={(value) => {
+                      handleItemChange(
+                        index,
+                        'item',
+                        getAllPro?.data.find((item) => item.id === value)
+                          ?.item_id
+                      );
+                      handleItemChange(index, 'id', value);
+                      handleItemChange(
+                        index,
+                        'total',
+                        getAllPro?.data.find((item) => item.id === value)?.price
+                      );
+                      handleItemChange(
+                        index,
+                        'price',
+                        getAllPro?.data.find((item) => item.id === value)?.price
+                      );
+                    }}
                     label={t('PRODUCT_NAME')}
-                    value={currentItem?.item}
+                    value={currentItem?.id}
                     directValue={
                       currentItem.name ||
                       getAllPro?.data
@@ -283,32 +306,40 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                           value: item.id,
                           label: item.name,
                         }))
-                        .find((option) => option?.value === items[index]?.item)
+                        .find((option) => option?.value === items[index]?.id)
                         ?.label
                     }
                   />
                   <IconInput
                     value={currentItem.qty}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      if (e.target.value == 0) return;
+                      handleItemChange(
+                        index,
+                        'total',
+                        Number(e.target.value) * Number(currentItem.price)
+                      );
                       handleItemChange(
                         index,
                         'qty',
-                        e.target.value.replace(/^0+(?=\d)/, '')
-                      )
-                    }
+                        Number(e.target.value.replace(/^0+(?=\d)/, ''))
+                      );
+                    }}
                     label={t('QUANTITY')}
+                    min={1}
                     type="number"
                     inputClassName="w-[117px]"
                   />
                   <IconInput
                     value={currentItem.total}
-                    onChange={(e) =>
-                      handleItemChange(
-                        index,
-                        'total',
-                        e.target.value.replace(/^0+(?=\d)/, '')
-                      )
-                    }
+                    disabled
+                    // onChange={(e) =>
+                    //   handleItemChange(
+                    //     index,
+                    //     'total',
+                    //     e.target.value.replace(/^0+(?=\d)/, '')
+                    //   )
+                    // }
                     type="number"
                     min="0"
                     label={t('PRICE')}
@@ -346,7 +377,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   onChange={(e) =>
                     handleItemChange(index, 'itemDescription', e.target.value)
                   }
-                  className="w-[499px]"
+                  className="w-full"
                   label={t('DESCRIPTION')}
                 />
               </>
@@ -358,10 +389,11 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     ...items,
                     {
                       item: '',
-                      qty: '',
-                      total: '',
+                      qty: 1,
+                      total: 0,
                       itemDescription: '',
                       name: '',
+                      id: '',
                     },
                   ];
                 });

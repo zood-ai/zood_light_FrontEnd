@@ -35,7 +35,7 @@ const LineChartExample = ({ data }) => {
           <XAxis dataKey="date" padding={{ left: 10, right: 10 }} />
 
           {/* Y-Axis without Label */}
-          <YAxis tickMargin={50} />
+          <YAxis tickMargin={80} />
 
           <Tooltip content={<CustomTooltip />} />
           <Legend />
