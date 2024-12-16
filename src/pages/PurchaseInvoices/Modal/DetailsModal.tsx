@@ -30,7 +30,7 @@ export const DetailsModal: React.FC<SellerDetailsModalProps> = ({
       <AlertDialogContent className="max-w-[1107px] bg-transparent border-none border     ">
         <div className="">
           <div className="relative">
-            <ViewModal />
+            <ViewModal title={'فاتورة  شراء'}/>
             <img
               onClick={onClose}
               loading="lazy"
