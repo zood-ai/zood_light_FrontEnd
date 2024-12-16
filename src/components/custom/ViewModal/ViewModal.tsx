@@ -14,8 +14,8 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const reactToPrintFn = useReactToPrint({ contentRef });
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
-  const { data: Taxes } = createCrudService<any>('manage/taxes').useGetAll();
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
+
   const { data: customerInfo } = createCrudService<any>(
     'manage/customers'
   ).useGetById(`${data?.customer?.id || data?.get_supplier?.id}`);
@@ -29,6 +29,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
     'inventory/purchasing'
   ).useGetById(`${data?.id}`);
 
+
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
   const Simple = pathname === '/zood-dashboard/corporate-invoices';
@@ -37,6 +38,7 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
   // const ShowCar = true;
   const Data = OrderData ? { ...OrderData } : { ...purchsingInfo };
+  console.log({Data})
   const [size, setSize] = useState('A4');
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);

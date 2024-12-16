@@ -33,6 +33,8 @@
   "ADD_NEW_ITEM": "Add new item",
   "ENTER_INVOICE_NUMBER": "Enter the reference number or invoice number",
   "CANCEL_ADD": "Cancel add",
+  "Inactive": "Inactive",
+  "Active": "Active",
 
   "INDIVIDUAL": "Individual",
   "CORPORATE": "Corporate",

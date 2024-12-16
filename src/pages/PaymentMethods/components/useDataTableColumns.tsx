@@ -26,7 +26,10 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'name',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('PAYMENT_METHOD_NAME')} />
+        <DataTableColumnHeader
+          column={column}
+          title={t('PAYMENT_METHOD_NAME')}
+        />
       ),
       cell: ({ row }) => {
         return (
@@ -67,7 +70,7 @@ export const useDataTableColumns = () => {
           <div className="flex space-x-2 w-[180px] md:w-auto">
             <StatusBadge
               status={status == '0' ? 'Inactive' : 'active'}
-              text={status == '0' ? 'Inactive' : 'Active'}
+              text={status == '0' ? t('Inactive') : t('Active')}
             />
           </div>
         );
@@ -77,7 +80,10 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'id',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('PAYMENT_METHOD_ACTION')} />
+        <DataTableColumnHeader
+          column={column}
+          title={t('PAYMENT_METHOD_ACTION')}
+        />
       ),
       cell: ({ row }) => {
         return (
