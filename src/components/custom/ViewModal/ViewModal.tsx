@@ -8,8 +8,10 @@ import { useLocation } from 'react-router-dom';
 import { QRCodeComp } from '@/components/custom/QRCodeComp';
 import Loading from '@/components/loader';
 import { currencyFormated } from '@/utils/currencyFormated';
-
-export const ViewModal: React.FC<ViewModalProps> = () => {
+interface ViewModalAttribute {
+  title:string;
+}
+export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) => {
   const data = useSelector((state: any) => state.toggleAction.data);
   const allSettings = useSelector((state: any) => state.allSettings.value);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -19,7 +21,6 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
   // const { data: allSettings.WhoAmI } = createCrudService<any>('auth/allSettings.whoami').useGetAll();
   const customerInfo = { data: data.customer };
   const supplierInfo = { data: data?.supplier };
-
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
   const Simple = pathname === '/zood-dashboard/corporate-invoices';
@@ -83,12 +84,13 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                       </div>
                       <QRCodeComp settings={allSettings.settings} Data={Data} />
                     </div>
-                    <div className="self-center ml-4 font-semibold text-right">
-                      {PriceQuote && 'فاتورة عرض سعر '}
+                    <div className="self-center ml-4 font-semibold text-right"> 
+                  {title}
+                      {/* {PriceQuote && 'فاتورة عرض سعر '}
                       {Corporate && 'فاتورة شراء'}
                       {!PriceQuote &&
                         Another &&
-                        ` فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`}
+                        ` فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`} */}
                     </div>
                     <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-500 border-solid max-md:mr-1 max-md:max-w-full">
                       <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
@@ -375,11 +377,12 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
 
                     {/* عنوان الفاتورة */}
                     <div className="text-center font-semibold text-lg my-6">
-                      {PriceQuote && 'فاتورة عرض سعر '}
+                       {title}
+                      {/* {PriceQuote && 'فاتورة عرض سعر '}
                       {Corporate && 'فاتورة شراء'}
                       {!PriceQuote &&
                         Another &&
-                        ` فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`}
+                        ` فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`} */}
                     </div>
 
                     {/* معلومات الفاتورة */}
