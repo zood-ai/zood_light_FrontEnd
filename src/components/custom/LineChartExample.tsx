@@ -1,3 +1,4 @@
+import { currencyFormated } from '@/utils/currencyFormated';
 import {
   BarChart,
   Bar,
@@ -15,7 +16,7 @@ const LineChartExample = ({ data }) => {
       const value = payload[0].value;
       return (
         <div className="bg-black bg-opacity-70 text-white p-2 rounded-lg text-sm font-bold shadow-lg">
-          <p>{`Sales Value: ${value.toFixed(2)}`}</p>
+          <p>{`Sales Value: ${currencyFormated(value)}`}</p>
         </div>
       );
     }
