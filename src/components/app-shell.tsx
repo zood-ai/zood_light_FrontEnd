@@ -20,8 +20,10 @@ import { toggleUserNavigate } from '@/store/slices/usrNavSlice';
 import FastAddActions from './FastAddActions';
 import DialogSidebar from './DialogSidebar';
 import { updateField } from '@/store/slices/orderSchema';
+import { setSettings } from '@/store/slices/allSettings';
 import createCrudService from '@/api/services/crudService';
 import Cookies from 'js-cookie';
+import axiosInstance from '@/api/interceptors';
 interface WelcomeMessageProps {
   name: string;
 }
@@ -37,12 +39,19 @@ export const WelcomeMessage: React.FC<WelcomeMessageProps> = ({ name }) => {
 const AppShell = () => {
   const [isCollapsed, setIsCollapsed] = useIsCollapsed();
   const { isLoading } = useLoading();
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const userNav = useSelector((state: any) => state.usrNavSlice.active);
+  const reFetch = useSelector((state: any) => state.allSettings.reFetch);
   const { openDialog, delRoute } = useGlobalDialog();
-  let dispatch = useDispatch();
+  const dispatch = useDispatch();
+
+  const [fastActionBtn, setFastActionBtn] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const { data: branchData } =
+    createCrudService<any>('manage/branches').useGetAll();
+
   useEffect(() => {
     if (userNav === true) {
       navigate(-1);
@@ -56,11 +65,23 @@ const AppShell = () => {
       };
     }
   }, [userNav]);
-  const [fastActionBtn, setFastActionBtn] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const { data: branchData } =
-    createCrudService<any>('manage/branches').useGetAll();
+  console.log({ reFetch });
 
+  useEffect(() => {
+    const fun = async () => {
+      console.log(1);
+      const { data: settings } = await axiosInstance.get('manage/settings');
+      const { data: whoAmI } = await axiosInstance.get('auth/whoami');
+      dispatch(
+        setSettings({
+          settings: settings,
+          WhoAmI: whoAmI,
+        })
+      );
+    };
+
+    fun();
+  }, [reFetch]);
   useEffect(() => {
     dispatch(
       updateField({
@@ -130,9 +151,9 @@ const AppShell = () => {
                 } flex items-center space-x-4`}
               >
                 <Button
-                style={{
-                  flexDirection: isRtl ? 'row-reverse' : 'row',
-                }}
+                  style={{
+                    flexDirection: isRtl ? 'row-reverse' : 'row',
+                  }}
                   className="pe-[24px] gap-2 ps-[16px] pt-[8px] pb-[6px] flex"
                   variant={'default'}
                   onClick={() => {}}

@@ -44,7 +44,6 @@ export const IndividualInvoicesAdd: React.FC<
       ...allUserData,
       data: myData,
     });
-    console.log({ searchInput, myData });
   }, [searchInput, allUserData]);
 
   return (

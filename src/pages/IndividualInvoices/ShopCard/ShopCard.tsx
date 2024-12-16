@@ -157,7 +157,6 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
               if (ref.current) {
                 ref.current.submitOrder(); // Call the child's function
               }
-              console.log(loading);
             }}
             className="w-[144px] mt-10"
           >

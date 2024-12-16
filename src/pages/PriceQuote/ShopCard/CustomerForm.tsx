@@ -161,7 +161,6 @@ const CustomerForm = () => {
     //   dispatch(addProduct(updatedProducts));
     // }
   };
-  console.log({ orderSchema });
 
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
@@ -221,7 +220,6 @@ const CustomerForm = () => {
                       const updatedItems = orderSchema.products.filter(
                         (el) => el.index !== index
                       );
-                      console.log({ updatedItems });
                       dispatch(addProduct(updatedItems));
                     }}
                     className="translate-y-[34px] cursor-pointer hover:scale-105"
