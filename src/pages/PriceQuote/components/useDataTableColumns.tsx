@@ -9,7 +9,8 @@ import { StatusBadge } from '@/components/custom/StatusBadge';
 import { Button } from '@/components/custom/button';
 import dayjs from 'dayjs';
 import { formatDateTime } from '@/utils/formatDateTime';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux'; 
+import {currencyFormated} from '../../../utils/currencyFormated'
 import {
   toggleActionView,
   toggleActionViewData,
@@ -63,7 +64,7 @@ export const useDataTableColumns = () => {
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('total_price').toFixed(2) || '0'}
+              {currencyFormated(row.getValue('total_price')) || '0'}
             </span>
           </div>
         );
