@@ -65,11 +65,9 @@ const AppShell = () => {
       };
     }
   }, [userNav]);
-  console.log({ reFetch });
 
   useEffect(() => {
     const fun = async () => {
-      console.log(1);
       const { data: settings } = await axiosInstance.get('manage/settings');
       const { data: whoAmI } = await axiosInstance.get('auth/whoami');
       dispatch(

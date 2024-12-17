@@ -246,11 +246,17 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                           </div>
                         </div>
                       ) : null}
-                      {Data?.data?.total_cost ? (
+                      {Data?.data?.items ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>المبلغ الإجمالي</div>
                           <div>
-                            SR {currencyFormated(Data?.data?.total_cost)}
+                            SR{' '}
+                            {currencyFormated(
+                              Data?.data?.items?.reduce(
+                                (sum, item) => sum + item?.pivot?.total_cost,
+                                0
+                              )
+                            )}
                           </div>
                         </div>
                       ) : null}
@@ -527,10 +533,18 @@ export const ViewModal: React.FC<ViewModalProps> = () => {
                             </p>
                           </div>
                         ) : null}
-                        {Data?.data?.total_cost ? (
+                        {Data?.data?.items ? (
                           <div className="flex justify-between items-center">
                             <p className="w-[50%]">الاجمالي</p>
-                            <p>SR {currencyFormated(Data?.data?.total_cost)}</p>
+                            <p>
+                              SR{' '}
+                              {currencyFormated(
+                                Data?.data?.items?.reduce(
+                                  (sum, item) => sum + item?.pivot?.total_cost,
+                                  0
+                                )
+                              )}
+                            </p>
                           </div>
                         ) : null}
                         {Data?.data?.discount_amount ? (
