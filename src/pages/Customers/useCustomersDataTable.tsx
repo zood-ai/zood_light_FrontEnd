@@ -3,7 +3,7 @@ import { formatDateTime } from '@/utils/formatDateTime'; // A utility to format 
 import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-table-column-header';
 import { StatusBadge } from '@/components/custom/StatusBadge';
 import { useTranslation } from 'react-i18next'; // A hook for translations
-
+import {currencyFormated} from '../../utils/currencyFormated'
 export const useCustomersDataTable = () => {
   const { t } = useTranslation();
   const columns: ColumnDef<any>[] = [
@@ -39,7 +39,7 @@ export const useCustomersDataTable = () => {
       cell: ({ row }) => {
         return (
           <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-            {row.getValue('total_price').toFixed(2) || '-'}
+            {currencyFormated(row.getValue('total_price')) || '-'}
           </span>
         );
       },
