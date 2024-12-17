@@ -232,11 +232,11 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                           </div>
                         </div>
                       ) : null}
-                      {Data?.data?.total_taxes ? (
+                      {Data?.data?.tax_exclusive_discount_amount ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>مجموع ضريبة القيمة المضافة</div>
                           <div>
-                            SR {currencyFormated(Data.data.total_taxes)}
+                            SR {currencyFormated(Data.data.tax_exclusive_discount_amount)}
                           </div>
                         </div>
                       ) : null}
@@ -558,11 +558,11 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                             </p>
                           </div>
                         ) : null}
-                        {Data?.data?.total_taxes ? (
+                        {Data?.data?.tax_exclusive_discount_amount ? (
                           <div className="flex justify-between items-center">
                             <p>مجموع ضريبة القيمة المضافة</p>
                             <p>
-                              SR {currencyFormated(Data?.data?.total_taxes)}
+                              SR {currencyFormated(Data?.data?.tax_exclusive_discount_amount)}
                             </p>
                           </div>
                         ) : null}
