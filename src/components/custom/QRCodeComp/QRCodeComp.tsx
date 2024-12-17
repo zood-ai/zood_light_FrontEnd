@@ -51,7 +51,9 @@ export const QRCodeComp: React.FC<QRCodeCompProps> = ({
   const totalAmount = String(
     `${
       (data?.type === 'Purchasing'
-        ? Data?.data?.total_cost?.toFixed(2)
+        ? Data?.data?.items
+            ?.reduce((sum, item) => sum + item?.pivot?.total_cost, 0)
+            ?.toFixed(2)
         : Data?.data?.total_price?.toFixed(2)) || '0.00'
     }`
   );
@@ -76,11 +78,6 @@ export const QRCodeComp: React.FC<QRCodeCompProps> = ({
     settings,
     data,
     Data,
-    // sellerName,
-    // vatNumber,
-    // // invoiceDate,
-    // totalAmount,
-    // vatAmount,
   ]);
   return (
     <img
