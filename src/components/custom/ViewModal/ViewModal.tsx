@@ -9,9 +9,11 @@ import { QRCodeComp } from '@/components/custom/QRCodeComp';
 import Loading from '@/components/loader';
 import { currencyFormated } from '@/utils/currencyFormated';
 interface ViewModalAttribute {
-  title:string;
+  title: string;
 }
-export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) => {
+export const ViewModal: React.FC<ViewModalProps> = ({
+  title,
+}: ViewModalAttribute) => {
   const data = useSelector((state: any) => state.toggleAction.data);
   const allSettings = useSelector((state: any) => state.allSettings.value);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -84,8 +86,8 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                       </div>
                       <QRCodeComp settings={allSettings.settings} Data={Data} />
                     </div>
-                    <div className="self-center ml-4 font-semibold text-right"> 
-                  {title}
+                    <div className="self-center ml-4 font-semibold text-right">
+                      {title}
                       {/* {PriceQuote && 'فاتورة عرض سعر '}
                       {Corporate && 'فاتورة شراء'}
                       {!PriceQuote &&
@@ -175,15 +177,15 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                               ? e?.pivot?.kitchen_notes
                               : e?.name}
                           </div>
-                          <div className="flex-grow flex justify-center items-center">
+                          <div className="max-w-[97px] flex-grow flex justify-center items-center">
                             {/* {e?.pivot?.quantity}  */}
                             {currencyFormated(e?.pivot?.quantity)}
                           </div>
-                          <div className="flex-grow flex justify-center items-center">
+                          <div className="max-w-[140px] flex-grow flex justify-center items-center">
                             {/* {e?.pivot?.unit_price?.toFixed(2)} */}
                             {currencyFormated(e?.pivot?.unit_price)}
                           </div>
-                          <div className="flex-grow flex justify-center items-center">
+                          <div className="max-w-[115px] flex-grow flex justify-center items-center">
                             {/* {(
                               e?.pivot?.quantity * e?.pivot?.unit_price
                             )?.toFixed(2)}  */}
@@ -195,18 +197,18 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                       ))}
                       {Data?.data?.items?.map((e) => (
                         <div className="flex font-semibold w-full">
-                          <div className="w-1/2">
+                          <div className="w-1/2 flex justify-center items-center">
                             {e?.name === 'sku-zood-20001'
                               ? e?.pivot?.kitchen_notes
                               : e?.name}
                           </div>
-                          <div className="w-1/3 flex justify-center items-center">
+                          <div className="max-w-[97px] flex-grow flex justify-center items-center">
                             {currencyFormated(e?.pivot?.quantity)}
                           </div>
-                          <div className="w-1/3 flex justify-center items-center">
+                          <div className="max-w-[140px] flex-grow flex justify-center items-center">
                             {currencyFormated(e?.pivot?.cost)}
                           </div>
-                          <div className="w-1/3 flex justify-center items-center">
+                          <div className="max-w-[115px] flex-grow flex justify-center items-center">
                             {currencyFormated(
                               e?.pivot?.quantity * e?.pivot?.cost
                             )}
@@ -236,7 +238,10 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>مجموع ضريبة القيمة المضافة</div>
                           <div>
-                            SR {currencyFormated(Data.data.tax_exclusive_discount_amount)}
+                            SR{' '}
+                            {currencyFormated(
+                              Data.data.tax_exclusive_discount_amount
+                            )}
                           </div>
                         </div>
                       ) : null}
@@ -383,7 +388,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
 
                     {/* عنوان الفاتورة */}
                     <div className="text-center font-semibold text-lg my-6">
-                       {title}
+                      {title}
                       {/* {PriceQuote && 'فاتورة عرض سعر '}
                       {Corporate && 'فاتورة شراء'}
                       {!PriceQuote &&
@@ -562,7 +567,10 @@ export const ViewModal: React.FC<ViewModalProps> = ({title}:ViewModalAttribute) 
                           <div className="flex justify-between items-center">
                             <p>مجموع ضريبة القيمة المضافة</p>
                             <p>
-                              SR {currencyFormated(Data?.data?.tax_exclusive_discount_amount)}
+                              SR{' '}
+                              {currencyFormated(
+                                Data?.data?.tax_exclusive_discount_amount
+                              )}
                             </p>
                           </div>
                         ) : null}
