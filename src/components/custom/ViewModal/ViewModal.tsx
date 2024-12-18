@@ -8,6 +8,7 @@ import { useLocation } from 'react-router-dom';
 import { QRCodeComp } from '@/components/custom/QRCodeComp';
 import Loading from '@/components/loader';
 import { currencyFormated } from '@/utils/currencyFormated';
+
 interface ViewModalAttribute {
   title: string;
 }
@@ -18,15 +19,10 @@ export const ViewModal: React.FC<ViewModalProps> = ({
   const allSettings = useSelector((state: any) => state.allSettings.value);
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
-  // const { data: settings } =
-  //   createCrudService<any>('manage/settings').useGetAll();
-  // const { data: allSettings.WhoAmI } = createCrudService<any>('auth/allSettings.whoami').useGetAll();
   const customerInfo = { data: data.customer };
   const supplierInfo = { data: data?.supplier };
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
-  const Simple = pathname === '/zood-dashboard/corporate-invoices';
-  const PriceQuote = pathname === '/zood-dashboard/price-quote';
   const Another = !Corporate;
   const ShowCar =
     allSettings.WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
@@ -42,9 +38,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-none h-[90vh] max-w-[80vw] overflow-y-auto relative bg-white">
-        {/* <div className="w-full h-full bg-black/50 z-[1000] sticky top-0 left-0 flex justify-start items-center">
-          <Loading className="max-h-fit block text-white" />
-        </div> */}
         <div className="flex flex-col rounded-none ">
           <div className="px-11 py-a12 w-full bg-white rounded-lg  border-solid max-md:px-5 max-md:max-w-full">
             <div className="flex gap-5 max-md:flex-col myDiv">
@@ -52,9 +45,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                 ref={contentRef}
                 style={{
                   width: '100%',
-                  maxWidth: '800px', // Ensures the content doesn't stretch
+                  maxWidth: '800px',
                   margin: 'auto',
-                  padding: '20px', // Adds spacing for better readability
+                  padding: '20px',
                 }}
                 className={`${"size === 'A4' ? 'a4-size' : 'small-receipt'"} flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
               >
@@ -88,11 +81,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                     </div>
                     <div className="self-center ml-4 font-semibold text-right">
                       {title}
-                      {/* {PriceQuote && 'فاتورة عرض سعر '}
-                      {Corporate && 'فاتورة شراء'}
-                      {!PriceQuote &&
-                        Another &&
-                        ` فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`} */}
                     </div>
                     <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-500 border-solid max-md:mr-1 max-md:max-w-full">
                       <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
@@ -137,6 +125,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         </div>
                       </div>
                       <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
+                        <div>الرقم المرجعي</div>
+                        <div className="mt-4 font-semibold w-full text-center">
+                          {data?.invoice_number || ''}
+                        </div>
+                      </div>
+                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
                         <div>رقم الفاتورة</div>
                         <div className="mt-4 font-semibold w-full text-center">
                           {data?.reference || ''}
@@ -177,18 +171,13 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                               ? e?.pivot?.kitchen_notes
                               : e?.name}
                           </div>
-                          <div className="max-w-[97px] flex-grow flex justify-center items-center">
-                            {/* {e?.pivot?.quantity}  */}
+                          <div className="flex-grow flex justify-center items-center">
                             {currencyFormated(e?.pivot?.quantity)}
                           </div>
-                          <div className="max-w-[140px] flex-grow flex justify-center items-center">
-                            {/* {e?.pivot?.unit_price?.toFixed(2)} */}
+                          <div className="flex-grow flex justify-center items-center">
                             {currencyFormated(e?.pivot?.unit_price)}
                           </div>
-                          <div className="max-w-[115px] flex-grow flex justify-center items-center">
-                            {/* {(
-                              e?.pivot?.quantity * e?.pivot?.unit_price
-                            )?.toFixed(2)}  */}
+                          <div className="flex-grow flex justify-center items-center">
                             {currencyFormated(
                               e?.pivot?.quantity * e?.pivot?.unit_price
                             )}
@@ -216,7 +205,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         </div>
                       ))}
                     </div>
-                    {/* CODING HERE */}
                     <div className="flex flex-col gap-3 mt-10 makeEvenOddBg">
                       {Data?.data?.subtotal_price ? (
                         <div className="flex justify-between p-2 rounded items-center">
@@ -332,8 +320,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         </div>
                       ) : null}
                     </div>
-
-                    {/* CODE DELETED HERE */}
                     <div className="flex justify-between items-center">
                       <p className="text-sm w-[50%] mt-[30px] text-[#26262F]">
                         الشروط والاحكام
@@ -351,7 +337,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         />
                       </div>
                     </div>
-
                     {data?.kitchen_notes ? (
                       <div className="flex flex-col pt-4 pb-2 bg-white rounded-none  max-md:px-5 justify-between">
                         <div>ملاحظات : {data?.kitchen_notes || ''}</div>
@@ -363,7 +348,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                   </div>
                 ) : (
                   <div className="flex print-content2 flex-col w-[390px]  mx-auto text-righ text-sm p-1 px-10">
-                    {/* الشعار */}
                     <p className="text-center mb-2">
                       {allSettings.settings?.data?.receipt_header}
                     </p>
@@ -375,8 +359,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                     <p className="font-semibold text-sm text-center pt-2 pb-5">
                       {allSettings.WhoAmI?.business?.name}
                     </p>
-
-                    {/* معلومات الشركة */}
                     <div className="text-center text-sm leading-6 mb-4">
                       {allSettings.WhoAmI?.user?.branches[0]
                         ?.registered_address &&
@@ -385,25 +367,15 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                             ?.registered_address
                         )?.streetName}
                     </div>
-
-                    {/* عنوان الفاتورة */}
                     <div className="text-center font-semibold text-lg my-6">
                       {title}
-                      {/* {PriceQuote && 'فاتورة عرض سعر '}
-                      {Corporate && 'فاتورة شراء'}
-                      {!PriceQuote &&
-                        Another &&
-                        ` فاتورة ضريبية ${Simple ? '' : 'مبسطة'}`} */}
                     </div>
-
-                    {/* معلومات الفاتورة */}
                     <div className="flex flex-col gap-3 mb-2">
                       <div className="flex justify-between">
                         <p>
                           {Another && 'اسم العميل'}
                           {Corporate && 'اسم المورد'}
                         </p>
-
                         <p>
                           {Corporate ? data?.get_supplier?.name : ''}
                           {Another ? data?.customer?.name : ''}
@@ -435,6 +407,10 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         <p>رقم الفاتورة </p>
                         <p>{data?.reference}</p>
                       </div>
+                      <div className="flex justify-between">
+                        <p>الرقم المرجعي</p>
+                        <p>{data?.invoice_number || ''}</p>
+                      </div>
                       {ShowCar && data?.kitchen_received_at && (
                         <div className="flex justify-between">
                           <p>نوع السيارة</p>
@@ -448,10 +424,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         </div>
                       )}
                     </div>
-
-                    {/* جدول المنتجات */}
                     <div className=" py-5">
-                      {/* رأس الجدول */}
                       <div className="flex font-semibold justify-between text-black text-xs  mb-2">
                         <div className="self-end text-center">اسم المنتج</div>
                         <div className="mr-[20px] self-end text-center">
@@ -462,8 +435,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         </div>
                         <div className="text-center ml-[20px]">المجموع</div>
                       </div>
-
-                      {/* بيانات الجدول */}
                       <div className="flex border-t-2 border-b-black/20 flex-col bg-white rounded py-2   text-sm">
                         {Data?.data?.products?.map((product, index) => (
                           <div
@@ -528,10 +499,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         ))}
                       </div>
                     </div>
-
-                    {/* معلومات الدفع */}
                     <div className="flex flex-col mt-4 gap-4">
-                      {/* first col div */}
                       <div className="flex flex-col gap-2">
                         {Data?.data?.subtotal_price ? (
                           <div className="flex justify-between items-center">
@@ -575,8 +543,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                           </div>
                         ) : null}
                       </div>
-                      {/* end col div */}
-                      {/* first col div */}
                       <div className="flex flex-col gap-4">
                         {Data?.data?.total_price ? (
                           <div className="flex justify-between items-center">
@@ -643,14 +609,11 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         </div>
                       ) : null}
                     </div>
-
                     {data?.kitchen_notes ? (
                       <div className="flex flex-col pt-8 pb-2 bg-white rounded-none  max-md:px-5 justify-between">
                         <div>ملاحظات : {data?.kitchen_notes || ''}</div>
                       </div>
                     ) : null}
-
-                    {/* الباركود */}
                     <div className="  my-6">
                       <img
                         src="/icons/parCodeIn80.webp"
@@ -675,16 +638,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                 <div className="flex flex-col max-md:mt-10">
                   <div className="flex flex-col w-full font-semibold text-right">
                     <div className="flex flex-col w-full">
-                      <div className="flex flex-col w-full text-zinc-800">
-                        <div className="flex flex-col w-full text-sm">
-                          <div className="flex self-end max-w-full min-h-[64px] w-[130px]" />
-                          {/* <div className="mt-3.5">
-                            شركة حلول التطبيقات لتقنية المعلوماتحي النخيل الرياض
-                            المملكة العربية السعودية0123, 31951
-                          </div>  */}
-                        </div>
-                        <div className="mt-8 text-base">طباعة الفاتورة</div>
-                      </div>
                       <div className="flex flex-col justify-center self-end mt-3 max-w-full text-sm whitespace-nowrap w-full">
                         <div className="flex gap-4 items-center w-full flex-grow text-zinc-800">
                           <div className="flex gap-2 items-center self-stretch my-auto">
@@ -730,15 +683,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                       </button>
                     </div>
                   </div>
-                  {/* <div className="flex flex-col self-end mx-auto items-center max-w-full rounded-none w-[154px] mt-10">
-                    <div className="flex flex-col justify-center px-4 py-5 bg-white rounded-lg border border-gray-500 border-solid max-md:px-5">
-                      <img
-                        loading="lazy"
-                        src="https://cdn.builder.io/api/v1/image/assets/TEMP/0545702f8efd834df3b6f82096b53bd74059f9eaf11522eb1eb8a7fe4841708e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
-                        className="object-contain aspect-[0.99] w-[106px]"
-                      />
-                    </div>
-                  </div> */}
                 </div>
               </div>
             </div>
