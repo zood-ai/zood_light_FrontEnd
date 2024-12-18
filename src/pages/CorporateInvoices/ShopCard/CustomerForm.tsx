@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
 import { useToast } from '@/components/custom/useToastComp';
 import { useTranslation } from 'react-i18next';
-import {currencyFormated} from '../../../utils/currencyFormated'
+import { currencyFormated } from '../../../utils/currencyFormated';
 
 import {
   toggleActionView,
@@ -33,7 +33,7 @@ const CustomerForm = () => {
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
   const { useGetAll: fetchAllProducts } = createCrudService<any>(
-    'menu/products?not_default=1&per_page=1000'
+    'menu/products?not_default=1&per_page=1000&sort=-updated_at'
   );
   const { data: defaultProduct } = createCrudService<any>(
     'menu/products?filter[name]=sku-zood-20001'
@@ -122,11 +122,7 @@ const CustomerForm = () => {
     }
   };
 
-  const handleItemChange = async (
-    index: number,
-    field: string,
-    value: any
-  ) => {
+  const handleItemChange = async (index: number, field: string, value: any) => {
     // if (params.id) return;
     if (field === 'product_id') {
       if (!value) {
@@ -253,16 +249,15 @@ const CustomerForm = () => {
                   inputClassName="flex-wrap md:w-[151px] sm:max-w-[151px] min-w-[80px]"
                 />
                 <IconInput
-                  type="text"
+                  type="number"
                   disabled={item.product_id}
-                   // value={item.unit_price}
-                  value={currencyFormated(item.unit_price)||0}
-                  onChange={(e) =>{ 
-                    const rawValue = e.target.value.replace(/,/g, '');
+                  // value={item.unit_price}
+                  value={item.unit_price || 0}
+                  onChange={(e) => {
+                    const rawValue = e.target.value;
                     const numericValue = parseFloat(rawValue) || 0;
                     handleItemChange(index, 'unit_price', numericValue);
-                  }
-                  }
+                  }}
                   label={t('PRICE')}
                   iconSrcLeft="SR"
                   inputClassName="flex-wrap md:w-[151px] sm:max-w-[151px] min-w-[80px]"
