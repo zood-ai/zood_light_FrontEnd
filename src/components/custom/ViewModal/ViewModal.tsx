@@ -125,12 +125,14 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
-                        <div>الرقم المرجعي</div>
-                        <div className="mt-4 font-semibold w-full text-center">
-                          {data?.invoice_number || ''}
+                      {title === 'فاتورة  شراء' && (
+                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
+                          <div>الرقم المرجعي</div>
+                          <div className="mt-4 font-semibold w-full text-center">
+                            {data?.invoice_number || ''}
+                          </div>
                         </div>
-                      </div>
+                      )}
                       <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
                         <div>رقم الفاتورة</div>
                         <div className="mt-4 font-semibold w-full text-center">
@@ -399,10 +401,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         <p>رقم الفاتورة </p>
                         <p>{data?.reference}</p>
                       </div>
-                      <div className="flex justify-between">
-                        <p>الرقم المرجعي</p>
-                        <p>{data?.invoice_number || ''}</p>
-                      </div>
+                      {title === 'فاتورة  شراء' && (
+                        <div className="flex justify-between">
+                          <p>الرقم المرجعي</p>
+                          <p>{data?.invoice_number || ''}</p>
+                        </div>
+                      )}
                       {ShowCar && data?.kitchen_received_at && (
                         <div className="flex justify-between">
                           <p>نوع السيارة</p>
@@ -619,6 +623,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                 <div className="flex flex-col max-md:mt-10">
                   <div className="flex flex-col w-full font-semibold text-right">
                     <div className="flex flex-col w-full">
+                      <div className="flex flex-col w-full text-zinc-800">
+                        <div className="flex flex-col w-full text-sm">
+                          <div className="flex self-end max-w-full min-h-[64px] w-[130px]" />
+                        </div>
+                        <div className="mt-8 text-base">طباعة الفاتورة</div>
+                      </div>
                       <div className="flex flex-col justify-center self-end mt-3 max-w-full text-sm whitespace-nowrap w-full">
                         <div className="flex gap-4 items-center w-full flex-grow text-zinc-800">
                           <div className="flex gap-2 items-center self-stretch my-auto">
