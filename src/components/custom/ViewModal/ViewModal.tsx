@@ -396,12 +396,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         <p>{data?.business_date?.split(' ')[0]}</p>
                       </div>
                       <div className="flex justify-between">
-                        <p>الرقم المرجعي</p>
-                        <p>{data?.invoice_number || ''}</p>
-                      </div>
-                      <div className="flex justify-between">
                         <p>رقم الفاتورة </p>
                         <p>{data?.reference}</p>
+                      </div>
+                      <div className="flex justify-between">
+                        <p>الرقم المرجعي</p>
+                        <p>{data?.invoice_number || ''}</p>
                       </div>
                       {ShowCar && data?.kitchen_received_at && (
                         <div className="flex justify-between">
