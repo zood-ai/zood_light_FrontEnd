@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SelectComp } from '@/components/custom/SelectItem';
 import IconInput from '@/components/custom/InputWithIcon';
 import { Button } from '@/components/custom/button';
@@ -23,7 +23,7 @@ import {
 } from '@/store/slices/toggleAction';
 import { TbMenuDeep } from 'react-icons/tb';
 import { GrMenu } from 'react-icons/gr';
-import {currencyFormated} from '../../../utils/currencyFormated'
+import { currencyFormated } from '../../../utils/currencyFormated';
 const CustomerFormEdit = () => {
   const { t } = useTranslation();
   const params = useParams();
@@ -34,8 +34,15 @@ const CustomerFormEdit = () => {
   // const ShowCar = true;
 
   const { mutate, isLoading: loadingOrder } = orderPayment.useCreate();
-  const getOrder = allServiceOrder.useGetById(params.id);
-  const payment = getOrder?.data?.data?.payment_status;
+  const Data = useSelector((state: any) => state.toggleAction.data);
+  const [getOrder, setGetOrder] = useState<any>(Data);
+  console.log({ Data, getOrder });
+  useEffect(() => {
+    axiosInstance.get(`/orders?filter[id]=${params.id}`).then((res) => {
+      setGetOrder(res?.data?.data[0]);
+    });
+  }, []);
+  const payment = getOrder?.payment_status;
 
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const dispatch = useDispatch();
@@ -67,9 +74,7 @@ const CustomerFormEdit = () => {
         const newHolder = holder.filter(
           (ele) => ele.business_date === undefined
         );
-        const newHolder2 = holder.filter(
-          (ele) => ele.business_date
-        );
+        const newHolder2 = holder.filter((ele) => ele.business_date);
 
         const holder2 = newHolder.map((ele) => ({
           ...ele,
@@ -108,14 +113,14 @@ const CustomerFormEdit = () => {
 
   const changeToTextArea = () => {
     setIsTextArea(!isTextArea);
-  }; 
- // const n = item?.pivot?.unit_price * item?.pivot?.quantity || 0;
+  };
+  // const n = item?.pivot?.unit_price * item?.pivot?.quantity || 0;
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
       <div className=" w-full xl:w-[550px] max-w-full">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
-          {getOrder?.data?.data?.products.map((item, index) => (
+          {getOrder?.products.map((item, index) => (
             <div key={index} className="flex flex-wrap">
               <div className="flex md:w-fit max-md:flex-grow gap-x-2 mb-5">
                 <IconInput
@@ -171,15 +176,14 @@ const CustomerFormEdit = () => {
               <div className="flex gap-x-md">
                 <IconInput
                   disabled
-           //       value={item?.pivot?.quantity}
+                  //       value={item?.pivot?.quantity}
                   value={currencyFormated(item?.pivot?.quantity)}
-                  
                   label={t('QUANTITY')}
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
-                  />
+                />
                 <IconInput
                   disabled
-                   value={currencyFormated(item?.pivot?.unit_price||0)}
+                  value={currencyFormated(item?.pivot?.unit_price || 0)}
                   // value={item?.pivot?.unit_price || 0}
                   label={t('PRICE')}
                   iconSrcLeft="SR"
@@ -190,7 +194,9 @@ const CustomerFormEdit = () => {
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                   iconSrcLeft="SR"
                   // value={item?.pivot?.unit_price * item?.pivot?.quantity || 0}
-                  value={currencyFormated(item?.pivot?.unit_price * item?.pivot?.quantity || 0)}
+                  value={currencyFormated(
+                    item?.pivot?.unit_price * item?.pivot?.quantity || 0
+                  )}
                   disabled
                 />
               </div>
@@ -204,7 +210,7 @@ const CustomerFormEdit = () => {
                 // className="col-span-10 "
                 label={t('CAR_TYPE')}
                 inputClassName="w-[240px] min-w-[120px]"
-                value={getOrder?.data?.data?.kitchen_received_at || ''}
+                value={getOrder?.kitchen_received_at || ''}
                 // value={formState.address}
                 // inputClassName="md:col-span-5"
               />
@@ -213,14 +219,14 @@ const CustomerFormEdit = () => {
                 name="kitchen_done_at"
                 inputClassName="w-[240px] min-w-[120px] mb-sm "
                 label={t('CAR_PLATE')}
-                value={getOrder?.data?.data?.kitchen_done_at || ''}
+                value={getOrder?.kitchen_done_at || ''}
               />
             </div>
           )}
           <Textarea
             disabled={params.id}
             name="kitchen_notes"
-            value={getOrder?.data?.data?.kitchen_notes || ''}
+            value={getOrder?.kitchen_notes || ''}
             className="w-full my-sm"
             label={t('NOTES')}
           />

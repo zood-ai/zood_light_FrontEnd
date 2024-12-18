@@ -37,7 +37,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     createCrudService<any>('manage/branches').useGetAll();
   const [totalShopCardCount, setTotalShopCardCount] = useState(0);
   const orderSchema = useSelector((state: any) => state.orderSchema);
-
   const cardItemValue = useSelector((state: any) => state.orderSchema.products);
   const [paymentMethod, setPaymentMethod] = useState<any>([
     {
@@ -62,9 +61,11 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
   }, [params.id, orderSchema.payments]);
 
   const dispatch = useDispatch();
-  const totalCost = cardItemValue.reduce(
-    (acc, item) => acc + item.unit_price * item.quantity,
-    0
+  const [totalCost, setTotalCost] = useState(
+    cardItemValue.reduce(
+      (acc, item) => acc + item.unit_price * item.quantity,
+      0
+    )
   );
 
   const handleItemChange = (index: number, field: string, value: string) => {
@@ -129,8 +130,14 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
   }, [paymentMethod, taxAmount, discountAmount, totalAmountIncludeAndExclude]);
   const [paymentMethodinit, setPaymentMethodinit] = useState([]);
 
+  const Data = useSelector((state: any) => state.toggleAction.data);
   useEffect(() => {
     if (params.id) {
+      if (Data) {
+        setFetchedPaymentMethod(Data?.payments);
+        setPaymentMethodinit(Data?.payments || []);
+        setdiscountAmount(Data?.discount_amount || 0);
+      }
       axiosInstance.get(`orders/${params.id}`).then((res) => {
         // setPaymentMethod(res?.data?.data?.payments || []);
         setFetchedPaymentMethod(res?.data?.data?.payments);
@@ -178,7 +185,25 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
     const Drepa = SubTotalAfterDiscount * (mainTax?.rate / 100);
     setTaxAmount(Drepa);
     setTotalAmountIncludeAndExclude(SubTotalAfterDiscount + Drepa);
-  }, [subTotal, cardItemValue, discountAmount, mainTax]);
+  }, [subTotal, cardItemValue, discountAmount, mainTax, totalCost]);
+
+  useEffect(() => {
+    if (params.id && Data) {
+      setTotalCost(
+        Data?.products?.reduce(
+          (acc, item) => acc + item?.pivot?.unit_price * item?.pivot?.quantity,
+          0
+        )
+      );
+    } else {
+      setTotalCost(
+        cardItemValue.reduce(
+          (acc, item) => acc + item.unit_price * item.quantity,
+          0
+        )
+      );
+    }
+  }, [params.id, Data?.products, Data, cardItemValue]);
 
   useEffect(() => {
     if (settings?.data?.tax_inclusive_pricing === 1) {
@@ -188,7 +213,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
       setSubTotal(totalCost);
     }
     handleIncludeAndExclude();
-  }, [discountAmount, taxAmount, orderSchema, mainTax]);
+  }, [discountAmount, taxAmount, orderSchema, mainTax, totalCost]);
   console.log({ orderSchema });
 
   return (
@@ -470,7 +495,6 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
           </div>
         </div>
       </div>
-          
     </>
   );
 };
