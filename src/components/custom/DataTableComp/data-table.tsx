@@ -289,6 +289,7 @@ export function DataTable<TData, TValue>({
                               dispatch(toggleActionViewData(row.original));
                               // navigate(`${url}/edit/${row.original.id}`);
                             } else {
+                              dispatch(toggleActionViewData(row.original));
                               navigate(`edit/${row.original.id}`);
                             }
                             // handleRowClick(row.original);

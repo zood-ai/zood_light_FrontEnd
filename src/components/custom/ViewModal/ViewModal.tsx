@@ -12,7 +12,6 @@ import { currencyFormated } from '@/utils/currencyFormated';
 interface ViewModalAttribute {
   title: string;
 }
-
 export const ViewModal: React.FC<ViewModalProps> = ({
   title,
 }: ViewModalAttribute) => {
@@ -187,18 +186,18 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                       ))}
                       {Data?.data?.items?.map((e) => (
                         <div className="flex font-semibold w-full">
-                          <div className="w-1/2">
+                          <div className="w-1/2 flex justify-center items-center">
                             {e?.name === 'sku-zood-20001'
                               ? e?.pivot?.kitchen_notes
                               : e?.name}
                           </div>
-                          <div className="w-1/3 flex justify-center items-center">
+                          <div className="max-w-[97px] flex-grow flex justify-center items-center">
                             {currencyFormated(e?.pivot?.quantity)}
                           </div>
-                          <div className="w-1/3 flex justify-center items-center">
+                          <div className="max-w-[140px] flex-grow flex justify-center items-center">
                             {currencyFormated(e?.pivot?.cost)}
                           </div>
-                          <div className="w-1/3 flex justify-center items-center">
+                          <div className="max-w-[115px] flex-grow flex justify-center items-center">
                             {currencyFormated(
                               e?.pivot?.quantity * e?.pivot?.cost
                             )}
@@ -223,11 +222,14 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                           </div>
                         </div>
                       ) : null}
-                      {Data?.data?.total_taxes ? (
+                      {Data?.data?.tax_exclusive_discount_amount ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>مجموع ضريبة القيمة المضافة</div>
                           <div>
-                            SR {currencyFormated(Data.data.total_taxes)}
+                            SR{' '}
+                            {currencyFormated(
+                              Data.data.tax_exclusive_discount_amount
+                            )}
                           </div>
                         </div>
                       ) : null}
@@ -239,11 +241,17 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                           </div>
                         </div>
                       ) : null}
-                      {Data?.data?.total_cost ? (
+                      {Data?.data?.items ? (
                         <div className="flex justify-between p-2 rounded items-center">
                           <div>المبلغ الإجمالي</div>
                           <div>
-                            SR {currencyFormated(Data?.data?.total_cost)}
+                            SR{' '}
+                            {currencyFormated(
+                              Data?.data?.items?.reduce(
+                                (sum, item) => sum + item?.pivot?.total_cost,
+                                0
+                              )
+                            )}
                           </div>
                         </div>
                       ) : null}
@@ -501,10 +509,18 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                             </p>
                           </div>
                         ) : null}
-                        {Data?.data?.total_cost ? (
+                        {Data?.data?.items ? (
                           <div className="flex justify-between items-center">
                             <p className="w-[50%]">الاجمالي</p>
-                            <p>SR {currencyFormated(Data?.data?.total_cost)}</p>
+                            <p>
+                              SR{' '}
+                              {currencyFormated(
+                                Data?.data?.items?.reduce(
+                                  (sum, item) => sum + item?.pivot?.total_cost,
+                                  0
+                                )
+                              )}
+                            </p>
                           </div>
                         ) : null}
                         {Data?.data?.discount_amount ? (
@@ -515,11 +531,14 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                             </p>
                           </div>
                         ) : null}
-                        {Data?.data?.total_taxes ? (
+                        {Data?.data?.tax_exclusive_discount_amount ? (
                           <div className="flex justify-between items-center">
                             <p>مجموع ضريبة القيمة المضافة</p>
                             <p>
-                              SR {currencyFormated(Data?.data?.total_taxes)}
+                              SR{' '}
+                              {currencyFormated(
+                                Data?.data?.tax_exclusive_discount_amount
+                              )}
                             </p>
                           </div>
                         ) : null}

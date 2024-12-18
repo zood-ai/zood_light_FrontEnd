@@ -126,13 +126,17 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   }, [paymentMethod, taxAmount, discountAmount, totalAmountIncludeAndExclude]);
   const [paymentMethodinit, setPaymentMethodinit] = useState([]);
 
+  const Data = useSelector((state: any) => state.toggleAction.data);
   useEffect(() => {
     if (params.id) {
-      // axiosInstance.get(`orders/${params.id}`).then((res) => {
-      //   setPaymentMethod(res?.data?.data?.payments || []);
-      //   setPaymentMethodinit(res?.data?.data?.payments || []);
-      //   setdiscountAmount(res?.data?.data?.discount_amount || 0);
-      // });
+      setPaymentMethod(Data?.payments || []);
+      setPaymentMethodinit(Data?.payments || []);
+      setdiscountAmount(Data?.discount_amount || 0);
+      axiosInstance.get(`orders/${params.id}`).then((res) => {
+        setPaymentMethod(res?.data?.data?.payments || []);
+        setPaymentMethodinit(res?.data?.data?.payments || []);
+        setdiscountAmount(res?.data?.data?.discount_amount || 0);
+      });
       // setdiscountAmount(orderSchema?.discount_amount || 0);
     }
   }, []);
