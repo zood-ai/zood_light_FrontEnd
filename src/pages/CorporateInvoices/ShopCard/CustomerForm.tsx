@@ -260,7 +260,6 @@ const CustomerForm = () => {
                   type="number"
                   disabled={item.product_id}
                   value={item.unit_price || 0}
-                  //value={'٧٨٩٧٨٩٧٨٩٧٨٩٧٨٩٧٨٩٧٨٩٧٨٩'}
                   onChange={(e) => {
                     handleEnglishNumbersOnly(e);
                     const rawValue = e.target.value;
