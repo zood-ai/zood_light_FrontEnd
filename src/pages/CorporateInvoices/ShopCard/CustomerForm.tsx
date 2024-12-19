@@ -122,6 +122,14 @@ const CustomerForm = () => {
     }
   };
 
+  const handleEnglishNumbersOnly = (e) => {
+    const arabicNumbers = /[٠-٩]/g;
+    console.log(arabicNumbers.test(e.key));
+    if (arabicNumbers.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
   const handleItemChange = async (index: number, field: string, value: any) => {
     // if (params.id) return;
     if (field === 'product_id') {
@@ -251,9 +259,10 @@ const CustomerForm = () => {
                 <IconInput
                   type="number"
                   disabled={item.product_id}
-                  // value={item.unit_price}
                   value={item.unit_price || 0}
+                  //value={'٧٨٩٧٨٩٧٨٩٧٨٩٧٨٩٧٨٩٧٨٩٧٨٩'}
                   onChange={(e) => {
+                    handleEnglishNumbersOnly(e);
                     const rawValue = e.target.value;
                     const numericValue = parseFloat(rawValue) || 0;
                     handleItemChange(index, 'unit_price', numericValue);
