@@ -31,7 +31,11 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader remove={true} column={column} title={t('INVOICE_NUMBER')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('INVOICE_NUMBER')}
+        />
       ),
       cell: ({ row }) => {
         return (
@@ -83,11 +87,16 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={t('TOTAL_PRICE')} />
       ),
       cell: ({ row }: any) => {
+        const sum = row?.original?.items.reduce(
+          (acc: any, item: any) =>
+            acc + item?.pivot?.quantity * item?.pivot?.cost,
+          0
+        );
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('total_cost') || '0'}
+              {sum || '0'}
             </span>
           </div>
         );
@@ -124,7 +133,7 @@ export const useDataTableColumns = () => {
                 <StatusBadge status="pending" text={'click to clearance'} />
               ))} */}
             {/* {row.getValue('zatca_report_status') === 'PASS' && ( */}
-            <StatusBadge status="reported"  text={t('REPORTED')} />
+            <StatusBadge status="reported" text={t('REPORTED')} />
             {/* )} */}
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
           </div>

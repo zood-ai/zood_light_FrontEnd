@@ -81,9 +81,7 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
           setSearchedData(allData); // Reset if search is cleared
           return;
         }
-        setAllUrl(
-          `inventory/purchasing?${date}`
-        );
+        setAllUrl(`inventory/purchasing?${date}`);
         const res = await axiosInstance.get(`/inventory/purchasing?${date}`);
 
         setSearchedData(res.data);
@@ -100,9 +98,7 @@ export const PurchaseInvoices: React.FC<PurchaseInvoicesProps> = () => {
       //   return referenceMatch || customerName;
       // });
 
-      setAllUrl(
-        `inventory/purchasing?search=${searchTerm}${date}`
-      );
+      setAllUrl(`inventory/purchasing?search=${searchTerm}${date}`);
       const res = await axiosInstance.get(
         `/inventory/purchasing?search=${searchTerm}${date}`
       );

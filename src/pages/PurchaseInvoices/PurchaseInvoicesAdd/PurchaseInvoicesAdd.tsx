@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { PurchaseInvoicesAddProps } from './PurchaseInvoicesAdd.types';
 import personIcon from '/icons/name person.svg';
 import callIcon from '/icons/call.svg';
@@ -22,7 +23,11 @@ import DelConfirm from '@/components/custom/DelConfim';
 import FastAddActionsCustomer from '@/components/FastAddActionsCustomer';
 import FileUpload from './uploadicon/FileUpload';
 import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
+import { GrMenu } from 'react-icons/gr';
+import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
+import { TbMenuDeep } from 'react-icons/tb';
 
+let holder = 0;
 export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const { t } = useTranslation();
   const [invoice, setInvoice] = useState({
@@ -37,9 +42,11 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       total: 0,
       item: '',
       itemDescription: '',
+      kitchen_notes: '',
       name: '',
       id: '',
       price: 0,
+      priceDisabled: true,
     },
   ]);
   const [fileBase64, setFileBase64] = useState<any>('');
@@ -53,11 +60,15 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const crudService = createCrudService<any>('inventory/purchasing');
   const whoIam = createCrudService<any>(`auth/whoami?${token}`).useGetAll();
   const [loading, setLoading] = useState(false);
+  const Data = useSelector((state: any) => state.toggleAction.data);
 
   const { useGetById, useUpdate, useCreate } = crudService;
   const { useGetAll: useGetAllPro } = createCrudService<any>(
     'menu/products?not_default=1&per_page=1000&sort=-created_at'
   );
+  const { data: defaultProduct } = createCrudService<any>(
+    'inventory/items?filter[name]=sku-zood-20001'
+  ).useGetAll();
   const { data: getAllPro } = useGetAllPro();
   const { data: allData } = createCrudService<any>(
     'inventory/suppliers'
@@ -67,32 +78,62 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   ).useGetAll();
 
   const cantClick = items?.find((item) => {
-    if (!(item.id && item.qty)) {
+    if (!((item.id && item.qty) || (item.kitchen_notes && item.qty))) {
       return item;
     }
   });
+  console.log({ Data });
   useEffect(() => {
     if (isEditMode) {
-      setInvoice({
-        supplier_id: allDataId?.data?.supplier?.id,
-        invoice_number: allDataId?.data?.invoice_number,
-        purchaseDescription: allDataId?.data?.notes,
-        attached_file: allDataId?.data?.attached_file,
-      });
+      const fun = async () => {
+        setInvoice({
+          supplier_id: Data?.get_supplier?.id,
+          invoice_number: Data?.invoice_number,
+          purchaseDescription: Data?.notes,
+          attached_file: Data?.attached_file,
+        });
 
-      setItems(
-        allDataId?.data?.items?.map((item) => ({
-          qty: item?.pivot?.quantity,
-          total: item?.pivot?.total_cost,
-          item: item?.pivot?.item_id,
-          id: item?.product_id,
-          itemDescription: item?.product?.description,
-          name: item?.name,
-          price: item?.pivot?.cost,
-        }))
-      );
+        setItems(
+          Data?.items?.map((item) => ({
+            qty: item?.pivot?.quantity ?? 1,
+            total: item?.pivot?.total_cost ?? 0,
+            item: item?.pivot?.item_id ?? '',
+            id: item?.product_id ?? '',
+            itemDescription: item?.product?.description ?? '',
+            kitchen_notes: item?.pivot?.kitchen_notes ?? '',
+            name: item?.name ?? '',
+            price: item?.pivot?.cost ?? 0,
+            priceDisabled: true,
+          }))
+        );
+        // const res = await axiosInstance.get(
+        //   `inventory/purchasing/${params.objId}`
+        // );
+        // console.log({ res });
+        // setInvoice({
+        //   supplier_id: res?.data?.data?.supplier?.id,
+        //   invoice_number: res?.data?.data?.invoice_number,
+        //   purchaseDescription: res?.data?.data?.notes,
+        //   attached_file: res?.data?.data?.attached_file,
+        // });
+
+        // setItems(
+        //   res?.data?.data?.items?.map((item) => ({
+        //     qty: item?.pivot?.quantity ?? 1,
+        //     total: item?.pivot?.total_cost ?? 0,
+        //     item: item?.pivot?.item_id ?? '',
+        //     id: item?.product_id ?? '',
+        //     itemDescription: item?.product?.description ?? '',
+        //     kitchen_notes: item?.pivot?.kitchen_notes ?? '',
+        //     name: item?.name ?? '',
+        //     price: item?.pivot?.cost ?? 0,
+        //     priceDisabled: true,
+        //   }))
+        // );
+      };
+      fun();
     }
-  }, [allDataId]);
+  }, [allDataId, isEditMode, Data, params.objId]);
   const { openDialog } = useGlobalDialog();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,8 +141,26 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   };
 
   const handleItemChange = (index: number, field: string, value: any) => {
+    if (isEditMode) return;
     const updatedItems = [...items];
-    updatedItems[index][field] = value;
+    if (field === 'kitchen_notes') {
+      updatedItems[index] = {
+        qty: 1,
+        total: 0,
+        item: defaultProduct ? defaultProduct?.data?.[holder]?.id : '',
+        id: defaultProduct ? defaultProduct?.data?.[holder]?.id : '',
+        itemDescription: '',
+        kitchen_notes: myInputRef?.current?.value,
+        name: 'sku-zood-20001',
+        price: 0,
+        priceDisabled: false,
+      };
+      holder++;
+      holder = holder === defaultProduct?.data?.length ? 0 : holder;
+    } else {
+      updatedItems[index][field] = value;
+    }
+    console.log({ updatedItems });
     setItems(updatedItems);
   };
   const { data: branchData } =
@@ -128,7 +187,10 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           `inventory/purchasing/create_purchasing_item/${params.objId}`,
           {
             type: 'items',
-            items: items.map((item) => item.item),
+            items: items.map((item) => ({
+              id: item.item,
+              kitchen_notes: item.kitchen_notes,
+            })),
           }
         );
         await axiosInstance.post(
@@ -138,25 +200,24 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
             id: item.item,
             quantity: item.qty,
-            total_cost: Number(item.price) * Number(item.qty),
+            total_cost: Number(item.total),
           }))
         );
       } else {
-        // const product = await axiosInstance.post(`menu/product/${}`)
         const { data } = await axiosInstance.post('inventory/purchasing', {
           branch_id: branchData?.data?.[0]?.id,
           supplier_id: invoice.supplier_id,
           type: 'items',
           notes: invoice.purchaseDescription,
           attached_file: fileBase64,
-          items: items.map((item) => item.item),
+          items: items.map((item) => ({
+            id: item.item,
+            kitchen_notes: item.kitchen_notes,
+          })),
           invoice_number:
             Number(invoice.invoice_number) ||
             Math.floor(Math.random() * 100000),
         });
-        // const res =  await axiosInstance.get(
-        //   `inventory/purchasing/${data?.data?.id}`
-        // )
         await axiosInstance.post(
           `inventory/purchasing/update_purchasing_item/${data?.data?.id}`,
           items.map((item) => ({
@@ -197,6 +258,12 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const setSuppId = (value: string) => {
     setInvoice({ ...invoice, supplier_id: value });
   };
+  const myInputRef = useRef(null);
+  const [isTextArea, setIsTextArea] = useState(false);
+  const changeToTextArea = () => {
+    setIsTextArea(!isTextArea);
+  };
+  console.log({ items });
 
   // Ensure DetailsHeadWithOutFilter is rendered correctly
   return (
@@ -216,33 +283,37 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   onValueChange={(value) =>
                     setInvoice({ ...invoice, supplier_id: value })
                   }
+                  disabled={isEditMode}
                   value={invoice.supplier_id}
                   label={t('SUPPLIER_NAME')}
                   className="w-full"
                 />
               </div>
               <div className="flex items-end">
-                <Button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setFastActionBtn(true);
-                  }}
-                  type="button"
-                  variant={'link'}
-                >
-                  <div className="flex gap-2">
-                    <span>
-                      <PlusIcon />
-                    </span>
-                    <span className="font-semibold">
-                      {t('ADD_NEW_SUPPLIER')}
-                    </span>
-                  </div>
-                </Button>
+                {!isEditMode && (
+                  <Button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setFastActionBtn(true);
+                    }}
+                    type="button"
+                    variant={'link'}
+                  >
+                    <div className="flex gap-2">
+                      <span>
+                        <PlusIcon />
+                      </span>
+                      <span className="font-semibold">
+                        {t('ADD_NEW_SUPPLIER')}
+                      </span>
+                    </div>
+                  </Button>
+                )}
               </div>
             </div>
             <div className="flex justify-start items-center">
               <IconInput
+                disabled={isEditMode}
                 name="invoice_number"
                 defaultValue={invoice.invoice_number}
                 onChange={handleInputChange}
@@ -250,7 +321,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 inputClassName="w-[274px]"
               />
             </div>
-            <Textarea
+            {/* <Textarea
               name="purchaseDescription"
               value={invoice.purchaseDescription}
               onChange={(e) =>
@@ -261,11 +332,173 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
               }
               className="w-full"
               label={t('PURCHASES_DESCRIPTION')}
-            />
+            /> */}
             {items?.map((currentItem, index) => (
               <>
-                <div className="flex gap-md">
-                  <CustomSearchInbox
+                <div className="relative max-w-[calc(100%-50px)] flex gap-md flex-wrap">
+                  {!isTextArea ? (
+                    <>
+                      <div className="flex w-full justify-between gap-5">
+                        {/* <SelectCompInput
+                          className="flex-grow w-full "
+                          placeholder={t('PRODUCT_NAME')}
+                          label={t('PRODUCT_NAME')}
+                          ref={myInputRef}
+                          cantType={isEditMode}
+                          cantChoose={isEditMode}
+                          options={getAllPro?.data?.map((item) => ({
+                            value: item.id,
+                            label: item.name,
+                          }))}
+                          onValueChange={(value) => {
+                            if (!value) return;
+                            if (isEditMode) return;
+                            console.log({ value });
+
+                            myInputRef.current.value = '';
+                            handleItemChange(
+                              index,
+                              'item',
+                              getAllPro?.data.find((item) => item.id === value)
+                                ?.item_id
+                            );
+                            handleItemChange(index, 'priceDisabled', true);
+                            handleItemChange(
+                              index,
+                              'name',
+                              getAllPro?.data.find((item) => item.id === value)
+                                ?.name
+                            );
+                            handleItemChange(index, 'id', value);
+                            handleItemChange(
+                              index,
+                              'total',
+                              getAllPro?.data.find((item) => item.id === value)
+                                ?.price
+                            );
+                            handleItemChange(
+                              index,
+                              'price',
+                              getAllPro?.data.find((item) => item.id === value)
+                                ?.price
+                            );
+                          }}
+                          onInputFieldChange={(value) => {
+                            if (isEditMode) return;
+                            handleItemChange(index, 'kitchen_notes', value);
+                          }}
+                          value={currentItem?.id}
+                          TextDisabled={currentItem.name !== 'sku-zood-20001'}
+                          directValue={
+                            currentItem.name === 'sku-zood-20001'
+                              ? currentItem?.kitchen_notes
+                              : currentItem.name ||
+                                getAllPro?.data
+                                  ?.map((item) => ({
+                                    value: item.id,
+                                    label: item.name,
+                                  }))
+                                  .find(
+                                    (option) =>
+                                      option?.value === items[index]?.id
+                                  )?.label
+                          }
+                        /> */}
+                        <SelectCompInput
+                          // disabled={isEditMode}
+                          cantDoAnything={isEditMode}
+                          className="flex-grow w-full "
+                          placeholder={t('PRODUCT_NAME')}
+                          options={getAllPro?.data?.map((product) => ({
+                            value: product.id,
+                            label: product.name,
+                          }))}
+                          label={t('PRODUCT_NAME')}
+                          ref={myInputRef}
+                          onValueChange={(value) => {
+                            if (!value) return;
+                            if (isEditMode) return;
+
+                            // myInputRef.current.value = '';
+                            handleItemChange(
+                              index,
+                              'item',
+                              getAllPro?.data.find((item) => item.id === value)
+                                ?.item_id
+                            );
+                            handleItemChange(index, 'priceDisabled', true);
+                            handleItemChange(
+                              index,
+                              'name',
+                              getAllPro?.data.find((item) => item.id === value)
+                                ?.name
+                            );
+                            handleItemChange(index, 'id', value);
+                            handleItemChange(
+                              index,
+                              'total',
+                              getAllPro?.data.find((item) => item.id === value)
+                                ?.price
+                            );
+                            handleItemChange(
+                              index,
+                              'price',
+                              getAllPro?.data.find((item) => item.id === value)
+                                ?.price
+                            );
+                          }}
+                          onInputFieldChange={(value) => {
+                            if (isEditMode) return;
+                            handleItemChange(index, 'kitchen_notes', value);
+                          }}
+                          value={currentItem.id}
+                          directValue={
+                            currentItem.name === 'sku-zood-20001'
+                              ? currentItem?.kitchen_notes
+                              : ''
+                          }
+                        />
+                        {!isEditMode && (
+                          <button
+                            type="button"
+                            onClick={changeToTextArea}
+                            className="w-fit h-fit mt-8"
+                          >
+                            <GrMenu size={25} />
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex w-full justify-between gap-5">
+                        <Textarea
+                          placeholder="وصف المنتج"
+                          defaultValue={
+                            currentItem.name === 'sku-zood-20001'
+                              ? currentItem?.kitchen_notes
+                              : currentItem?.name
+                          }
+                          disabled={isEditMode}
+                          ref={myInputRef}
+                          onChange={() => {
+                            if (isEditMode) return;
+                            handleItemChange(index, 'kitchen_notes', '1');
+                          }}
+                          label={t('PRODUCT_NAME')}
+                          className="flex-grow min-w-[455px] h-min"
+                        />
+                        <button
+                          type="button"
+                          onClick={changeToTextArea}
+                          className="h-fit mt-6"
+                        >
+                          <TbMenuDeep size={25} />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                  {/* <CustomSearchInbox
                     className="w-full"
                     placeholder={t('PRODUCT_NAME')}
                     options={getAllPro?.data
@@ -307,51 +540,63 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                         .find((option) => option?.value === items[index]?.id)
                         ?.label
                     }
-                  />
-                  <IconInput
-                    value={currentItem.qty}
-                    onChange={(e) => {
-                      if (e.target.value == 0) return;
-                      handleItemChange(
-                        index,
-                        'total',
-                        Number(e.target.value) * Number(currentItem.price)
-                      );
-                      handleItemChange(
-                        index,
-                        'qty',
-                        Number(e.target.value.replace(/^0+(?=\d)/, ''))
-                      );
-                    }}
-                    label={t('QUANTITY')}
-                    min={1}
-                    type="number"
-                    inputClassName="w-[117px]"
-                  />
-                  <IconInput
-                    value={currentItem.total}
-                    disabled
-                    // onChange={(e) =>
-                    //   handleItemChange(
-                    //     index,
-                    //     'total',
-                    //     e.target.value.replace(/^0+(?=\d)/, '')
-                    //   )
-                    // }
-                    type="number"
-                    min="0"
-                    label={t('PRICE')}
-                    inputClassName="w-[117px]"
-                    iconSrcLeft={'SR'}
-                  />
-                  {items.length > 1 && (
+                  /> */}
+                  <div className="flex gap-10">
+                    <IconInput
+                      value={currentItem.qty}
+                      disabled={isEditMode}
+                      onChange={(e) => {
+                        if (isEditMode) return;
+                        if (e.target.value == 0) return;
+                        if (!currentItem.kitchen_notes) {
+                          handleItemChange(
+                            index,
+                            'total',
+                            Number(e.target.value) * Number(currentItem.price)
+                          );
+                        }
+                        handleItemChange(
+                          index,
+                          'qty',
+                          Number(e.target.value.replace(/^0+(?=\d)/, ''))
+                        );
+                      }}
+                      label={t('QUANTITY')}
+                      min={1}
+                      type="number"
+                      inputClassName="flex-grow"
+                    />
+                    <IconInput
+                      value={currentItem.total}
+                      disabled={currentItem.priceDisabled}
+                      onChange={(e) => {
+                        if (isEditMode) return;
+                        handleItemChange(
+                          index,
+                          'price',
+                          parseFloat(e.target.value.replace(/^0+(?=\d)/, ''))
+                        );
+                        handleItemChange(
+                          index,
+                          'total',
+                          parseFloat(e.target.value.replace(/^0+(?=\d)/, ''))
+                        );
+                      }}
+                      type="number"
+                      min="0"
+                      label={t('PRICE')}
+                      inputClassName="flex-grow"
+                      iconSrcLeft={'SR'}
+                    />
+                  </div>
+                  {!isEditMode && items.length > 1 && (
                     <div
                       onClick={() => {
                         const newItems = [...items];
                         newItems.splice(index, 1);
                         setItems(newItems);
                       }}
-                      className="translate-y-[34px] cursor-pointer hover:scale-105"
+                      className="absolute translate-y-[32px] -left-10 cursor-pointer hover:scale-105"
                     >
                       <svg
                         width="24"
@@ -368,7 +613,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     </div>
                   )}
                 </div>
-                <Textarea
+                {/* <Textarea
                   rows={2}
                   name="itemDescription"
                   value={currentItem.itemDescription}
@@ -377,47 +622,54 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   }
                   className="w-full"
                   label={t('DESCRIPTION')}
-                />
+                /> */}
               </>
             ))}
-            <Button
-              onClick={() => {
-                setItems(() => {
-                  return [
-                    ...items,
-                    {
-                      item: '',
-                      qty: 1,
-                      total: 0,
-                      itemDescription: '',
-                      name: '',
-                      id: '',
-                    },
-                  ];
-                });
-              }}
-              type="button"
-              className=" justify-end   "
-              variant={'link'}
-            >
-              <div className="flex gap-2">
-                <span>
-                  <PlusIcon />
-                </span>
-                <span className="font-semibold">{t('ADD_NEW_ITEM')}</span>
-              </div>
-            </Button>
-            <FileUpload
-              onFileSelect={function (file: File): void {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                  const base64 = reader.result?.toString().split(',')[1];
-                  setFileBase64(`data:image/png;base64,${base64}`);
-                  setFileName(file.name); // Set the file name
-                };
-                reader.readAsDataURL(file);
-              }}
-            />
+            {!isEditMode && (
+              <Button
+                onClick={() => {
+                  setItems(() => {
+                    return [
+                      ...items,
+                      {
+                        item: '',
+                        qty: 1,
+                        total: 0,
+                        kitchen_notes: '',
+                        itemDescription: '',
+                        name: '',
+                        id: '',
+                        price: 0,
+                        priceDisabled: true,
+                      },
+                    ];
+                  });
+                }}
+                type="button"
+                className=" justify-end   "
+                variant={'link'}
+              >
+                <div className="flex gap-2">
+                  <span>
+                    <PlusIcon />
+                  </span>
+                  <span className="font-semibold">{t('ADD_NEW_ITEM')}</span>
+                </div>
+              </Button>
+            )}
+            {!isEditMode && (
+              <FileUpload
+                onFileSelect={function (file: File): void {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    const base64 = reader.result?.toString().split(',')[1];
+                    setFileBase64(`data:image/png;base64,${base64}`);
+                    setFileName(file.name); // Set the file name
+                  };
+                  reader.readAsDataURL(file);
+                }}
+              />
+            )}
             {fileName && (
               <div className="mt-2 text-sm text-gray-600">
                 {`Selected file: ${fileName}`}
@@ -430,33 +682,34 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 </a>
               </div>
             )}
-            <div className="flex flex-wrap gap-y-5">
-              <Button
-                loading={loading}
-                disabled={
-                  loading ||
-                  cantClick ||
-                  !(allDataId && allDataId?.data?.status !== 'Closed')
-                    ? true
-                    : false
-                }
-                type="submit"
-                className="px-6 py-1.5 mta-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
-              >
-                {isEditMode ? t('UPDATE_INVOICE') : t('ADD_INVOICE')}
-              </Button>
-              {allDataId &&
-                isEditMode &&
-                allDataId?.data?.status !== 'Closed' && (
-                  <Button
-                    loading={loading}
-                    type="button"
-                    onClick={handleConfirmation}
-                    className="px-6 py-1.5 mx-4 text-sm font-semibold rounded min-h-[39px] w-[144px]"
-                  >
-                    {t('CONFIRM')}
-                  </Button>
-                )}
+            <div className="flex flex-wrap gap-y-5 mt-5">
+              {!isEditMode && (
+                <Button
+                  loading={loading}
+                  disabled={
+                    loading ||
+                    cantClick ||
+                    !(allDataId && allDataId?.data?.status !== 'Closed')
+                      ? true
+                      : false
+                  }
+                  type="submit"
+                  className="px-6 py-1.5 mta-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
+                >
+                  {isEditMode ? t('UPDATE_INVOICE') : t('ADD_INVOICE')}
+                </Button>
+              )}
+              {isEditMode && allDataId?.data?.status !== 'Closed' && (
+                <Button
+                  loading={loading}
+                  disabled={loading}
+                  type="button"
+                  onClick={handleConfirmation}
+                  className="px-6 py-1.5 mx-4 text-sm font-semibold rounded min-h-[39px] w-[144px]"
+                >
+                  {t('CONFIRM')}
+                </Button>
+              )}
               <DelConfirm route={'inventory/purchasing'} />
             </div>
           </div>

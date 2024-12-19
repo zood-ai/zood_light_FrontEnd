@@ -30,6 +30,12 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
       className,
       label,
       value,
+      directValue,
+      cantDoAnything = false,
+      cantType = false,
+      TextDisabled = false,
+      disabled = false,
+      cantChoose = false,
       ...props
     },
     ref
@@ -51,18 +57,6 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
       onValueChange('');
       setDropDownValue('');
       setInputValue(value);
-    };
-
-    const handleValueChange = (value: string) => {
-      // if (inputValue) return;
-      if (value === 'clear') {
-        onValueChange('');
-        setInputValue('');
-      } else {
-        onValueChange(value);
-        setInputValue('');
-      }
-      // setIsInputActive(false); // Reset to dropdown mode after selection
     };
 
     useEffect(() => {
@@ -88,12 +82,12 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
           onValueChange={(value) => {
             onValueChange(value);
             setDropDownValue(value);
-            setInputValue('');
+            // setInputValue('');
           }}
           placeholder={inputValue == '' && placeholder}
           label={label}
           className={className}
-          disabled={params.id}
+          disabled={disabled || cantChoose || cantDoAnything}
         />
 
         {/* <Select
@@ -118,11 +112,12 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
         </Select> */}
 
         {/* Transparent Input Overlay */}
-        {!params.id ? (
+        {!disabled ? (
           <input
             ref={ref}
             type="text"
-            value={inputValue}
+            disabled={cantType || cantDoAnything}
+            defaultValue={directValue ? directValue : inputValue}
             onFocus={handleInputFocus}
             onChange={handleInputChange}
             // placeholder={placeholder}

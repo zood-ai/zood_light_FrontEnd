@@ -9,8 +9,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import useDirection from '@/hooks/useDirection';
 
 const LineChartExample = ({ data }) => {
+  const isRtl = useDirection();
   const CustomTooltip = ({ payload }: any) => {
     if (payload && payload.length) {
       const value = payload[0].value;
@@ -24,7 +26,7 @@ const LineChartExample = ({ data }) => {
   };
 
   return (
-    <div className="col-span-1  md:col-span-2 w-[120%] md:w-[100%] h-[400px]">
+    <div dir={!isRtl ? 'rtl': 'ltr'} className="col-span-1  md:col-span-2 w-[120%] md:w-[100%] h-[400px]">
       <ResponsiveContainer width={'100%'} height={'100%'}>
         <BarChart
           data={data?.sum_orders}
@@ -36,7 +38,7 @@ const LineChartExample = ({ data }) => {
           <XAxis dataKey="date" padding={{ left: 10, right: 10 }} />
 
           {/* Y-Axis without Label */}
-          <YAxis tickMargin={80} /> 
+          <YAxis tickMargin={!isRtl ? 100 : 30}/> 
 
           <Tooltip content={<CustomTooltip />} />
           <Legend />
