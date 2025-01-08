@@ -93,7 +93,7 @@ const CustomerForm = () => {
   const handleItemChange = async (
     index: number,
     field: string,
-    value: string
+    value: any
   ) => {
     if (field === 'product_id') {
       if (!value) {
@@ -141,8 +141,8 @@ const CustomerForm = () => {
         i === index
           ? {
               ...item,
-              unit_price: parseInt(value) || 1,
-              total_price: (parseInt(value) || 1) * item.quantity || 0,
+              unit_price: value,
+              total_price: value * item.quantity || 0,
             }
           : item
       );
@@ -200,9 +200,35 @@ const CustomerForm = () => {
                 <IconInput
                   disabled={item.product_id}
                   value={item.unit_price || 0}
-                  onChange={(e) =>
-                    handleItemChange(index, 'unit_price', e.target.value)
-                  }
+                  onChange={(e) => {
+                    let rawValue = e.target.value;
+
+                    // Normalize Arabic-Hindi numerals to Western Arabic numerals
+                    rawValue = rawValue.replace(/[\u0660-\u0669]/g, (d) =>
+                      String.fromCharCode(d.charCodeAt(0) - 0x0660 + 48)
+                    );
+
+                    // Allow only numbers and a single decimal point
+                    rawValue = rawValue.replace(/[^0-9.]/g, '');
+
+                    // Prevent multiple decimal points
+                    const parts = rawValue.split('.');
+                    if (parts.length > 2) {
+                      rawValue = `${parts[0]}.${parts[1]}`; // Keep only the first two parts
+                    }
+
+                    // Prevent leading zeros unless followed by a decimal point
+                    if (
+                      rawValue.startsWith('0') &&
+                      rawValue[1] !== '.' &&
+                      rawValue.length > 1
+                    ) {
+                      rawValue = rawValue.replace(/^0+/, '');
+                    }
+
+                    // Update the value
+                    handleItemChange(index, 'unit_price', rawValue);
+                  }}
                   label={t('PRICE')}
                   iconSrcLeft="SR"
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
