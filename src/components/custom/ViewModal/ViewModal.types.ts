@@ -1,1 +1,3 @@
-export type ViewModalProps = {};
+export type ViewModalProps = {
+  title: string;
+}

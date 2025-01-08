@@ -1,20 +1,18 @@
-import { useSelector } from 'react-redux';
-import { useState, useRef, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useState, useRef } from 'react';
 import { ViewModalProps } from './ViewModal.types';
-import createCrudService from '@/api/services/crudService';
 import { useReactToPrint } from 'react-to-print';
 import './ViewModal.css';
 import { useLocation } from 'react-router-dom';
 import { QRCodeComp } from '@/components/custom/QRCodeComp';
-import Loading from '@/components/loader';
 import { currencyFormated } from '@/utils/currencyFormated';
+import axiosInstance from '@/api/interceptors';
+import { toast } from '@/components/ui/use-toast';
+import { toggleActionView } from '@/store/slices/toggleAction';
+import { useQueryClient } from '@tanstack/react-query';
 
-interface ViewModalAttribute {
-  title: string;
-}
-export const ViewModal: React.FC<ViewModalProps> = ({
-  title,
-}: ViewModalAttribute) => {
+export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
+  const dispatch = useDispatch();
   const data = useSelector((state: any) => state.toggleAction.data);
   const allSettings = useSelector((state: any) => state.allSettings.value);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -27,12 +25,37 @@ export const ViewModal: React.FC<ViewModalProps> = ({
   const ShowCar =
     allSettings.WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
   const Data = { data };
+  const [loading, setLoading] = useState(false);
   const [size, setSize] = useState('A4');
+  const queryClient = useQueryClient();
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);
   };
+  console.log({ data });
   const handlePrint = () => {
     reactToPrintFn();
+  };
+  const handleReturn = async () => {
+    if (!data) return;
+    setLoading(true);
+    try {
+      await axiosInstance.put(`/orders/${data?.id}/refund`);
+      toast({
+        title: 'Returned',
+        description: 'Item returned successfully',
+        duration: 3000,
+        variant: 'default',
+      });
+      queryClient.invalidateQueries(['/orders']);
+      dispatch(toggleActionView(false));
+    } catch (error) {
+      toast({
+        title: 'somthing went wrong',
+        description: 'somthing went wrong',
+        duration: 3000,
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -652,6 +675,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         <div className="flex gap-4 items-center w-full flex-grow text-zinc-800">
                           <div className="flex gap-2 items-center self-stretch my-auto">
                             <button
+                              disabled={loading}
                               onClick={() => handleSizeChange('80mm')}
                               className={`self-stretch my-auto`}
                             >
@@ -666,6 +690,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                           </div>
                           <div className="flex gap-2 items-center self-stretch my-auto">
                             <button
+                              disabled={loading}
                               onClick={() => handleSizeChange('A4')}
                               className={`self-stretch my-auto `}
                             >
@@ -680,6 +705,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                           </div>
                         </div>
                         <button
+                          disabled={loading}
                           onClick={handlePrint}
                           className="gap-2.5 self-end px-8 py-1 mt-4 max-w-full text-white bg-indigo-900 rounded-lg min-h-[32px] mx-auto w-[100px] max-md:px-5"
                         >
@@ -687,11 +713,17 @@ export const ViewModal: React.FC<ViewModalProps> = ({
                         </button>
                       </div>
                     </div>
-                    <div className="flex flex-grow flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg  max-md:mt-10">
-                      <button className="px-2.5 py-1 bg-white rounded-lg border border-red-500 border-solid max-md:px-5 w-[100px]">
-                        استرجاع
-                      </button>
-                    </div>
+                    {Another && (
+                      <div className="flex flex-grow flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg  max-md:mt-10">
+                        <button
+                          disabled={loading}
+                          onClick={handleReturn}
+                          className="px-2.5 py-1 bg-white rounded-lg border border-red-500 border-solid max-md:px-5 w-[100px]"
+                        >
+                          استرجاع
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

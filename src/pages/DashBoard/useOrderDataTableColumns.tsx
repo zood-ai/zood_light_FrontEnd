@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-table-column-header';
 import { formatDateTime } from '@/utils/formatDateTime';
 import { StatusBadge } from '@/components/custom/StatusBadge';
-import {currencyFormated} from "@/utils/currencyFormated"
+import { currencyFormated } from '@/utils/currencyFormated';
 export const useOrderDataTableColumns = () => {
   const { t } = useTranslation();
 
@@ -13,7 +13,11 @@ export const useOrderDataTableColumns = () => {
     {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader remove={true} column={column} title={t('INVOICE_NUMBER')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('INVOICE_NUMBER')}
+        />
       ),
       cell: ({ row }) => (
         <span className="font-medium">{row.getValue('reference')}</span>
@@ -77,12 +81,16 @@ export const useOrderDataTableColumns = () => {
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('payment_status') == 'partial' ? (
+              {row?.original.return_reason ? (
+                <StatusBadge status="pending" text={t('RETURN_PAYMENT')} />
+              ) : row.getValue('payment_status') == 'partial' ? (
                 <StatusBadge status="Inactive" text={t('PARTIALLY_PAID')} />
               ) : row.getValue('payment_status') == 'unpaid' ? (
                 <StatusBadge status="error" text={t('UNPAID')} />
-              ) : (
+              ) : row.getValue('payment_status') == 'fully' ? (
                 <StatusBadge status="active" text={t('PAID')} />
+              ) : (
+                '-'
               )}
             </span>
           </div>

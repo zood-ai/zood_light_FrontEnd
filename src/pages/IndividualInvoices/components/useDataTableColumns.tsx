@@ -14,7 +14,7 @@ import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
-import {currencyFormated} from '../../../utils/currencyFormated'
+import { currencyFormated } from '../../../utils/currencyFormated';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
@@ -24,7 +24,11 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader remove={true} column={column} title={t('INVOICE_NUMBER')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('INVOICE_NUMBER')}
+        />
       ),
       cell: ({ row }) => {
         return (
@@ -94,16 +98,22 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={t('PAYMENT_STATUS')} />
       ),
       cell: ({ row }: any) => {
+        console.log({ row });
+
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('payment_status') == 'partial' ? (
+              {row?.original.return_reason ? (
+                <StatusBadge status="pending" text={t('RETURN_PAYMENT')} />
+              ) : row.getValue('payment_status') == 'partial' ? (
                 <StatusBadge status="Inactive" text={t('PARTIALLY_PAID')} />
               ) : row.getValue('payment_status') == 'unpaid' ? (
                 <StatusBadge status="error" text={t('UNPAID')} />
-              ) : (
+              ) : row.getValue('payment_status') == 'fully' ? (
                 <StatusBadge status="active" text={t('PAID')} />
+              ) : (
+                '-'
               )}
             </span>
           </div>
@@ -123,7 +133,7 @@ export const useDataTableColumns = () => {
                 <StatusBadge status="pending" text={'click to reported'} />
               ))} */}
             {/* {row.getValue('zatca_report_status') === 'PASS' && ( */}
-              <StatusBadge status="reported"  text={t('REPORTED')} />
+            <StatusBadge status="reported" text={t('REPORTED')} />
             {/* )} */}
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
           </div>
