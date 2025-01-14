@@ -69,6 +69,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const { data: defaultProduct } = createCrudService<any>(
     'inventory/items?filter[name]=sku-zood-20001'
   ).useGetAll();
+  console.log({ defaultProduct: defaultProduct?.data?.[holder]?.id });
   const { data: getAllPro } = useGetAllPro();
   const { data: allData } = createCrudService<any>(
     'inventory/suppliers'
@@ -147,8 +148,8 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       updatedItems[index] = {
         qty: 1,
         total: 0,
-        item: defaultProduct ? defaultProduct?.data?.[holder]?.id : '',
-        id: defaultProduct ? defaultProduct?.data?.[holder]?.id : '',
+        item: defaultProduct ? defaultProduct?.data?.[0]?.id : '',
+        id: defaultProduct ? defaultProduct?.data?.[0]?.id : '',
         itemDescription: '',
         kitchen_notes: myInputRef?.current?.value,
         name: 'sku-zood-20001',
@@ -204,6 +205,11 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           }))
         );
       } else {
+        const { data: defaultProduct } = await axiosInstance.get(
+          'inventory/items?filter[name]=sku-zood-20001'
+        );
+        console.log(1234, { defaultProduct });
+
         const { data } = await axiosInstance.post('inventory/purchasing', {
           branch_id: branchData?.data?.[0]?.id,
           supplier_id: invoice.supplier_id,
@@ -211,7 +217,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           notes: invoice.purchaseDescription,
           attached_file: fileBase64,
           items: items.map((item) => ({
-            id: item.item,
+            id: item.item || defaultProduct?.data?.[0]?.id || '',
             kitchen_notes: item.kitchen_notes,
           })),
           invoice_number:
@@ -221,7 +227,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
         await axiosInstance.post(
           `inventory/purchasing/update_purchasing_item/${data?.data?.id}`,
           items.map((item) => ({
-            id: item.item,
+            id: item.item || defaultProduct?.data?.[0]?.id || '',
             quantity: item.qty,
             total_cost: Number(item.price) * Number(item.qty),
           }))
@@ -562,8 +568,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                         );
                       }}
                       label={t('QUANTITY')}
-                      min={1}
-                      type="number"
                       inputClassName="flex-grow"
                     />
                     <IconInput
@@ -571,19 +575,9 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                       disabled={currentItem.priceDisabled}
                       onChange={(e) => {
                         if (isEditMode) return;
-                        handleItemChange(
-                          index,
-                          'price',
-                          parseFloat(e.target.value.replace(/^0+(?=\d)/, ''))
-                        );
-                        handleItemChange(
-                          index,
-                          'total',
-                          parseFloat(e.target.value.replace(/^0+(?=\d)/, ''))
-                        );
+                        handleItemChange(index, 'price', e.target.value);
+                        handleItemChange(index, 'total', e.target.value);
                       }}
-                      type="number"
-                      min="0"
                       label={t('PRICE')}
                       inputClassName="flex-grow"
                       iconSrcLeft={'SR'}
