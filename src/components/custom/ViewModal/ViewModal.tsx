@@ -18,7 +18,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
   const customerInfo = { data: data.customer };
-  const supplierInfo = { data: data?.supplier };
+  const supplierInfo = { data: data?.get_supplier };
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
   const Another = !Corporate;
