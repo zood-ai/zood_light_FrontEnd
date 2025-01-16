@@ -22,6 +22,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
   const Another = !Corporate;
+
   const ShowCar =
     allSettings.WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
   const Data = { data };
@@ -31,7 +32,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const handleSizeChange = (newSize: string) => {
     setSize(newSize);
   };
-  console.log({ data });
   const handlePrint = () => {
     reactToPrintFn();
   };
@@ -57,6 +57,8 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
       });
     }
   };
+
+  console.log({ allSettings });
 
   return (
     <>
@@ -91,13 +93,19 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                             {allSettings.WhoAmI?.business?.name}
                           </p>
                         </div>
-                        <p className="mt-4 w-[277px] leading-[30.18px]">
+                        <p className="mt-4 leading-[30.18px]">
                           {allSettings.WhoAmI?.user?.branches[0]
                             ?.registered_address &&
                             JSON.parse(
                               allSettings.WhoAmI?.user?.branches[0]
                                 ?.registered_address
                             )?.streetName}
+                        </p>
+                        <p className="w-[277px]">
+                          {allSettings.settings?.data?.business_tax_number}
+                        </p>
+                        <p className="w-[277px]">
+                          {allSettings.WhoAmI?.user?.branches[0]?.phone}
                         </p>
                       </div>
                       <QRCodeComp settings={allSettings.settings} Data={Data} />
@@ -181,11 +189,14 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       )}
                     </div>
                     <div className="flex z-10 flex-wrap gap-5 justify-between px-4 py-1.5 mt-4 w-full font-semibold text-right text-white rounded border border-gray-500 border-solid bg-zinc-500 max-md:mr-1 max-md:max-w-full">
-                      <div className="flex w-full  text-center">
+                      <div className="flex w-full items-center text-center">
                         <div className="w-1/2">اسم المنتج</div>
-                        <div className="flex-grow">كمية</div>
-                        <div className="flex-grow">سعر الوحدة</div>
-                        <div className="flex-grow">المجموع</div>
+                        <div className="w-[120px]">كمية</div>
+                        <div className="w-[120px]">سعر الوحدة</div>
+                        <div className="w-[120px]">
+                          المجموع <br />
+                          (شامل الضريبة)
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded border border-gray-500 border-solid w-[802px] max-w-full max-md:mr-1 px-3 text-right">
@@ -196,13 +207,13 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               ? e?.pivot?.kitchen_notes
                               : e?.name}
                           </div>
-                          <div className="flex-grow flex justify-center items-center">
+                          <div className="w-[120px] flex justify-center items-center">
                             {currencyFormated(e?.pivot?.quantity)}
                           </div>
-                          <div className="flex-grow flex justify-center items-center">
+                          <div className="w-[120px] flex justify-center items-center">
                             {currencyFormated(e?.pivot?.unit_price)}
                           </div>
-                          <div className="flex-grow flex justify-center items-center">
+                          <div className="w-[120px] flex justify-center items-center">
                             {currencyFormated(
                               e?.pivot?.quantity * e?.pivot?.unit_price
                             )}
@@ -346,10 +357,10 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       ) : null}
                     </div>
                     <div className="flex justify-between items-center">
-                      <p className="text-sm w-[50%] mt-[30px] text-[#26262F]">
+                      {/* <p className="text-sm w-[50%] mt-[30px] text-[#26262F]">
                         الشروط والاحكام
-                      </p>
-                      <div className="justify-items-end">
+                      </p> */}
+                      {/* <div className="justify-items-end">
                         <img
                           loading="lazy"
                           src="https://cdn.builder.io/api/v1/image/assets/TEMP/6f427b12df7330067f0a9d705f3491cda199d05af240961b0cade6a24ca16fbb?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
@@ -360,7 +371,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           srcSet="https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=100 100w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=200 200w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=400 400w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=800 800w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=1200 1200w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=1600 1600w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e&width=2000 2000w, https://cdn.builder.io/api/v1/image/assets/TEMP/09bd1d8b3659c4aa3e73986718a7168664c3a59f4de1c92cf4f068ebb6f83a0e?placeholderIfAbsent=true&apiKey=8679f2257b144d7b937e32f7e767988e"
                           className="object-contain self-center mt-2 aspect-[1.74] w-[99px]"
                         />
-                      </div>
+                      </div> */}
                     </div>
                     {data?.kitchen_notes ? (
                       <div className="flex flex-col pt-4 pb-2 bg-white rounded-none  max-md:px-5 justify-between">
@@ -460,7 +471,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className=" ml-[10px] self-end text-center">
                           سعر الوحدة
                         </div>
-                        <div className="text-center ml-[20px]">المجموع</div>
+                        <div className="text-center ml-[20px]">
+                          المجموع (شامل الضريبة)
+                        </div>
                       </div>
                       <div className="flex border-t-2 border-b-black/20 flex-col bg-white rounded py-2   text-sm">
                         {Data?.data?.products?.map((product, index) => (
@@ -642,11 +655,11 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       </div>
                     ) : null}
                     <div className="  my-6">
-                      <img
+                      {/* <img
                         src="/icons/parCodeIn80.webp"
                         alt="Barcode"
                         className="w-[381px] h-[57px]"
-                      />
+                      /> */}
                       <div className="  my-4 flex justify-center">
                         <QRCodeComp
                           settings={allSettings.settings}

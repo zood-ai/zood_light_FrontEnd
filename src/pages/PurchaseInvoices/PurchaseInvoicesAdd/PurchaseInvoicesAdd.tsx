@@ -232,6 +232,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             total_cost: Number(item.price) * Number(item.qty),
           }))
         );
+        await handleConfirmation(data?.data?.id);
       }
       openDialog(isEditMode ? 'updated' : 'added');
       navigate('/zood-dashboard/purchase-invoices');
@@ -246,11 +247,11 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const handleBkAction = () => {
     setIsOpen(true);
   };
-  const handleConfirmation = async () => {
+  const handleConfirmation = async (id) => {
     setLoading(true);
     try {
       await axiosInstance.get(
-        `inventory/purchasing/receiver_items/${params.objId}`
+        `inventory/purchasing/receiver_items/${id ? id : params.objId}`
       );
     } catch (e) {
       console.error(e);
@@ -691,17 +692,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   className="px-6 py-1.5 mta-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
                 >
                   {isEditMode ? t('UPDATE_INVOICE') : t('ADD_INVOICE')}
-                </Button>
-              )}
-              {isEditMode && allDataId?.data?.status !== 'Closed' && (
-                <Button
-                  loading={loading}
-                  disabled={loading}
-                  type="button"
-                  onClick={handleConfirmation}
-                  className="px-6 py-1.5 mx-4 text-sm font-semibold rounded min-h-[39px] w-[144px]"
-                >
-                  {t('CONFIRM')}
                 </Button>
               )}
               <DelConfirm route={'inventory/purchasing'} />
