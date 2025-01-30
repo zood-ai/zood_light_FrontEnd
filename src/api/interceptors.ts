@@ -5,7 +5,7 @@ import axios, {
 } from 'axios';
 import { toast } from '@/components/ui/use-toast';
 import { setGlobalLoading } from '@/context/LoadingContext';
-import { getToken } from '@/utils/auth';
+import { getToken, removeToken } from '@/utils/auth';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
@@ -56,6 +56,7 @@ axiosInstance.interceptors.response.use(
 
     if (error.response?.status === 401) {
       showToast('Error', 'Unauthorized access - token expired.');
+      removeToken()
       window.location.href = '/';
     } else {
       // remove all 404 errors like (customer not found - rout not found - etc)
