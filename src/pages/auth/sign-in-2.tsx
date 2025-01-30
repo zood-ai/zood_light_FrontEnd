@@ -20,6 +20,7 @@ import { useAuth } from '@/context/AuthContext';
 import IconInput from '@/components/custom/InputWithIcon';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { getToken } from '@/utils/auth';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -46,6 +47,11 @@ export default function SignIn2() {
       password: '',
     },
   });
+
+  useEffect(() => {
+    const token = getToken();
+    if (token) navigate('/zood-dashboard');
+  }, []);
 
   // Handle SignUp
   const handleSignUp = () => {
