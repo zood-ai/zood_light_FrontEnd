@@ -30,6 +30,8 @@ export const ShopCardPQ: React.FC<ShopCardProps> = () => {
     [orderSchema]
   );
   const { data: getTaxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
 
   const taxAmount = useMemo(
     () => (totalCost * getTaxes?.data?.[0]?.rate) / 100,
@@ -45,6 +47,18 @@ export const ShopCardPQ: React.FC<ShopCardProps> = () => {
         discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
         discount_type: 2,
         total_price: item.price * item.qty || 0,
+        taxes: [
+          {
+            id: getTaxes?.data[0]?.id,
+            rate: getTaxes?.data[0]?.rate,
+            amount: !settings.data?.tax_inclusive_pricing
+              ? (item.price * item.qty || 0) *
+                ((getTaxes?.data[0]?.rate || 0) / 100)
+              : (item.price * item.qty || 0) *
+                ((getTaxes?.data[0]?.rate || 0) /
+                  (100 + getTaxes?.data[0]?.rate || 0)),
+          },
+        ],
       }));
 
       dispatch(addProduct(products));

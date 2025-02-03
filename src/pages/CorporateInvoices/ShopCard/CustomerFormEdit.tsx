@@ -52,7 +52,7 @@ const CustomerFormEdit = () => {
   const [isTextArea, setIsTextArea] = useState(false);
 
   const handleSubmitOrder = async () => {
-    // setLoading(true);
+    setLoading(true);
 
     const totalPrice = orderSchema.total_price;
     if (totalPrice == 0) {
@@ -82,7 +82,15 @@ const CustomerFormEdit = () => {
           added_at: ele.added_at || new Date().toISOString(),
         }));
         holder2.push(...newHolder2);
-        if (holder2.length === 0) return;
+        if (holder2.length === 0) {
+          showToast({
+            description: 'الرجاء ادخال المبلغ',
+            duration: 4000,
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
         await mutate(
           {
             order_id: params.id,
@@ -102,7 +110,7 @@ const CustomerFormEdit = () => {
             onError: () => setLoading(false),
           }
         );
-      }
+      } else setLoading(false);
     } catch (error) {
       setLoading(false);
       console.error('Failed to submit order', error);

@@ -35,10 +35,14 @@ const CustomerForm = () => {
   const { useGetAll: fetchAllProducts } = createCrudService<any>(
     'menu/products?not_default=1&per_page=1000&sort=-updated_at'
   );
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
+
   const { data: defaultProduct } = createCrudService<any>(
     'menu/products?filter[name]=sku-zood-20001'
   ).useGetAll();
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
+  const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();
   const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
   // const ShowCar = true;
 
@@ -111,6 +115,7 @@ const CustomerForm = () => {
     index: number;
     total_price: number;
     kitchen_notes: string;
+    taxes: any;
   }) => {
     const updatedItems = orderSchema.products.map((item, index) =>
       index === newItem.index ? { ...item, ...newItem } : item
@@ -119,14 +124,6 @@ const CustomerForm = () => {
       dispatch(addProduct([...updatedItems, newItem]));
     } else {
       dispatch(addProduct(updatedItems));
-    }
-  };
-
-  const handleEnglishNumbersOnly = (e) => {
-    const arabicNumbers = /[٠-٩]/g;
-    console.log(arabicNumbers.test(e.key));
-    if (arabicNumbers.test(e.key)) {
-      e.preventDefault();
     }
   };
 
@@ -141,6 +138,13 @@ const CustomerForm = () => {
           name: '',
           unit_price: 0,
           total_price: 0,
+          taxes: [
+            {
+              id: taxes?.data[0]?.id,
+              rate: taxes?.data[0]?.rate,
+              amount: 0,
+            },
+          ],
           kitchen_notes: myInputRef?.current?.value,
         });
         return;
@@ -158,6 +162,20 @@ const CustomerForm = () => {
           kitchen_notes: '',
           total_price:
             productData.price * productData.quantity || productData.price,
+          taxes: [
+            {
+              id: taxes?.data[0]?.id,
+              rate: taxes?.data[0]?.rate,
+              amount: !settings.data?.tax_inclusive_pricing
+                ? (productData.price * productData.quantity ||
+                    productData.price) *
+                  ((taxes?.data[0]?.rate || 0) / 100)
+                : (productData.price * productData.quantity ||
+                    productData.price) *
+                  ((taxes?.data[0]?.rate || 0) /
+                    (100 + taxes?.data[0]?.rate || 0)),
+            },
+          ],
         });
       } catch (error) {
         console.error('Failed to fetch product data', error);
@@ -169,6 +187,18 @@ const CustomerForm = () => {
               ...item,
               quantity: Number(value) || 1,
               total_price: (Number(value) || 1) * item.unit_price || 0,
+              taxes: [
+                {
+                  id: taxes?.data[0]?.id,
+                  rate: taxes?.data[0]?.rate,
+                  amount: !settings.data?.tax_inclusive_pricing
+                    ? ((Number(value) || 1) * item.unit_price || 0) *
+                      ((taxes?.data[0]?.rate || 0) / 100)
+                    : ((Number(value) || 1) * item.unit_price || 0) *
+                      ((taxes?.data[0]?.rate || 0) /
+                        (100 + taxes?.data[0]?.rate || 0)),
+                },
+              ],
             }
           : item
       );
@@ -180,6 +210,18 @@ const CustomerForm = () => {
               ...item,
               unit_price: value,
               total_price: value * item.quantity || 0,
+              taxes: [
+                {
+                  id: taxes?.data[0]?.id,
+                  rate: taxes?.data[0]?.rate,
+                  amount: !settings.data?.tax_inclusive_pricing
+                    ? (value * item.quantity || 0) *
+                      ((taxes?.data[0]?.rate || 0) / 100)
+                    : (value * item.quantity || 0) *
+                      ((taxes?.data[0]?.rate || 0) /
+                        (100 + taxes?.data[0]?.rate || 0)),
+                },
+              ],
             }
           : item
       );
@@ -329,10 +371,19 @@ const CustomerForm = () => {
                       discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
                       discount_type: 2,
                       total_price: 0,
+                      taxes: [
+                        {
+                          id: taxes?.data[0]?.id,
+                          rate: taxes?.data[0]?.rate,
+                          amount: 0,
+                        },
+                      ],
                     },
                   ])
                 )
               }
+              loading={loading}
+              disabled={loading}
               type="button"
               className="justify-end  mb-sm"
               variant="link"

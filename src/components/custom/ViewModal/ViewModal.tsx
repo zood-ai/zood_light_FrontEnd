@@ -193,9 +193,10 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="w-1/2">اسم المنتج</div>
                         <div className="w-[120px]">كمية</div>
                         <div className="w-[120px]">سعر الوحدة</div>
+                        <div className="w-[120px]">قيمة الضريبة</div>
                         <div className="w-[120px]">
                           المجموع <br />
-                          (شامل الضريبة)
+                          (غير شامل الضريبة)
                         </div>
                       </div>
                     </div>
@@ -212,6 +213,15 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           </div>
                           <div className="w-[120px] flex justify-center items-center">
                             {currencyFormated(e?.pivot?.unit_price)}
+                          </div>
+                          <div className="w-[120px] flex justify-center items-center">
+                            {currencyFormated(
+                              Data?.data?.order_product
+                                ? Data?.data?.order_product.find(
+                                    (el) => el?.product_id === e?.id
+                                  )?.taxes?.[0]?.pivot?.amount || 0
+                                : 0
+                            )}
                           </div>
                           <div className="w-[120px] flex justify-center items-center">
                             {currencyFormated(
@@ -316,9 +326,15 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         </div>
                       ) : null}
                       {Data?.data?.payments?.length > 0 &&
-                      Data?.data?.total_price ? (
+                      Data?.data?.total_price &&
+                      Data?.data?.payments?.reduce(
+                        (sum, item) => sum + item?.amount,
+                        0
+                      ) -
+                        Data?.data?.total_price >
+                        0 ? (
                         <div className="flex justify-between p-2 rounded items-center">
-                          <div>إجمالي المبلغ المستحق</div>
+                          <div>إجمالي المبلغ المتبقي</div>
                           <div>
                             SR{' '}
                             {(Data?.data?.payments?.reduce(
@@ -335,9 +351,15 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           </div>
                         </div>
                       ) : null}
-                      {Data?.data?.total_price ? (
+                      {Data?.data?.total_price &&
+                      Data.data.total_price -
+                        Data?.data?.payments?.reduce(
+                          (sum, item) => sum + item.amount,
+                          0
+                        ) >
+                        0 ? (
                         <div className="flex justify-between p-2 rounded items-center">
-                          <div>إجمالي المبلغ المتبقي</div>
+                          <div>إجمالي المبلغ المستحق</div>
                           <div>
                             SR{' '}
                             {((Data?.data?.payments?.reduce(
@@ -383,7 +405,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                     </p>
                   </div>
                 ) : (
-                  <div className="flex print-content2 flex-col w-[390px]  mx-auto text-righ text-sm p-1 px-10">
+                  <div className="flex print-content2 flex-col w-[500px]  mx-auto text-righ text-sm p-1 px-10">
                     <p className="text-center mb-2">
                       {allSettings.settings?.data?.receipt_header}
                     </p>
@@ -464,15 +486,20 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                     </div>
                     <div className=" py-5">
                       <div className="flex font-semibold justify-between text-black text-xs  mb-2">
-                        <div className="self-end text-center">اسم المنتج</div>
-                        <div className="mr-[20px] self-end text-center">
+                        <div className="!w-[80px] self-end text-center">
+                          اسم المنتج
+                        </div>
+                        <div className="!w-[70px]  self-end text-center">
                           كمية
                         </div>
-                        <div className=" ml-[10px] self-end text-center">
+                        <div className="!w-[70px]  self-end text-center">
                           سعر الوحدة
                         </div>
-                        <div className="text-center ml-[20px]">
-                          المجموع (شامل الضريبة)
+                        <div className="!w-[70px]  self-end text-center">
+                          قيمة الضريبة
+                        </div>
+                        <div className="!w-[70px] text-center">
+                          المجموع (غير شامل الضريبة)
                         </div>
                       </div>
                       <div className="flex border-t-2 border-b-black/20 flex-col bg-white rounded py-2   text-sm">
@@ -481,22 +508,33 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                             key={index}
                             className="flex justify-between border-b-2 border-b-black/20"
                           >
-                            <div className="w-1/4 flex-grow items-center text-[12px]">
+                            <div className="!w-[80px] flex-grow items-center text-[12px]">
                               {product?.name === 'sku-zood-20001'
                                 ? product?.pivot?.kitchen_notes
                                 : product?.name}
                             </div>
-                            <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
+                            <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
                               <p>
                                 {currencyFormated(product?.pivot?.quantity)}
                               </p>
                             </div>
-                            <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
+                            <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
                               <p>
                                 {currencyFormated(product?.pivot?.unit_price)}
                               </p>
                             </div>
-                            <div className="w-1/4 flex-grow items-center flex justify-center text-[12px]">
+                            <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
+                              <p>
+                                {currencyFormated(
+                                  Data?.data?.order_product
+                                    ? Data?.data?.order_product.find(
+                                        (el) => el?.product_id === product?.id
+                                      )?.taxes?.[0]?.pivot?.amount || 0
+                                    : 0
+                                )}
+                              </p>
+                            </div>
+                            <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
                               <p>
                                 {currencyFormated(
                                   product?.pivot?.quantity *
@@ -608,9 +646,15 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         ) : null}
                       </div>
                       {Data?.data?.payments?.length > 0 &&
-                      Data?.data?.total_price ? (
+                      Data?.data?.total_price &&
+                      Data?.data?.payments?.reduce(
+                        (sum, item) => sum + item?.amount,
+                        0
+                      ) -
+                        Data?.data?.total_price >
+                        0 ? (
                         <div className="flex justify-between items-center">
-                          <p>إجمالي المبلغ المستحق</p>
+                          <div>إجمالي المبلغ المتبقي</div>
                           <p>
                             SR{' '}
                             {Data?.data?.payments?.reduce(
@@ -628,9 +672,15 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         </div>
                       ) : null}
                       {Data?.data?.payments?.length > 0 &&
-                      Data?.data?.total_price ? (
+                      Data?.data?.total_price &&
+                      Data?.data?.total_price -
+                        Data?.data?.payments?.reduce(
+                          (sum, item) => sum + item?.amount,
+                          0
+                        ) >
+                        0 ? (
                         <div className="flex justify-between rounded items-center">
-                          <div>إجمالي المبلغ المتبقي</div>
+                          <p>إجمالي المبلغ المستحق</p>
                           <div>
                             SR{' '}
                             {(Data?.data?.payments?.reduce(

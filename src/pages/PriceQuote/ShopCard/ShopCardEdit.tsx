@@ -28,19 +28,19 @@ export const ShopCardEditPQ: React.FC<ShopCardProps> = () => {
     [orderSchema]
   );
   const { data: getTaxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
 
   const taxAmount = useMemo(
     () => (totalCost * getTaxes?.data?.[0]?.rate) / 100,
     [totalCost, getTaxes]
   );
- 
 
   useEffect(() => {
     dispatch(updateField({ field: 'type', value: 2 }));
   }, []);
 
-  
-  const { data : getOrdersById} = createCrudService<any>('orders').useGetById(
+  const { data: getOrdersById } = createCrudService<any>('orders').useGetById(
     `${params.id || ''}`
   );
   useEffect(() => {
@@ -50,21 +50,33 @@ export const ShopCardEditPQ: React.FC<ShopCardProps> = () => {
   }, [totalCost, taxAmount]);
 
   const handleBkAction = () => setIsOpen(true);
-  
+
   useEffect(() => {
     if (params.id && getOrdersById) {
-      
-      dispatch(updateField({ field: 'discount_amount', value: getOrdersById.data.discount_amount}));
-      updateField({ field: 'total_price', value: getOrdersById.data.total_price});
+      dispatch(
+        updateField({
+          field: 'discount_amount',
+          value: getOrdersById.data.discount_amount,
+        })
+      );
+      updateField({
+        field: 'total_price',
+        value: getOrdersById.data.total_price,
+      });
       dispatch(updateField({ field: 'type', value: 2 }));
-      dispatch(updateField({ field: 'customer_id', value: getOrdersById.data.customer?.id }));
+      dispatch(
+        updateField({
+          field: 'customer_id',
+          value: getOrdersById.data.customer?.id,
+        })
+      );
       dispatch(
         updateField({
           field: 'branch_id',
           value: Cookies.get('branch_id') || '',
         })
       );
- 
+
       const products = getOrdersById?.data?.products?.map((item: any) => ({
         product_id: item.id || '',
         quantity: item.quantity || 0,
@@ -73,14 +85,25 @@ export const ShopCardEditPQ: React.FC<ShopCardProps> = () => {
         discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
         discount_type: 2,
         total_price: item.price * item.quantity || 0,
+        taxes: [
+          {
+            id: getTaxes?.data[0]?.id,
+            rate: getTaxes?.data[0]?.rate,
+            amount: !settings.data?.tax_inclusive_pricing
+              ? (item.price * item.quantity || 0) *
+                ((getTaxes?.data[0]?.rate || 0) / 100)
+              : (item.price * item.quantity || 0) *
+                ((getTaxes?.data[0]?.rate || 0) /
+                  (100 + getTaxes?.data[0]?.rate || 0)),
+          },
+        ],
       }));
-      
-      dispatch(addProduct(products));
-            // dispatch(addTax(products));
 
+      dispatch(addProduct(products));
+      // dispatch(addTax(products));
     }
   }, [getOrdersById]);
-  
+
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />

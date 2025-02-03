@@ -34,6 +34,9 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
   const allService = createCrudService<any>('manage/customers');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
+  const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
 
   const initialValue = {
     name: '',
@@ -92,6 +95,18 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
         quantity: item.qty || 0,
         unit_price: item.price || 0,
         total_price: item.price * item.qty || 0,
+        taxes: [
+          {
+            id: taxes?.data[0]?.id,
+            rate: taxes?.data[0]?.rate,
+            amount: !settings.data?.tax_inclusive_pricing
+              ? (item.price * item.qty || 0) *
+                ((taxes?.data[0]?.rate || 0) / 100)
+              : (item.price * item.qty || 0) *
+                ((taxes?.data[0]?.rate || 0) /
+                  (100 + taxes?.data[0]?.rate || 0)),
+          },
+        ],
       }));
 
       dispatch(addProduct(products));

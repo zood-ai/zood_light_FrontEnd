@@ -22,6 +22,9 @@ export const ShopCardEdit: React.FC<ShopCardProps> = () => {
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const [isOpen, setIsOpen] = useState(false);
   const params = useParams();
+  const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
   const getOrdersById = createCrudService<any>('orders').useGetById(
     params.id || ''
   );
@@ -69,6 +72,16 @@ export const ShopCardEdit: React.FC<ShopCardProps> = () => {
       discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
       discount_type: 2,
       total_price: item.price * item.qty || 0,
+      taxes: [
+        {
+          id: taxes?.data[0]?.id,
+          rate: taxes?.data[0]?.rate,
+          amount: !settings.data?.tax_inclusive_pricing
+            ? (item.price * item.qty || 0) * ((taxes?.data[0]?.rate || 0) / 100)
+            : (item.price * item.qty || 0) *
+              ((taxes?.data[0]?.rate || 0) / (100 + taxes?.data[0]?.rate || 0)),
+        },
+      ],
     }));
 
     dispatch(addProduct(products1));

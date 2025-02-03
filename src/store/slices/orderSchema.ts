@@ -8,6 +8,7 @@ interface Product {
   id?: any;
   image?: any;
   discount_amount: any;
+  taxes?: Tax[];
 }
 
 interface Payment {
@@ -69,6 +70,13 @@ const initialState: OrderSchemaState = {
       unit_price: 0,
       total_price: 0,
       discount_amount: 0,
+      taxes: [
+        {
+          id: "b4335516-f710-463a-901a-a1b1fce2333b",
+          rate: 5,
+          amount: 1.04
+        }
+      ]
     },
   ],
   payments: [

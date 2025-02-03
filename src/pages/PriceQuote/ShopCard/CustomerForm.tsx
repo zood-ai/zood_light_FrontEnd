@@ -22,6 +22,9 @@ const CustomerForm = () => {
   const { t } = useTranslation();
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
+  const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
   const { useGetAll: fetchAllProducts } = createCrudService<any>(
     'menu/products?not_default=1&per_page=1000'
   );
@@ -79,6 +82,7 @@ const CustomerForm = () => {
     index: number;
     total_price: number;
     kitchen_notes: string;
+    taxes: any;
   }) => {
     const updatedItems = orderSchema.products.map((item, index) =>
       index === newItem.index ? { ...item, ...newItem } : item
@@ -90,11 +94,7 @@ const CustomerForm = () => {
     }
   };
 
-  const handleItemChange = async (
-    index: number,
-    field: string,
-    value: any
-  ) => {
+  const handleItemChange = async (index: number, field: string, value: any) => {
     if (field === 'product_id') {
       if (!value) {
         updateCardItem({
@@ -105,6 +105,13 @@ const CustomerForm = () => {
           unit_price: 0,
           total_price: 0,
           kitchen_notes: myInputRef?.current?.value,
+          taxes: [
+            {
+              id: taxes?.data[0]?.id,
+              rate: taxes?.data[0]?.rate,
+              amount: 0,
+            },
+          ],
         });
         return;
       }
@@ -121,6 +128,20 @@ const CustomerForm = () => {
           kitchen_notes: '',
           total_price:
             productData.price * productData.quantity || productData.price,
+          taxes: [
+            {
+              id: taxes?.data[0]?.id,
+              rate: taxes?.data[0]?.rate,
+              amount: !settings.data?.tax_inclusive_pricing
+                ? (productData.price * productData.quantity ||
+                    productData.price) *
+                  ((taxes?.data[0]?.rate || 0) / 100)
+                : (productData.price * productData.quantity ||
+                    productData.price) *
+                  ((taxes?.data[0]?.rate || 0) /
+                    (100 + taxes?.data[0]?.rate || 0)),
+            },
+          ],
         });
       } catch (error) {
         console.error('Failed to fetch product data', error);
@@ -132,6 +153,9 @@ const CustomerForm = () => {
               ...item,
               quantity: parseInt(value) || 1,
               total_price: (parseInt(value) || 1) * item.unit_price || 0,
+              amount:
+                ((parseInt(value) || 1) * item.unit_price || 0) *
+                ((taxes?.data[0]?.rate || 0) / 100),
             }
           : item
       );
@@ -143,23 +167,23 @@ const CustomerForm = () => {
               ...item,
               unit_price: value,
               total_price: value * item.quantity || 0,
+              taxes: [
+                {
+                  id: taxes?.data[0]?.id,
+                  rate: taxes?.data[0]?.rate,
+                  amount: !settings.data?.tax_inclusive_pricing
+                    ? (value * item.quantity || 0) *
+                      ((taxes?.data[0]?.rate || 0) / 100)
+                    : (value * item.quantity || 0) *
+                      ((taxes?.data[0]?.rate || 0) /
+                        (100 + taxes?.data[0]?.rate || 0)),
+                },
+              ],
             }
           : item
       );
       dispatch(addProduct(updatedProducts));
     }
-
-    // else if (field === 'name') {
-    //   const updatedProducts = orderSchema.products.map((item, i) =>
-    //     i == index
-    //       ? {
-    //           ...item,
-    //           kitchen_notes: value,
-    //         }
-    //       : item
-    //   );
-    //   dispatch(addProduct(updatedProducts));
-    // }
   };
 
   return (
@@ -268,6 +292,13 @@ const CustomerForm = () => {
                       discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
                       discount_type: 2,
                       total_price: 0,
+                      taxes: [
+                        {
+                          id: taxes?.data[0]?.id,
+                          rate: taxes?.data[0]?.rate,
+                          amount: 0,
+                        },
+                      ],
                     },
                   ])
                 )
