@@ -222,7 +222,7 @@ const CustomerForm = () => {
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                 />
                 <IconInput
-                  disabled={item.product_id}
+                  // disabled={item.product_id}
                   value={item.unit_price || 0}
                   onChange={(e) => {
                     let rawValue = e.target.value;

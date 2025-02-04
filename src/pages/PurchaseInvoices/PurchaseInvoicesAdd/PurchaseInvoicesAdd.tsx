@@ -573,7 +573,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     />
                     <IconInput
                       value={currentItem.total}
-                      disabled={currentItem.priceDisabled}
+                      disabled={params.id === 'edit'}
                       onChange={(e) => {
                         if (isEditMode) return;
                         handleItemChange(index, 'price', e.target.value);
