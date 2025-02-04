@@ -107,30 +107,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             priceDisabled: true,
           }))
         );
-        // const res = await axiosInstance.get(
-        //   `inventory/purchasing/${params.objId}`
-        // );
-        // console.log({ res });
-        // setInvoice({
-        //   supplier_id: res?.data?.data?.supplier?.id,
-        //   invoice_number: res?.data?.data?.invoice_number,
-        //   purchaseDescription: res?.data?.data?.notes,
-        //   attached_file: res?.data?.data?.attached_file,
-        // });
-
-        // setItems(
-        //   res?.data?.data?.items?.map((item) => ({
-        //     qty: item?.pivot?.quantity ?? 1,
-        //     total: item?.pivot?.total_cost ?? 0,
-        //     item: item?.pivot?.item_id ?? '',
-        //     id: item?.product_id ?? '',
-        //     itemDescription: item?.product?.description ?? '',
-        //     kitchen_notes: item?.pivot?.kitchen_notes ?? '',
-        //     name: item?.name ?? '',
-        //     price: item?.pivot?.cost ?? 0,
-        //     priceDisabled: true,
-        //   }))
-        // );
       };
       fun();
     }
@@ -173,21 +149,11 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
     try {
       if (isEditMode) {
-        // const { data } = await axiosInstance.put(
-        //   `inventory/purchasing/${params.objId}`,
-        //   {
-        //     // branch_id: branchData?.data?.[0]?.id,
-        //     // supplier_id: invoice.supplier_id,
-        //     type: 'items',
-        //     notes: invoice.purchaseDescription,
-        //     items: items.map((item) => item.item),
-
-        //   }
-        // );
         await axiosInstance.post(
           `inventory/purchasing/create_purchasing_item/${params.objId}`,
           {
             type: 'items',
+            notes: invoice.purchaseDescription,
             items: items.map((item) => ({
               id: item.item,
               kitchen_notes: item.kitchen_notes,
@@ -328,18 +294,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 inputClassName="w-[274px]"
               />
             </div>
-            {/* <Textarea
-              name="purchaseDescription"
-              value={invoice.purchaseDescription}
-              onChange={(e) =>
-                setInvoice({
-                  ...invoice,
-                  purchaseDescription: e.target.value,
-                })
-              }
-              className="w-full"
-              label={t('PURCHASES_DESCRIPTION')}
-            /> */}
             {items?.map((currentItem, index) => (
               <>
                 <div className="relative max-w-[calc(100%-50px)] flex gap-md flex-wrap">
@@ -652,6 +606,19 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 </div>
               </Button>
             )}
+            <Textarea
+              disabled={params.id === 'edit'}
+              name="notes"
+              value={invoice.purchaseDescription}
+              onChange={(e) =>
+                setInvoice({
+                  ...invoice,
+                  purchaseDescription: e.target.value,
+                })
+              }
+              className="flex-grow max-w-[500px] my-sm"
+              label={t('PURCHASES_DESCRIPTION')}
+            />
             {!isEditMode && (
               <FileUpload
                 onFileSelect={function (file: File): void {
