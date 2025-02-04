@@ -79,7 +79,7 @@ export const ShopCardEditCo: React.FC<ShopCardProps> = () => {
         {
           id: taxes?.data[0]?.id,
           rate: taxes?.data[0]?.rate,
-          amount: !settings.data?.tax_inclusive_pricing
+          amount: !settings?.data?.tax_inclusive_pricing
             ? (item.price * item.qty || 0) * ((taxes?.data[0]?.rate || 0) / 100)
             : (item.price * item.qty || 0) *
               ((taxes?.data[0]?.rate || 0) / (100 + taxes?.data[0]?.rate || 0)),
