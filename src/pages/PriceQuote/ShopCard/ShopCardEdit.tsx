@@ -89,7 +89,7 @@ export const ShopCardEditPQ: React.FC<ShopCardProps> = () => {
           {
             id: getTaxes?.data[0]?.id,
             rate: getTaxes?.data[0]?.rate,
-            amount: !settings.data?.tax_inclusive_pricing
+            amount: !settings?.data?.tax_inclusive_pricing
               ? (item.price * item.quantity || 0) *
                 ((getTaxes?.data[0]?.rate || 0) / 100)
               : (item.price * item.quantity || 0) *

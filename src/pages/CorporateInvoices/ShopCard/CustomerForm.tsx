@@ -166,7 +166,7 @@ const CustomerForm = () => {
             {
               id: taxes?.data[0]?.id,
               rate: taxes?.data[0]?.rate,
-              amount: !settings.data?.tax_inclusive_pricing
+              amount: !settings?.data?.tax_inclusive_pricing
                 ? (productData.price * productData.quantity ||
                     productData.price) *
                   ((taxes?.data[0]?.rate || 0) / 100)
@@ -191,7 +191,7 @@ const CustomerForm = () => {
                 {
                   id: taxes?.data[0]?.id,
                   rate: taxes?.data[0]?.rate,
-                  amount: !settings.data?.tax_inclusive_pricing
+                  amount: !settings?.data?.tax_inclusive_pricing
                     ? ((Number(value) || 1) * item.unit_price || 0) *
                       ((taxes?.data[0]?.rate || 0) / 100)
                     : ((Number(value) || 1) * item.unit_price || 0) *
@@ -214,7 +214,7 @@ const CustomerForm = () => {
                 {
                   id: taxes?.data[0]?.id,
                   rate: taxes?.data[0]?.rate,
-                  amount: !settings.data?.tax_inclusive_pricing
+                  amount: !settings?.data?.tax_inclusive_pricing
                     ? (value * item.quantity || 0) *
                       ((taxes?.data[0]?.rate || 0) / 100)
                     : (value * item.quantity || 0) *
