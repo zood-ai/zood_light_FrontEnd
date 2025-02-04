@@ -193,7 +193,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="w-1/2">اسم المنتج</div>
                         <div className="w-[120px]">كمية</div>
                         <div className="w-[120px]">سعر الوحدة</div>
-                        <div className="w-[120px]">قيمة الضريبة</div>
+                        {!Corporate && (
+                          <div className="w-[120px]">قيمة الضريبة</div>
+                        )}
                         <div className="w-[120px]">
                           المجموع <br />
                           (غير شامل الضريبة)
@@ -214,15 +216,18 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           <div className="w-[120px] flex justify-center items-center">
                             {currencyFormated(e?.pivot?.unit_price)}
                           </div>
-                          <div className="w-[120px] flex justify-center items-center">
-                            {currencyFormated(
-                              Data?.data?.order_product
-                                ? Data?.data?.order_product.find(
-                                    (el) => el?.product_id === e?.id
-                                  )?.taxes?.[0]?.pivot?.amount || 0
-                                : 0
-                            )}
-                          </div>
+
+                          {!Corporate && (
+                            <div className="w-[120px] flex justify-center items-center">
+                              {currencyFormated(
+                                Data?.data?.order_product
+                                  ? Data?.data?.order_product.find(
+                                      (el) => el?.product_id === e?.id
+                                    )?.taxes?.[0]?.pivot?.amount || 0
+                                  : 0
+                              )}
+                            </div>
+                          )}
                           <div className="w-[120px] flex justify-center items-center">
                             {currencyFormated(
                               e?.pivot?.quantity * e?.pivot?.unit_price
@@ -237,13 +242,13 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               ? e?.pivot?.kitchen_notes
                               : e?.name}
                           </div>
-                          <div className="max-w-[97px] flex-grow flex justify-center items-center">
+                          <div className="max-w-[120px] flex-grow flex justify-center items-center">
                             {currencyFormated(e?.pivot?.quantity)}
                           </div>
-                          <div className="max-w-[140px] flex-grow flex justify-center items-center">
+                          <div className="max-w-[120px] flex-grow flex justify-center items-center">
                             {currencyFormated(e?.pivot?.cost)}
                           </div>
-                          <div className="max-w-[115px] flex-grow flex justify-center items-center">
+                          <div className="max-w-[120px] flex-grow flex justify-center items-center">
                             {currencyFormated(
                               e?.pivot?.quantity * e?.pivot?.cost
                             )}
@@ -495,9 +500,11 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="!w-[70px]  self-end text-center">
                           سعر الوحدة
                         </div>
-                        <div className="!w-[70px]  self-end text-center">
-                          قيمة الضريبة
-                        </div>
+                        {!Corporate && (
+                          <div className="!w-[70px]  self-end text-center">
+                            قيمة الضريبة
+                          </div>
+                        )}
                         <div className="!w-[70px] text-center">
                           المجموع (غير شامل الضريبة)
                         </div>
@@ -523,17 +530,19 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                                 {currencyFormated(product?.pivot?.unit_price)}
                               </p>
                             </div>
-                            <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
-                              <p>
-                                {currencyFormated(
-                                  Data?.data?.order_product
-                                    ? Data?.data?.order_product.find(
-                                        (el) => el?.product_id === product?.id
-                                      )?.taxes?.[0]?.pivot?.amount || 0
-                                    : 0
-                                )}
-                              </p>
-                            </div>
+                            {!Corporate && (
+                              <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
+                                <p>
+                                  {currencyFormated(
+                                    Data?.data?.order_product
+                                      ? Data?.data?.order_product.find(
+                                          (el) => el?.product_id === product?.id
+                                        )?.taxes?.[0]?.pivot?.amount || 0
+                                      : 0
+                                  )}
+                                </p>
+                              </div>
+                            )}
                             <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
                               <p>
                                 {currencyFormated(
@@ -551,21 +560,21 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           >
                             <div
                               style={{ width: `calc(100%/3)` }}
-                              className="flex-grow items-center text-[12px]"
+                              className="!w-[70px] items-center text-[12px]"
                             >
                               {product?.name === 'sku-zood-20001'
                                 ? product?.pivot?.kitchen_notes
                                 : product?.name}
                             </div>
-                            <div className="flex-grow items-center flex justify-center text-[12px]">
+                            <div className="!w-[70px] items-center flex justify-center text-[12px]">
                               <p>
                                 {currencyFormated(product?.pivot?.quantity)}
                               </p>
                             </div>
-                            <div className="flex-grow items-center flex justify-center text-[12px]">
+                            <div className="!w-[70px] items-center flex justify-center text-[12px]">
                               <p>{currencyFormated(product?.pivot?.cost)}</p>
                             </div>
-                            <div className="flex-grow items-center flex justify-center text-[12px]">
+                            <div className="!w-[70px] items-center flex justify-center text-[12px]">
                               <p>
                                 {currencyFormated(
                                   product?.pivot?.quantity *
