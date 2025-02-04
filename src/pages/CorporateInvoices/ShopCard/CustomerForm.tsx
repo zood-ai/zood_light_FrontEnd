@@ -300,7 +300,7 @@ const CustomerForm = () => {
                 />
                 <IconInput
                   type="string"
-                  disabled={item.product_id}
+                  // disabled={item.product_id}
                   value={item.unit_price || 0}
                   onChange={(e) => {
                     let rawValue = e.target.value;
