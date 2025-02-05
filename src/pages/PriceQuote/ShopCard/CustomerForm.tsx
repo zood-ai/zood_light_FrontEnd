@@ -214,7 +214,7 @@ const CustomerForm = () => {
                 }
                 value={item.product_id}
               />
-              <div className="flex gap-x-md">
+              <div className="flex gap-x-md mt-5">
                 <IconInput
                   disabled={params.id}
                   value={item.quantity}
