@@ -35,6 +35,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     invoice_number: '',
     purchaseDescription: '',
     attached_file: '',
+    paid_tax: 0,
   });
   const [items, setItems] = useState([
     {
@@ -83,15 +84,16 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       return item;
     }
   });
-  console.log({ Data });
   useEffect(() => {
     if (isEditMode) {
+      console.log({ Data });
       const fun = async () => {
         setInvoice({
           supplier_id: Data?.get_supplier?.id,
           invoice_number: Data?.invoice_number,
           purchaseDescription: Data?.notes,
           attached_file: Data?.attached_file,
+          paid_tax: Data?.paid_tax,
         });
 
         setItems(
@@ -110,7 +112,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       };
       fun();
     }
-  }, [allDataId, isEditMode, Data, params.objId]);
+  }, [allDataId, isEditMode, Data?.paid_tax, Data, params.objId]);
   const { openDialog } = useGlobalDialog();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -182,6 +184,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           type: 'items',
           notes: invoice.purchaseDescription,
           attached_file: fileBase64,
+          paid_tax: invoice.paid_tax,
           items: items.map((item) => ({
             id: item.item || defaultProduct?.data?.[0]?.id || '',
             kitchen_notes: item.kitchen_notes,
@@ -243,7 +246,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
       <form onSubmit={handleFormSubmit}>
-        <div className="flex flex-col items-start w-[550px]">
+        <div className="flex flex-col items-start w-[500px]">
           <div className="grid grid-cols-1 gap-y-[16px]">
             <div className="grid grid-cols-1 md:grid-cols-2">
               <div>
@@ -296,7 +299,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             </div>
             {items?.map((currentItem, index) => (
               <>
-                <div className="relative max-w-[calc(100%-50px)] flex gap-md flex-wrap">
+                <div className="relative max-w-[500px] flex gap-md flex-wrap">
                   {!isTextArea ? (
                     <>
                       <div className="flex w-full justify-between gap-5">
@@ -606,6 +609,20 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 </div>
               </Button>
             )}
+
+            <div className="flex items-end">
+              <IconInput
+                disabled={isEditMode}
+                name="paid_tax"
+                type="number"
+                step="0.0001"
+                min="0"
+                value={invoice.paid_tax}
+                onChange={handleInputChange}
+                label={t('tax')}
+                inputClassName="w-full lg:!w-[500px]"
+              />
+            </div>
             <Textarea
               disabled={params.id === 'edit'}
               name="notes"

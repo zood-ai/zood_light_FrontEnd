@@ -105,6 +105,7 @@ const CustomerForm = () => {
           unit_price: 0,
           total_price: 0,
           kitchen_notes: myInputRef?.current?.value,
+          is_tax_included: settings?.data?.tax_inclusive_pricing,
           taxes: [
             {
               id: taxes?.data[0]?.id,
@@ -128,6 +129,7 @@ const CustomerForm = () => {
           kitchen_notes: '',
           total_price:
             productData.price * productData.quantity || productData.price,
+            is_tax_included: settings?.data?.tax_inclusive_pricing,
           taxes: [
             {
               id: taxes?.data[0]?.id,
@@ -167,6 +169,7 @@ const CustomerForm = () => {
               ...item,
               unit_price: value,
               total_price: value * item.quantity || 0,
+              is_tax_included: settings?.data?.tax_inclusive_pricing,
               taxes: [
                 {
                   id: taxes?.data[0]?.id,
@@ -188,7 +191,7 @@ const CustomerForm = () => {
 
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
-      <div className="w-full xl:w-[550px] max-w-full">
+      <div className="w-full xl:w-[500px] max-w-full">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
           {orderSchema.products.map((item, index) => (
@@ -211,7 +214,7 @@ const CustomerForm = () => {
                 }
                 value={item.product_id}
               />
-              <div className="flex gap-x-md">
+              <div className="flex gap-x-md mt-5">
                 <IconInput
                   disabled={params.id}
                   value={item.quantity}
@@ -292,6 +295,7 @@ const CustomerForm = () => {
                       discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
                       discount_type: 2,
                       total_price: 0,
+                      is_tax_included: settings?.data?.tax_inclusive_pricing,
                       taxes: [
                         {
                           id: taxes?.data[0]?.id,

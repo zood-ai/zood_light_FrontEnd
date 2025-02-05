@@ -62,9 +62,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
 
   return (
     <>
-      <div className="flex flex-wrap gap-4 rounded-none h-[90vh] max-w-[80vw] overflow-y-auto relative bg-white">
-        <div className="flex flex-col rounded-none ">
-          <div className="px-11 py-a12 w-full bg-white rounded-lg  border-solid max-md:px-5 max-md:max-w-full">
+      <div className="flex flex-wrap gap-4 rounded-lg-none h-[90vh] max-w-[80vw] overflow-y-auto relative bg-white">
+        <div className="flex flex-col rounded-lg-none ">
+          <div className="px-11 py-a12 w-full bg-white rounded-lg-lg  border-solid max-md:px-5 max-md:max-w-full">
             <div className="flex gap-5 max-md:flex-col myDiv">
               <div
                 ref={contentRef}
@@ -77,7 +77,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                 className={`${"size === 'A4' ? 'a4-size' : 'small-receipt'"} flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
               >
                 {size === 'A4' ? (
-                  <div className="flex print-content flex-col px-3 pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg  text-zinc-800 max-md:mt-10 max-md:max-w-full">
+                  <div className="flex print-content flex-col px-3 pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg-lg  text-zinc-800 max-md:mt-10 max-md:max-w-full">
                     <p className="text-center mb-2">
                       {allSettings.settings?.data?.receipt_header}
                     </p>
@@ -113,8 +113,8 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                     <div className="self-center ml-4 font-semibold text-right">
                       {title}
                     </div>
-                    <div className="flex flex-wrap mt-4 text-right bg-white rounded border border-gray-500 border-solid max-md:mr-1 max-md:max-w-full">
-                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
+                    <div className="flex flex-wrap mt-4 text-right bg-white rounded-lg border border-[#ECECEC] border-solid max-md:mr-1 max-md:max-w-full">
+                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid max-md:px-5 justify-between">
                         {Corporate && 'اسم المورد'}
                         {Another && 'اسم العميل'}
                         <div className="mt-4 font-semibold w-full text-center">
@@ -122,14 +122,14 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           {Another ? data?.customer?.name : ''}
                         </div>
                       </div>
-                      <div className="flex z-10 flex-col flex-1 px-3 min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-gray-500 border-solid max-md:px-5 justify-between">
+                      <div className="flex z-10 flex-col flex-1 px-3 min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-[#ECECEC] border-solid max-md:px-5 justify-between">
                         <div className="self-center">الجوال</div>
                         <div className="self-start mt-4 w-full text-center font-semibold">
                           {Corporate ? supplierInfo?.data?.phone : ''}
                           {Another ? customerInfo?.data?.phone : ''}
                         </div>
                       </div>
-                      <div className="flex flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white rounded border border-gray-500 border-solid max-md:pl-5 justify-between">
+                      <div className="flex flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white rounded-lg border border-[#ECECEC] border-solid max-md:pl-5 justify-between">
                         <div className="self-center">الرقم الضريبي</div>
                         <div className="mt-4 text-center font-semibold">
                           {Corporate
@@ -140,7 +140,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                             : ''}
                         </div>
                       </div>
-                      <div className="flex z-10 flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white border border-gray-500 border-solid max-md:px-5 justify-between">
+                      <div className="flex z-10 flex-col flex-1 px-3 min-w-fit pt-4 pb-2 bg-white border border-[#ECECEC] border-solid max-md:px-5 justify-between">
                         <div className="self-center">تاريخ الفاتورة</div>
                         <div className="flex gap-2 mt-4 font-semibold whitespace-nowrap justify-between">
                           {data?.business_date?.split(' ')[0] && (
@@ -156,14 +156,14 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         </div>
                       </div>
                       {title === 'فاتورة  شراء' && (
-                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
+                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid max-md:px-5 justify-between">
                           <div>الرقم المرجعي</div>
                           <div className="mt-4 font-semibold w-full text-center">
                             {data?.invoice_number || ''}
                           </div>
                         </div>
                       )}
-                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
+                      <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid max-md:px-5 justify-between">
                         <div>رقم الفاتورة</div>
                         <div className="mt-4 font-semibold w-full text-center">
                           {data?.reference || ''}
@@ -172,15 +172,16 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                     </div>
                     <div className="flex">
                       {ShowCar && data?.kitchen_received_at && (
-                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
+                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid max-md:px-5 justify-between">
                           <div>نوع السيارة</div>
                           <div className="mt-4 font-semibold w-full text-center">
                             {data?.kitchen_received_at || ''}
                           </div>
                         </div>
                       )}
+
                       {ShowCar && data?.kitchen_done_at && (
-                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-none border border-gray-500 border-solid max-md:px-5 justify-between">
+                        <div className="flex flex-col flex-1 items-center px-3 min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid max-md:px-5 justify-between">
                           <div>رقم اللوحة</div>
                           <div className="mt-4 font-semibold w-full text-center">
                             {data?.kitchen_done_at || ''}
@@ -188,24 +189,58 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         </div>
                       )}
                     </div>
-                    <div className="flex z-10 flex-wrap gap-5 justify-between px-4 py-1.5 mt-4 w-full font-semibold text-right text-white rounded border border-gray-500 border-solid bg-zinc-500 max-md:mr-1 max-md:max-w-full">
+
+                    {!Corporate && data?.kitchen_notes && (
+                      <div className="mt-6 flex flex-1 items-center min-w-fit bg-white rounded-lg-none border border-[#ECECEC] border-solid max-md:px-5 justify-between">
+                        <div className="flex-grow p-4 font-semibold text-base w-[100px] flex items-center justify-center">
+                          ملاحظات
+                        </div>
+                        <div className="p-4 border-r-2 border-r-[#ECECEC] font-normal text-base w-full">
+                          {data?.kitchen_notes || ''}
+                          {/* الابواب الخشبية وتصليح الاقفال وعمل ديكور السقف فك
+                          القديم وتركيب جديد 60+60 ابيض عمل نظافة داخل البيت
+                          كاملوالحمامات والمطبخ تركيبسيراميكالجدران والارضية مع
+                          المواد السباك ومواد النجار */}
+                        </div>
+                      </div>
+                    )}
+                    {Corporate && data?.notes && (
+                      <div className="mt-6 flex flex-1 items-center min-w-fit bg-white rounded-lg-none border border-[#ECECEC] border-solid max-md:px-5 justify-between">
+                        <div className="flex-grow py-4 px-7 font-semibold text-base min-w-[100px] flex items-center justify-center text-nowrap">
+                          وصف المشتريات
+                        </div>
+                        <div className="p-4 border-r-2 border-r-[#ECECEC] font-normal text-base w-full">
+                          {data?.notes || ''}
+                          {/* الابواب الخشبية وتصليح الاقفال وعمل ديكور السقف فك
+                          القديم وتركيب جديد 60+60 ابيض عمل نظافة داخل البيت
+                          كاملوالحمامات والمطبخ تركيبسيراميكالجدران والارضية مع
+                          المواد السباك ومواد النجار */}
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex z-10 flex-wrap gap-5 justify-between px-3 py-1.5 mt-4 w-full font-semibold text-right text-white rounded-lg border border-[#ECECEC] border-solid bg-[#868686] max-md:mr-1 max-md:max-w-full">
                       <div className="flex w-full items-center text-center">
-                        <div className="w-1/2">اسم المنتج</div>
+                        <div className={`${Corporate ? 'w-1/2' : 'w-1/3'}`}>
+                          اسم المنتج
+                        </div>
                         <div className="w-[120px]">كمية</div>
                         <div className="w-[120px]">سعر الوحدة</div>
                         {!Corporate && (
+                          <div className="w-[230px]">المجموع الكلي</div>
+                        )}
+                        {!Corporate && (
                           <div className="w-[120px]">قيمة الضريبة</div>
                         )}
-                        <div className="w-[120px]">
+                        <div className="w-[120px] py-4">
                           المجموع <br />
                           (غير شامل الضريبة)
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded border border-gray-500 border-solid w-[802px] max-w-full max-md:mr-1 px-3 text-right">
+                    <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded-lg border border-[#ECECEC] border-solid w-[802px] max-w-full max-md:mr-1 px-3 text-right">
                       {Data?.data?.products?.map((e) => (
                         <div className="flex font-semibold w-full">
-                          <div className="w-1/2 flex justify-center items-center">
+                          <div className="w-1/3 flex justify-center items-center">
                             {e?.name === 'sku-zood-20001'
                               ? e?.pivot?.kitchen_notes
                               : e?.name}
@@ -215,6 +250,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           </div>
                           <div className="w-[120px] flex justify-center items-center">
                             {currencyFormated(e?.pivot?.unit_price)}
+                          </div>
+                          <div className="w-[230px] flex justify-center items-center">
+                            {currencyFormated(
+                              parseFloat(e?.pivot?.unit_price) *
+                                parseFloat(e?.pivot?.quantity)
+                            )}
                           </div>
 
                           {!Corporate && (
@@ -228,9 +269,17 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               )}
                             </div>
                           )}
-                          <div className="w-[120px] flex justify-center items-center">
+                          <div className="w-[140px] flex justify-center items-center">
                             {currencyFormated(
-                              e?.pivot?.quantity * e?.pivot?.unit_price
+                              parseFloat(e?.pivot?.unit_price) *
+                                parseFloat(e?.pivot?.quantity) -
+                                (Data?.data?.order_product.find(
+                                  (el) => el?.product_id === e?.id
+                                )?.is_tax_included && Data?.data?.order_product
+                                  ? Data?.data?.order_product.find(
+                                      (el) => el?.product_id === e?.id
+                                    )?.taxes?.[0]?.pivot?.amount || 0
+                                  : 0)
                             )}
                           </div>
                         </div>
@@ -258,7 +307,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                     </div>
                     <div className="flex flex-col gap-3 mt-10 makeEvenOddBg">
                       {Data?.data?.subtotal_price ? (
-                        <div className="flex justify-between p-2 rounded items-center">
+                        <div className="flex justify-between p-2 rounded-lg items-center">
                           <div>الإجمالي الفرعي</div>
                           <div>
                             SR {currencyFormated(Data?.data?.subtotal_price)}
@@ -266,35 +315,16 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         </div>
                       ) : null}
                       {Data?.data?.discount_amount ? (
-                        <div className="flex justify-between p-2 rounded items-center">
+                        <div className="flex justify-between p-2 rounded-lg items-center">
                           <div>خصم</div>
                           <div>
                             SR {currencyFormated(Data?.data?.discount_amount)}
                           </div>
                         </div>
                       ) : null}
-                      {Data?.data?.tax_exclusive_discount_amount ? (
-                        <div className="flex justify-between p-2 rounded items-center">
-                          <div>مجموع ضريبة القيمة المضافة</div>
-                          <div>
-                            SR{' '}
-                            {currencyFormated(
-                              Data.data.tax_exclusive_discount_amount
-                            )}
-                          </div>
-                        </div>
-                      ) : null}
-                      {Data?.data?.total_price ? (
-                        <div className="flex justify-between p-2 rounded items-center">
-                          <div>المبلغ الإجمالي</div>
-                          <div>
-                            SR {currencyFormated(Data?.data?.total_price)}
-                          </div>
-                        </div>
-                      ) : null}
                       {Data?.data?.items ? (
-                        <div className="flex justify-between p-2 rounded items-center">
-                          <div>المبلغ الإجمالي</div>
+                        <div className="flex justify-between p-2 rounded-lg items-center">
+                          <div>المبلغ الإجمالي غير شامل الضريبة</div>
                           <div>
                             SR{' '}
                             {currencyFormated(
@@ -306,10 +336,56 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           </div>
                         </div>
                       ) : null}
+                      {Data?.data?.tax_exclusive_discount_amount ? (
+                        <div className="flex justify-between p-2 rounded-lg items-center">
+                          <div>مجموع ضريبة القيمة المضافة</div>
+                          <div>
+                            SR{' '}
+                            {currencyFormated(
+                              Data.data.tax_exclusive_discount_amount
+                            )}
+                          </div>
+                        </div>
+                      ) : null}
+                      {Corporate ? (
+                        <div className="flex justify-between p-2 rounded-lg items-center">
+                          <div>مجموع ضريبة القيمة المضافة</div>
+                          <div>
+                            SR{' '}
+                            {currencyFormated(
+                              parseFloat(Data.data.paid_tax || 0)
+                            )}
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {Data?.data?.total_price ? (
+                        <div className="flex justify-between p-2 rounded-lg items-center">
+                          <div>المبلغ الإجمالي</div>
+                          <div>
+                            SR {currencyFormated(Data?.data?.total_price)}
+                          </div>
+                        </div>
+                      ) : null}
+                      {Data?.data?.items ? (
+                        <div className="flex justify-between p-2 rounded-lg items-center">
+                          <div>المبلغ الإجمالي شامل الضريبة</div>
+                          <div>
+                            SR{' '}
+                            {currencyFormated(
+                              parseFloat(Data.data.paid_tax || 0) +
+                                Data?.data?.items?.reduce(
+                                  (sum, item) => sum + item?.pivot?.total_cost,
+                                  0
+                                )
+                            )}
+                          </div>
+                        </div>
+                      ) : null}
                       {Data?.data?.payments?.map((e) => {
                         if (e?.payment_method_id) {
                           return (
-                            <div className="flex justify-between p-2 rounded items-center">
+                            <div className="flex justify-between p-2 rounded-lg items-center">
                               <div>{e?.payment_method?.name}</div>
                               <div>SR {currencyFormated(e?.amount)}</div>
                             </div>
@@ -317,7 +393,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         }
                       })}
                       {Data?.data?.payments?.length > 0 ? (
-                        <div className="flex justify-between p-2 rounded items-center">
+                        <div className="flex justify-between p-2 rounded-lg items-center">
                           <div>المبلغ الإجمالي المدفوع</div>
                           <div>
                             SR{' '}
@@ -338,7 +414,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       ) -
                         Data?.data?.total_price >
                         0 ? (
-                        <div className="flex justify-between p-2 rounded items-center">
+                        <div className="flex justify-between p-2 rounded-lg items-center">
                           <div>إجمالي المبلغ المتبقي</div>
                           <div>
                             SR{' '}
@@ -363,7 +439,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           0
                         ) >
                         0 ? (
-                        <div className="flex justify-between p-2 rounded items-center">
+                        <div className="flex justify-between p-2 rounded-lg items-center">
                           <div>إجمالي المبلغ المستحق</div>
                           <div>
                             SR{' '}
@@ -400,11 +476,11 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         />
                       </div> */}
                     </div>
-                    {data?.kitchen_notes ? (
-                      <div className="flex flex-col pt-4 pb-2 bg-white rounded-none  max-md:px-5 justify-between">
+                    {/* {data?.kitchen_notes ? (
+                      <div className="flex flex-col pt-4 pb-2 bg-white rounded-lg-none  max-md:px-5 justify-between">
                         <div>ملاحظات : {data?.kitchen_notes || ''}</div>
                       </div>
-                    ) : null}
+                    ) : null} */}
                     <p className="text-center">
                       {allSettings.settings?.data?.receipt_footer}
                     </p>
@@ -488,6 +564,10 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           <p>{data?.kitchen_done_at || ''}</p>
                         </div>
                       )}
+                      <div className="flex justify-between">
+                        <p>رقم اللوحة</p>
+                        <p>{data?.kitchen_done_at || ''}</p>
+                      </div>
                     </div>
                     <div className=" py-5">
                       <div className="flex font-semibold justify-between text-black text-xs  mb-2">
@@ -506,10 +586,11 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           </div>
                         )}
                         <div className="!w-[70px] text-center">
-                          المجموع (غير شامل الضريبة)
+                          {/* المجموع (غير شامل الضريبة) */}
+                          المجموع (شامل الضريبة)
                         </div>
                       </div>
-                      <div className="flex border-t-2 border-b-black/20 flex-col bg-white rounded py-2   text-sm">
+                      <div className="flex border-t-2 border-b-black/20 flex-col bg-white rounded-lg py-2   text-sm">
                         {Data?.data?.products?.map((product, index) => (
                           <div
                             key={index}
@@ -688,7 +769,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           0
                         ) >
                         0 ? (
-                        <div className="flex justify-between rounded items-center">
+                        <div className="flex justify-between rounded-lg items-center">
                           <p>إجمالي المبلغ المستحق</p>
                           <div>
                             SR{' '}
@@ -709,7 +790,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       ) : null}
                     </div>
                     {data?.kitchen_notes ? (
-                      <div className="flex flex-col pt-8 pb-2 bg-white rounded-none  max-md:px-5 justify-between">
+                      <div className="flex flex-col pt-8 pb-2 bg-white rounded-lg-none  max-md:px-5 justify-between">
                         <div>ملاحظات : {data?.kitchen_notes || ''}</div>
                       </div>
                     ) : null}
@@ -757,7 +838,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               onClick={() => handleSizeChange('80mm')}
                               className={`flex shrink-0 self-stretch my-auto w-3 h-3 ${
                                 size == '80mm' ? 'bg-indigo-900' : 'bg-white'
-                              } rounded-full border-4 border-gray-200 border-solid`}
+                              } rounded-lg-full border-4 border-gray-200 border-solid`}
                             />
                           </div>
                           <div className="flex gap-2 items-center self-stretch my-auto">
@@ -772,25 +853,25 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               onClick={() => handleSizeChange('A4')}
                               className={`flex shrink-0 self-stretch my-auto w-3 h-3 ${
                                 size == 'A4' && 'bg-indigo-900'
-                              } rounded-full border-4 border-gray-200 border-solid`}
+                              } rounded-lg-full border-4 border-gray-200 border-solid`}
                             />
                           </div>
                         </div>
                         <button
                           disabled={loading}
                           onClick={handlePrint}
-                          className="gap-2.5 self-end px-8 py-1 mt-4 max-w-full text-white bg-indigo-900 rounded-lg min-h-[32px] mx-auto w-[100px] max-md:px-5"
+                          className="gap-2.5 self-end px-8 py-1 mt-4 max-w-full text-white bg-indigo-900 rounded-lg-lg min-h-[32px] mx-auto w-[100px] max-md:px-5"
                         >
                           طباعة
                         </button>
                       </div>
                     </div>
                     {Another && (
-                      <div className="flex flex-grow flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg  max-md:mt-10">
+                      <div className="flex flex-grow flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg-lg  max-md:mt-10">
                         <button
                           disabled={loading}
                           onClick={handleReturn}
-                          className="px-2.5 py-1 bg-white rounded-lg border border-red-500 border-solid max-md:px-5 w-[100px]"
+                          className="px-2.5 py-1 bg-white rounded-lg-lg border border-red-500 border-solid max-md:px-5 w-[100px]"
                         >
                           استرجاع
                         </button>

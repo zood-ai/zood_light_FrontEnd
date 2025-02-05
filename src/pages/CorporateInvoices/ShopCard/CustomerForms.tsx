@@ -111,31 +111,8 @@ const CustomerForms = () => {
 
   return (
     <>
-      <div className="flex-wrap flex gap-md mb-md ">
-        <div className="flex-grow md:flex-grow-0">
-          {/* <CustomSearchInbox
-            options={allData?.data?.map((item) => ({
-              value: item.id,
-              label: item.name,
-            }))} 
-          
-            placeholder="اسم العميل"
-            onValueChange={(value) => {
-              if (params.id) {
-                return;
-              } else { 
-
-                handleInputChangex('customer_id', value);
-              }
-            }}
-       //     label="اسم العميل" 
-       //allData?.data[0]?.name!==lastCustomerName?allData?.data[0]?.name:'selectValue'
-       label={'اسم العميل'}  
-       className=" w-full  md:w-[21vw]"
-            value={orderSchema?.customer_id}
-            disabled={params.id}
-          /> */}
-
+      <div className="flex-wrap flex mb-md ">
+        <div className="">
           <CustomSearchInbox
             options={allData?.data?.map((item) => ({
               value: item.id,

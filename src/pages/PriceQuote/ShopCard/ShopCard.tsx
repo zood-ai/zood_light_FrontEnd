@@ -47,6 +47,7 @@ export const ShopCardPQ: React.FC<ShopCardProps> = () => {
         discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
         discount_type: 2,
         total_price: item.price * item.qty || 0,
+        is_tax_included: settings?.data?.tax_inclusive_pricing,
         taxes: [
           {
             id: getTaxes?.data[0]?.id,
