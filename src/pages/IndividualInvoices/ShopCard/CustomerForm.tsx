@@ -302,7 +302,7 @@ const CustomerForm = forwardRef(({ setLoading, loading }: any, ref) => {
       )}
       {((params.id && orderSchema?.customer_id) || !params.id) &&
         !showCustomer && (
-          <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit w-full xl:w-[550px] max-w-full">
+          <div className="flex flex-wrap gap-x-5 gap-y-5 h-fit w-full xl:w-[500px] max-w-full">
             <div className="flex gap-3 w-full">
               <CustomSearchInbox
                 options={allData?.data?.map((item) => ({

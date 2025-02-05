@@ -116,6 +116,7 @@ const CustomerForm = () => {
     total_price: number;
     kitchen_notes: string;
     taxes: any;
+    is_tax_included: boolean;
   }) => {
     const updatedItems = orderSchema.products.map((item, index) =>
       index === newItem.index ? { ...item, ...newItem } : item
@@ -138,6 +139,7 @@ const CustomerForm = () => {
           name: '',
           unit_price: 0,
           total_price: 0,
+          is_tax_included: settings?.data?.tax_inclusive_pricing,
           taxes: [
             {
               id: taxes?.data[0]?.id,
@@ -162,6 +164,7 @@ const CustomerForm = () => {
           kitchen_notes: '',
           total_price:
             productData.price * productData.quantity || productData.price,
+          is_tax_included: settings?.data?.tax_inclusive_pricing,
           taxes: [
             {
               id: taxes?.data[0]?.id,
@@ -187,6 +190,7 @@ const CustomerForm = () => {
               ...item,
               quantity: Number(value) || 1,
               total_price: (Number(value) || 1) * item.unit_price || 0,
+              is_tax_included: settings?.data?.tax_inclusive_pricing,
               taxes: [
                 {
                   id: taxes?.data[0]?.id,
@@ -210,6 +214,7 @@ const CustomerForm = () => {
               ...item,
               unit_price: value,
               total_price: value * item.quantity || 0,
+              is_tax_included: settings?.data?.tax_inclusive_pricing,
               taxes: [
                 {
                   id: taxes?.data[0]?.id,
@@ -235,7 +240,7 @@ const CustomerForm = () => {
 
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-10 space-y-5">
-      <div className="w-full xl:w-[550px] max-w-full">
+      <div className="w-full xl:w-[500px] max-w-full">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
           {orderSchema.products.map((item, index) => (
@@ -371,6 +376,7 @@ const CustomerForm = () => {
                       discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
                       discount_type: 2,
                       total_price: 0,
+                      is_tax_included: settings?.data?.tax_inclusive_pricing,
                       taxes: [
                         {
                           id: taxes?.data[0]?.id,

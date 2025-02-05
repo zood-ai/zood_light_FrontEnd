@@ -95,6 +95,7 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
         quantity: item.qty || 0,
         unit_price: item.price || 0,
         total_price: item.price * item.qty || 0,
+        is_tax_included: settings?.data?.tax_inclusive_pricing,
         taxes: [
           {
             id: taxes?.data[0]?.id,

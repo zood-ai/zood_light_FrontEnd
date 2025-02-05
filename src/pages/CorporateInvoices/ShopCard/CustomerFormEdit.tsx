@@ -125,7 +125,7 @@ const CustomerFormEdit = () => {
   // const n = item?.pivot?.unit_price * item?.pivot?.quantity || 0;
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
-      <div className=" w-full xl:w-[550px] max-w-full">
+      <div className=" w-full xl:w-[500px] max-w-full">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
           {getOrder?.products.map((item, index) => (

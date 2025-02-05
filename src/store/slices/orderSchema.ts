@@ -74,7 +74,7 @@ const initialState: OrderSchemaState = {
         {
           id: "b4335516-f710-463a-901a-a1b1fce2333b",
           rate: 5,
-          amount: 1.04
+          amount: 1.04,
         }
       ]
     },
