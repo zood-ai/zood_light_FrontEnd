@@ -305,7 +305,7 @@ const CustomerForm = forwardRef(
       if (!setNewCustomer) return;
       if (!showCustomer) setNewCustomer(false);
     }, [showCustomer]);
-    console.log({ newCustomerData });
+    console.log({ newCustomerData, orderSchema });
     return (
       <div className="mt-5 flex xl:justify-between flex-col gap-x-4">
         {!params.id && !orderSubmited && (

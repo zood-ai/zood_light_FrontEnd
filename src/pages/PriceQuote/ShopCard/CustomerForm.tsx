@@ -127,19 +127,16 @@ const CustomerForm = () => {
           name: productData.name,
           unit_price: productData.price,
           kitchen_notes: '',
-          total_price:
-            productData.price * productData.quantity || productData.price,
-            is_tax_included: settings?.data?.tax_inclusive_pricing,
+          total_price: productData.price * 1 || productData.price,
+          is_tax_included: settings?.data?.tax_inclusive_pricing,
           taxes: [
             {
               id: taxes?.data[0]?.id,
               rate: taxes?.data[0]?.rate,
               amount: !settings?.data?.tax_inclusive_pricing
-                ? (productData.price * productData.quantity ||
-                    productData.price) *
+                ? (productData.price * 1 || productData.price) *
                   ((taxes?.data[0]?.rate || 0) / 100)
-                : (productData.price * productData.quantity ||
-                    productData.price) *
+                : (productData.price * 1 || productData.price) *
                   ((taxes?.data[0]?.rate || 0) /
                     (100 + taxes?.data[0]?.rate || 0)),
             },
@@ -155,9 +152,20 @@ const CustomerForm = () => {
               ...item,
               quantity: parseInt(value) || 1,
               total_price: (parseInt(value) || 1) * item.unit_price || 0,
-              amount:
-                ((parseInt(value) || 1) * item.unit_price || 0) *
-                ((taxes?.data[0]?.rate || 0) / 100),
+              taxes: [
+                {
+                  id: taxes?.data[0]?.id,
+                  rate: taxes?.data[0]?.rate,
+                  amount: !settings?.data?.tax_inclusive_pricing
+                    ? item.unit_price *
+                      (parseInt(value) || 1) *
+                      ((taxes?.data[0]?.rate || 0) / 100)
+                    : item.unit_price *
+                      (parseInt(value) || 1) *
+                      ((taxes?.data[0]?.rate || 0) /
+                        (100 + taxes?.data[0]?.rate || 0)),
+                },
+              ],
             }
           : item
       );
@@ -289,7 +297,7 @@ const CustomerForm = () => {
                     ...orderSchema.products,
                     {
                       product_id: '',
-                      quantity: '1',
+                      quantity: 1,
                       unit_price: '0',
                       discount_amount: 0,
                       discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
