@@ -25,11 +25,12 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
   const [isOpen, setIsOpen] = useState(false);
   const params = useParams();
   const { t } = useTranslation();
-  const ref = useRef<{ submitOrder: () => void }>(null);
+  const ref = useRef<{ submitOrder: (newCustomer: any) => void }>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
+  const [newCustomer, setNewCustomer] = useState(false);
 
   const totalCost = useMemo(
     () => cardItemValue?.reduce((acc, item) => acc + item.price * item.qty, 0),
@@ -84,28 +85,6 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
     params.id !== 'add' ? params.objId ?? '' : ''
   );
 
-  // Trigger fetching products based on params and fetched order data
-  // useEffect(() => {
-  //   if (params.id !== 'add' && getOrdersById?.data?.data) {
-  //     const { data } = getOrdersById.data;
-
-  //     // Map products data
-  //     const products = data.products?.map((item: any) => ({
-  //       id: item.id || '',
-  //       image: item.image || '',
-  //       qty: item.pivot?.quantity || 0,
-  //       price: item.pivot?.unit_price || 0,
-  //       total_price: item.pivot?.total_price || 0,
-  //       name: item.name || '',
-  //       discount_amount: item.pivot?.discount_amount,
-  //       discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
-  //       discount_type: item.pivot?.discount_type || 2,
-  //     }));
-
-  //     dispatch(setCardItem(products));
-  //   }
-  // }, [params.objId, getOrdersById?.data?.data]);
-
   // Handle customer ID update
   useEffect(() => {
     if (params.objId && getOrdersById?.data?.data) {
@@ -116,27 +95,6 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
   const { data: branchData } =
     createCrudService<any>('manage/branches').useGetAll();
 
-  // Map payments data and update subtotal
-  // useEffect(() => {
-  //   if (params.objId && getOrdersById?.data?.data) {
-  //     const { data } = getOrdersById.data;
-
-  //     const payments = data.payments?.map((item: any) => ({
-  //       tendered: 180,
-  //       amount: item.amount || 0,
-  //       payment_method_id: item.payment_method_id || '',
-  //       tips: 0,
-  //       meta: { external_additional_payment_info: 'some info' },
-  //     }));
-
-  //     dispatch(addPayment(payments));
-
-  //     // Update subtotal price
-  //     dispatch(updateField({ field: 'subtotal_price', value: data.payments?.total_price }));
-  //   }
-  // }, [params.objId, getOrdersById?.data?.data]);
-
-  // Set remaining fields
   useEffect(() => {
     if (params.objId) {
       dispatch(
@@ -171,7 +129,7 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
             disabled={loading || (params.id ? true : false)}
             onClick={() => {
               if (ref.current) {
-                ref.current.submitOrder(); // Call the child's function
+                ref.current.submitOrder({ newCustomer }); // Call the child's function
               }
             }}
             className="w-[144px] mt-10"
@@ -180,7 +138,13 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
           </Button>
         </div>
         <div className="w-[45%] max-xl:w-full xl:mt-[-70px]">
-          <CustomerForm setLoading={setLoading} loading={loading} ref={ref} />
+          <CustomerForm
+            newCustomer={newCustomer}
+            setNewCustomer={setNewCustomer}
+            setLoading={setLoading}
+            loading={loading}
+            ref={ref}
+          />
         </div>
       </div>
 
