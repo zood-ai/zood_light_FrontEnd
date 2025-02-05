@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setCardItem } from '@/store/slices/cardItems';
 import imagePLaceHolder from '/icons/imagePLaceHolder.svg';
 import { useTranslation } from 'react-i18next';
+import createCrudService from '@/api/services/crudService';
 
 export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
   const { t } = useTranslation();
@@ -19,6 +20,9 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
     () => cardItemValue.find((i: { id: string }) => i.id === item.id),
     [cardItemValue, item.id]
   );
+  const { data: settings } =
+    createCrudService<any>('manage/settings').useGetAll();
+  const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();
 
   const qty = cardItem ? cardItem.qty : 0;
   const [inputQty, setInputQty] = useState(qty);
@@ -42,6 +46,19 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
               return {
                 ...item,
                 qty: item.qty + newItem.qty,
+                is_tax_included: settings?.data?.tax_inclusive_pricing,
+                taxes: [
+                  {
+                    id: taxes?.data[0]?.id,
+                    rate: taxes?.data[0]?.rate,
+                    amount: !settings?.data?.tax_inclusive_pricing
+                      ? (newItem.price * (item.qty + newItem.qty) || 0) *
+                        ((taxes?.data[0]?.rate || 0) / 100)
+                      : (newItem.price * (item.qty + newItem.qty) || 0) *
+                        ((taxes?.data[0]?.rate || 0) /
+                          (100 + taxes?.data[0]?.rate || 0)),
+                  },
+                ],
               };
             }
             return item;
@@ -50,7 +67,26 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
         dispatch(setCardItem(updatedItems));
       } else {
         dispatch(
-          setCardItem([...cardItemValue, { ...newItem, qty: newItem.qty }])
+          setCardItem([
+            ...cardItemValue,
+            {
+              ...newItem,
+              qty: newItem.qty,
+              is_tax_included: settings?.data?.tax_inclusive_pricing,
+              taxes: [
+                {
+                  id: taxes?.data[0]?.id,
+                  rate: taxes?.data[0]?.rate,
+                  amount: !settings?.data?.tax_inclusive_pricing
+                    ? (newItem.price * newItem.qty || 0) *
+                      ((taxes?.data[0]?.rate || 0) / 100)
+                    : (newItem.price * newItem.qty || 0) *
+                      ((taxes?.data[0]?.rate || 0) /
+                        (100 + taxes?.data[0]?.rate || 0)),
+                },
+              ],
+            },
+          ])
         );
       }
     },
