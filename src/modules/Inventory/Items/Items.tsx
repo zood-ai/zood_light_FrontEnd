@@ -12,6 +12,8 @@ import HeaderPage from "@/components/ui/custom/HeaderPage";
 import HeaderTable from "@/components/ui/custom/HeaderTable";
 import CustomModal from "@/components/ui/custom/CustomModal";
 import useItems from "./hooks/useItems";
+import AuthPermission from "@/guards/AuthPermission";
+import { PERMISSIONS } from "@/constants/constants";
 
 const Items = () => {
   const columns: ColumnDef<IItemsList>[] = [
@@ -96,9 +98,10 @@ const Items = () => {
 
   return (
     <>
+
       <HeaderPage
-        title="Inventory Items  "
-        textButton="Add Item  "
+        title="Inventory Items"
+        textButton="Add Item"
         exportButton={true}
         modalName={"items"}
         handleExport={ItemsExport}
@@ -106,7 +109,9 @@ const Items = () => {
         onClickAdd={() => {
           setIsOpen(true);
         }}
+        permission={[PERMISSIONS.can_add_and_edit_inventory_items_recipes_and_suppliers]}
       />
+   
       <HeaderTable isCategory={true} isSupplier={true} isBranches={true} />
 
       <CustomTable
@@ -121,6 +126,7 @@ const Items = () => {
           setIsEdit(true);
         }}
       />
+
       <CustomSheet
         isOpen={isOpen}
         isEdit={isEdit}
@@ -143,6 +149,7 @@ const Items = () => {
         onSubmit={onSubmit}
         setModalName={setModalName}
         isLoading={isPending || isPendingEdit || isPendingDelete}
+        permission={[PERMISSIONS.can_add_and_edit_inventory_items_recipes_and_suppliers]}
       />
 
       <CustomModal

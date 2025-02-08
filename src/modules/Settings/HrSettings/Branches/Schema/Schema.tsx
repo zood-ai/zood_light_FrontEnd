@@ -3,7 +3,7 @@ import { array, z } from "zod";
 export const formBranchesSchema = z.object({
   branch_id: z.string().optional(),
   departments: z.array(z.object({ id: z.string() })).optional(),
-  holiday_entitlements: z.string(),
+  holiday_entitlements: z.string().nullable(),
   holidays: array(z.object({
     name: z.string(),
     from_date: z.string(),

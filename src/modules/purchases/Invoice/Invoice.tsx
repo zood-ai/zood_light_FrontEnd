@@ -23,6 +23,8 @@ import { AlertDialogAction } from "@/components/ui/alert-dialog";
 import { AlertDialogCancel } from "@radix-ui/react-alert-dialog";
 import { Loader2 } from "lucide-react";
 import Avatar from "@/components/ui/avatar";
+import AuthPermission from "@/guards/AuthPermission";
+import { PERMISSIONS } from "@/constants/constants";
 
 const Invoices = () => {
   const columns: ColumnDef<IInvoice>[] = [
@@ -63,11 +65,10 @@ const Invoices = () => {
             row.toggleSelected(!!value);
           }}
           aria-label="Select row"
-          className={`checkbox ${
-            row.original.status == 2 || row.original.status == 1
+          className={`checkbox ${row.original.status == 2 || row.original.status == 1
               ? "bg-gray-200"
               : "bg-white"
-          }`}
+            }`}
         />
       ),
       enableSorting: false,
@@ -209,18 +210,14 @@ const Invoices = () => {
     isPendingDelete,
     invoiceUpdate,
     isPendingUpdate,
+    isLoadingOne
   } = useInvoiceHttp({
     invoiceId: rowData,
     handleCloseSheet: handleCloseSheet,
     setModalName: setModalName,
+    setInvoiceOne: (data: any) => { form.reset(data); },
   });
 
-  useEffect(() => {
-    if (Object.values(invoiceOne || {}).length > 0) {
-      form.reset(invoiceOne);
-      setIsOpen(true);
-    }
-  }, [Object.values(invoiceOne || {}).length > 0, form]);
 
   const handleRemove = () => {
     const items = form.watch("items") || [];
@@ -263,6 +260,7 @@ const Invoices = () => {
   const onSubmit = async (values: any) => {
     invoiceUpdate(values);
   };
+  
 
   return (
     <>
@@ -279,6 +277,7 @@ const Invoices = () => {
         onClickExportInventory={() => {
           invoiceExport();
         }}
+        permission={[PERMISSIONS.can_access_inventory_management_features]}
       />
       <HeaderTable
         isInvoiceNumber={true}
@@ -315,7 +314,9 @@ const Invoices = () => {
         }}
         headerLeftText={"Invoice #162037"}
         form={form}
-        isLoadingForm={isPendingInvoiceOne || isFetchingInvoice}
+
+        isLoadingForm={!isLoadingOne }
+
         width="w-[672px]"
         headerStyle="border-b-0 flex items-center justify-between w-full"
         purchaseHeader={
@@ -332,6 +333,7 @@ const Invoices = () => {
         }
         receiveOrder={
           <>
+          <AuthPermission permissionRequired={[PERMISSIONS.can_edit_invoices,PERMISSIONS.can_access_inventory_management_features]}>
             {[1, 2].includes(invoiceOne?.status) ? (
               <Button
                 type="button"
@@ -405,7 +407,9 @@ const Invoices = () => {
                 </Button>
               </>
             )}
+            </AuthPermission>
           </>
+
         }
         children={
           <InvoiceForm setIsEditItem={setIsEditItem} rowData={rowData} />
@@ -413,6 +417,7 @@ const Invoices = () => {
         onSubmit={onSubmit}
         contentStyle="px-0"
         setModalName={setModalName}
+        permission={[PERMISSIONS.can_access_inventory_management_features]}
       />
 
       {/* ------------------------------- */}
@@ -442,11 +447,11 @@ const Invoices = () => {
             </AlertDialogCancel>
           </>
         }
-        handleConfirm={() => {}}
+        handleConfirm={() => { }}
         deletedItemName={""}
       />
       {/* //////////////////////////////////////// */}
-
+<AuthPermission permissionRequired={[PERMISSIONS.can_edit_invoices]}>
       <CustomSheet
         isOpen={[1, 2].includes(invoiceOne?.status) ? false : isEditItem}
         handleCloseSheet={() => {
@@ -500,6 +505,7 @@ const Invoices = () => {
         onSubmit={onSubmit}
         contentStyle="px-0"
       />
+    </AuthPermission>
     </>
   );
 };

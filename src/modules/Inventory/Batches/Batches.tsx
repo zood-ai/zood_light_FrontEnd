@@ -14,6 +14,7 @@ import { IBatchesList } from './types/type'
 // hooks
 import useBatches from './hooks/useBatches'
 import CustomModal from '@/components/ui/custom/CustomModal'
+import { PERMISSIONS } from '@/constants/constants'
 
 const Batches = () => {
   const {
@@ -81,6 +82,8 @@ const Batches = () => {
         onClickAdd={() => {
           setIsOpen(true)
         }}
+                permission={[PERMISSIONS.can_add_and_edit_inventory_items_recipes_and_suppliers]}
+        
       />
       <HeaderTable />
       <CustomTable

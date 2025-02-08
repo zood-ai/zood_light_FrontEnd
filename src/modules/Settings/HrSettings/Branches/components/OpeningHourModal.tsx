@@ -9,6 +9,9 @@ import CustomSelect from "@/components/ui/custom/CustomSelect";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TimeOptions } from "@/constants/dropdownconstants";
 import { getDay } from "@/utils/function";
+import { Button } from "@/components/ui/button";
+import useBranchesHttps from "../queriesHttp/useBranchesHttp";
+import useFilterQuery from "@/hooks/useFilterQuery";
 
 const OpeningHourModal = ({
 
@@ -23,13 +26,13 @@ const OpeningHourModal = ({
     setOpenCloseModal: Dispatch<SetStateAction<boolean>>;
 
 }) => {
-    const defaultValues = {
-
-    };
+   
+    const { filterObj } = useFilterQuery()
     const handleCloseSheet = () => {
-        form.reset(defaultValues);
+                form.setValue("opening_hours",BrancheOne?.opening_hours );
         setOpenCloseModal(false);
     };
+    const { isLoadingEdit, branchEdit,BrancheOne } = useBranchesHttps({ handleCloseSheet: handleCloseSheet ,branchId:filterObj?.id})
     const form = useForm({});
     const { watch, setValue } = useFormContext()
     const onSubmit = (values: any) => {
@@ -48,6 +51,25 @@ const OpeningHourModal = ({
             contentStyle="p-0"
             width="w-[700px]"
             onSubmit={onSubmit}
+            purchaseHeader={
+                <div className="flex items-center justify-between w-full">
+                    <div>
+                        <h1 className="text-textPrimary text-[16px] font-semibold">
+                            Opening hours
+                        </h1>
+
+                    </div>
+                    <Button
+                        loading={isLoadingEdit}
+                        disabled={!watch("opening_hours")}
+                        onClick={() => {
+                            branchEdit({ opening_hours: watch("opening_hours"), branch_id: filterObj?.id })
+                        }}
+                    >
+                        Save Changes
+                    </Button>
+                </div>
+            }
 
         >
             <>
@@ -59,7 +81,9 @@ const OpeningHourModal = ({
                         </p>
                         <div className="flex items-center gap-3 col-span-2">
                             <p>open from</p>
-                            <CustomSelect options={TimeOptions} width="w-[60px]"
+                            <CustomSelect
+                                disabled={!!watch(`opening_hours.${i}.is_closed`)}
+                                options={TimeOptions} width="w-[80px]"
                                 value={watch(`opening_hours.${i}.from`)}
                                 onValueChange={(e) => {
                                     setValue(`opening_hours.${i}.from`, e)
@@ -67,7 +91,9 @@ const OpeningHourModal = ({
                                 }
                             />
                             <p>to</p>
-                            <CustomSelect options={TimeOptions} width="w-[60px]"
+                            <CustomSelect
+                                disabled={!!watch(`opening_hours.${i}.is_closed`)}
+                                options={TimeOptions} width="w-[80px]"
                                 value={watch(`opening_hours.${i}.to`)}
                                 onValueChange={(e) => {
                                     setValue(`opening_hours.${i}.to`, e)

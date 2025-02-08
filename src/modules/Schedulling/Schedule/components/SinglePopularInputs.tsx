@@ -6,7 +6,7 @@ import { useRef } from "react";
 import useClickOutside from "@/hooks/useClickOutside";
 import { formAddPopularShiftSchema } from "../Schema/schema";
 import { z } from "zod";
-import { UseMutateFunction } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
 
 const SinglePopularInputs = ({
   focusedInput,
@@ -28,6 +28,8 @@ const SinglePopularInputs = ({
   isEdit?: boolean;
 }) => {
   const InputsRef = useRef(null);
+
+  const { toast } = useToast();
 
   useClickOutside({
     enabled: focusedInput !== "" && shiftAction,

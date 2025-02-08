@@ -2,93 +2,52 @@ import FilterOptions from "@/components/FilterOption";
 import { CustomTable } from "@/components/ui/custom/CustomTable";
 import HeaderPage from "@/components/ui/custom/HeaderPage";
 import HeaderTable from "@/components/ui/custom/HeaderTable";
-import { RequestsStatusOptions } from "@/constants/dropdownconstants";
-import { ColumnDef, Row } from "@tanstack/react-table";
+import {
+  RequestsStatusOptions,
+  TimeOffRequestsTypeOptions,
+} from "@/constants/dropdownconstants";
 import { IRequestsList } from "./types/types";
-import { format } from "date-fns";
-import Avatar from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { CustomSheet } from "@/components/ui/custom/CustomSheet";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { formRequestSchema } from "./Schema/schema";
+import {
+  formRequestSchema,
+  formShiftChangesSchema,
+  formTimeOffSchema,
+} from "./Schema/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import RequestDetails from "./components/RequestDetails";
 import useRequeststHttp from "./queriesHttp/RequestsHttp";
-import { Status, Type } from "./contants/contants";
 import CustomModal from "@/components/ui/custom/CustomModal";
+import { Button } from "@/components/ui/button";
+import AuthPermission from "@/guards/AuthPermission";
+import { PERMISSIONS } from "@/constants/constants";
+import useRequestsColumns from "./hooks/useRequestsColumns";
+import useFilterQuery from "@/hooks/useFilterQuery";
+import RequestModal from "./components/RequestModal";
+import { Badge } from "@/components/ui/badge";
+import { Status } from "./contants/contants";
 import { getBadgeColor } from "./helpers/helpers";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 const Requests = () => {
-  const columns: ColumnDef<IRequestsList>[] = [
-    {
-      accessorKey: "created_at",
-      header: () => <div>Requested date</div>,
-      cell: ({ row }: { row: Row<IRequestsList> }) => (
-        <>{format(row.getValue("created_at"), "dd MMM")}</>
-      ),
-    },
-    {
-      accessorKey: "employee",
-      header: () => <div>Request by</div>,
-      cell: ({ row }: { row: Row<IRequestsList> }) => {
-        const name =
-          row.original.employee.first_name +
-          " " +
-          row.original.employee.last_name;
-        return (
-          <div className="flex items-center gap-2">
-            <Avatar text={name} />
-            <div>{name}</div>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "location",
-      header: () => <div>Location</div>,
-      cell: ({ row }: { row: Row<IRequestsList> }) => (
-        <>{row.original.branch.name || "-"}</>
-      ),
-    },
-    {
-      accessorKey: "type",
-      header: () => <div>Type</div>,
-      cell: ({ row }: { row: Row<IRequestsList> }) => {
-        return (
-          <div className="">{Type[row.getValue("type") as number] || "-"}</div>
-        );
-      },
-    },
-    // {
-    //   accessorKey: "for",
-    //   header: () => <div>For</div>,
-    //   cell: ({ row }: { row: Row<IRequestsList> }) => {
-    //     return <div className="">{row.getValue("for") || "-"}</div>;
-    //   },
-    // },
-    // {
-    //   accessorKey: "overlapwith",
-    //   header: () => <div>Overlapwith</div>,
-    //   cell: ({ row }: { row: Row<IRequestsList> }) => {
-    //     return <div className="">SAR {row.getValue("overlapwith") || "-"}</div>;
-    //   },
-    // },
-    {
-      accessorKey: "status",
-      header: () => <div>Status</div>,
-      cell: ({ row }: { row: Row<IRequestsList> }) => {
-        return (
-          <div className="">
-            <Badge variant={getBadgeColor(row.getValue("status"))}>
-              {Status[row.getValue("status") as number]}
-            </Badge>
-          </div>
-        );
-      },
-    },
-  ];
+  const { ApprovalsColumns, TimeOffColumns, ShiftChangesColumns } =
+    useRequestsColumns();
+  const { filterObj } = useFilterQuery();
+
+  const columns = useMemo(() => {
+    return {
+      "4": ApprovalsColumns,
+      "2": TimeOffColumns,
+      "3": ShiftChangesColumns,
+    };
+  }, [
+    ApprovalsColumns,
+    TimeOffColumns,
+    ShiftChangesColumns,
+    filterObj.group_by,
+  ]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -99,54 +58,135 @@ const Requests = () => {
     setIsEdit(false);
     setIsOpen(false);
     setModalName("");
-
     setRowData(undefined);
     form.reset({});
   };
-  const { RequestsData, isFetchingRequests, approveRequest, isApproveRequest } =
-    useRequeststHttp({
-      handleCloseSheet,
-    });
-
-  const form = useForm<z.infer<typeof formRequestSchema>>({
-    resolver: zodResolver(formRequestSchema),
+  const {
+    RequestsData,
+    isFetchingRequests,
+    approveRequest,
+    isApproveRequest,
+    TotalRequests,
+  } = useRequeststHttp({
+    handleCloseSheet,
+    getTotal: true,
   });
 
-  const handleSubmit = async (data: z.infer<typeof formRequestSchema>) => {
-    approveRequest({ requestId: rowData?.id ?? 0, status: "11" });
+  const ScheduleApprovalTotalReq = TotalRequests?.totals?.find(
+    (req) => req?.type_enum == 4
+  )?.total
+
+  const TimeOffTotalReq = TotalRequests?.totals?.find(
+    (req) => req?.type_enum == 2
+  )?.total;
+
+  const ShiftChangesTotalReq =
+    TotalRequests?.totals?.find((req) => req?.type_enum == 3)?.total ?? 0;
+
+  const OpenShiftTotalReq =
+    TotalRequests?.totals?.find((req) => req?.type_enum == 1)?.total ?? 0;
+
+  // console.log({
+  //   ShiftChangesTotalReq,
+  //   OpenShiftTotalReq,
+  //   show: ShiftChangesTotalReq || OpenShiftTotalReq,
+  // });
+
+  const schema =
+    filterObj.group_by === "4"
+      ? formRequestSchema
+      : rowData?.type == "3"
+      ? formShiftChangesSchema
+      : formTimeOffSchema;
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+  });
+
+  console.log({ form: form.getValues() });
+
+  const handleSubmit = async (data: z.infer<typeof schema>) => {
+    console.log({ data });
+
+    // approveRequest({ requestId: rowData?.id ?? 0, status: "11" });
   };
 
   const handleConfirm = async () => {
-    approveRequest({ requestId: rowData?.id ?? 0, status: "12" });
+    if (modalName === "close edit") {
+      handleCloseSheet();
+      return;
+    }
+    approveRequest({ requestId: rowData?.id ?? "0", status: "12" });
+  };
+
+  const modalLeftText = () => {
+    switch (filterObj?.group_by) {
+      case "4":
+        return "Approve schedule request";
+      case "2":
+        return `${
+          rowData?.type == "2" && rowData?.details?.type
+            ? "🏝 Paid Holiday"
+            : "💤 Unpaid Day off"
+        } `;
+      case "3":
+        return rowData?.type == "1"
+          ? "Claim shift request"
+          : rowData?.shift && rowData?.original_shift
+          ? "Swap shift request"
+          : "Drop shift request";
+      default:
+        return "Approve schedule request";
+    }
   };
 
   return (
     <>
-      <HeaderPage
-        title="Employee Requests"
-        children={
-          <FilterOptions
-            filters={[
-              { label: "Approvals", group_by: "4" },
-              { label: "Time off", group_by: "2" },
-              { label: "Shift changes", group_by: "3" },
-            ]}
-          />
-        }
-      />
+      <HeaderPage title="Employee Requests">
+        <FilterOptions
+          filters={[
+            {
+              label: "Approvals",
+              group_by: "4",
+              showBadge: ScheduleApprovalTotalReq,
+              badgeValue: ScheduleApprovalTotalReq,
+            },
+            {
+              label: "Time off",
+              group_by: "2",
+              showBadge: TimeOffTotalReq,
+              badgeValue: TimeOffTotalReq,
+
+              premission: [PERMISSIONS.can_approve_holiday_request],
+            },
+            {
+              label: "Shift changes",
+              group_by: "3",
+              premission: [PERMISSIONS.can_approve_schedule],
+              showBadge: !!ShiftChangesTotalReq || !!OpenShiftTotalReq,
+              badgeValue: ShiftChangesTotalReq + OpenShiftTotalReq,
+            },
+          ]}
+        />
+      </HeaderPage>
       <HeaderTable
         isStatus
         isSearch={false}
+        isType={filterObj.group_by === "2"}
+        TypeOptions={TimeOffRequestsTypeOptions}
         optionStatus={RequestsStatusOptions}
       />
       <CustomTable
-        columns={columns}
+        columns={columns[filterObj?.group_by] || ApprovalsColumns}
         data={RequestsData?.data || []}
         loading={isFetchingRequests}
         paginationData={RequestsData?.meta}
         onRowClick={(row: IRequestsList) => {
-          if (row.status == "1") {
+          setRowData(row);
+          setIsOpen(true);
+
+          if (filterObj?.group_by === "2") {
             setRowData(row);
+            form.setValue("details", row.details ?? []);
             setIsOpen(true);
           }
         }}
@@ -155,16 +195,65 @@ const Requests = () => {
       <CustomSheet
         isOpen={isOpen}
         isEdit={isOpen}
+        isDirty={form.formState.isDirty}
         DeleteText="Reject"
+        hideIcon={
+          rowData?.type == "2" || rowData?.type == "1" || rowData?.type == "3"
+        }
         isLoading={isApproveRequest}
-        headerLeftText="Approve schedule request"
+        headerLeftText={modalLeftText()}
         textEditButton="Approve"
         form={form}
         handleCloseSheet={handleCloseSheet}
         onSubmit={handleSubmit}
         setModalName={setModalName}
+        purchaseHeader={
+          rowData?.status != "1" ? (
+            <div className="flex items-center justify-between w-full ">
+              <span className="text-lg font-semibold">{modalLeftText()}</span>{" "}
+              <Badge variant={getBadgeColor(rowData?.status ?? "1")}>
+                {Status[rowData?.status as string]}
+              </Badge>
+            </div>
+          ) : undefined
+        }
+        receiveOrder={
+          rowData?.status == "1" ? (
+            <AuthPermission
+              permissionRequired={[PERMISSIONS.can_approve_schedule]}
+            >
+              <Button
+                type="button"
+                loading={isApproveRequest}
+                className="px-2 font-semibold min-w-20"
+                onClick={() => {
+                  const data =
+                    filterObj.group_by == "2"
+                      ? {
+                          details: form.getValues("details"),
+                        }
+                      : rowData?.type == "3" &&
+                        !!form.getValues("replacement_id")
+                      ? {
+                          replacement_id: form.getValues("replacement_id"),
+                        }
+                      : {};
+
+                  approveRequest({
+                    requestId: rowData?.id ?? 0,
+                    status: "11",
+                    data,
+                  });
+                }}
+              >
+                Approve
+              </Button>
+            </AuthPermission>
+          ) : undefined
+        }
+        permission={[PERMISSIONS.can_approve_schedule]}
       >
-        <RequestDetails rowData={rowData} />
+        <RequestModal rowData={rowData} />
       </CustomSheet>
 
       <CustomModal
@@ -172,7 +261,15 @@ const Requests = () => {
         setModalName={setModalName}
         handleConfirm={handleConfirm}
         isPending={isApproveRequest}
-        deletedItemName="this request"
+        headerModal="Are you sure you want to reject this request"
+        confirmbtnText="Yes , Reject this request"
+        deletedItemName="This request"
+        descriptionModal={
+          <>
+            <Label className="block text-left">Add a note</Label>
+            <Textarea className="w-full" />
+          </>
+        }
       />
     </>
   );

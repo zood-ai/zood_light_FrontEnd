@@ -32,10 +32,8 @@ const ItemsList = ({
   const { setValue, watch } = useFormContext();
 
   const { itemsData, isFetchingItems } = useCommonRequests({
-    filterItem:
-      watch("type") == 4
-        ? `filter[branches][0]=${watch("branch_id")}`
-        : `filter[branches][0]=${watch("warehouse_id")}`,
+    filterItem: `join_branches[0]=${watch("branch_id")}&join_branches[1]=${watch("warehouse_id")}`
+
   });
   useEffect(() => {
     const arr: {

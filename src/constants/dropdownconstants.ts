@@ -543,6 +543,11 @@ export const RequestsStatusOptions = [
   { value: "11", label: "Approved" },
 ];
 
+export const TimeOffRequestsTypeOptions = [
+  { value: "false", label: "Day Off 💤" },
+  { value: "true", label: "Holiday 🏖" },
+];
+
 export const DelivaryDateOptions = [
   { value: "yestarday", label: "Yesterday" },
   { value: "today", label: "Today" },
@@ -568,14 +573,16 @@ export const ROLES_TYPES = [
   "Can deactivate users from other locations",
   "Can export employee data",
   "Can edit permissions for users",
+  "Can clock out from any location",
   "Can access inventory management features",
+];
+export const ROLES_TYPES_INVENTORY = [
   "Can add and edit inventory items, recipes and suppliers",
   "Can add inventory items from deliveries only",
   "Can access Inventory reports",
   "Can edit stock counts",
   "Can edit waste",
   "Can edit invoices",
-  "Can clock out from any location",
 ];
 export const StatusOptionsOrderCpu = [
   { value: "2", label: "Requested" },
@@ -680,4 +687,14 @@ export const resaonsDelete = [
   { value: "retirement", label: "Retirement" },
   { value: "npn-starter", label: "Non starter" },
   { value: "25", label: "Other" },
+];
+
+export const PayrollStatusOptions = [
+  { value: "1", label: "Approved" },
+  { value: "0", label: "Unapproved" },
+];
+
+export const PayRateOptions = [
+  { value: "SAR", label: "SAR (added to existing rate)" },
+  { value: "%", label: "% (added to existing rate" },
 ];

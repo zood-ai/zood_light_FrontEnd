@@ -23,6 +23,7 @@ import CustomCircle from "@/components/ui/custom/CustomCircle";
 import MemoChecked from "@/assets/icons/Checked";
 import { Badge } from "@/components/ui/badge";
 import { handleStatusShap } from "../ReceiveOrders/helpers/helpers";
+import { PERMISSIONS } from "@/constants/constants";
 
 const PriceChanges = () => {
   const [priceChangeId, setPriceChangeId] = useState("");
@@ -69,7 +70,7 @@ const PriceChanges = () => {
       header: () => <div>Supplier</div>,
 
       cell: ({ row }) => (
-        <div className=" flex items-center">
+        <div className="flex items-center ">
           {row.original.status == 2 ? (
             <div className="flex items-center">
               <div className="w-[32px] h-[32px] bg-success rounded-full mx-[4px] flex justify-center items-center">
@@ -142,7 +143,7 @@ const PriceChanges = () => {
         return (
           <div>
             {rowIndex === row.index && row?.original?.status === 1 ? (
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 <Button
                   variant={"outline"}
                   disabled={isPendingStatus}
@@ -236,8 +237,10 @@ const PriceChanges = () => {
               </h1>
               <p className="text-gray-500 text-[14px] flex items-center gap-2 font-medium">
                 {PriceChangeData?.data?.supplier_name}
-                {!PriceChangeData?.data?.creditNotices?.length && (
+                {PriceChangeData?.data?.accept_price_change_from_supplier ? (
                   <Badge variant={handleStatusShap("4")}>Price update</Badge>
+                ) : (
+                  ""
                 )}
               </p>
             </div>
@@ -251,6 +254,7 @@ const PriceChanges = () => {
         }
         onSubmit={onSubmit}
         contentStyle="p-0"
+        permission={[PERMISSIONS.can_edit_waste]}
       >
         <PriceChangesForm PriceChange={PriceChangeData?.data} />
       </CustomSheet>

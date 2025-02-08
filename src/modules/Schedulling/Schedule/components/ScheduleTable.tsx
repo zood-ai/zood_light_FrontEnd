@@ -9,36 +9,44 @@ import SingleDepartment from "./SingleDepartment";
 import DayHeader from "./DayHeader";
 import { TScheduledData } from "../types/types";
 import DayHeaderSkeleton from "./DayHeaderSkeleton";
-import DepartmentSkeleton from "./DepartmentSkeleton";
 import EmployeeRowSkeleton from "./EmployeeRowSkeleton";
-import useScheduletHttp from "../queriesHttp/ScheduleHttp";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { formUpdatePeopleSchema } from "../../People/Schema/schema";
+import {
+  formPeopleSchema,
+  formUpdatePeopleSchema,
+} from "../../People/Schema/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { defaultValueUpdate } from "../../People/defaultValue";
-import SharedPeopleEditModal from "../../People/components/SharedPeopleEditModal";
+import SharedPeopleEditModal from "../../../../sharedModals/SharedPeopleEditModal";
 import usePeopleHttp from "../../People/queriesHttp/usePeopleHttp";
 import useFilterQuery from "@/hooks/useFilterQuery";
 import { useSearchParams } from "react-router-dom";
+import OpenShiftRow from "./OpenShiftRow";
+import EmployeeRow from "./EmployeeRow";
 
 type TScheduleTable = {
   isFetchingSchedule: boolean;
   ScheduleData: TScheduledData;
+  showAvaliability: boolean;
+  sortEmployees: boolean;
 };
 
 const ScheduleTable = ({
   isFetchingSchedule,
   ScheduleData,
+  showAvaliability,
+  sortEmployees,
 }: TScheduleTable) => {
-  const { PopularShiftData } = useScheduletHttp({});
-
   const [isEdit, setIsEdit] = useState(false);
   const [modalName, setModalName] = useState("");
+
+  const [sortBy, setSortBy] = useState<string>("people");
 
   const { filterObj } = useFilterQuery();
 
   const [, setSearchParam] = useSearchParams({});
+  const [attendanceDays, setAttendanceDays] = useState<string>("30");
 
   const form = useForm<z.infer<typeof formUpdatePeopleSchema>>({
     resolver: zodResolver(formUpdatePeopleSchema),
@@ -57,26 +65,37 @@ const ScheduleTable = ({
     employeeDataOne,
     isFetchingemployeeOne,
     isLoadingEdit,
-    feedbackData,
     isLoadingFeedback,
+    employeeAttendace,
+    editEmployee,
+    isFetchingemployeeAttendace,
   } = usePeopleHttp({
     employeeId: filterObj?.id || "",
     handleCloseSheet: handleCloseSheet,
     setEmployeeOne: (data: any) => {
       form.reset(data);
     },
+    attendanceDays,
+    fromSchedule: true,
   });
 
-  const onSubmit = (values: z.infer<typeof formUpdatePeopleSchema>) => {
+  const onSubmit = (values: z.infer<typeof formPeopleSchema>) => {
     if (isEdit) {
-      // editEmployee({ ...values, _method: "PUT" });
-      return;
+      editEmployee({ ...values, _method: "PUT" });
     }
-    // addEmployee(values);
   };
+
+  const employees = sortEmployees
+    ? ScheduleData?.employees?.sort((a, b) =>
+        a.first_name.localeCompare(b.first_name)
+      )
+    : ScheduleData?.employees?.sort((a, b) =>
+        b.first_name.localeCompare(a.first_name)
+      );
+
   return (
     <>
-      <div className="flex">
+      <div className="flex" id="print">
         <DndProvider backend={HTML5Backend}>
           <div className="h-[calc(100vh-130px)]  overflow-y-scroll  w-full">
             <table className="mx-auto w-full  border-separate border-spacing-0 border-r border-[#d4e2ed] text-[14px] leading-4">
@@ -85,13 +104,16 @@ const ScheduleTable = ({
                   <th className="sticky top-0 z-20 border    border-r-0 box-border text-center align-top p-3 pt-4 bg-white w-72 mx-auto h-full border-separate border-spacing-0 border-[#d4e2ed] text-[14px] leading-4">
                     <CustomSelect
                       width="w-full"
+                      removeDefaultOption
                       options={[
-                        { value: "departments", label: "Departments" },
+                        // { value: "departments", label: "Departments" },
                         { value: "people", label: "People" },
-                        { value: "positions", label: "Positions" },
-                        { value: "stations", label: "Stations" },
+                        // { value: "positions", label: "Positions" },
                       ]}
-                      defaultValue={"departments"}
+                      defaultValue={sortBy}
+                      onValueChange={(value) => {
+                        setSortBy(value);
+                      }}
                       disabled
                     />
                     {/* <button
@@ -114,11 +136,11 @@ const ScheduleTable = ({
               </thead>
 
               <tbody>
-                {isFetchingSchedule && (
+                {isFetchingSchedule ? (
                   <>
                     {Array.from({ length: 2 }).map((_, i) => (
                       <Fragment key={i}>
-                        <DepartmentSkeleton />
+                        {/* <DepartmentSkeleton /> */}
 
                         {Array.from({ length: 3 }).map((_, i) => (
                           <EmployeeRowSkeleton key={i} />
@@ -126,26 +148,58 @@ const ScheduleTable = ({
                       </Fragment>
                     ))}
                   </>
+                ) : (
+                  <>
+                    {sortBy === "people" && (
+                      <>
+                        <OpenShiftRow
+                          days={ScheduleData?.days}
+                          fromOpenShift
+                          sortBy={sortBy}
+                        />
+                        {employees?.map((employee) => {
+                          return (
+                            <EmployeeRow
+                              key={employee.first_name + employee.last_name}
+                              employee={employee}
+                              sortBy={sortBy}
+                              showAvaliability={showAvaliability}
+                              departmentId={employee?.departments?.[0]?.id}
+                              positionId={
+                                employee?.departments[0]?.pivot
+                                  ?.forecast_position_id as number
+                              }
+                              days={ScheduleData?.days}
+                              isPublished={ScheduleData?.table?.status === 2}
+                              isFetchingSchedule={isFetchingSchedule}
+                              setIsEdit={setIsEdit}
+                            />
+                          );
+                        })}
+                      </>
+                    )}
+                  </>
                 )}
+
                 {/* Departments */}
-                {ScheduleData?.departments.map((department) => (
-                  <SingleDepartment
-                    key={department.id}
-                    department={department}
-                    employees={ScheduleData?.employees}
-                    days={ScheduleData?.days}
-                    isFetchingSchedule={isFetchingSchedule}
-                    setIsEdit={setIsEdit}
-                  />
-                ))}
+                {sortBy === "departments" &&
+                  ScheduleData?.departments.map((department) => (
+                    <SingleDepartment
+                      key={department.id}
+                      department={department}
+                      showAvaliability={showAvaliability}
+                      employees={ScheduleData?.employees}
+                      days={ScheduleData?.days}
+                      sortBy={sortBy}
+                      isFetchingSchedule={isFetchingSchedule}
+                      setIsEdit={setIsEdit}
+                    />
+                  ))}
               </tbody>
             </table>
           </div>
 
-          <PopularShiftDrawer
-            employees={ScheduleData?.employees}
-            PopularShifts={PopularShiftData}
-          />
+          <PopularShiftDrawer employees={employees} />
         </DndProvider>
       </div>
 
@@ -159,8 +213,12 @@ const ScheduleTable = ({
         handleCloseSheet={handleCloseSheet}
         employeeDataOne={employeeDataOne}
         isFetchingemployeeOne={isFetchingemployeeOne}
-        feedbackData={feedbackData}
         isLoadingFeedback={isLoadingFeedback}
+        resetFrom={(data) => form.reset(data)}
+        employeeAttendace={employeeAttendace}
+        setAttendanceDays={setAttendanceDays}
+        attendanceDays={attendanceDays}
+        isFetchingemployeeAttendace={isFetchingemployeeAttendace}
       />
     </>
   );

@@ -2,10 +2,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import CustomSelect from "@/components/ui/custom/CustomSelect";
 import { Label } from "@/components/ui/label";
 import { TimeOptions } from "@/constants/dropdownconstants";
+import PopularShiftInput from "@/modules/Schedulling/Schedule/components/PopularShiftInput";
+import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 const Availability = () => {
   const { setValue, watch } = useFormContext();
+    const [focusedInput, setFocusedInput] =useState("");
+  
   return (
     <div className="flex flex-col gap-[16px]">
       {watch("availability")?.map((item, index) =>
@@ -14,33 +18,27 @@ const Availability = () => {
         <div className="flex items-center gap-[56px]">
           <p className="w-11">{item?.day}</p>
           <div>
+        
             <div className="flex items-center gap-2">
               <p className="text-[#72727B]">From</p>
-              <CustomSelect
-                options={TimeOptions}
-                width="w-[76px]"
-                value={watch(`availability.${index}.from`)}
-                disabled={watch(`availability.${index}.is_available`)}
-                onValueChange={(e) => {
-
-                  setValue(`availability.[${index}].from`, e, { shouldValidate: true });
-                }}
+              <PopularShiftInput
+                className="w-[50px] px-1 text-center h-[30px] "
+                name={`availability.${index}.from`}
+                formkey={`availability.${index}.from`}
+                focusedInput={focusedInput}
+                setFocusedInput={setFocusedInput}
+                disabled={!watch(`availability.${index}.is_available`)}
+                
               />
               <p className="text-[#72727B]">to</p>
+              <PopularShiftInput
+                className="w-[50px] px-1 text-center h-[30px] "
+                name={`availability.${index}.to`}
+                formkey={`availability.${index}.to`}
+                focusedInput={focusedInput}
+                setFocusedInput={setFocusedInput}
+                disabled={!watch(`availability.${index}.is_available`)}
 
-              <CustomSelect
-                options={TimeOptions}
-                width="w-[76px]"
-                value={watch(`availability.${index}.to`)}
-
-                disabled={watch(`availability.${index}.is_available`)}
-                onValueChange={(e) => {
-                  if (e == "null") {
-                    setValue("to", null);
-                    return;
-                  }
-                  setValue(`availability.[${index}].to`, e, { shouldValidate: true });
-                }}
               />
             </div>
           </div>

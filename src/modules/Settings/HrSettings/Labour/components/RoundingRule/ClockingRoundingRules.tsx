@@ -52,7 +52,11 @@ const ClockingRoundingRules = () => {
                                 }}
                             />
                             <p>for a period of up to </p>
-                            <Input className="w-[70px]" value={watch(`rounding_rules.${index}.minutes`)}
+                            <Input className="w-[70px]"
+                            type='number'
+                             min={0}
+                             step={"0.01"}
+                             value={watch(`rounding_rules.${index}.minutes`)}
                                 onChange={(e) => {
                                     setValue(`rounding_rules.${index}.minutes`, +e.target.value, { shouldDirty: true, shouldValidate: true })
                                 }}

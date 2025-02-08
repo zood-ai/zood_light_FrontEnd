@@ -10,18 +10,21 @@ import HolidayEntitlement from "./HolidayEntitlement";
 import Departments from "./Departments";
 import Positions from "./Positions";
 import ClockingMobile from "./ClockingMobile";
+import AuthPermission from "@/guards/AuthPermission";
+import { PERMISSIONS } from "@/constants/constants";
 
 const EditBranch = () => {
-  const { watch, setValue } = useFormContext();
 
   return (
     <>
-      <LabourTargets />
+      <AuthPermission permissionRequired={[PERMISSIONS.can_adjust_cost_of_labour_view]}>
+        <LabourTargets />
+      </AuthPermission>
       <OpeningHour />
       <HolidayandEvents />
       <HolidayEntitlement />
-      <Positions />
       <Departments />
+      <Positions />
       <ClockingMobile />
     </>
   );

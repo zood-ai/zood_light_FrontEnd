@@ -33,13 +33,14 @@ import { Button } from "@/components/ui/button";
 import InvoiceForm from "./components/InvoiceModal";
 import CancelModal from "./components/CanceledModal";
 import TransferCPUModal from "./components/TransferCpuModal";
+import { PERMISSIONS } from "@/constants/constants";
 
 const ReceiveOrders = () => {
   const columns: ColumnDef<IReveiceOrders>[] = [
     {
       accessorKey: "reference",
       header: () => <div>Order Number</div>,
-      cell: ({ row }) => <>{row.getValue("reference")}</>,
+      cell: ({ row }) => <div>{row.getValue("reference")}</div>,
     },
     {
       accessorKey: "supplier_name",
@@ -216,8 +217,9 @@ const ReceiveOrders = () => {
       });
     }
   };
-  console.log(form.getValues());
-
+ 
+  
+console.log(form.formState.errors);
 
   return (
     <>
@@ -229,10 +231,11 @@ const ReceiveOrders = () => {
         <>
           <HeaderPage
             title="Orders"
-            textButton="Recieve without order"
+            textButton="Receive without order"
             onClickAdd={() => {
               setIsOpenWithoutOrder(true);
             }}
+            permission={[PERMISSIONS.can_access_inventory_management_features]}
           />
           <HeaderTable isSearch={false} isStatus={true} />
           <CustomTable
@@ -321,9 +324,10 @@ const ReceiveOrders = () => {
                 <Badge variant="info">
                   {receiveOrder?.status == "22" ? "Incoming" : "Requested"}{" "}
                 </Badge>{" "}
-                {(form.watch(`accept_price_change_from_supplier`) == 1 && form.formState.isDirty) && (
-                  <Badge variant="success">Price change</Badge>
-                )}
+                {form.watch(`accept_price_change_from_supplier`) == 1 &&
+                  form.formState.isDirty && (
+                    <Badge variant="success">Price change</Badge>
+                  )}
               </div>
             }
             receiveOrder={
@@ -372,6 +376,7 @@ const ReceiveOrders = () => {
             contentStyle="p-0"
             onSubmit={onSubmit}
             textEditButton="Receive order"
+            permission={[PERMISSIONS.can_access_inventory_management_features]}
           >
             <>
               <InvoiceDetails />
@@ -464,6 +469,7 @@ const ReceiveOrders = () => {
             contentStyle="p-0"
             onSubmit={onSubmit}
             textEditButton="Receive order"
+            permission={[PERMISSIONS.can_access_inventory_management_features]}
           >
             <>
               <TransferCPUModal />
@@ -499,12 +505,13 @@ const ReceiveOrders = () => {
             receiveOrder={
               steps == 4 ? (
                 <div
-                  className={` text-[20px] font-bold cursor-pointer ${check
-                    ? "text-primary"
-                    : "text-primary-foreground cursor-not-allowed"
-                    }`}
+                  className={` text-[20px] font-bold cursor-pointer ${
+                    check
+                      ? "text-primary"
+                      : "text-primary-foreground cursor-not-allowed"
+                  }`}
                   onClick={() => {
-                    setIndex(-1)
+                    setIndex(-1);
                     if (check) {
                       setSteps(3);
                     }
@@ -598,14 +605,13 @@ const ReceiveOrders = () => {
                 )}
               </div>
             }
+            permission={[PERMISSIONS.can_access_inventory_management_features]}
           >
             <>
               {steps == 1 && <SuppliersList setSteps={setSteps} />}
               {steps == 2 && <DelivaryData setSteps={setSteps} />}
               {steps == 3 && <ItemsList setSteps={setSteps} />}
-              {steps == 4 && (
-                <SingleItem setCheck={setCheck} index={index} />
-              )}
+              {steps == 4 && <SingleItem setCheck={setCheck} index={index} />}
               {steps == 5 && <ItemsList setSteps={setSteps} />}
               {steps == 6 && (
                 <Summary

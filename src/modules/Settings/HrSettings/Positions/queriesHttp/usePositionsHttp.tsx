@@ -68,6 +68,7 @@ const usePositionsHttps = ({ handleCloseSheet, id, setPositionsOne }: IUsePositi
             handleCloseSheet?.();
 
             queryClient.invalidateQueries({ queryKey: ["Positionse-one"] });
+            queryClient.invalidateQueries({ queryKey: ["branche-single-hr"] });
         },
         onError: (error) => {
             if (axios.isAxiosError(error)) {
@@ -109,8 +110,8 @@ const usePositionsHttps = ({ handleCloseSheet, id, setPositionsOne }: IUsePositi
         },
     });
     // delete
-    const { mutate: departmentDelete, isPending: isLoadingDelete } = useMutation({
-        mutationKey: ["department-delete"],
+    const { mutate: positionDelete, isPending: isLoadingDelete } = useMutation({
+        mutationKey: ["position-delete"],
         mutationFn: async (values: string) => {
             return axiosInstance.delete(`/forecast-console/position/${values}`);
         },
@@ -145,7 +146,7 @@ const usePositionsHttps = ({ handleCloseSheet, id, setPositionsOne }: IUsePositi
         isLoadingEdit,
         positionsEdit,
         isLoadingDelete,
-        departmentDelete
+        positionDelete
     };
 };
 

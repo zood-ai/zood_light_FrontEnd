@@ -1,34 +1,40 @@
-import { useEffect } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import { DEFAULT_INSIGHTS_DATE } from "@/constants/constants";
+import Login from "@/modules/Auth/Login/Login";
+import { PERMISSIONS, PermissionsLinks } from "@/constants/constants";
+import useRedirectToPermissionLink from "@/hooks/useRedirectToPermissionLink";
 
-const AuthGuard =
-  (
-    Component: React.ComponentType<{ permission: { [key: string]: boolean } }>
-  ) =>
-  ({ ...props }) => {
-    const token = Cookies.get("token");
-    const { pathname } = useLocation();
-    const navigate = useNavigate();
 
-    useEffect(() => {
-      if (token && pathname === "/login") {
-        navigate("/insights/sales?" + DEFAULT_INSIGHTS_DATE);
-      }
-    }, [pathname]);
+const AuthGuardLogin = (Component: any) => ({ ...props }) => {
+  const token = Cookies.get("token");
+  const navigate = useNavigate();
+  const { redirectFn } = useRedirectToPermissionLink()
+  const permissions = useMemo(() => {
+    return JSON.parse(localStorage.getItem("___permission") || "{}");
+  }, []);
 
-    const permission: { [key: string]: boolean } = {
-      canWrite: true,
-      canRead: true,
-      canDelete: true,
-    };
+  const hasValidPermissions = Object.keys(PERMISSIONS).some(
+    (key) => permissions[key]
+  );
 
-    return token ? (
-      <Component {...props} permission={permission} />
-    ) : (
-      <Navigate to="/login" />
-    );
-  };
+  useEffect(() => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-export default AuthGuard;
+    if (!hasValidPermissions) {
+      redirectFn(permissions);
+      return
+    }
+
+    navigate('/');
+
+
+  }, [token, permissions, navigate]);
+
+  return token && permissions ? <Component {...props} /> : <Login />;
+};
+
+export default AuthGuardLogin;

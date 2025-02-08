@@ -5,7 +5,7 @@ import useAvatar from "@/hooks/useAvatar";
 interface AvatarProps {
   text: string;
   className?: string;
-  bg?: "primary" | "secondary";
+  bg?: "primary" | "secondary"|"danger";
   type?: "Normal" | "Approved" | "Exported";
 }
 
@@ -22,7 +22,9 @@ const Avatar: React.FC<AvatarProps> = ({
 
   switch (type) {
     case "Normal":
-      bgColor = bg === "secondary" ? "var(--primary)" : "var(--info)";
+      bgColor = bg === "secondary" ? "var(--primary)" :
+      bg==="danger"? "var(--warn)":
+      "var(--info)";
       content = (
         <div className="text-white text-[13px] font-bold">{initials}</div>
       );

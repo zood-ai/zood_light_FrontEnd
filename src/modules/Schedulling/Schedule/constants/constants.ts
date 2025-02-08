@@ -5,3 +5,16 @@ export const SHIFT_TYPES_IDS = {
   EXCEPTION: 3,
   OVERTIME: 4,
 };
+
+export const SHIFT_STATUS = {
+  DRAFT: 0,
+  READY: 1,
+  WITH_APPROVAL: 3,
+  PUBLISHED: 2,
+};
+
+export const TABLE_STATUS = {
+  1: "Draft",
+  2: "Published",
+  3: "Pending",
+};

@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Avatar from "@/components/ui/avatar";
 import useReceiveOrdersHttp from "../queriesHttp/useReceiveOrdersHttp";
+import AuthPermission from "@/guards/AuthPermission";
+import { PERMISSIONS } from "@/constants/constants";
 interface CreateNewItemProps {
   setNewItem: React.Dispatch<React.SetStateAction<boolean>>;
   rowData?: any;
@@ -39,18 +41,21 @@ export const AddNewItem: React.FC<CreateNewItemProps> = ({
     isLoading,
   } = useCustomQuery(
     ["get/purchase-orders", receiveOrder],
-    `forecast-console/orders/${watch('branch')}/supplier/${watch('supplier')}/items`,
+    `forecast-console/orders/${watch("branch")}/supplier/${watch(
+      "supplier"
+    )}/items`,
     {},
     {},
     "post"
   );
 
   useEffect(() => {
-    const arr = itemsData?.itemDailyUsage?.map((e: any) => ({
-      value: e?.id,
-      label: e?.name,
-      unit: e?.unit,
-    })) || [];
+    const arr =
+      itemsData?.itemDailyUsage?.map((e: any) => ({
+        value: e?.id,
+        label: e?.name,
+        unit: e?.unit,
+      })) || [];
 
     const watchedItems = watch("items") || [];
 
@@ -73,8 +78,6 @@ export const AddNewItem: React.FC<CreateNewItemProps> = ({
 
     console.log("Unshared Items:", unsharedItems); // Logging for debugging
   }, [itemsData?.itemDailyUsage, watch("items")]);
-
-
 
   const { control } = useFormContext();
 
@@ -122,7 +125,7 @@ export const AddNewItem: React.FC<CreateNewItemProps> = ({
     const item = itemsData?.itemDailyUsage?.find(
       (item: { id: string }) => item?.id == e
     );
-
+    
     append({
       item_id: item?.id,
       name: item?.name,
@@ -147,9 +150,10 @@ export const AddNewItem: React.FC<CreateNewItemProps> = ({
         (taxGroups?.find((e: { id: string }) => e.id === item?.tax_group?.id)
           ?.rate /
           100) *
-        item?.cost +
+          item?.cost +
         item?.cost,
       order_unit: item?.pack_unit,
+      supplier_item_id: item?.supplier_item_id,
     });
 
     calculationSun();
@@ -175,7 +179,11 @@ export const AddNewItem: React.FC<CreateNewItemProps> = ({
             </DropdownMenuTrigger>
 
             {items?.length ? (
-              <DropdownMenuContent className={`w-30 bg-white w-[248px] ${items?.length > 4 ? "h-[180px]" : "h-auto"} overflow-y-scroll`}>
+              <DropdownMenuContent
+                className={`w-30 bg-white w-[248px] ${
+                  items?.length > 4 ? "h-[180px]" : "h-auto"
+                } overflow-y-scroll`}
+              >
                 {items?.map((item: any) => (
                   <DropdownMenuCheckboxItem
                     className="cursor-pointer text-black "
@@ -199,23 +207,29 @@ export const AddNewItem: React.FC<CreateNewItemProps> = ({
           </DropdownMenu>
         )}
 
-        <Button
-          type="button"
-          className="border-gray-400 border-[1px] text-text-textPrimary bg-[#EAF2F7] mx-[8px]"
-          onClick={() => {
-            if (scollToRef?.current) {
-              scollToRef.current.scrollIntoView({ behavior: "smooth" });
-            }
-
-            setNewItem(true);
-            setValue("itemNew", {
-              tax_group_id: "",
-              pack_unit: "",
-            });
-          }}
+        <AuthPermission
+          permissionRequired={[
+            PERMISSIONS?.can_add_inventory_items_from_deliveries_only,
+          ]}
         >
-          Create new
-        </Button>
+          <Button
+            type="button"
+            className="border-gray-400 border-[1px] text-text-textPrimary bg-[#EAF2F7] mx-[8px]"
+            onClick={() => {
+              if (scollToRef?.current) {
+                scollToRef.current.scrollIntoView({ behavior: "smooth" });
+              }
+
+              setNewItem(true);
+              setValue("itemNew", {
+                tax_group_id: "",
+                pack_unit: "",
+              });
+            }}
+          >
+            Create new
+          </Button>
+        </AuthPermission>
       </div>
     </>
   );

@@ -15,14 +15,10 @@ const ChooseQuantity = ({
 }) => {
   const [item, setItem] = useState<any>();
   const { watch, getValues, setValue, control } = useFormContext();
-  const { filterObj } = useFilterQuery();
-  console.log(watch("branch_id"), watch("warehouse_id"), watch("type"), "ware");
-
+  
   const { itemsData, isFetchingItems } = useCommonRequests({
-    filterItem:
-      watch("type") == 4
-        ? `filter[branches][0]=${watch("branch_id")}`
-        : `filter[branches][0]=${watch("warehouse_id")}`,
+    filterItem: `join_branches[0]=${watch("branch_id")}&join_branches[1]=${watch("warehouse_id")}`
+
   });
   const items = useWatch({ name: "items", control });
   const ItemIndex =
@@ -83,6 +79,7 @@ const ChooseQuantity = ({
     validateItem();
   };
 
+  
   return (
     <>
       {isFetchingItems ? (

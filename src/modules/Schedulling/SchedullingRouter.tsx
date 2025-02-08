@@ -1,4 +1,3 @@
-import { DEFAULT_INSIGHTS_DATE } from "@/constants/constants";
 import { lazy } from "react";
 
 interface SchedullingRouter {
@@ -10,6 +9,7 @@ interface SchedullingRouter {
 const People = lazy(() => import("./People/People"));
 const Requests = lazy(() => import("./Requests/Requests"));
 const Schedule = lazy(() => import("./Schedule/Schedule"));
+const Payroll = lazy(() => import("./Payroll/Payroll"));
 
 const SchedullingRouters: SchedullingRouter[] = [
   {
@@ -24,6 +24,10 @@ const SchedullingRouters: SchedullingRouter[] = [
   {
     path: "requests",
     element: <Requests />,
+  },
+  {
+    path: "payroll",
+    element: <Payroll />,
   },
 ];
 

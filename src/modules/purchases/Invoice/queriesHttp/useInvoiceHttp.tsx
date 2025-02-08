@@ -45,12 +45,15 @@ const useInvoiceHttp = ({
     data: invoiceOne,
     isLoading: isFetchingInvoiceOne,
     isPending: isPendingInvoiceOne,
+    isFetchedAfterMount: isLoadingOne,
     refetch: refetchInvoiceOne,
   } = useCustomQuery(
     ["invoice-one", invoiceId],
     `forecast-console/invoice/${invoiceId}`,
     {
       select: (data: any) => {
+       
+        
         const newDataFormat = {
           invoice_number: data?.data?.invoice_number,
           supplier_name: data?.data?.supplier_name,
@@ -91,12 +94,12 @@ const useInvoiceHttp = ({
             tax_amount: item?.pivot?.tax_amount,
           })),
         };
-
         return newDataFormat;
       },
 
       enabled: !!invoiceId,
       onSuccess: (data) => {
+        
         setInvoiceOne({
           invoice_number: data?.data?.invoice_number,
           supplier_name: data?.data?.supplier_name,
@@ -316,6 +319,7 @@ const useInvoiceHttp = ({
     isLoadingReceive,
     UnreceiveCreditNotice,
     isLoadingUnReceive,
+    isLoadingOne
   };
 };
 

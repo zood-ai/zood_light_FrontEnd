@@ -23,16 +23,6 @@ const ClockingRulesSection = () => {
     resolver: zodResolver(formClockingRulesSchema),
     defaultValues,
   });
-  const { clockingRulesEdit } = useShiftTypesHttps({
-    clockingRules: isEdit,
-    setClockingRulesOne: (data: any) => {
-      form.reset(data)
-    }
-  })
-  console.log(form.formState.errors);
-
-
-
   const handleCloseSheet = () => {
 
     setIsEdit(false)
@@ -40,12 +30,20 @@ const ClockingRulesSection = () => {
     form.reset(defaultValues);
     setModalName('')
   };
+  const { clockingRulesEdit } = useShiftTypesHttps({
+    clockingRules: isEdit,
+    setClockingRulesOne: (data: any) => {
+      form.reset(data)
+    },
+    handleCloseSheet:handleCloseSheet
+  })
+
+
+
   const onSubmit = (values: any) => {
-    console.log(values);
 
     clockingRulesEdit(values)
   };
-  console.log(form.getValues())
 
   return (
     <div className=" flex flex-col gap-8 ">

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 
 // Constants
-import { DEFAULT_INSIGHTS_DATE } from "@/constants/constants";
+import { DEFAULT_INSIGHTS_DATE, PERMISSIONS } from "@/constants/constants";
 
 // Hooks
 import useFilterQuery from "@/hooks/useFilterQuery";
@@ -32,7 +32,8 @@ interface IItem {
   name: string;
   route: string;
   hide?: boolean;
-  permisssion?:string;
+  permission?: string[];
+  admin?: boolean;
 }
 
 
@@ -55,11 +56,33 @@ const SideBar = () => {
       route: branchFilter?.length
         ? `/insights/sales?${DEFAULT_INSIGHTS_DATE}&filter[branch]=${branchFilter}${cpuFilter}`
         : `/insights/sales?${DEFAULT_INSIGHTS_DATE}`,
+      admin: true,
+
     },
     {
       name: "Schedulling & Workforce",
       icon: <EmployeeIcon color={getIconColor("schedulling")} />,
       route: `/schedulling/schedule`,
+      permission: [
+
+        PERMISSIONS.can_see_and_edit_employee_wages,
+        PERMISSIONS.can_see_and_upload_employee_documents,
+        PERMISSIONS.can_export_timecards,
+        PERMISSIONS.can_edit_timecards,
+        PERMISSIONS.can_override_timecards,
+        PERMISSIONS.can_approve_timecards,
+        PERMISSIONS.can_approve_schedule,
+        PERMISSIONS.can_view_personal_info,
+        PERMISSIONS.can_approve_holiday_request,
+        PERMISSIONS.can_access_reports_for_all_locations,
+        PERMISSIONS.can_adjust_cost_of_labour_view,
+        PERMISSIONS.can_edit_holiday_entitlements,
+        PERMISSIONS.can_deactivate_users_from_other_locations,
+        PERMISSIONS.can_export_employee_data,
+        PERMISSIONS.can_edit_permissions_for_users
+      ],
+
+
     },
     {
       name: "POS",
@@ -67,6 +90,8 @@ const SideBar = () => {
       route: branchFilter?.length
         ? `/POS/orders?filter[branch]=${branchFilter}${cpuFilter}`
         : `/POS/orders`,
+      admin: true,
+
     },
 
     // {
@@ -80,6 +105,8 @@ const SideBar = () => {
       route: branchFilter?.length
         ? `/waste/counts?filter[branch]=${branchFilter}${cpuFilter}`
         : "/waste/counts",
+      permission:
+        [PERMISSIONS.can_access_inventory_management_features]
     },
     {
       name: "Purchases",
@@ -87,6 +114,10 @@ const SideBar = () => {
       route: branchFilter?.length
         ? `/purchase/purchase-orders?filter[branch]=${branchFilter}${cpuFilter}`
         : `/purchase/purchase-orders`,
+      permission:
+        [
+          PERMISSIONS.can_access_inventory_management_features
+        ]
     },
     {
       name: "Transfer",
@@ -94,6 +125,7 @@ const SideBar = () => {
       route: branchFilter?.length
         ? `/transfer?filter[branch]=${branchFilter}${cpuFilter}`
         : `/transfer`,
+      permission: [PERMISSIONS.can_access_inventory_management_features]
     },
     {
       name: "Menu Setup",
@@ -101,6 +133,8 @@ const SideBar = () => {
       route: branchFilter?.length
         ? `/menu/categories?filter[branch]=${branchFilter}${cpuFilter}`
         : `/menu/categories`,
+      admin: true,
+
     },
     {
       name: "Central Kitchen",
@@ -109,6 +143,8 @@ const SideBar = () => {
       route: branchFilter?.length
         ? `/central-kitchen/production?filter[branch]=${branchFilter}${cpuFilter}`
         : `/central-kitchen/production`,
+      permission: [PERMISSIONS.can_access_inventory_management_features]
+
     },
     {
       name: "Inventory Setup",
@@ -116,7 +152,10 @@ const SideBar = () => {
       route: branchFilter?.length
         ? `/inventory/items?filter[branch]=${branchFilter}${cpuFilter}`
         : `/inventory/items`,
-        permisssion:"can_access_inventory_management_features"
+      permission: [
+        PERMISSIONS.can_access_inventory_management_features,
+
+      ]
     },
   ];
 
@@ -133,51 +172,55 @@ const SideBar = () => {
         {items
           .filter((item) => !item?.hide)
           .map((item, index) => (
-            // <AuthPermission key={index} permissionRequired={item?.permisssion}>
-            <li key={index} className="w-full min-h-12">
-              <Tooltip delayDuration={50}>
-                <TooltipTrigger asChild>
-                  <div
-                    onClick={() => handleClick(item)}
-                    onKeyDown={(e) => e.key === "Enter" && handleClick(item)}
-                    className={`cursor-pointer border-r-2 px-[22px] py-[15px] ${
-                      pathname.split("/")[1] ===
-                      item?.route?.split("/")?.[1]?.split("?")[0]
+            <AuthPermission key={index} permissionRequired={item?.permission} >
+              <li key={index} className="w-full min-h-12">
+                <Tooltip delayDuration={50}>
+                  <TooltipTrigger asChild>
+                    <div
+                      onClick={() => handleClick(item)}
+                      onKeyDown={(e) => e.key === "Enter" && handleClick(item)}
+                      className={`cursor-pointer border-r-2 px-[22px] py-[15px] ${pathname.split("/")[1] ===
+                        item?.route?.split("/")?.[1]?.split("?")[0]
                         ? " border-primary"
                         : " border-transparent"
-                    }`}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={item.name}
+                        }`}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={item.name}
+                    >
+                      {item.icon}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    className="bg-[#4e667e] text-white text-xs z-[100]"
                   >
-                    {item.icon}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="right"
-                  className="bg-[#4e667e] text-white text-xs z-[100]"
-                >
-                  {item.name}
-                </TooltipContent>
-              </Tooltip>
-            </li>
-            // {/* </AuthPermission> */}
+                    {item.name}
+                  </TooltipContent>
+                </Tooltip>
+              </li>
+            </AuthPermission>
           ))}
       </ul>
-      <div
-        className={`mt-auto cursor-pointer border-r-2 px-[22px] py-[15px] ${
-          pathname.split("/")[1] === "settings"
-            ? " border-primary"
-            : " border-transparent"
-        }`}
-      >
-        <SettingsIcon
-          color={getIconColor("settings")}
-          onClick={() => {
-            nagivate("settings/pos-settings/branches");
-          }}
-        />
-      </div>
+      {
+
+        <AuthPermission>
+
+          <div
+            className={`mt-auto cursor-pointer border-r-2 px-[22px] py-[15px] ${pathname.split("/")[1] === "settings"
+              ? " border-primary"
+              : " border-transparent"
+              }`}
+          >
+            <SettingsIcon
+              color={getIconColor("settings")}
+              onClick={() => {
+                nagivate("settings/pos-settings/branches");
+              }}
+            />
+          </div>
+        </AuthPermission>
+      }
     </nav>
   );
 };

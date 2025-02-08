@@ -11,6 +11,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import usePurchaseOrderHttp from "../../PurchaseOrders/queriesHttp/usePurchaseOrderHttp";
 import CustomModal from "@/components/ui/custom/CustomModal";
+import { PERMISSIONS } from "@/constants/constants";
 
 const PlaceOrderModal = ({
   openDraftModal,
@@ -96,7 +97,6 @@ const PlaceOrderModal = ({
 
   useEffect(() => {
     if (formItems?.length > 0) {
-
       form.setValue(
         "items",
         formItems.map(
@@ -109,6 +109,8 @@ const PlaceOrderModal = ({
             tax_group_id: string;
             total_cost: number;
             sub_total: number;
+            supplier_item_id: string;
+
             invoice_quantity: number;
             total_tax: number;
             unit: string;
@@ -128,6 +130,7 @@ const PlaceOrderModal = ({
             tax_group_id: item.tax_group_id,
             total_cost: item.total_cost,
             sub_total: item.sub_total,
+            supplier_item_id: item.supplier_item_id,
           })
         )
       );

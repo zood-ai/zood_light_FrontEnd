@@ -4,9 +4,11 @@ import * as React from "react";
 const MoreIcon: React.FC<PropsIcon> = ({
   color = "var(--gray-300)",
   onClick,
+  className
 }) => {
   return (
     <svg
+    className={className}
       width="18"
       height="4"
       viewBox="0 0 18 4"

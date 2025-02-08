@@ -23,8 +23,6 @@ const AuthComp = <T extends FieldValues>({
     btnTxt,
 }: AuthCompProps<T>) => {
     const onSubmit = (values: T) => {
-        console.log(values);
-
         fn(values);
     };
 

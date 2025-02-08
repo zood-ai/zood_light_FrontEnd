@@ -19,7 +19,7 @@ const CustomClockingRules = () => {
                 bgColor="bg-[#edfafcff]"
                 colorIcon="var(--secondary-foreground)"
                 className="mb-3"
-                content={`Set up automated rues to compty with labour laws.`}
+                content={`Set up automated rules to comply with labour laws.`}
             />
             <Label>Custom rules</Label>
             {fields?.map((item, index) => (
@@ -33,11 +33,12 @@ const CustomClockingRules = () => {
                             When a shift is equal or greater than
                         </p>
                         <Input className="w-[70px]"
-                            value={watch(`break_rules.${index}.shit_hours`)}
+                            value={watch(`break_rules.${index}.shift_hours`)}
                             min={0}
-
+                            step={"0.01"}
+                            type="number"
                             onChange={(e) => {
-                                setValue(`break_rules.${index}.shit_hours`, +e.target.value, { shouldDirty: true, shouldValidate: true })
+                                setValue(`break_rules.${index}.shift_hours`, +e.target.value, { shouldDirty: true, shouldValidate: true })
                             }}
                         />
                         <p>
@@ -50,7 +51,9 @@ const CustomClockingRules = () => {
                             the <span className="font-bold">Paid</span> break will be
                         </p>
                         <Input className="w-[70px]"
+                         type="number"
                             min={0}
+                            step={"0.01"}
                             value={watch(`break_rules.${index}.paid_minutes`)}
                             onChange={(e) => {
 
@@ -69,6 +72,8 @@ const CustomClockingRules = () => {
                         </p>
                         <Input className="w-[70px]"
                             min={0}
+                               step={"0.01"}
+                             type="number"
                             value={watch(`break_rules.${index}.unpaid_minutes`)}
                             onChange={(e) => {
                                 setValue(`break_rules.${index}.unpaid_minutes`, +e.target.value, { shouldDirty: true, shouldValidate: true })
@@ -83,7 +88,7 @@ const CustomClockingRules = () => {
             ))}
             <div className="border border-input rounded-[4px] mt-5 p-3 font-bold text-primary text-[16px] cursor-pointer"
                 onClick={() => {
-                    append({ shit_hours: 0, paid_minutes: 0, unpaid_minutes: 0 })
+                    append({ shift_hours: 0, paid_minutes: 0, unpaid_minutes: 0 })
                 }
                 }
 
