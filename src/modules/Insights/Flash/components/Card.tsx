@@ -20,6 +20,9 @@ type ICardItem = {
   actual_gp: number;
   labour: number;
   profit: number;
+  forecasted_sales: number;
+  forecasted_gp: number;
+  forecasted_profit: number;
 };
 
 const DetailsCard = ({
@@ -94,11 +97,14 @@ const Card = ({ items, loading }: { items: ICardItem[]; loading: boolean }) => {
                     {
                       title: "Sales",
                       cost: item.total_sales,
+                      forcastCost: item?.forecasted_sales,
                       url: `/insights/sales?${DEFAULT_INSIGHTS_DATE}&filter[branch]=${item.branch_id}`,
                     },
                     {
                       title: "CoGS",
                       cost: item.actual_gp,
+                      forcastCost: item?.forecasted_gp,
+
                       url: `/insights/sales?${DEFAULT_INSIGHTS_DATE}&filter[branch]=${item.branch_id}`,
                     },
                     {
@@ -109,6 +115,7 @@ const Card = ({ items, loading }: { items: ICardItem[]; loading: boolean }) => {
                     {
                       title: "Flash profit",
                       cost: item.profit,
+                      forcastCost: item?.forecasted_profit,
                       url: `/insights/sales?${DEFAULT_INSIGHTS_DATE}&filter[branch]=${item.branch_id}`,
                     },
                   ].map((detail, idx) => (
@@ -117,14 +124,14 @@ const Card = ({ items, loading }: { items: ICardItem[]; loading: boolean }) => {
                       title={detail?.title}
                       cost={detail?.cost}
                       url={detail.url}
-                      forcastCost={0}
+                      forcastCost={detail.forcastCost || 0}
                     />
                   ))}
                 </div>
               ))}
             </>
           ) : (
-            <div className="flex  flex-col items-center justify-center mt-56 ">
+            <div className="flex flex-col items-center justify-center mt-56 ">
               <div>👀</div>
               There’s no records to display
             </div>

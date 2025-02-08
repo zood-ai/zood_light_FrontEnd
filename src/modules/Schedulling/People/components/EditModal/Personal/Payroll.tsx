@@ -4,9 +4,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 const Payroll = () => {
-  const { register, watch, setValue, formState, trigger } = useFormContext()
-  console.log(formState.errors?.swift?.message);
-
+  const { register, watch, setValue, formState, trigger } = useFormContext();
 
   return (
     <>
@@ -17,41 +15,47 @@ const Payroll = () => {
         <h3 className="font-bold text-[16px]">Payroll</h3>
       </div>
 
-      <div className="flex items-center gap-[32px]">
+      <div className="grid grid-cols-2 gap-4">
         <div>
-
-          <Input label="Iban" className="w-[250px]"
+          <Input
+            label="Iban"
+            className="w-[250px]"
             placeholder="Enter IBAN"
             type="text"
-            value={watch('iban')}
+            value={watch("iban")}
             onChange={(e) => {
-              setValue('iban', e.target.value, { shouldValidate: true })
-              trigger('iban')
+              setValue("iban", e.target.value, { shouldValidate: true });
+              trigger("iban");
             }}
+            errorText={
+              <p className="text-warn text-[10px] w-[140px]">
+                {typeof formState?.errors?.iban?.message === "string"
+                  ? formState.errors.iban.message
+                  : ""}
+              </p>
+            }
           />
-          <p className="text-warn">
-            {typeof formState?.errors?.iban?.message === 'string' ? formState.errors.iban.message : ""}
-          </p>
+         
         </div>
         <div>
-
-          <Input label="SWIFT/BIC" className="w-[250px]"
+          <Input
+            label="SWIFT/BIC"
+            className="w-[250px]"
             type="text"
             placeholder="Enter SWIFT/BIC"
-            value={watch('swift')}
+            value={watch("swift")}
             onChange={(e) => {
-              setValue('swift', e.target.value, { shouldValidate: true })
-              trigger('swift')
+              setValue("swift", e.target.value, { shouldValidate: true });
+              trigger("swift");
             }}
-
-
+            errorText={
+              <p className="text-warn text-[10px] w-[140px]">
+                {typeof formState?.errors?.swift?.message === "string"
+                  ? formState.errors.swift.message
+                  : ""}
+              </p>
+            }
           />
-          <p className="text-warn">
-
-            {typeof formState?.errors?.swift?.message === 'string' ? formState.errors.swift.message : ""}
-
-          </p>
-
         </div>
       </div>
     </>

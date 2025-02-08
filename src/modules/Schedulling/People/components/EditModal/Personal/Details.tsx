@@ -9,8 +9,8 @@ import { useFormContext } from "react-hook-form";
 const Details = () => {
   const { register, watch, setValue, formState, trigger } = useFormContext()
   const addressFields = [
-    { label: "House Number or Name", placeholder: "House number or name", name: "house_number" },
-    { label: "Street Address", placeholder: "Street address", name: "street_address" },
+    { label: "House Number or Name", placeholder: "House number or name", name: "home_number" },
+    { label: "Street Address", placeholder: "Street address", name: "street" },
     { label: "Town", placeholder: "Town", name: "town" },
     { label: "City", placeholder: "City", name: "city" },
     { label: "Postcode", placeholder: "Postcode", name: "postcode" }]
@@ -109,10 +109,10 @@ const Details = () => {
 
 
 
-      <div className="flex  gap-[68px]">
+      <div className="grid grid-cols-2 gap-4">
 
         <div>
-          <Input label="TIN" className="w-[250px]" placeholder="TIN" {...register('tin')} />
+          <Input label="TIN" className="w-[250px]" placeholder="TIN" {...register('tin')} type="number"/>
           <CustomInputDate
             required
             onSelect={(e) => {
@@ -141,6 +141,8 @@ const Details = () => {
                   value={watch(`address.${field.name}`)}
                   onChange={(e) => {
                     setValue(`address.${field.name}`, e.target.value)
+                    console.log(watch(`address`));
+                    
                   }}
 
                 />

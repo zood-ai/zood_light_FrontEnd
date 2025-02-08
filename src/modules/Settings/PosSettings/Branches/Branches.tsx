@@ -27,12 +27,12 @@ const Branches = () => {
     {
       accessorKey: "name",
       header: () => <div>Name</div>,
-      cell: ({ row }) => <>{row.getValue("name")}</>,
+      cell: ({ row }) => <p>{row.getValue("name")}</p>,
     },
     {
       accessorKey: "reference",
       header: () => <div>Reference</div>,
-      cell: ({ row }) => <>{row.getValue("reference")}</>,
+      cell: ({ row }) => <p>{row.getValue("reference")}</p>,
     },
     {
       accessorKey: "tax_group",
@@ -103,7 +103,7 @@ const Branches = () => {
       branchDelete(rowData);
     }
   };
-  console.log(form.getValues());
+  console.log(form.formState.errors);
 
   return (
     <>

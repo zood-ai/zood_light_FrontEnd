@@ -273,7 +273,7 @@ const InvoiceForm = ({
                   <div className="flex flex-col ">
                     <span className="text-gray">{item?.name}</span>
                     <span className="text-textPrimary">
-                      ({item?.pack_unit})
+                      ({item?.unit})
                     </span>
                   </div>
                   <div className="flex items-center gap-[112px]">

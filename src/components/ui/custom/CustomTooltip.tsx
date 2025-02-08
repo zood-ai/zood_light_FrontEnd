@@ -19,7 +19,7 @@ const CustomTooltip = ({
         <TooltipTrigger>{tooltipIcon}</TooltipTrigger>
         <TooltipContent
           side="bottom"
-          className="bg-[#4e667e] text-white text-xs z-[100] p-2 w-72 mt-2 rounded-md "
+          className="bg-[#4e667e] text-white text-xs z-[100] p-2 w-auto mt-2 rounded-md "
         >
           <p>{tooltipContent}</p>
         </TooltipContent>

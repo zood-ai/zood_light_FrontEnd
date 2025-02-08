@@ -39,4 +39,5 @@ export interface IItem {
   total_cost: number;
   case_unit?: string;
   stock_counts: [{ unit: string }];
+  supplier_item_id?: string;
 }

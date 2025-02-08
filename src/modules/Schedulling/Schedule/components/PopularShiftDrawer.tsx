@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 // Types
-import { TDrawerType, TEmployee, TPopularShift } from "../types/types";
+import { TDrawerType, TEmployee } from "../types/types";
 
 // Components
 import PopularShiftDrawerHeader from "./PopularShiftDrawerHeader";
@@ -9,12 +9,8 @@ import PopularShiftDrawerBody from "./PopularShiftDrawerBody";
 
 type TPopularShiftDrawer = {
   employees: TEmployee[];
-  PopularShifts: TPopularShift[];
 };
-const PopularShiftDrawer = ({
-  employees,
-  PopularShifts,
-}: TPopularShiftDrawer) => {
+const PopularShiftDrawer = ({ employees }: TPopularShiftDrawer) => {
   const [drawerType, setDrawerType] = useState<TDrawerType>("addShiftDrawer");
   const [isOpen, setIsOpen] = useState(false);
 
@@ -35,7 +31,6 @@ const PopularShiftDrawer = ({
         isOpen={isOpen}
         drawerType={drawerType}
         employees={employees}
-        PopularShifts={PopularShifts}
       />
     </div>
   );

@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import CreaditNotesForm from "./components/CreaditNotesForm";
 import CustomCircle from "@/components/ui/custom/CustomCircle";
 import MemoChecked from "@/assets/icons/Checked";
+import { PERMISSIONS } from "@/constants/constants";
+import AuthPermission from "@/guards/AuthPermission";
 
 const CreditNotes = () => {
   const [rowsSelectedIds, setRowsSelectedIds] = useState<
@@ -216,14 +218,19 @@ const CreditNotes = () => {
                 {invoiceData?.data?.supplier_name || ""}
               </p>
             </div>
+            <AuthPermission permissionRequired={[PERMISSIONS.can_edit_invoices]}>
+
+
             <Button
               className="bg-[#E7EDF3] text-textPrimary border-gray-400"
               variant={"outline"}
             >
               Show photos
             </Button>
+            </AuthPermission>
           </div>
         }
+        permission={[PERMISSIONS.can_edit_invoices]}
         onSubmit={onSubmit}
         contentStyle="p-0"
       >

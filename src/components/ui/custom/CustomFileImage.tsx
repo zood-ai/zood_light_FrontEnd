@@ -22,7 +22,7 @@ const CustomFileImage = ({
   className?: string;
 }) => {
   const { setValue, getValues, watch } = useFormContext();
-  const [file, setFile] = useState<any>("");
+  const [file, setFile] = useState<any>(defaultValue);
   const [name, setName] = useState<string>("");
   const [target, setTraget] = useState<string>("");
 
@@ -31,6 +31,9 @@ const CustomFileImage = ({
       const selectedFile = event.target.files?.[0]; // Get the first file
 
       if (selectedFile) {
+
+        console.log(selectedFile,"selectedFile");
+        
         setName(selectedFile.name); // Set file name
         setFile(selectedFile); // Store the file in state
         setValue(fileParam, selectedFile, { shouldValidate: true }); // Set the form value for this file
@@ -80,11 +83,16 @@ const CustomFileImage = ({
     event.preventDefault();
   };
 
-  useEffect(() => {
-    setFile(defaultValue);
-    setValue('file', defaultValue);
-  }, [defaultValue]);
+  // useEffect(() => {
+  //  if(defaultValue?.length){
+  //   setName(defaultValue);
+  //   setFile(defaultValue);
+  //   setValue('file', defaultValue);
+  //  }
+  // }, [defaultValue]);
 
+  console.log(file,"file");
+  
   return (
     <div className={className}>
       <div>

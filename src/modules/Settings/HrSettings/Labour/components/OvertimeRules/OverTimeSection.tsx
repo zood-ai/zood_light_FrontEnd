@@ -11,6 +11,8 @@ import useShiftTypesHttps from '../../queriesHttps/useShiftTypes';
 import CustomModal from '@/components/ui/custom/CustomModal';
 
 const OverTimeSection = () => {
+
+
     const [isOpenShift, setIsOpenShift] = React.useState(false);
     const [isOpenOverTime, setIsOpenOverTime] = React.useState(false);
     const [isEdit, setIsEdit] = React.useState(false);
@@ -67,7 +69,6 @@ const OverTimeSection = () => {
         }
         overTimeRuleAdd(values)
     };
-    console.log(form.formState.errors)
 
 
     return (

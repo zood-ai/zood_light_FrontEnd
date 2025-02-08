@@ -30,6 +30,7 @@ export const formReceiveOrderSchema = z
         unit: z.string(),
         pack_per_case: z.number(),
         pack_size: z.number(),
+        supplier_item_id: z.string(),
       })
     ),
     status: z.number(),
@@ -37,9 +38,11 @@ export const formReceiveOrderSchema = z
   .refine(
     (data) => data.total === data.sub_total,
     (data) => ({
-      message: `Delivery total is ${data?.sub_total > data.total ? "lower than" : "higher than"
-        }  expected (SAR) ${data?.sub_total
-        } Check for qty and/or price discrepancies.`,
+      message: `Delivery total is ${
+        data?.sub_total > data.total ? "lower than" : "higher than"
+      }  expected (SAR) ${
+        data?.sub_total
+      } Check for qty and/or price discrepancies.`,
       path: ["total"],
     })
   );
@@ -68,6 +71,7 @@ export const formReceiveOrderWithoutSchema = z.object({
       sub_total: z.number(),
       tax_amount: z.number(),
       tax_group_id: z.string(),
+      supplier_item_id:z.string(),
       total_cost: z.number(),
     })
   ),
@@ -115,8 +119,6 @@ export const uploadImageSchema = z.object({
   image: z.any(),
 });
 
-
-
 export const formTransferCPUSchema = z.object({
   sub_total: z.number(),
   invoice_date: z.string(),
@@ -144,6 +146,7 @@ export const formTransferCPUSchema = z.object({
       unit: z.string(),
       pack_per_case: z.number(),
       pack_size: z.number(),
+      supplier_item_id:z.string(),
     })
   ),
   status: z.number(),

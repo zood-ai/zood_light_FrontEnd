@@ -28,6 +28,8 @@ import EmptyItemsIcon from "@/assets/icons/EmptyItems";
 
 // Types
 import { IItemData, IPurchaseOrderForm } from "../types/type";
+import { PERMISSIONS } from "@/constants/constants";
+import AuthPermission from "@/guards/AuthPermission";
 
 const PurchaseOrderForm = ({
   items,
@@ -201,53 +203,58 @@ const PurchaseOrderForm = ({
           </div>
         )}
       </>
-
-      {watch("items").length > 0 && (
-        <div className="absolute bottom-0 left-0 flex w-full gap-3 p-2 bg-white">
-          <Button
-            variant={"outline"}
-            type="button"
-            className="w-full mt-4 text-primary border-gray-400 text-[16px] h-[50px] font-semibold rounded-3xl"
-            disabled={
-              !!Object.keys(formState.errors)?.length ||
-              LoadingCreatePurchaseOrder ||
-              LoadingUpdatePurchaseOrder
-            }
-            onClick={() => {
-              if (formReceive) {
-                UpdatePurchaseOrder({
-                  values: getValues(),
-                  orderId: orderId as string,
-                });
-              } else {
-                CreatePurchaseOrder({ ...getValues(), status: "1" });
+      <AuthPermission
+        permissionRequired={[
+          PERMISSIONS.can_access_inventory_management_features,
+        ]}
+      >
+        {watch("items").length > 0 && (
+          <div className="absolute bottom-0 left-0 flex w-full gap-3 p-2 bg-white">
+            <Button
+              variant={"outline"}
+              type="button"
+              className="w-full mt-4 text-primary border-gray-400 text-[16px] h-[50px] font-semibold rounded-3xl"
+              disabled={
+                !!Object.keys(formState.errors)?.length ||
+                LoadingCreatePurchaseOrder ||
+                LoadingUpdatePurchaseOrder
               }
-            }}
-          >
-            Save for later
-          </Button>
-          <Button
-            className="w-full mt-4 h-[50px] flex gap-2 font-semibold bg-primary rounded-3xl"
-            disabled={
-              !!Object.keys(formState.errors)?.length ||
-              LoadingCreatePurchaseOrder ||
-              LoadingUpdatePurchaseOrder
-            }
-            onClick={() => {
-              setShowCart(true);
-            }}
-            type="button"
-          >
-            <div className="relative">
-              <ShoppingCartIcon />
-              <span className="bg-[#EB8E35] w-[16px] h-[17px] rounded-full text-[12px] font-semibold flex items-center justify-center absolute -top-[7px] left-3">
-                {watch("items")?.length}
-              </span>
-            </div>
-            View Shopping Cart
-          </Button>
-        </div>
-      )}
+              onClick={() => {
+                if (formReceive) {
+                  UpdatePurchaseOrder({
+                    values: getValues(),
+                    orderId: orderId as string,
+                  });
+                } else {
+                  CreatePurchaseOrder({ ...getValues(), status: "1" });
+                }
+              }}
+            >
+              Save for later
+            </Button>
+            <Button
+              className="w-full mt-4 h-[50px] flex gap-2 font-semibold bg-primary rounded-3xl"
+              disabled={
+                !!Object.keys(formState.errors)?.length ||
+                LoadingCreatePurchaseOrder ||
+                LoadingUpdatePurchaseOrder
+              }
+              onClick={() => {
+                setShowCart(true);
+              }}
+              type="button"
+            >
+              <div className="relative">
+                <ShoppingCartIcon />
+                <span className="bg-[#EB8E35] w-[16px] h-[17px] rounded-full text-[12px] font-semibold flex items-center justify-center absolute -top-[7px] left-3">
+                  {watch("items")?.length}
+                </span>
+              </div>
+              View Shopping Cart
+            </Button>
+          </div>
+        )}
+      </AuthPermission>
     </>
   );
 };

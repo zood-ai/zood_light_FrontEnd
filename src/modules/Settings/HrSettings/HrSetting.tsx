@@ -11,7 +11,7 @@ const HrSettings: React.FC = () => {
   };
 
   const menuItems = [
-    { name: "Hr Settings", path: "branches" },
+    { name: "Location Settings", path: "branches" },
     {
       name: "Onboarding",
       path: "onboarding",
@@ -23,6 +23,7 @@ const HrSettings: React.FC = () => {
     { name: "Departments", path: "departments" },
     { name: "Positions", path: "positions" },
     { name: "Stations", path: "stations" },
+    { name: "Location Group", path: "location-group" },
     { name: "Roles", path: "roles" },
   ];
 
@@ -33,10 +34,11 @@ const HrSettings: React.FC = () => {
           <p
             key={path}
             onClick={() => handleNavigation(path)}
-            className={`py-5 px-3 border-b-2 cursor-pointer ${subPath === path
-              ? "border-primary text-primary"
-              : "border-transparent"
-              }`}
+            className={`py-5 px-3 border-b-2 cursor-pointer ${
+              subPath === path
+                ? "border-primary text-primary"
+                : "border-transparent"
+            }`}
           >
             {name}
           </p>

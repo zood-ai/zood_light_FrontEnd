@@ -35,7 +35,7 @@ const BranchDesc = () => {
         <Input
           label="Name"
           placeholder=" Branch name"
-          {...register("name")}
+          {...register("name",{required:true})}
           required
           className="w-[268px]"
         />
@@ -50,7 +50,7 @@ const BranchDesc = () => {
         <Input
           label="Sku"
           placeholder="Generate Sku"
-          {...register("reference")}
+          {...register("reference",{required:true})}
           required
           disabled
           className="w-[268px]"
@@ -145,53 +145,56 @@ const BranchDesc = () => {
       <div className="flex gap-3 items-center">
         <Input
           label="Latitude"
-          type="number"
           className="w-[268px]"
-          value={getValues("latitude")}
-          onChange={(e) => {
-            const value = e.target.value;
-            const numberValue = value ? Number(value) : undefined;
+          value={watch("latitude")}
+          disabled
+          required
+          // onChange={(e) => {
+          //   const value = e.target.value;
+          //   const numberValue = value ? Number(value) : undefined;
 
-            if (
-              numberValue !== undefined &&
-              !isNaN(numberValue) &&
-              Number.isFinite(numberValue)
-            ) {
-              setValue("latitude", numberValue, {
-                shouldValidate: true,
-                shouldDirty: true,
-              });
-            } else {
-              setValue("latitude", 0, {
-                shouldValidate: false,
-              });
-            }
-          }}
+          //   if (
+          //     numberValue !== undefined &&
+          //     !isNaN(numberValue) &&
+          //     Number.isFinite(numberValue)
+          //   ) {
+          //     setValue("latitude", numberValue, {
+          //       shouldValidate: true,
+          //       shouldDirty: true,
+          //     });
+          //   } else {
+          //     setValue("latitude", 0, {
+          //       shouldValidate: false,
+          //     });
+          //   }
+          // }}
         />
         <Input
           label="Longitude"
           className="w-[268px]"
           type="number"
-          value={getValues("longitude")}
-          onChange={(e) => {
-            const value = e.target.value;
-            const numberValue = value ? Number(value) : undefined;
+          disabled
+          required
+          value={watch("longitude")}
+          // onChange={(e) => {
+          //   const value = e.target.value;
+          //   const numberValue = value ? Number(value) : undefined;
 
-            if (
-              numberValue !== undefined &&
-              !isNaN(numberValue) &&
-              Number.isFinite(numberValue)
-            ) {
-              setValue("longitude", numberValue, {
-                shouldValidate: true,
-                shouldDirty: true,
-              });
-            } else {
-              setValue("longitude", 0, {
-                shouldValidate: false,
-              });
-            }
-          }}
+          //   if (
+          //     numberValue !== undefined &&
+          //     !isNaN(numberValue) &&
+          //     Number.isFinite(numberValue)
+          //   ) {
+          //     setValue("longitude", numberValue, {
+          //       shouldValidate: true,
+          //       shouldDirty: true,
+          //     });
+          //   } else {
+          //     setValue("longitude", 0, {
+          //       shouldValidate: false,
+          //     });
+          //   }
+          // }}
         />
       </div>
 

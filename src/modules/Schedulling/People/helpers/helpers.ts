@@ -24,11 +24,11 @@ export const handleStatusShap = (status: number) => {
         case 1:
             return "danger";
         case 2:
-            return "success";
+            return "info";
         case 3:
             return "info";
         case 4:
-            return "success";
+            return "info";
         case 5:
             return "success";
         case 6:

@@ -191,7 +191,6 @@ export default function SalesCharts({
       },
     },
   ];
-  console.log(salesChartData?.business_date_data);
 
   const chartData =
     tab === 1
@@ -209,7 +208,7 @@ export default function SalesCharts({
   return (
     <div className="border p-[16px] rounded-[4px] h-[500px] ">
       <div className="grid grid-cols-2 gap-6">
-        <div className="flex w-full items-center gap-2 font-bold">
+        <div className="flex items-center w-full gap-2 font-bold">
           <p className="text-[20px] ">
             Sales v Forecast {fromDate}-{toDate}{" "}
           </p>
@@ -255,7 +254,7 @@ export default function SalesCharts({
           </p>
         </div>
       </div>
-      <div className=" flex justify-between">
+      <div className="flex justify-between ">
         <div>
           {" "}
           {isFetchingSalesInsight ? (

@@ -102,6 +102,7 @@ const useOrdersHttp = ({
             pack_size: +e?.pivot?.pack_size,
             pack_per_case: +e?.pivot?.pack_per_case,
             tax_amount: +(e?.pivot?.total_tax / e?.pivot?.quantity)?.toFixed(2),
+            supplier_item_id:e?.pivot?.supplier_item_id
             // tax_amount: (
             //   (taxGroups?.find(
             //     (a: { id: string }) => a.id === e?.pivot?.tax_group_id
@@ -154,6 +155,7 @@ const useOrdersHttp = ({
             total_cost: e?.pivot?.total_cost,
             sub_total: e?.pivot?.sub_total,
             tax_group_id: e?.pivot?.tax_group_id,
+            supplier_item_id:e.pivot?.supplier_item_id,
             tax_amount:
               e?.pivot?.tax_group_id == null
                 ? 0
@@ -164,6 +166,7 @@ const useOrdersHttp = ({
                     100) *
                   +e?.pivot?.sub_total
                 ).toFixed(2),
+               
           })),
         });
       },

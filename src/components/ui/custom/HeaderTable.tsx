@@ -49,6 +49,9 @@ type IHeaderTable = {
   TypeOptions?: { value: string; label: string }[];
   isGroup?: boolean;
   isDelivaryDate?: boolean;
+  isEmployees?: boolean;
+  employee?: string;
+  isBranchesTimeCard?: boolean;
 };
 
 const HeaderTable = ({
@@ -84,6 +87,9 @@ const HeaderTable = ({
   TypeOptions = TypesOptions,
   isGroup = false,
   isDelivaryDate = false,
+  isEmployees = false,
+  employee = "filter[employee_id]",
+  isBranchesTimeCard = false,
 
   onClickExport,
 }: IHeaderTable) => {
@@ -136,6 +142,9 @@ const HeaderTable = ({
 
     setSearchParams(new URLSearchParams(newFilterObj));
   };
+  const { employeesSelect } = useCommonRequests({
+    getEmployees: true,
+  });
 
   const CheckParamsLength =
     // check if there is a page param in url only to aviod show clear filter btn in this case
@@ -329,6 +338,67 @@ const HeaderTable = ({
               />
             )}
 
+            {isItems && (
+              <CustomSelect
+                placeHolder="All Items"
+                optionDefaultLabel="All Items"
+                options={ItemsSelect}
+                value={searchParams.get(`${itemKey}`) || ""}
+                onValueChange={(value) => {
+                  let updatedFilterObj: {
+                    [x: string]: string;
+                  } = { ...filterObj };
+                  if (value === "null") {
+                    delete updatedFilterObj[`${itemKey}`];
+                  } else {
+                    updatedFilterObj[`${itemKey}`] = value;
+                  }
+
+                  setSearchParams(updatedFilterObj);
+                }}
+              />
+            )}
+
+            {isEmployees && (
+              <CustomSelect
+                placeHolder="Filter by employee"
+                options={employeesSelect}
+                optionDefaultLabel="All Employees"
+                value={searchParams.get(employee) || ""}
+                onValueChange={(value) => {
+                  let updatedFilterObj: {
+                    [x: string]: string;
+                  } = { ...filterObj };
+                  if (value === "null") {
+                    delete updatedFilterObj[employee];
+                  } else {
+                    updatedFilterObj[employee] = value;
+                  }
+
+                  setSearchParams(updatedFilterObj);
+                }}
+              />
+            )}
+            {isStatus && (
+              <CustomSelect
+                placeHolder="Filter by status"
+                options={optionStatus}
+                optionDefaultLabel="All Status"
+                value={searchParams.get(statusKey) || ""}
+                onValueChange={(value) => {
+                  let updatedFilterObj: {
+                    [x: string]: string;
+                  } = { ...filterObj };
+                  if (value === "null") {
+                    delete updatedFilterObj[statusKey];
+                  } else {
+                    updatedFilterObj[statusKey] = value;
+                  }
+
+                  setSearchParams(updatedFilterObj);
+                }}
+              />
+            )}
             {isBranches && (
               <CustomSelect
                 placeHolder="All Locations"
@@ -355,48 +425,41 @@ const HeaderTable = ({
               />
             )}
 
-            {isItems && (
+            {isBranchesTimeCard && (
               <CustomSelect
-                placeHolder="All Items"
-                optionDefaultLabel="All Items"
-                options={ItemsSelect}
-                value={searchParams.get(`${itemKey}`) || ""}
+                placeHolder="All Locations"
+                width="w-[200px] "
+                options={[
+                  {
+                    label: `${branchesSelect?.find(
+                      (branch) => branch?.value == filterObj?.["filter[branch]"]
+                    )?.label} team`,
+                    value: "true",
+                  },
+                  {
+                    label: `${branchesSelect?.find(
+                      (branch) => branch?.value == filterObj?.["filter[branch]"]
+                    )?.label} timecards`,
+                    value: "false",
+                  },
+                ]}
+                value={searchParams.get("is_home") || ""}
                 onValueChange={(value) => {
                   let updatedFilterObj: {
                     [x: string]: string;
                   } = { ...filterObj };
                   if (value === "null") {
-                    delete updatedFilterObj[`${itemKey}`];
+                    delete updatedFilterObj["is_home"];
                   } else {
-                    updatedFilterObj[`${itemKey}`] = value;
+                    
+                      updatedFilterObj["is_home"] = value;
+                    
                   }
 
                   setSearchParams(updatedFilterObj);
                 }}
               />
             )}
-
-            {isStatus && (
-              <CustomSelect
-                placeHolder="Filter by status"
-                options={optionStatus}
-                optionDefaultLabel="All Status"
-                value={searchParams.get(statusKey) || ""}
-                onValueChange={(value) => {
-                  let updatedFilterObj: {
-                    [x: string]: string;
-                  } = { ...filterObj };
-                  if (value === "null") {
-                    delete updatedFilterObj[statusKey];
-                  } else {
-                    updatedFilterObj[statusKey] = value;
-                  }
-
-                  setSearchParams(updatedFilterObj);
-                }}
-              />
-            )}
-
             {isOrderType && (
               <CustomSelect
                 placeHolder="Filter by Order type"
@@ -419,9 +482,10 @@ const HeaderTable = ({
             )}
             {isType && (
               <CustomSelect
-                placeHolder="All Types"
-                optionDefaultLabel="All Types"
+                placeHolder="All Active"
+                optionDefaultLabel="All Active"
                 options={TypeOptions}
+                width="w-[200px]"
                 value={searchParams.get(statusTypeKey) || ""}
                 onValueChange={(value) => {
                   let updatedFilterObj: {

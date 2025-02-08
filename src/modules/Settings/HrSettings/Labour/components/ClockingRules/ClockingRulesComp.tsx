@@ -31,7 +31,7 @@ const ClockingRulesComp = ({ form }: any) => {
                     <RadioGroupItem value={"1"} />
                   </FormControl>
                   <FormLabel className="font-normal">
-                    All recorded btreaks breaks will be  <span className="font-bold">
+                    All recorded  breaks will be  <span className="font-bold">
                       Paid
                     </span>
                   </FormLabel>
@@ -41,7 +41,7 @@ const ClockingRulesComp = ({ form }: any) => {
                     <RadioGroupItem value="2" />
                   </FormControl>
                   <FormLabel className="font-normal">
-                    All recorded btreaks breaks will be <span className="font-bold">
+                    All recorded  breaks will be <span className="font-bold">
                       Unpaid
                     </span>
                   </FormLabel>

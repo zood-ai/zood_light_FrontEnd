@@ -51,6 +51,8 @@ const useShiftTypesHttps = ({ handleCloseSheet, shiftId, setShiftTypeOne, overTi
                     deleted_when_schedule_cleared: !!data?.shift_type?.deleted_when_schedule_cleared,
                     icon: data?.shift_type?.icon,
                     is_paid: !!data?.shift_type?.is_paid,
+                    pay_rate_amount: data?.shift_type?.pay_rate_amount,
+                    pay_rate_type: data?.shift_type?.pay_rate_type,
 
                 }
                 return newData;
@@ -65,6 +67,8 @@ const useShiftTypesHttps = ({ handleCloseSheet, shiftId, setShiftTypeOne, overTi
                     deleted_when_schedule_cleared: !!data?.shift_type?.deleted_when_schedule_cleared,
                     icon: data?.shift_type?.icon,
                     is_paid: !!data?.shift_type?.is_paid,
+                    pay_rate_amount: data?.shift_type?.pay_rate_amount,
+                    pay_rate_type: data?.shift_type?.pay_rate_type,
 
                 });
             },
@@ -78,7 +82,7 @@ const useShiftTypesHttps = ({ handleCloseSheet, shiftId, setShiftTypeOne, overTi
         },
         onSuccess: (data) => {
             toast({
-                description: "Updated shiftType Successfully",
+                description: "Created shift type successfully",
             });
             refetchShiftTypes();
             handleCloseSheet?.();
@@ -105,7 +109,7 @@ const useShiftTypesHttps = ({ handleCloseSheet, shiftId, setShiftTypeOne, overTi
         },
         onSuccess: (data) => {
             toast({
-                description: "Updated shiftType Successfully",
+                description: "Updated shift type successfully",
             });
             refetchShiftTypes();
             handleCloseSheet?.();
@@ -215,7 +219,7 @@ const useShiftTypesHttps = ({ handleCloseSheet, shiftId, setShiftTypeOne, overTi
         },
         onSuccess: (data) => {
             toast({
-                description: "Updated overTimeRule Successfully",
+                description: "Created overtime rule successfully",
             });
             refetchOverTimeRules();
             handleCloseSheet?.();
@@ -243,7 +247,7 @@ const useShiftTypesHttps = ({ handleCloseSheet, shiftId, setShiftTypeOne, overTi
         },
         onSuccess: (data) => {
             toast({
-                description: "Updated overTimeRule Successfully",
+                description: "Updated overtime rule successfully",
             });
             refetchOverTimeRules(); //refetch data
             handleCloseSheet?.();
@@ -335,7 +339,7 @@ const useShiftTypesHttps = ({ handleCloseSheet, shiftId, setShiftTypeOne, overTi
         },
         onSuccess: (data) => {
             toast({
-                description: "Updated overTimeRule Successfully",
+                description: "Updated clocking rules Successfully",
             });
             refetchOverTimeRules();
             handleCloseSheet?.();

@@ -8,6 +8,8 @@ import CustomSelect from "@/components/ui/custom/CustomSelect";
 import useCommonRequests from "@/hooks/useCommonRequests";
 import { IItem } from "../types/types";
 import useReceiveOrdersHttp from "../queriesHttp/useReceiveOrdersHttp";
+import AuthPermission from "@/guards/AuthPermission";
+import { PERMISSIONS } from "@/constants/constants";
 export const CreateNewItem = ({
   newItem,
   setNewItem,
@@ -219,6 +221,7 @@ export const CreateNewItem = ({
             100) *
           (+watch(`itemNew.cost`) * +watch(`itemNew.invoice_quantity`))
         ).toFixed(2) || 0),
+        supplier_item_id: data?.data?.data?.supplier_item_id||"",
     });
     calculationSun();
     setNewItem(false);
@@ -338,6 +341,9 @@ export const CreateNewItem = ({
                 {...register("itemNew.quantity")}
               />
             </div>
+            
+
+            
             <div className="flex pt-[16px] ml-[875px] ">
               <Button
                 type="button"

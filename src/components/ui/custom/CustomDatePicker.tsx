@@ -23,7 +23,13 @@ import {
 import useFilterQuery from "@/hooks/useFilterQuery";
 import { useSearchParams } from "react-router-dom";
 
-const CustomDatePicker = ({ disableChoose }: { disableChoose?: boolean }) => {
+const CustomDatePicker = ({
+  disableChoose,
+  showType = true,
+}: {
+  disableChoose?: boolean;
+  showType?: boolean;
+}) => {
   const [dateType, setDateType] = useState<DateType>("weekly");
   const { filterObj } = useFilterQuery();
 
@@ -58,33 +64,36 @@ const CustomDatePicker = ({ disableChoose }: { disableChoose?: boolean }) => {
         className="cursor-pointer"
         onClick={() => handleNextPrevChange("prev", dateType)}
       />
+      {showType && (
+        <CustomDropDown
+          options={[
+            { label: "Weekly", value: "weekly" },
+            { label: "Monthly", value: "monthly" },
+            { label: "Custom", value: "custom" },
+          ]}
+          defaultValue="weekly"
+          
+          onValueChange={(value) => {
+            setDateType(value as DateType);
+            if (value == "weekly") {
+              setSearchParams({
+                ...filterObj,
+                from: format(startOfWeek(new Date()), "yyyy-MM-dd"),
+                to: format(endOfWeek(new Date()), "yyyy-MM-dd"),
+              });
+            }
+            if (value == "monthly") {
+              setSearchParams({
+                ...filterObj,
+                from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
+                to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
+              });
+            }
+          }}
+          disabled={disableChoose}
+        />
+      )}
 
-      <CustomDropDown
-        options={[
-          { label: "Weekly", value: "weekly" },
-          { label: "Monthly", value: "monthly" },
-          { label: "Custom", value: "custom" },
-        ]}
-        defaultValue="weekly"
-        onValueChange={(value) => {
-          setDateType(value as DateType);
-          if (value == "weekly") {
-            setSearchParams({
-              ...filterObj,
-              from: format(startOfWeek(new Date()), "yyyy-MM-dd"),
-              to: format(endOfWeek(new Date()), "yyyy-MM-dd"),
-            });
-          }
-          if (value == "monthly") {
-            setSearchParams({
-              ...filterObj,
-              from: format(startOfMonth(new Date()), "yyyy-MM-dd"),
-              to: format(endOfMonth(new Date()), "yyyy-MM-dd"),
-            });
-          }
-        }}
-        disabled={disableChoose}
-      />
       <CustomCalendar
         dateType={dateType}
         date={date}

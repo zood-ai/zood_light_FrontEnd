@@ -17,56 +17,90 @@ import usePeopleHttp from "./queriesHttp/usePeopleHttp";
 import { handleStatus, handleStatusShap } from "./helpers/helpers";
 import { useSearchParams } from "react-router-dom";
 import useFilterQuery from "@/hooks/useFilterQuery";
-import SharedEditModal from "./components/SharedPeopleEditModal";
+import SharedEditModal from "../../../sharedModals/SharedPeopleEditModal";
 import { defaultValueUpdate } from "./defaultValue";
+import { PERMISSIONS } from "@/constants/constants";
 
 const People = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [modalName, setModalName] = useState("");
-  const [rowData, setRowData] = useState<any>();
+  const [, setModalName] = useState("");
+  const [, setRowData] = useState<any>();
   const [, setSearchParam] = useSearchParams({});
   const { filterObj } = useFilterQuery();
+  const [attendanceDays, setAttendanceDays] = useState<string>("30");
 
   const columns: ColumnDef<any>[] = [
     {
-      accessorKey: "name",
+      accessorKey: "Name",
       header: () => <div>Name</div>,
       cell: ({ row }: any) => (
         <div className="flex items-center gap-[10px]">
-          <Avatar text={row.getValue("name")} bg="secondary" />
-          {row.getValue("name")}
+
+{ row?.original?.image == null ? (
+             <Avatar
+             text={
+               row?.original?.preferred_name == null
+                 ? `${row?.original?.first_name}  ${row?.original?.last_name}`
+                 : `${row?.original?.preferred_name}`
+             }
+             bg="secondary"
+           />
+          ) : (
+            <img
+              src={ row?.original?.image}
+              alt="avatar"
+              className="w-10 h-10 rounded-full"
+            />
+          )}
+         
+
+          {row?.original?.preferred_name == null ? (
+            <>
+              {row?.original?.first_name} {row?.original?.last_name}
+            </>
+          ) : (
+            <>{row?.original?.preferred_name}</>
+          )}
         </div>
       ),
+      enableHiding: false,
+     
     },
     {
-      accessorKey: "department",
+      accessorKey: "Department",
       header: () => <div>Department</div>,
-      cell: ({ row }: any) => <>{row.getValue("department")}</>,
+      cell: ({ row }: any) => <>{row?.original?.department}</>,
     },
     {
-      accessorKey: "position",
+      accessorKey: "Position",
       header: () => <div>Position</div>,
-      cell: ({ row }: any) => <>{row.getValue("position")}</>,
+      cell: ({ row }: any) => <>{row?.original?.position}</>,
     },
     {
-      accessorKey: "branch",
+      accessorKey: "Home branch",
       header: () => <div>Home location</div>,
-      cell: ({ row }: any) => <>{row.getValue("branch")}</>,
+      cell: ({ row }: any) => <>{row?.original?.branch}</>,
     },
     {
-      accessorKey: "absences",
+      accessorKey: "Lates",
+      header: () => <div>Lates</div>,
+      cell: ({ row }: any) => <>{row?.original?.lates}</>,
+    },
+    {
+      accessorKey: "Absences",
       header: () => <div>Absences</div>,
-      cell: ({ row }: any) => <>{row.getValue("absences")}</>,
+      cell: ({ row }: any) => <>{row?.original?.absences}</>,
     },
     {
-      accessorKey: "holiday_balance",
+      accessorKey: "Holiday balance",
       header: () => <div>Holiday Balance</div>,
-      cell: ({ row }: any) => <>{row.getValue("holiday_balance")}</>,
+      cell: ({ row }: any) => <> {row?.original?.holiday_balance}</>,
     },
 
     {
-      accessorKey: "avg_weekly_hours",
+      accessorKey: "Avg weekly hours",
+
       header: () => (
         <div>
           Avg weekly hours <p className="text-[#698392]">(contracted)</p>
@@ -74,13 +108,17 @@ const People = () => {
       ),
       cell: ({ row }: any) => (
         <>
-          {row.getValue("avg_weekly_hours")}
-          <span className="text-[#698392]"> (0)</span>
+          {row?.original?.avg_weekly_hours}
+          <span className="text-[#698392]">
+            {" "}
+            ({row?.original?.contract_hrs})
+          </span>
         </>
       ),
     },
     {
       accessorKey: "status",
+      enableHiding: false,
       header: () => <div>Status</div>,
       cell: ({ row }: any) => (
         <Badge variant={handleStatusShap(row.getValue("status"))}>
@@ -96,6 +134,8 @@ const People = () => {
     form.reset(defaultValue);
     setRowData(null);
     setSearchParam({});
+
+    
   };
 
   const defaultValue = {
@@ -106,7 +146,7 @@ const People = () => {
     branch_id: "",
     forecast_department_id: "",
     forecast_position_id: 0,
-    roles: [{ id: "" }],
+    role_id: "",
     contact: "",
     contact_hrs: 0,
     start_date: "",
@@ -115,6 +155,20 @@ const People = () => {
     wage: 0,
     documents: [],
     send_invitation: 0,
+    notes: [],
+    address: {
+      home_number: null,
+      street: null,
+      town: null,
+      city: null,
+      postcode: null,
+    },
+    contact_name: "",
+    contact_relation: "",
+    contact_phone: 0,
+    visa_date: new Date(),
+    payroll_id:null,
+    timecard_id:null,
   };
 
   const getSchema = () => {
@@ -146,15 +200,18 @@ const People = () => {
     editEmployee,
     isFetchingemployeeOne,
     isLoadingEdit,
-    feedbackData,
     isLoadingFeedback,
-    employeeAttendace
+    employeeAttendace,
+    isFetchingemployeeAttendace,
+    historyData
+    
   } = usePeopleHttp({
     employeeId: filterObj?.id || "",
     handleCloseSheet: handleCloseSheet,
     setEmployeeOne: (data: any) => {
       form.reset(data);
     },
+    attendanceDays: attendanceDays,
   });
   const onSubmit = (values: z.infer<typeof formPeopleSchema>) => {
     if (isEdit) {
@@ -164,6 +221,7 @@ const People = () => {
     addEmployee(values);
   };
 
+  
   return (
     <>
       <HeaderPage
@@ -171,13 +229,17 @@ const People = () => {
         textButton="Add person "
         exportButton
         onClickAdd={() => {
+          form.setValue("pin", +Math.random().toFixed(4).slice(2, 6));
           setIsOpen(true);
         }}
+        permissionExport={[PERMISSIONS.can_export_employee_data]}
+        modalName="employee"
       />
       <HeaderTable
         isType
         TypeOptions={typesPeople}
         statusTypeKey="filter[status]"
+        isBranches
       />
       <CustomTable
         loading={isLoadingPeople}
@@ -187,9 +249,9 @@ const People = () => {
         onRowClick={(row: any) => {
           setRowData(row);
           setIsEdit(true);
-
-          setSearchParam({ id: row?.id });
+          setSearchParam({ ...filterObj, id: row?.id });
         }}
+        showBar={true}
       />
 
       {/***************************************** Create employee {/******************************************/}
@@ -234,7 +296,6 @@ const People = () => {
             </Button>
           </div>
         }
-        
       >
         <CreateModal />
       </CustomSheet>
@@ -250,11 +311,13 @@ const People = () => {
         handleCloseSheet={handleCloseSheet}
         employeeDataOne={employeeDataOne}
         isFetchingemployeeOne={isFetchingemployeeOne}
-        feedbackData={feedbackData}
-        isLoadingFeedback={isLoadingFeedback}  
+        isLoadingFeedback={isLoadingFeedback}
         resetFrom={(data) => form.reset(data)}
         employeeAttendace={employeeAttendace}
-
+        setAttendanceDays={setAttendanceDays}
+        attendanceDays={attendanceDays}
+        isFetchingemployeeAttendace={isFetchingemployeeAttendace}
+        historyData={historyData}
       />
     </>
   );
