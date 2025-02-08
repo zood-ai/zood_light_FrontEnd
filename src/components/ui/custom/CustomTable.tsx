@@ -23,7 +23,13 @@ import ArrowRightLinetIcon from "@/assets/icons/ArrowRightLine";
 import { useSearchParams } from "react-router-dom";
 import { Skeleton } from "../skeleton";
 import useFilterQuery from "@/hooks/useFilterQuery";
-
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import BarIcon from "@/assets/icons/BarIcon";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -39,6 +45,7 @@ interface DataTableProps<TData, TValue> {
   countReport?: boolean;
   conditionProp?: string;
   customRowStyle?: string;
+  showBar?: boolean;
 }
 
 export function CustomTable<TData, TValue>({
@@ -54,6 +61,7 @@ export function CustomTable<TData, TValue>({
   className,
   countReport,
   customRowStyle,
+  showBar = false,
 }: DataTableProps<TData, TValue>) {
   const [searchParams, setSearchParams] = useSearchParams();
   const { filterObj } = useFilterQuery();
@@ -101,9 +109,9 @@ export function CustomTable<TData, TValue>({
   return (
     <>
       {loading ? (
-        <div className="flex gap-5 flex-col mt-2">
+        <div className="flex flex-col gap-5 mt-2">
           {Array.from({ length: 10 }).map((_, index) => (
-            <Skeleton className="h-4 w-full  mt-2  -z-50" key={index} />
+            <Skeleton className="w-full h-4 mt-2 -z-50" key={index} />
           ))}
         </div>
       ) : (
@@ -111,27 +119,62 @@ export function CustomTable<TData, TValue>({
           <div>
             <Table className={className}>
               {table.getRowModel().rows?.length ? (
-                <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => {
-                        return (
-                          <TableHead
-                            key={header.id}
-                            // onMouseDown={() => console.log("header")}
-                          >
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                          </TableHead>
-                        );
-                      })}
-                    </TableRow>
-                  ))}
-                </TableHeader>
+                <>
+                  <TableHeader>
+                    {table?.getHeaderGroups()?.map((headerGroup) => (
+                      <TableRow
+                        key={headerGroup.id}
+                        className="hover:bg-transparent"
+                      >
+                        {headerGroup.headers?.map((header) => {
+                          return (
+                            <TableHead
+                              key={header.id}
+                              // onMouseDown={() => console.log("header")}
+                            >
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                  )}
+                            </TableHead>
+                          );
+                        })}
+                        {showBar && (
+                          <>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <div className="p-5 mt-2 cursor-pointer bg:primary">
+                                  <BarIcon />
+                                </div>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="bg-white mx-11">
+                                {table
+                                  .getAllColumns()
+                                  .filter((column) => column.getCanHide())
+                                  .map((column) => {
+                                    return (
+                                      <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className="text-black "
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={(value) =>
+                                          column.toggleVisibility(!!value)
+                                        }
+                                      >
+                                        {column.id}
+                                      </DropdownMenuCheckboxItem>
+                                    );
+                                  })}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </>
+                        )}
+                      </TableRow>
+                    ))}
+                  </TableHeader>
+                </>
               ) : (
                 <></>
               )}

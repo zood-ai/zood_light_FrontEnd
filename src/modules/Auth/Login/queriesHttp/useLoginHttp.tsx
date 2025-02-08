@@ -4,12 +4,12 @@ import { useMutation } from "@tanstack/react-query";
 import { formLoginSchema } from "../schema/Schema";
 import { z } from "zod";
 import Cookies from "js-cookie";
-import { endOfWeek, format, startOfWeek } from "date-fns";
-import { DEFAULT_INSIGHTS_DATE } from "@/constants/constants";
+import useRedirectToPermissionLink from "@/hooks/useRedirectToPermissionLink";
+
 
 const useLoginHttp = () => {
   const { toast } = useToast();
-
+  const {redirectFn} = useRedirectToPermissionLink()
   // login
   const { mutate: login, isPending: loadingLogin } = useMutation({
     mutationKey: ["login"],
@@ -24,13 +24,10 @@ const useLoginHttp = () => {
       Cookies.set("name", data?.data?.data?.user?.name);
       Cookies.set("id", data?.data?.data?.forecast_employee?.id);
       Cookies.set("profile_photo", data?.data?.data?.employee?.profile_photo);
-      // localStorage.setItem("___permission",JSON.stringify( ["can_access_inventory_management_features"]));
-
-      console.log(data?.data);
-      
- 
-      // window.location.href = `/insights/sales?${DEFAULT_INSIGHTS_DATE}`;
-      window.location.href = `/schedulling/schedule`;
+      localStorage.setItem("___permission", JSON.stringify(data?.data?.data?.permissions));
+      localStorage.setItem("___role", JSON.stringify(data?.data?.data?.role?.name));
+      localStorage.setItem("___admin", JSON.stringify(data?.data?.data?.role.is_owner));
+      redirectFn(data?.data?.data?.permissions);
 
       toast({
         description: data?.data?.message,
@@ -39,6 +36,7 @@ const useLoginHttp = () => {
     onError: (data: any) => {
       toast({
         description: data?.data?.message,
+        variant:"error"
       });
     },
   });

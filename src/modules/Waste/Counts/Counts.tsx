@@ -34,7 +34,8 @@ import ArrowRightIcon from "@/assets/icons/ArrowRIghtIcon";
 import Export from "@/assets/icons/Export";
 
 // constants
-import { INV_COUNT_TYPES } from "@/constants/constants";
+import { INV_COUNT_TYPES, PERMISSIONS } from "@/constants/constants";
+import AuthPermission from "@/guards/AuthPermission";
 
 const Counts = () => {
   const [countId, setCountId] = useState("");
@@ -211,7 +212,7 @@ const Counts = () => {
       header: () => <div>Type</div>,
 
       cell: ({ row }: { row: Row<ICountsList> }) => (
-        <>{row.getValue("type") || "-"}</>
+        <div>{row.getValue("type") || "-"}</div>
       ),
     },
     {
@@ -243,6 +244,7 @@ const Counts = () => {
               setIsOpen(true);
             }}
             textButton="New Count"
+            permission={[PERMISSIONS.can_edit_stock_counts]}
           >
             {/* <Button
               className="text-gray-400 bg-transparent border-gray-400"
@@ -388,8 +390,8 @@ const Counts = () => {
             isLoading={isPendingGenerateReport}
             purchaseHeader={
               <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-textPrimary flex items-center gap-2 text-[16px] font-semibold w-full">
+                <div className="flex items-center w-full gap-2">
+                  <h1 className="text-textPrimary flex items-center gap-2 text-[16px] font-semibold  ">
                     {INV_COUNT_TYPES[ReportData?.invCount?.type]} count • 
                     {format(
                       ReportData?.from || new Date(),
@@ -400,8 +402,8 @@ const Counts = () => {
                       Day {ReportData?.lastDayOption}
                     </span>
                   </h1>
-                  <ArrowRightIcon className="-ml-1" />
-                  <h1 className="text-textPrimary flex items-center gap-2 text-[16px] font-semibold w-full">
+                  <ArrowRightIcon className="w-3 h-3 -ml-1" />
+                  <h1 className="text-textPrimary flex items-center gap-2 text-[16px] font-semibold ">
                     {INV_COUNT_TYPES[ReportData?.invCount?.type]} count • 
                     {format(ReportData?.to || new Date(), "dd MMMM yyyy")} {""}
                     <span className="bg-muted border border-secondary rounded-sm flex items-center justify-center w-[59px] h-[24px] text-secondary text-[12px] font-medium">
@@ -410,7 +412,9 @@ const Counts = () => {
                     </span>
                   </h1>
                 </div>
-                <div className="flex items-center gap-2">
+                <AuthPermission permissionRequired={[PERMISSIONS.can_edit_stock_counts]}>
+                  
+                   <div className="flex items-center gap-2">
                   <Button
                     variant={"outline"}
                     disabled={isPendingDelete}
@@ -452,7 +456,8 @@ const Counts = () => {
                   >
                     Close
                   </Button>
-                </div>
+                </div></AuthPermission>
+               
               </div>
             }
             tabs={[

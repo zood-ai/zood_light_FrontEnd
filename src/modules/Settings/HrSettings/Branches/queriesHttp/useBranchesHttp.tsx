@@ -23,14 +23,13 @@ const useBranchesHttps = ({ handleCloseSheet, setBranchOne, branchId }: IUseBran
     isPending: isLoadingBranches,
     refetch: refetchBranches,
   } = useCustomQuery(
-    ["branches", filterObj],
-    "/manage/branches?include[0]=tax_group&page=1",
-    {},
-    { ...filterObj }
+    ["branches"],
+    "/forecast-console/branches-location-setting",
+ 
   );
 
   const { data: BrancheOne, isPending: isLoadingBrancheOne } = useCustomQuery(
-    ["branche-one", branchId || ""],
+    ["branche-single-hr", branchId || ""],
     `/forecast-console/get-location-setting/${branchId}`,
     {
       select: (data: any) => {

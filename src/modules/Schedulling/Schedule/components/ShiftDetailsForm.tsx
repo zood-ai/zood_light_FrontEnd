@@ -9,58 +9,117 @@ import { useEffect, useMemo, useState } from "react";
 import PopularShiftInput from "./PopularShiftInput";
 import { z } from "zod";
 import { formAddShiftSchema } from "../Schema/schema";
+import { TDepartment } from "../types/types";
 
 type TShiftDetailsForm = {
+  departments?: TDepartment[];
   formData: z.infer<typeof formAddShiftSchema>;
   handleSetFormValues: (
     key: keyof z.infer<typeof formAddShiftSchema>,
     value: string | number | null
   ) => void;
+  fromOpenShift?: boolean;
+  isEdit?: boolean;
 };
 const ShiftDetailsForm = ({
   formData,
   handleSetFormValues,
+  departments,
+  fromOpenShift,
+  isEdit,
 }: TShiftDetailsForm) => {
-  const [isGetPositions, setIsGetPositions] = useState(false);
   const [focusedInput, setFocusedInput] = useState("");
   const { filterObj } = useFilterQuery();
 
-  useEffect(() => {
-    if (!formData.department_id) return;
-    setIsGetPositions(true);
-  }, [formData.department_id]);
   const {
     departmentsSelect,
     isDepartmentsLoading,
-    positionsSelect,
-    isPositionsLoading,
     employeesSelect,
     isEmployeesLoading,
     shiftTypesSelect,
     isShiftTypesLoading,
+    positionsSelect,
+    isPositionsLoading,
   } = useCommonRequests({
     getDepartments: true,
+    getPositions: true,
+    departmentId: formData.department_id ? formData.department_id : undefined,
     locationId: filterObj["filter[branch]"],
-    departmentId: formData.department_id,
-    getPositions: isGetPositions,
     getEmployees: true,
     getShiftTypes: true,
   });
 
-  const filterEmployees = useMemo(() => {
-    if (formData.position_id && formData.department_id) {
-      return employeesSelect?.filter((empl) => {
-        return empl.departments.find(
-          (dep) =>
-            dep.id === formData.department_id &&
-            dep.pivot.forecast_position_id === formData.position_id
-        );
-      });
+  useEffect(() => {
+    if (shiftTypesSelect && !isEdit) {
+      handleSetFormValues(
+        "shift_type_id",
+        shiftTypesSelect?.find((shift) => shift?.type === "regular")?.value
+      );
     }
-    return employeesSelect?.filter((empl) => {
-      return empl.departments.find((dep) => dep.id === formData.department_id);
-    });
-  }, [employeesSelect, formData.department_id, formData.position_id]);
+  }, [shiftTypesSelect?.length]);
+
+  // incase of employee select get the department and position of the employee
+  const departmentsOptions = useMemo(
+    () =>
+      formData.employee_id
+        ? employeesSelect
+            ?.find((emp) => emp.value === formData.employee_id)
+            ?.departments?.map((dep) => {
+              return {
+                value: dep.id,
+                label: dep.name,
+                positions: [
+                  {
+                    value: dep.positions?.id,
+                    label: dep.positions?.name,
+                  },
+                ],
+              };
+            })
+        : departmentsSelect,
+    [formData.employee_id, employeesSelect, departmentsSelect]
+  );
+
+  const employeesOptions = useMemo(
+    () =>
+      formData.department_id
+        ? employeesSelect?.filter((emp) =>
+            emp.departments?.find((dep) => dep.id === formData.department_id)
+          )
+        : employeesSelect,
+    [employeesSelect, formData.department_id]
+  );
+
+  const positionsOptions = useMemo(() => {
+    if (formData.employee_id) {
+      let employeePositions = employeesOptions
+        ?.find((emp) => emp.value === formData.employee_id)
+        ?.positions?.map((pos) => {
+          return {
+            value: pos.pivot.forecast_position_id,
+            label: pos.name,
+            departmentId: pos.forecast_department_id,
+          };
+        });
+      if (formData.department_id) {
+        employeePositions = employeePositions?.filter(
+          (pos) => pos.departmentId === formData.department_id
+        );
+      }
+
+      return employeePositions;
+    }
+    return positionsSelect;
+  }, [employeesOptions, positionsSelect, formData.employee_id]);
+
+  const shiftTypeOptions = fromOpenShift
+    ? shiftTypesSelect?.filter(
+        (shift) =>
+          shift?.type !== "time_off" &&
+          shift?.type !== "sick_day" &&
+          shift?.type !== "holiday"
+      )
+    : shiftTypesSelect;
 
   return (
     <>
@@ -114,16 +173,22 @@ const ShiftDetailsForm = ({
             Department
           </Label>
           <CustomSelect
-            placeHolder="Choose category"
+            placeHolder="Choose department"
+            // removeDefaultOption={!fromOpenShift}
+            key={JSON.stringify(departmentsOptions)}
             width="w-[200px]"
             loading={isDepartmentsLoading}
-            // disabled
-            value={formData.department_id}
-            options={departmentsSelect}
+            value={formData.department_id ?? "null"}
+            options={departmentsOptions}
             onValueChange={(e) => {
-              handleSetFormValues("department_id", e);
-              handleSetFormValues("position_id", 0);
-              handleSetFormValues("employee_id", null);
+              if (e === "null") {
+                handleSetFormValues("department_id", null);
+                handleSetFormValues("position_id", null);
+                handleSetFormValues("employee_id", null);
+              } else {
+                handleSetFormValues("department_id", e);
+                handleSetFormValues("position_id", null);
+              }
             }}
           />
         </FormItem>
@@ -146,9 +211,10 @@ const ShiftDetailsForm = ({
           </Label>
           <CustomSelect
             placeHolder="Regular"
+            removeDefaultOption
             width="w-[200px]"
             loading={isShiftTypesLoading}
-            options={shiftTypesSelect}
+            options={shiftTypeOptions}
             value={formData.shift_type_id}
             onValueChange={(e) => {
               handleSetFormValues("shift_type_id", e);
@@ -169,7 +235,7 @@ const ShiftDetailsForm = ({
             placeHolder="Select"
             width="w-[200px]"
             // disabled={!fromOpenShift}
-            options={filterEmployees}
+            options={employeesOptions}
             value={
               formData.employee_id === null ? "null" : formData.employee_id
             }
@@ -178,18 +244,32 @@ const ShiftDetailsForm = ({
               if (e !== "null") {
                 handleSetFormValues("employee_id", e);
 
-                const employee = filterEmployees.find((emp) => emp.value === e);
-                // employee may be exist in multiple departments
-                const positionId = employee?.departments.find(
-                  (dep) =>
-                    dep.id === formData.department_id &&
-                    dep.pivot.forecast_employee_id === e
-                ).pivot.forecast_position_id;
+                const employeeDepartments = employeesOptions.find(
+                  (emp) => emp.value === e
+                )?.departments;
 
-                handleSetFormValues("position_id", positionId);
+                if (formData.department_id) {
+                  const positionId = employeeDepartments?.find(
+                    (dep) => dep.id === formData.department_id
+                  )?.pivot.forecast_position_id;
+                  handleSetFormValues("position_id", positionId);
+                }
+
+                // handleSetFormValues("position_id", departmen);
+
+                // const employee = filterEmployees.find((emp) => emp.value === e);
+                // employee may be exist in multiple departments
+                // const positionId = employee?.departments.find(
+                //   (dep) =>
+                //     dep.id === formData.department_id &&
+                //     dep.pivot.forecast_employee_id === e
+                // ).pivot.forecast_position_id;
+
+                // handleSetFormValues("position_id", positionId);
               } else {
                 handleSetFormValues("employee_id", null);
                 handleSetFormValues("position_id", null);
+                handleSetFormValues("department_id", null);
               }
             }}
           />
@@ -202,15 +282,12 @@ const ShiftDetailsForm = ({
             placeHolder="Select"
             width="w-[200px]"
             loading={isPositionsLoading}
-            // disabled={!fromOpenShift}
-            value={formData.position_id === 0 ? "null" : formData.position_id}
-            options={positionsSelect?.filter(
-              (pos) => pos.departmentId === formData.department_id
-            )}
+            key={JSON.stringify(positionsOptions)}
+            value={!formData.position_id ? "null" : formData.position_id}
+            options={positionsOptions}
             onValueChange={(e) => {
               if (e === "null") {
                 handleSetFormValues("position_id", 0);
-                handleSetFormValues("employee_id", null);
                 return;
               }
               handleSetFormValues("position_id", +e);

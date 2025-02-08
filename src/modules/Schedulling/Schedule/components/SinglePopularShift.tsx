@@ -22,15 +22,17 @@ const SinglePopularShift = ({ shift }: { shift: TPopularShift }) => {
   const [isEdit, setIsEdit] = useState(false);
   const [focusedInput, setFocusedInput] = useState("time_from");
 
+  const shiftValues = {
+    shift_type_id: shift.shift_type_id,
+    time_from: shift.time_from,
+    time_to: shift.time_to,
+    branch_id: shift.branch_id,
+    isPopular: true,
+  };
+
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "shift",
-    item: {
-      shift_type_id: shift.shift_type_id,
-      time_from: shift.time_from,
-      time_to: shift.time_to,
-      branch_id: shift.branch_id,
-      isPopular: true,
-    },
+    item: () => shiftValues,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),

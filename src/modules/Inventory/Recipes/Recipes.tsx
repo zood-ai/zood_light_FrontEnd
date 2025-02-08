@@ -19,6 +19,8 @@ import Avatar from "@/components/ui/avatar";
 import { formSchema, defaultValues } from "./schema/RecipeSchema";
 import useFilterQuery from "@/hooks/useFilterQuery";
 import useCommonRequests from "@/hooks/useCommonRequests";
+import { PERMISSIONS } from "@/constants/constants";
+import AuthPermission from "@/guards/AuthPermission";
 
 const Recipes = () => {
   //==========STATES==========//
@@ -234,7 +236,9 @@ const Recipes = () => {
         onClickAdd={() => {
           setIsOpen(true);
         }}
-        modalName={"recipes"}
+        modalName={"recipes"}    
+        permission={[PERMISSIONS.can_add_and_edit_inventory_items_recipes_and_suppliers]}
+
       />
       <HeaderTable />
 
@@ -250,6 +254,7 @@ const Recipes = () => {
           setIsOpen(true);
         }}
       />
+      <AuthPermission permissionRequired={[PERMISSIONS.can_add_and_edit_inventory_items_recipes_and_suppliers]}>
 
       <CustomSheet
         isOpen={isOpen}
@@ -267,9 +272,12 @@ const Recipes = () => {
           isPendingEdit ||
           isPendingDelete
         }
+        permission={[PERMISSIONS.can_add_and_edit_inventory_items_recipes_and_suppliers]}
+
       >
         <RecipeDetailsForm InventoryItemsSelect={InventoryItemsSelect} />
       </CustomSheet>
+      </AuthPermission>
       <CustomModal
         modalName={modalName}
         setModalName={setModalName}

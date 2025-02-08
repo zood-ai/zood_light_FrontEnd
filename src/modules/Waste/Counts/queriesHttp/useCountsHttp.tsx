@@ -256,7 +256,7 @@ const useCountsHttp = ({
       },
       onSuccess: (data) => {
         toast({
-          description: data?.data?.message,
+          description: data?.data?.message || "Report Exported Successfully",
         });
         window.open(data?.data.url, "_blank");
       },

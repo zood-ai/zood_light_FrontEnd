@@ -10,11 +10,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { formBranchesSchema } from "./Schema/Schema";
 import EditBranch from "./components/EditBranch";
 import CustomModal from "@/components/ui/custom/CustomModal";
+import { set } from "date-fns";
+import { useSearchParams } from "react-router-dom";
+import useFilterQuery from "@/hooks/useFilterQuery";
 
 const Branches = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [modalName, setModalName] = useState("");
-  const [rowData, setRowData] = useState<any>();
+  const [,setSearchParam]=useSearchParams();
+  const [name,setName]=useState('')
+  const {filterObj}=useFilterQuery()
 
   const columns: ColumnDef<any>[] = [
     {
@@ -59,9 +64,10 @@ const Branches = () => {
     setModalName("");
     setIsEdit(false);
     form.reset()
+    setSearchParam({})
   };
   const onSubmit = (values) => {
-    branchEdit({ branch_id: rowData?.id, ...values });
+    branchEdit({ branch_id: filterObj?.id, ...values });
   };
 
   const { BranchesData, isLoadingBranches, branchEdit, isLoadingEdit, isLoadingBrancheOne, BrancheOne } =
@@ -69,17 +75,14 @@ const Branches = () => {
       handleCloseSheet: handleCloseSheet, setBranchOne: (data) => {
         form.reset(data)
       },
-      branchId: rowData?.id
+      branchId: filterObj?.id
     });
-
 
 console.log(form.formState.errors,form.getValues());
 
-
-
   return (
     <div className="flex flex-col gap-[16px]">
-      <p className="text-[24px] font-bold ">Hr Settings</p>
+      <p className="text-[24px] font-bold ">Location Settings</p>
       <HeaderTable />
       <CustomTable
         columns={columns}
@@ -87,7 +90,9 @@ console.log(form.formState.errors,form.getValues());
         loading={isLoadingBranches}
         onRowClick={(row) => {
           setIsEdit(true);
-          setRowData(row);
+          setName(row?.name)
+          setSearchParam({id:row?.id})
+          
 
         }}
         paginationData={BranchesData?.meta}
@@ -98,7 +103,7 @@ console.log(form.formState.errors,form.getValues());
         isOpen={isEdit}
         isEdit={false}
         handleCloseSheet={handleCloseSheet}
-        headerLeftText={rowData?.name}
+        headerLeftText={name}
         isDirty={form.formState.isDirty}
         isLoading={isLoadingEdit}
         form={form}

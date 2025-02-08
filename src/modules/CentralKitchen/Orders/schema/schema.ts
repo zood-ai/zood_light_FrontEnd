@@ -25,6 +25,7 @@ export const formOrdersSchema = z.object({
       price_per_unit: z.number(),
       unit: z.string(),
       pack_per_case: z.number().nullable(),
+      supplier_item_id:z.string(),
       pack_size: z.number(),
     })
   ),

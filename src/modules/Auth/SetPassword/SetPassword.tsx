@@ -8,6 +8,7 @@ import { formSetPasswordSchema } from "./Schema/schema";
 import MemoChecked from "@/assets/icons/Checked";
 import useFilterQuery from "@/hooks/useFilterQuery";
 import useSetPasswordHttp from "./queriesHttp/useSetPasswordHttp";
+import { PasswordInput } from "@/components/ui/custom/CustomInputPassword";
 
 const SetPassword = () => {
     const { filterObj } = useFilterQuery()
@@ -116,10 +117,9 @@ const SetPassword = () => {
                         disabled={true}
                         {...register("email")}
                     />
-                    <Input
+                    <PasswordInput
                         label="Set Password"
                         placeholder="Password"
-                        type="password"
                         className="w-[348px] "
                         {...register("password", {
                             onChange: () => {
@@ -127,6 +127,7 @@ const SetPassword = () => {
                             },
                         })}
                     />
+
 
 
                     <ul className="lg:hidden block  marker:text-red-500 list-outside list-disc w-full m-5">

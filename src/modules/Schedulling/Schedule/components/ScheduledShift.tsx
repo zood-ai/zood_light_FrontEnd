@@ -13,19 +13,27 @@ import useScheduletHttp from "../queriesHttp/ScheduleHttp";
 import SingleDraggedShift from "./SingleDraggedShift";
 import CustomModal from "@/components/ui/custom/CustomModal";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SHIFT_TYPES_IDS } from "../constants/constants";
+import DropSkeleton from "./DropSkeleton";
+import UnAvaliabileShift from "./UnAvaliabileShift";
+import TimeIcon from "@/assets/icons/Time";
 
 const ScheduledShift = ({
   employeeId = null,
   day,
   nextDay,
+  showAvaliability,
   departmentId,
   positionId,
   index,
   setCellIndex,
   cellIndex,
   isAvaliabile,
+  availabilityTime,
   fromOpenShift,
+  departments,
+  sortBy,
+  prevLastDay,
+  isPublished,
 }: TScheduledShift) => {
   const { filterObj } = useFilterQuery();
   const [isCreateShiftDrawerOpen, setIsCreateShiftDrawerOpen] =
@@ -70,6 +78,8 @@ const ScheduledShift = ({
     defaultValues,
   });
 
+  console.log({ erros: form.formState.errors });
+
   const handleConfirm = async () => {
     if (modalName === "close edit") {
       handleCloseSheet();
@@ -85,7 +95,10 @@ const ScheduledShift = ({
     }
 
     if (!values.notes) delete values.notes;
-    addShiftData(values);
+
+    const status = isPublished ? 2 : 0;
+
+    addShiftData({ ...values, status: status });
   };
   const [{ isOver }, drop] = useDrop(() => ({
     accept: ["shift", "shift-employee"],
@@ -105,7 +118,9 @@ const ScheduledShift = ({
       };
 
       if (item.isPopular) {
-        addShiftData(values);
+        const status = isPublished ? 2 : 0;
+
+        addShiftData({ ...values, status });
         return;
       }
 
@@ -117,10 +132,14 @@ const ScheduledShift = ({
     }),
   }));
 
-  const shiftsBelongToEmployee = day?.shifts?.filter(
-    (shift) =>
-      shift.employee_id === employeeId && shift.department_id === departmentId
-  );
+  const shiftsBelongToEmployee =
+    sortBy === "people"
+      ? day?.shifts?.filter((shift) => shift.employee_id === employeeId)
+      : day?.shifts?.filter(
+          (shift) =>
+            shift.employee_id === employeeId &&
+            shift.department_id === departmentId
+        );
 
   const handleSetForm = () => {
     form.setValue("date", day?.date, {
@@ -135,20 +154,16 @@ const ScheduledShift = ({
       });
     }
 
-    form.setValue("department_id", departmentId as string, {
+    form.setValue("department_id", (departmentId as string) ?? null, {
       shouldValidate: true,
       shouldDirty: true,
     });
 
-    form.setValue("position_id", positionId as number, {
+    form.setValue("position_id", (positionId as number) ?? null, {
       shouldValidate: true,
       shouldDirty: true,
     });
     form.setValue("station_id", "ca2a6c58-6169-4736-b5a0-250777e35ab8", {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-    form.setValue("shift_type_id", SHIFT_TYPES_IDS.REGULAR, {
       shouldValidate: true,
       shouldDirty: true,
     });
@@ -180,11 +195,7 @@ const ScheduledShift = ({
         ref={drop}
         className={`relative w-[150px]  cursor-pointer h-[56px]  text-center align-top p-1 border-b border-l border-[#d4e2ed] group/main`}
       >
-        {isOver && (
-          <div className="absolute  inset-0 m-1 z-20 bg-gray-100  border-b-[2px] border-primary rounded-sm">
-            <div className="flex items-center justify-center h-full">🎯</div>
-          </div>
-        )}
+        {isOver && <DropSkeleton />}
 
         <div className="relative space-y-2 ">
           {shiftsBelongToEmployee?.map((shift) => (
@@ -194,6 +205,7 @@ const ScheduledShift = ({
               nextDay={nextDay ?? ""}
               addShiftData={addShiftData}
               isAddingShift={isAddingShift}
+              prevLastDay={prevLastDay ?? ""}
               setIsCreateShiftDrawerOpen={setIsCreateShiftDrawerOpen}
               setIsEditShiftDrawerOpen={setIsEditShiftDrawerOpen}
               form={form}
@@ -205,38 +217,28 @@ const ScheduledShift = ({
             />
           ))}
         </div>
-
-        {!isAvaliabile && !fromOpenShift && (
-          <button
-            className={`flex relative group  ${
-              shiftsBelongToEmployee.length > 0 ? "mt-2" : ""
-            } items-center  w-full bg-gray-100 rounded-sm h-[50px] `}
-          >
-            <div className="flex items-center justify-center w-full">
-              <span className="">Unavailable ⏰</span>
-            </div>
-            <div className="absolute z-50 -translate-x-1/2 left-1/2  hidden gap-2 -bottom-[8px]  group-hover:flex">
-              <button disabled={isAddingShift}>
-                <PlusIcon
-                  className="w-3 h-3 "
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsCreateShiftDrawerOpen(true);
-                    const values = {
-                      employee_id: employeeId || null,
-                      position_id: positionId,
-                      department_id: departmentId,
-                      date: day.date,
-                      branch_id: filterObj["filter[branch]"],
-                    };
-
-                    form.reset(values);
-                  }}
-                />
-              </button>
-            </div>
-          </button>
+        {showAvaliability && !shiftsBelongToEmployee?.length && (
+          <div className="absolute flex items-center gap-1 text-[10px] text-gray-300 left-3 top-2 left">
+            <TimeIcon color={"var(--gray-400)"} />
+            {availabilityTime?.from} - {availabilityTime?.to}
+          </div>
         )}
+
+        {!isAvaliabile &&
+          !fromOpenShift &&
+          day.shifts.find((shift) => shift.employee_id === employeeId)?.date !==
+            day.date && (
+            <UnAvaliabileShift
+              employeeShiftLength={shiftsBelongToEmployee?.length > 0}
+              isAddingShift={isAddingShift}
+              date={day?.date}
+              departmentId={departmentId}
+              positionId={positionId}
+              employeeId={employeeId}
+              setIsCreateShiftDrawerOpen={setIsCreateShiftDrawerOpen}
+              resetForm={form.reset}
+            />
+          )}
 
         {(cellIndex === index ||
           isUpdateShiftData ||
@@ -282,8 +284,11 @@ const ScheduledShift = ({
         setModalName={setModalName}
       >
         <ShiftDetailsForm
+          departments={departments}
+          isEdit={isEditShiftDrawerOpen}
           formData={form.getValues()}
           handleSetFormValues={handleSetFormValues}
+          fromOpenShift={fromOpenShift}
         />
       </CustomSheet>
 

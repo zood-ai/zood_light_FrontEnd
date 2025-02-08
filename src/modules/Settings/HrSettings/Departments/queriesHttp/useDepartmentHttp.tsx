@@ -74,6 +74,7 @@ const useDepartmentsHttps = ({ handleCloseSheet, id, setDepartmentOne }: IUseDep
             handleCloseSheet?.();
 
             queryClient.invalidateQueries({ queryKey: ["departmente-one"] });
+            queryClient.invalidateQueries({ queryKey: ["branche-single-hr"] });
         },
         onError: (error) => {
             if (axios.isAxiosError(error)) {

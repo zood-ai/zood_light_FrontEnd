@@ -42,7 +42,7 @@ const SendTransfer = ({
           <CustomSelect
             placeHolder="Choose one"
             options={branch}
-            width="w-[150px] h-[40px]"
+            width="w-[150px]"
             value={watch("branch_id")}
             onValueChange={(e) => {
               if (e == "null") {
@@ -61,7 +61,7 @@ const SendTransfer = ({
         </p>
         <div>
           <CustomInputDate
-            width="w-[150px] h-[40px]"
+            width="w-[150px] "
             date={watch("delivery_date")}
             defaultValue={watch("delivery_date")}
             onSelect={(selectedDate) => {

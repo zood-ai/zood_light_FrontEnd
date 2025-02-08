@@ -3,10 +3,10 @@ import Position from "./Role/Position";
 import Location from "./Role/Location";
 import Holiday from "./Role/Holiday ";
 
-const Role = () => {
+const Role = ({employeeData}:{employeeData:{id:string}[]}) => {
   return (
     <>
-      <Location />
+      <Location employeeData={employeeData}/>
       <Position />
       <Holiday />
     </>

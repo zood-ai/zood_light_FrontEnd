@@ -13,6 +13,7 @@ const Departments = lazy(() => import("./Departments/Departments"));
 const Positions = lazy(() => import("./Positions/Positions"));
 const Stations = lazy(() => import("./Stations/Stations"));
 const Roles = lazy(() => import("./Roles/Roles"));
+const LocationGroup = lazy(() => import("./LocationGroup/LocationGroup"));
 const Labour = lazy(() => import("./Labour/Labour")); // Labour
 
 const HrSettingsRouters: PosSettingsRouter[] = [
@@ -25,19 +26,16 @@ const HrSettingsRouters: PosSettingsRouter[] = [
     index: true,
     path: "labour",
     element: <Labour />,
-
   },
   {
     index: true,
     path: "onboarding",
     element: <Onboarding />,
-
   },
   {
     index: true,
     path: "departments",
     element: <Departments />,
-
   },
   {
     index: true,
@@ -48,6 +46,11 @@ const HrSettingsRouters: PosSettingsRouter[] = [
     index: true,
     path: "stations",
     element: <Stations />,
+  },
+  {
+    index: true,
+    path: "location-group",
+    element: <LocationGroup />,
   },
   {
     index: true,

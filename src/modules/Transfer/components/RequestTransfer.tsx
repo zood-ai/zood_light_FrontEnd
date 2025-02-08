@@ -39,7 +39,7 @@ const RequestTransfer = ({
           <CustomSelect
             placeHolder="Choose one"
             options={branch}
-            width="w-[150px] h-[40px]"
+            width="w-[150px]"
             value={watch("warehouse_id")}
             onValueChange={(e) => {
               if (e == "null") {

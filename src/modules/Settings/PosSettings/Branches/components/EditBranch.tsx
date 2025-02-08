@@ -4,6 +4,7 @@ import BranchDesc from "./BranchDesc";
 import Device from "./Device";
 import DeleteDevice from "./DeleteBranch";
 import EmployeeBranch from "./EmployeeBranch";
+import LeafletMap from "./Map";
 
 const EditBranch = ({
   setIsEdit,
@@ -20,9 +21,13 @@ const EditBranch = ({
       <Selection />
       {/* device */}
       <Device />
-
+      {/* Map */}
+      <LeafletMap />
       {/* Delete */}
       <DeleteDevice setIsEdit={setIsEdit} />
+
+      {/* {} */}
+
     </>
   );
 };

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import CustomModal from "@/components/ui/custom/CustomModal";
 import { FormMessage } from "@/components/ui/form";
 import useStorageAreas from "./hooks/useStorageAreas";
+import { PERMISSIONS } from "@/constants/constants";
 
 const StorageArea = () => {
   const {
@@ -75,6 +76,8 @@ const StorageArea = () => {
           setIsOpen(true);
         }}
         modalName={"storage_areas"}
+        permission={[PERMISSIONS.can_add_and_edit_inventory_items_recipes_and_suppliers]}
+        
       />
       <HeaderTable isBranches branchkey="filter[branch]" />
       <CustomTable

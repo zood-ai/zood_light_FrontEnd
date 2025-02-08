@@ -150,8 +150,11 @@ const ItemsList = ({
                       (itemDaily: { id: string }) =>
                         itemDaily?.id === item?.value
                     )?.pack_per_case,
+                    supplier_item_id: itemsData?.itemDailyUsage?.find(
+                      (itemDaily: { id: string }) =>
+                        itemDaily?.id === item?.value
+                    )?.supplier_item_id
                   };
-
                   setValue("items", [...currentItems, newItem]);
                 }}
               >

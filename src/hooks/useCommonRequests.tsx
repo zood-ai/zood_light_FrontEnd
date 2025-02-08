@@ -244,6 +244,7 @@ const useCommonRequests = ({
     `forecast-console/all-items?${filterItem}`,
     { enabled: !!filterItem }
   );
+  
 
   // batches
   const { data: batchesData, isFetching: isFetchingBatches } = useCustomQuery(
@@ -375,12 +376,14 @@ const useCommonRequests = ({
       toast({
         description: "Export File Successfully",
       });
-
       window.open(data?.data?.url, "_blank");
     },
     onError: (error: any) => {
+      console.log(error);
+
       toast({
-        description: error.response?.data.message,
+        description: error.data.message,
+        variant: "error",
       });
     },
   });
@@ -396,8 +399,12 @@ const useCommonRequests = ({
   const { data: departmentsData, isLoading: isDepartmentsLoading } =
     useCustomQuery(
       ["departments", locationId || ""],
-      
-      `${locationId?`/forecast-console/department?filter[branches][0]=${locationId}`:`/forecast-console/department`}`,
+
+      `${
+        locationId
+          ? `/forecast-console/department?filter[branches][0]=${locationId}`
+          : `/forecast-console/department`
+      }`,
       {
         enabled: getDepartments || !!locationId,
       }
@@ -410,7 +417,7 @@ const useCommonRequests = ({
     }) => ({
       label: department.name,
       value: department.id,
-      positions: department.positions.map(
+      positions: department?.positions?.map(
         (position: { name: string; id: number }) => ({
           label: position.name,
           value: position.id,
@@ -418,6 +425,7 @@ const useCommonRequests = ({
       ),
     })
   );
+
   const { data: departmentsDataList, isLoading: isDepartmentsLoadingList } =
     useCustomQuery(
       ["departments-list", locationList || ""],
@@ -428,10 +436,15 @@ const useCommonRequests = ({
       { "filter[branches]": locationList }
     );
   const { data: positionsData, isLoading: isPositionsLoading } = useCustomQuery(
-    ["departments", departmentId || ""],
-    `/forecast-console/position?filter[department_id]=${departmentId}`,
+    ["positions", departmentId ?? ""],
+    `/forecast-console/position`,
     {
       enabled: getPositions || !!departmentId,
+    },
+    {
+      ...(departmentId
+        ? { "filter[department_id]": departmentId ?? "" }
+        : { type: "all" }),
     }
   );
   const positionsSelect = positionsData?.map(
@@ -453,6 +466,15 @@ const useCommonRequests = ({
       first_name: string;
       id: string;
       last_name: string;
+      positions: {
+        forecast_department_id: string;
+        id: number;
+        name: string;
+        pivot: {
+          forecast_position_id: number;
+          forecast_employee_id: string;
+        };
+      }[];
       departments: {
         id: string;
         name: string;
@@ -466,6 +488,7 @@ const useCommonRequests = ({
       label: employee.first_name + " " + employee.last_name,
       value: employee.id,
       departments: employee.departments,
+      positions: employee.positions,
     })
   );
 
@@ -474,9 +497,11 @@ const useCommonRequests = ({
       enabled: getShiftTypes,
     });
   const shiftTypesSelect = shiftTypesData?.map(
-    (shift: { id: string; name: string; icon: string }) => ({
+    (shift: { id: string; name: string; icon: string; type: string }) => ({
       label: shift.icon + " " + shift.name,
       value: shift.id,
+
+      type: shift.type,
     })
   );
   const { data: rolesData, isLoading: isrolesLoading } = useCustomQuery(
@@ -492,7 +517,7 @@ const useCommonRequests = ({
       value: role.id,
     })
   );
-  const { data: documentsData,isLoading:isDocumentsLoading } = useCustomQuery(
+  const { data: documentsData, isLoading: isDocumentsLoading } = useCustomQuery(
     ["documents"],
     `/forecast-console/documents`,
     {
@@ -587,8 +612,9 @@ const useCommonRequests = ({
     shiftTypesSelect,
     isShiftTypesLoading,
     documentsData,
-    isDocumentsLoading
-
+    isDocumentsLoading,
+    rolesData,
+  
   };
 };
 

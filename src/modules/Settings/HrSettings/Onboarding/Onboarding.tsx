@@ -88,7 +88,7 @@ const Onboarding = () => {
     }
   };
 
-  console.log(form.formState.errors);
+  console.log(form.getValues());
 
 
   return (

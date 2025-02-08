@@ -8,6 +8,8 @@ import useFilterQuery from "@/hooks/useFilterQuery";
 import { Loader2 } from "lucide-react";
 
 import { useSearchParams } from "react-router-dom";
+import { getHoursAndMinutes } from "../helpers/helpers";
+import CloseEyeIcon from "@/assets/icons/CloseEye";
 
 type TEmployeeRow = {
   employee: TEmployee;
@@ -16,6 +18,9 @@ type TEmployeeRow = {
   departmentId: string;
   positionId: number;
   setIsEdit: React.Dispatch<React.SetStateAction<boolean>>;
+  sortBy: string;
+  showAvaliability: boolean;
+  isPublished?: boolean;
 };
 const EmployeeRow = ({
   employee,
@@ -24,8 +29,13 @@ const EmployeeRow = ({
   departmentId,
   positionId,
   setIsEdit,
+  sortBy,
+  showAvaliability,
+  isPublished,
 }: TEmployeeRow) => {
-  const name = `${employee?.first_name} ${employee?.last_name}`;
+  const name = employee.preferred_name
+    ? employee.preferred_name
+    : `${employee?.first_name || ""} ${employee?.last_name || ""}`;
 
   const [, setSearchParam] = useSearchParams({});
 
@@ -53,14 +63,23 @@ const EmployeeRow = ({
         <div className="group flex items-center min-w-[285px] hover:bg-gray-100 border-l-0 justify-between px-4 text-gray-600">
           <div className="flex items-center p-2">
             <div className="flex cursor-pointer">
-              <Avatar text={name} bg="secondary" />
+              {employee.image ? (
+                <img
+                  src={employee?.image}
+                  alt="avatar"
+                  className="w-10 h-10 rounded-full"
+                />
+              ) : (
+                <Avatar text={name} bg="secondary" />
+              )}
               <div className="flex items-center justify-between">
                 <div className="flex flex-col items-start justify-center ml-2 leading-tight text-s">
                   <span className="w-40 font-semibold text-left truncate">
                     {name}
                   </span>
                   <p className="font-normal text-gray-500">
-                    0h 0m/{employee.total_shifts}h 0m
+                    {getHoursAndMinutes(employee?.total_shifts)}/
+                    {getHoursAndMinutes(employee?.contract_hrs)}
                   </p>
                 </div>
                 <div className="absolute hidden group-hover:block right-4">
@@ -77,7 +96,7 @@ const EmployeeRow = ({
                       {isShowEmployee ? (
                         <Loader2 className="animate-spin" size={20} />
                       ) : (
-                        "show"
+                        <CloseEyeIcon />
                       )}
                     </button>
                   ) : isHideEmployee ? (
@@ -138,16 +157,24 @@ const EmployeeRow = ({
         <ScheduledShift
           key={day.date}
           day={day}
+          showAvaliability={showAvaliability}
+          availabilityTime={employee?.availability?.find(
+            (avali) => avali.day === day.day
+          )}
           index={i}
+          isPublished={isPublished}
           isAvaliabile={
             employee?.availability?.find((avali) => avali.day === day.day)
               ?.is_available as boolean
           }
           employeeId={employee.id}
+          departments={employee?.departments}
           nextDay={days[i + 1]?.date}
+          prevLastDay={days[days.length - 2]?.date}
           isFetchingSchedule={isFetchingSchedule}
           departmentId={departmentId}
           positionId={positionId}
+          sortBy={sortBy}
           setCellIndex={setCellIndex}
           cellIndex={cellIndex}
         />

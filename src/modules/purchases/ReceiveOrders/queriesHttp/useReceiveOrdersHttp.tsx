@@ -90,6 +90,7 @@ const useReceiveOrdersHttp = ({
             quantity: e?.pivot?.quantity || 0,
             cost: e?.pivot?.cost,
             pack_unit: e?.pack_unit,
+            supplier_item_id: e?.pivot?.supplier_item_id,
             order_cost: e?.pivot?.cost,
             total_tax: e?.pivot?.total_tax,
             total_cost: e?.pivot?.total_cost,
@@ -105,6 +106,7 @@ const useReceiveOrdersHttp = ({
             //     100) *
             //   +e?.pivot?.sub_total
             // ).toFixed(2),
+       
           })),
         };
 
@@ -138,6 +140,8 @@ const useReceiveOrdersHttp = ({
             name: e?.name,
             unit: e?.unit,
             price_per_unit: e?.pivot?.cost,
+            supplier_item_id: e?.pivot?.supplier_item_id,
+
             invoice_quantity: e?.pivot?.invoice_quantity || 0,
             quantity: e?.pivot?.quantity || 0,
             cost: e?.pivot?.cost,
