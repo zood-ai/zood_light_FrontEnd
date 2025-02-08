@@ -33,6 +33,7 @@ export interface MonthlyCalendarProps {
 
 export interface CustomDropDownProps {
   options: { label: string; value: any }[];
+  removeDefaultOption?: boolean;
   className?: string;
   defaultValue?: any;
   onValueChange?: (value: any) => void;
@@ -48,6 +49,7 @@ export interface CustomDropDownProps {
   optionDefaultLabel?: string;
   displayValue?: boolean;
   showSearch?: boolean;
+  showIcon?: boolean;
 }
 
 export interface IHeaderPageProps {
@@ -70,6 +72,8 @@ export interface IHeaderPageProps {
   disabledDropDown?: boolean;
   setIsShowDropDown?: React.Dispatch<React.SetStateAction<boolean>>;
   isShowDropDown?: boolean;
+  permission?: string[];
+  permissionExport?:string[]
 }
 
 export interface ICustomSelect {

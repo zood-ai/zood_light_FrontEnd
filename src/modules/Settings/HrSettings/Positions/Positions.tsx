@@ -12,6 +12,7 @@ import useCommonRequests from "@/hooks/useCommonRequests";
 import usePositionsHttps from "./queriesHttp/usePositionsHttp";
 import CustomModal from "@/components/ui/custom/CustomModal";
 import useFilterQuery from "@/hooks/useFilterQuery";
+import PositionModalShared from "@/sharedModals/SharedPositionModal";
 const Departments = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [modalName, setModalName] = useState("");
@@ -29,7 +30,6 @@ const {filterObj}=useFilterQuery()
   });
   const { departmentsData } = useCommonRequests({ getDepartments: true, locationId: filterObj['filter[branch]'] })
  
-  console.log(filterObj["filter ['branch']"]);
   
   const handleCloseSheet = () => {
     setIsOpen(false);
@@ -40,7 +40,7 @@ const {filterObj}=useFilterQuery()
   };
   const { positionsData,
     isLoadingPositions,
-    departmentDelete,
+    positionDelete,
     isLoadingPositionSingle,
     positionsAdd, isLoadingAdd,
     isLoadingEdit,
@@ -63,13 +63,12 @@ const {filterObj}=useFilterQuery()
     if (modalName === "close edit") {
       handleCloseSheet();
     } else {
-      departmentDelete(rowData?.id || "");
+      positionDelete(rowData?.id || "");
     }
   };
 
-  console.log(form.formState.errors)
   return (
-    <div className="ml-[241px] w-[645px]">
+    <div className="ml-[241px] w-[645px] ">
       <CustomSection
         title="Positions"
         description="Add new position"
@@ -95,53 +94,7 @@ const {filterObj}=useFilterQuery()
         }
       />
 
-      <CustomSheet
-        isOpen={isOpen}
-        isEdit={isEdit}
-        isDirty={form.formState.isDirty}
-        btnText={"Create"}
-        handleCloseSheet={handleCloseSheet}
-        headerLeftText={(isOpen && isEdit) ? "Edit Position" : "New Position"}
-        form={form}
-        isLoadingForm={isLoadingPositionSingle}
-        isLoading={isLoadingEdit || isLoadingDelete || isLoadingAdd}
-        onSubmit={onSubmit}
-        setModalName={setModalName}
-      >
-        <>
-          <Input
-            type="text"
-            label="Name Position"
-            value={form.watch("name")}
-            className="w-[300px]"
-            placeholder="Enter name"
-            onChange={(e) => {
-              form.setValue("name", e.target.value, { shouldValidate: true, shouldDirty: true });
-            }}
-          />
-          <CustomSelect
-            label="Department"
-            name="forecast_department_id"
-            options={departmentsData?.map((dep) => ({ label: dep.name, value: dep.id }))}
-            width="w-[300px]"
-            value={form.watch("forecast_department_id")}
-            optionDefaultLabel="Select Department"
-            onValueChange={(e) =>
-              form.setValue(`forecast_department_id`, e, {
-                shouldValidate: true,
-                shouldDirty: true,
-              })
-            }
-
-          />
-        </>
-      </CustomSheet>
-      <CustomModal
-        modalName={modalName}
-        setModalName={setModalName}
-        handleConfirm={handleConfirm}
-        deletedItemName={rowData?.name}
-      />
+     <PositionModalShared isOpen={isOpen} setIsOpen={setIsOpen} isEdit={isEdit} setIsEdit={setIsEdit} />
     </div>
   );
 };

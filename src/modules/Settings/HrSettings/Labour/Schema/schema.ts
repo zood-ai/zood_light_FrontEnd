@@ -1,15 +1,18 @@
 import { z } from "zod";
 export const formShiftTypeSchema = z.object({
-    name: z.string(),
+    name: z.string().trim().min(1, { message: "name is required" }),
     icon: z.string(),
     is_paid: z.boolean(),
     include_employee_working_hours: z.boolean(),
     employee_need_to_punch: z.boolean(),
-    deleted_when_schedule_cleared: z.boolean()
+    deleted_when_schedule_cleared: z.boolean(),
+    pay_rate_amount:z.number().optional(),
+    pay_rate_type: z.string().optional(),
 
 });
 export const formOverTimeRulesSchema = z.object({
-    id: z.string(),
+    id: z.string().optional(),
+
     name: z.string().min(1, "is required"),
     scenario: z.enum(["1", "2"]),
     paid_rate: z.number().min(1, "is required"),
@@ -47,7 +50,7 @@ export const formClockingRulesSchema = z.object(
             break_option: z.literal("3"),
             break_rules: z.array(
                 z.object({
-                    shit_hours: z.number().min(1, "is required"),
+                    shift_hours: z.number().min(1, "is required"),
                     paid_minutes: z.number().min(1, "is required"),
                     unpaid_minutes: z.number().min(1, "is required"),
                 })

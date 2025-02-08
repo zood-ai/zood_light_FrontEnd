@@ -84,6 +84,7 @@ const AddRemoveItems = ({
             id: item?.id,
             quantity: quantity ? quantity : 1,
             pack_per_case: item.pack_per_case,
+            supplier_item_id: item.supplier_item_id,
             pack_size: item.pack_size,
             cost: item.cost,
             invoice_quantity: 1,

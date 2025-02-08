@@ -5,15 +5,37 @@ import ScheduledShift from "./ScheduledShift";
 // Icons
 import OpenShiftIcon from "@/assets/icons/OpenShift";
 import { TScheduledDay } from "../types/types";
+import useCommonRequests from "@/hooks/useCommonRequests";
+import { getHoursAndMinutes } from "../helpers/helpers";
 
 const OpenShiftRow = ({
   days,
   departmentId,
+  fromOpenShift,
+  sortBy,
 }: {
   days: TScheduledDay[];
-  departmentId: string;
+  departmentId?: string;
+  fromOpenShift?: boolean;
+  sortBy: string;
 }) => {
   const [cellIndex, setCellIndex] = useState<number | null>(null);
+
+  const { departmentsSelect } = useCommonRequests({
+    getDepartments: true,
+  });
+
+  const totalHours = days?.reduce((acc, day) => {
+    return (
+      acc +
+      day?.shifts?.reduce((acc, shift) => {
+        if (!shift.employee_id) {
+          return acc + shift.hours;
+        }
+        return acc;
+      }, 0)
+    );
+  }, 0);
 
   return (
     <tr className="open-shifts">
@@ -26,21 +48,29 @@ const OpenShiftRow = ({
             <span className="font-semibold leading-5 text-gray-600">
               Open shifts
             </span>
-            <span className="font-normal text-gray-500">0h 0m</span>
+            <span className="font-normal text-gray-500">
+              {getHoursAndMinutes(totalHours)}
+            </span>
           </div>
         </div>
       </th>
-      {days.map((day, i) => (
+      {days?.map((day, i) => (
         <ScheduledShift
           setCellIndex={setCellIndex}
           cellIndex={cellIndex}
           index={i}
           nextDay={days[i + 1]?.date}
+          prevLastDay={days[days.length - 2]?.date}
+          departments={departmentsSelect?.map((dep) => ({
+            name: dep.label,
+            id: dep.value,
+          }))}
           key={day.day}
           departmentId={departmentId}
           day={day}
-          fromOpenShift
+          fromOpenShift={fromOpenShift}
           isAvaliabile={true}
+          sortBy={sortBy}
         />
       ))}
     </tr>

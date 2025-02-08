@@ -8,12 +8,14 @@ const PopularShiftInput = ({
   setFocusedInput,
   className = "w-[45px]",
   focusedInput,
+  disabled
 }: {
   name: string;
   formkey: string;
   setFocusedInput?: (name: string) => void;
   className?: string;
   focusedInput?: string;
+  disabled?:boolean
 }) => {
   const { setValue, watch } = useFormContext();
 
@@ -31,12 +33,22 @@ const PopularShiftInput = ({
     if (endTime.length === 1) {
       endTime = `0${endTime}`;
     }
+    if (startTime.length > 2) {
+      startTime = startTime.slice(0, 2);
+    }
+
+    if (endTime.length > 2) {
+      endTime = endTime.slice(0, 2);
+    }
+
     if (!/^\d+$/.test(startTime) || +startTime > 23 || !startTime) {
       startTime = "00";
     }
+
     if (!/^\d+$/.test(endTime) || +endTime > 59 || !endTime) {
       endTime = "00";
     }
+
     if (name === "time_to") {
       setValue(formkey, `${startTime}:${endTime}`, {
         shouldValidate: true,
@@ -81,6 +93,7 @@ const PopularShiftInput = ({
         e.stopPropagation();
         setFocusedInput?.(name);
       }}
+      disabled={disabled}
     />
   );
 };

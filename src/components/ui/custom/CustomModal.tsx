@@ -11,6 +11,7 @@ import {
 
 // Icons
 import AlertIcon from "@/assets/icons/Alert";
+import AuthPermission from "@/guards/AuthPermission";
 
 interface CustomModalProps {
   modalName: string;
@@ -29,6 +30,7 @@ interface CustomModalProps {
   contentStyle?: string;
   showSaveLaterBtn?: boolean;
   handleRequest?: () => void;
+  permissions?: string[];
 }
 
 const CustomModal = ({
@@ -48,6 +50,7 @@ const CustomModal = ({
   contentStyle = "font-light",
   showSaveLaterBtn,
   handleRequest,
+  permissions
 }: CustomModalProps) => {
   const closeEdit = modalName === "close edit";
 
@@ -89,6 +92,7 @@ const CustomModal = ({
             <>{footerModal}</>
           ) : (
             <>
+            <AuthPermission permissionRequired={permissions}>
               {showSaveLaterBtn && (
                 <AlertDialogAction
                   onClick={handleRequest}
@@ -110,6 +114,7 @@ const CustomModal = ({
                   ? "Stop editing"
                   : `Yes, delete ${deletedItemName}`}
               </AlertDialogAction>
+              </AuthPermission>
               <AlertDialogCancel
                 onClick={() => setModalName("")}
                 disabled={isPending}

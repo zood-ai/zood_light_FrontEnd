@@ -17,6 +17,7 @@ import moment from "moment";
 import { CreateModal } from "./components/CreateModal";
 import useCommonRequests from "@/hooks/useCommonRequests";
 import useFilterQuery from "@/hooks/useFilterQuery";
+import { PERMISSIONS } from "@/constants/constants";
 
 const Category = () => {
   const { toast } = useToast();
@@ -116,6 +117,8 @@ const Category = () => {
         }}
         exportButton={true}
         modalName={"categories"}
+        permission={[PERMISSIONS.can_add_and_edit_inventory_items_recipes_and_suppliers]}
+        
       />
       <HeaderTable SearchInputkey="filter[name]" />
 

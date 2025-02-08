@@ -69,6 +69,8 @@ const Item = ({
     ? item?.pack_per_case * item?.pack_size
     : item?.pack_size;
 
+  console.log({ items: getValues(`items`) });
+
   const updatedItemQty = (itemIndex: number, quantity: number) => {
     setQty(quantity);
     setUpdatedItem(
@@ -87,6 +89,7 @@ const Item = ({
             quantity: quantity,
             invoice_quantity: quantity,
             total_tax: item.tax_amount * quantity,
+            supplier_item_id: item.supplier_item_id,
             cost: item.cost,
             sub_total: item.cost * quantity,
             total_cost: item.cost * quantity + item.tax_amount,
@@ -118,12 +121,14 @@ const Item = ({
         )
       );
       setQty(Math.ceil(covredCount / packUnit));
+
       setValue(
         `items`,
         [
           ...getValues(`items`),
           {
             item_id: item?.id,
+            supplier_item_id: item.supplier_item_id,
             id: item?.id,
             pack_per_case: item.pack_per_case,
             pack_size: item.pack_size,

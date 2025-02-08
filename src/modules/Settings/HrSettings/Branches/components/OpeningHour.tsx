@@ -3,14 +3,16 @@ import React, { useState } from 'react'
 import OpeningHourModal from './OpeningHourModal'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import { getDay } from '@/utils/function'
+import useBranchesHttps from '../queriesHttp/useBranchesHttp'
+import useFilterQuery from '@/hooks/useFilterQuery'
 
 const OpeningHour = () => {
-    const { watch, control } = useFormContext()
-
-
+    const { setValue } = useFormContext()
+    const {filterObj}=useFilterQuery()
     const [isOpen, setIsOpen] = useState(false)
     const [modalName, setModalName] = useState("")
 
+const{BrancheOne}=useBranchesHttps({branchId:filterObj.id})
 
     return (
         <div className='px-3'>
@@ -20,17 +22,21 @@ const OpeningHour = () => {
                 <PenIcon color='#9ca3af' className='cursor-pointer'
                     onClick={() => {
                         setIsOpen(true)
+                        setValue("opening_hours",BrancheOne?.opening_hours );
                     }
                     }
                 />
             </div>
 
 
-            {watch("opening_hours")?.map((item, index) => (
+            {BrancheOne?.opening_hours?.map((item, index) => (
+                <>
                 <div className='grid grid-cols-2 pt-5' key={index}>
                     <p>{getDay(item.day)}</p>
-                    <p className='text-right'>{item.from}-{item.to}</p>
+                    {item?.is_closed? <p className='text-red-500 text-right'>Closed</p>: <p className='text-right'>{item.from}-{item.to}</p>}
+                   
                 </div>
+                </>
             ))}
 
             <OpeningHourModal

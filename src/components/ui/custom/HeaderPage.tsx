@@ -11,6 +11,8 @@ import { useLocation } from "react-router-dom";
 import CustomFileImage from "./CustomFileImage";
 import useCommonRequests from "@/hooks/useCommonRequests";
 import useFilterQuery from "@/hooks/useFilterQuery";
+import AuthPermission from "@/guards/AuthPermission";
+import { PERMISSIONS } from "@/constants/constants";
 const HeaderPage = ({
   title,
   textButton,
@@ -28,6 +30,8 @@ const HeaderPage = ({
   disabledDropDown,
   setIsShowDropDown,
   isShowDropDown,
+  permission,
+  permissionExport
 }: IHeaderPageProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { pathname } = useLocation();
@@ -145,6 +149,7 @@ const HeaderPage = ({
           )}
           {exportButton && (
             <>
+          <AuthPermission permissionRequired={permission}>
               <Button
                 className="font-semibold border-none bg-popover text-primary "
                 variant="outline"
@@ -155,7 +160,8 @@ const HeaderPage = ({
               >
                 Import{" "}
               </Button>
-
+              </AuthPermission>
+              <AuthPermission permissionRequired={permission||permissionExport}>
               <Button
                 className="font-semibold border-none bg-popover text-primary "
                 variant="outline"
@@ -164,8 +170,11 @@ const HeaderPage = ({
               >
                 Export{" "}
               </Button>
+          </AuthPermission>
             </>
           )}
+          <AuthPermission permissionRequired={permission}>
+
           {textButton && (
             <Button
               onClick={onClickAdd}
@@ -177,7 +186,11 @@ const HeaderPage = ({
               {textButton}
             </Button>
           )}
+          </AuthPermission>
           {/* {exportButton && <Button>Export / Import</Button>} */}
+         
+          <AuthPermission permissionRequired={[PERMISSIONS.can_export_timecards]}>
+
           {exportInventory && (
             <Button
               variant="outline"
@@ -187,6 +200,7 @@ const HeaderPage = ({
               <ExportImage color="var(--text-primary)" />
             </Button>
           )}
+          </AuthPermission>
         </div>
       </div>
       <CustomSheet
@@ -224,6 +238,7 @@ const HeaderPage = ({
             </Button>
           </div>
         }
+
         form={form}
         onSubmit={onSubmit}
         btnText="Save Changes"

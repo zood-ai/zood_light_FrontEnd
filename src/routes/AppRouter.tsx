@@ -23,6 +23,8 @@ import { DEFAULT_INSIGHTS_DATE } from '@/constants/constants'
 import SchedullingRouters from '@/modules/Schedulling/SchedullingRouter'
 import CentralKitchenRouters from '@/modules/CentralKitchen/CentralKitchenRoutes'
 import SetPassword from '@/modules/Auth/SetPassword/SetPassword'
+import NotFound from './NotFound'
+import MySchedule from '@/modules/Schedulling/mySchedule/MySchedule'
 
 const AppRouter = () => {
   // change to context
@@ -37,12 +39,16 @@ const AppRouter = () => {
     {
       path: '/',
       element: <AuthRoute />,
-      errorElement: <div>error</div>,
+      errorElement: <>error</>,
       children: [
         {
           index: true,
-          element: <Navigate to={`/insights/sales?${DEFAULT_INSIGHTS_DATE}`} replace />,
+          element: <MySchedule/>,
         },
+        {
+          element: <Navigate to={`/insights/sales?${DEFAULT_INSIGHTS_DATE}`}  />,
+        }
+        ,
         { path: 'insights', children: InsightsRouters },
         { path: 'schedulling', children: SchedullingRouters },
         { path: 'inventory', children: InventoryRouters },
@@ -70,6 +76,10 @@ const AppRouter = () => {
       element: <UnAuthRoute />,
       children: [{ index: true, element: <SignUp /> }],
     },
+    {
+      path: '/not-found',
+      element: <NotFound/>,
+    }
   ]
 
   const router = createBrowserRouter(routerConfig)

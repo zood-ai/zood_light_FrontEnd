@@ -7,7 +7,13 @@ import useCommonRequests from "@/hooks/useCommonRequests";
 import { ISelect } from "@/types/global.type";
 import { Skeleton } from "./ui/skeleton";
 
-const LocationForm = ({ className }: { className?: string }) => {
+const LocationForm = ({
+  className,
+  text = " Select the locations that this item is available in",
+}: {
+  className?: string;
+  text?: string;
+}) => {
   const { control } = useFormContext();
   const { branchesSelect, isBranchesLoading } = useCommonRequests({
     getBranches: true,
@@ -21,12 +27,11 @@ const LocationForm = ({ className }: { className?: string }) => {
         return (
           <>
             <p>
-              Select the locations that this item is available in{" "}
-              <span className="text-warn text-[18px]">*</span>
+              {text} <span className="text-warn text-[18px]">*</span>
             </p>
             <div className={className}>
               {isBranchesLoading ? (
-                <div className="flex gap-5 flex-col mt-5">
+                <div className="flex flex-col gap-5 mt-5">
                   {Array.from({ length: 6 }).map((_, index) => (
                     <Skeleton className="h-4 w-[150px]" key={index} />
                   ))}
@@ -74,19 +79,21 @@ const LocationForm = ({ className }: { className?: string }) => {
                               field.onChange(
                                 branchesSelect.map((branch: ISelect) => ({
                                   id: branch.value,
-                                }))
+                                })),
+                                { shouldValidate: true }
                               );
                             } else {
-                              field.onChange([
-                                ...field?.value,
-                                { id: branch.value },
-                              ]);
+                              field.onChange(
+                                [...field?.value, { id: branch.value }],
+                                { shouldValidate: true }
+                              );
                             }
                           } else {
                             field.onChange(
                               field.value?.filter(
                                 (value: any) => value.id !== branch.value
-                              )
+                              ),
+                              { shouldValidate: true }
                             );
                           }
                         }}

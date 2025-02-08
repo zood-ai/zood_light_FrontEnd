@@ -16,6 +16,7 @@ import { formCPUschema } from "./Schema/Schema";
 import useCPUHttp from "./hooks/useCPUHttp";
 import Avatar from "@/components/ui/avatar";
 import CPUDetails from "./Components/CPUDetails";
+import { PERMISSIONS } from "@/constants/constants";
 
 const CPU = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -119,6 +120,8 @@ const CPU = () => {
           setIsOpen(true);
         }}
         modalName={"CPU"}
+                permission={[PERMISSIONS.can_add_and_edit_inventory_items_recipes_and_suppliers]}
+        
       />
       <HeaderTable />
       <CustomTable

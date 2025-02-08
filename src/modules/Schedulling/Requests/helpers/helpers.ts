@@ -1,4 +1,4 @@
-export const getBadgeColor = (status: number) => {
+export const getBadgeColor = (status: number | string) => {
   switch (status) {
     case 1:
       return "info";

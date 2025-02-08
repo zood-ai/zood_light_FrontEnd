@@ -29,6 +29,8 @@ import Summary from "./components/Summary";
 import CustomModal from "@/components/ui/custom/CustomModal";
 import moment from "moment";
 import { watch } from "fs";
+import { PERMISSIONS } from "@/constants/constants";
+import AuthPermission from "@/guards/AuthPermission";
 const Waste = () => {
   const [openRowIndex, setOpenRowIndex] = useState<number | null>(null);
   const [steps, setSteps]: [number, Dispatch<SetStateAction<number>>] =
@@ -536,9 +538,12 @@ const Waste = () => {
             receiveOrder={
               <>
                 <div className="flex items-center gap-2">
+                  <AuthPermission permissionRequired={[PERMISSIONS.can_edit_waste]}>
+
                   <Button loading={isPendingDelete || isPendingUpdate}>
                     Save
                   </Button>
+                  </AuthPermission>
                   {/* <Button
                     type="button"
                     loading={isPendingDelete}
@@ -560,6 +565,8 @@ const Waste = () => {
             }
             onSubmit={onSubmit}
             contentStyle="px-0"
+            permission={[PERMISSIONS.can_edit_waste]}
+
           />
           {/* new */}
           <CustomSheet

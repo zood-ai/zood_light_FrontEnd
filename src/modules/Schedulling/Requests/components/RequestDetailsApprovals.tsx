@@ -4,20 +4,32 @@ import { Textarea } from "@/components/ui/textarea";
 import React from "react";
 import { IRequestsList } from "../types/types";
 import { useNavigate } from "react-router-dom";
+import { useFormContext } from "react-hook-form";
 
-const RequestDetails = ({
+const RequestDetailsApprovals = ({
   rowData,
 }: {
   rowData: IRequestsList | undefined;
 }) => {
   const name = rowData?.employee.first_name + " " + rowData?.employee.last_name;
   const navigate = useNavigate();
+  const { setValue } = useFormContext();
+
   return (
     <div className="-mt-2">
       <h3 className="font-semibold">Request made by {name}</h3>
       <div className="my-3">
         <Label>Notes</Label>
-        <Textarea rows={6} placeholder="Add note" />
+        <Textarea
+          rows={6}
+          placeholder="Add note"
+          onChange={(e) =>
+            setValue("notes", e.target.value, {
+              shouldValidate: true,
+              shouldDirty: true,
+            })
+          }
+        />
       </div>
 
       <Button
@@ -35,4 +47,4 @@ const RequestDetails = ({
   );
 };
 
-export default RequestDetails;
+export default RequestDetailsApprovals;

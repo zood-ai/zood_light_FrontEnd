@@ -26,6 +26,7 @@ const InvoiceForm = ({
     invoiceId: rowData,
     handleCloseSheet: () => {},
   });
+console.log(invoiceOne,rowData,"invoiceOne");
 
   return (
     <div className="pb-20">

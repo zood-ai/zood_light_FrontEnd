@@ -8,15 +8,24 @@ import { useFormContext } from "react-hook-form";
 import { resaonsDelete } from "@/constants/dropdownconstants";
 import CustomModal from "@/components/ui/custom/CustomModal";
 import { useState } from "react";
-const Remove = ({handleCloseSheet}: any) => {
+const Remove = ({handleCloseSheet}:any) => {
   const [modalName, setModalName] = useState("");
+  const handleClose=()=>
+  {
+    setModalName("")
+    handleCloseSheet()
+  }
 
-  const { deleteEmployee } = usePeopleHttp({handleCloseSheet: handleCloseSheet})
+  const { deleteEmployee,isLoadingDeleteEmployee } = usePeopleHttp({handleCloseSheet: handleClose,setModalName:setModalName})
   const { filterObj } = useFilterQuery()
   const { watch,setValue } = useFormContext()
   const handleConfirm = () => {
-    deleteEmployee({ id: filterObj?.id||'',reason_removed:watch('reason_removed')})
-    setModalName("")
+    deleteEmployee({ id: filterObj?.id||'',
+      reason_removed:watch('reason_removed')
+     
+
+    })
+   
   }
   return (
     <div className="border border-warn rounded-[4px] mt-[40px] p-[16px]">
@@ -39,7 +48,7 @@ const Remove = ({handleCloseSheet}: any) => {
       <CustomSelect options={resaonsDelete} 
       label="Reason of removal"
        className="pb-8" 
-       
+       width="w-200px"
        value={watch('reason_removed')}
         onValueChange={(e) => {
         setValue('reason_removed', e)
@@ -84,6 +93,7 @@ const Remove = ({handleCloseSheet}: any) => {
         modalName={modalName}
         setModalName={setModalName}
         handleConfirm={handleConfirm}
+        isPending={isLoadingDeleteEmployee}
         deletedItemName={ ""}
       />
     </div>

@@ -16,6 +16,8 @@ import CustomModal from "@/components/ui/custom/CustomModal";
 import { formSupplierSchema } from "./Schema/Schema";
 import useSupplierHttp from "./hooks/useSupplierHttp";
 import Avatar from "@/components/ui/avatar";
+import AuthPermission from "@/guards/AuthPermission";
+import { PERMISSIONS } from "@/constants/constants";
 
 const Suppliers = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -123,6 +125,8 @@ const Suppliers = () => {
           setIsOpen(true);
         }}
         modalName={"suppliers"}
+        permission={[PERMISSIONS.can_add_and_edit_inventory_items_recipes_and_suppliers]}
+
       />
       <HeaderTable />
       <CustomTable
@@ -136,7 +140,9 @@ const Suppliers = () => {
         loading={isLoading}
         // name={matchingIndexes}
         paginationData={SupplierData?.meta}
+
       />
+      <AuthPermission permissionRequired={[PERMISSIONS.can_add_and_edit_inventory_items_recipes_and_suppliers]}>
 
       <CustomSheet
         isOpen={isOpen}
@@ -154,7 +160,10 @@ const Suppliers = () => {
           { name: "Branches", content: <Branches /> },
           { name: "Order rules", content: <OrderRules /> },
         ]}
+        permission={[PERMISSIONS.can_add_and_edit_inventory_items_recipes_and_suppliers]}
+
       />
+      </AuthPermission>
       <CustomModal
         modalName={modalName}
         setModalName={setModalName}

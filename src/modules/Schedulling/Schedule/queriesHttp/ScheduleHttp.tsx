@@ -28,6 +28,7 @@ const useScheduletHttp = ({
     branch_id: filterObj["filter[branch]"],
     date_from: filterObj.from,
     date_to: filterObj.to,
+    homeOnly: filterObj.homeOnly,
   };
 
   // get all the data
@@ -41,6 +42,7 @@ const useScheduletHttp = ({
       branch_id: filterObj["filter[branch]"],
       date_from: filterObj.from,
       date_to: filterObj.to,
+      homeOnly: filterObj.homeOnly,
     }
   );
 
@@ -148,7 +150,6 @@ const useScheduletHttp = ({
           ["forecast-console/popular-shift", filters],
           (oldData: any) => {
             if (!oldData) return;
-            console.log({ data });
 
             return [...oldData, data];
           }
@@ -211,18 +212,9 @@ const useScheduletHttp = ({
           description: "Shift updated Successfully",
         });
 
-        queryClient.setQueryData(
-          ["forecast-console/popular-shift", filters],
-          (oldData: any) => {
-            if (!oldData) return;
-            return oldData.map((shift) => {
-              if (shift.id === data.id) {
-                return data;
-              }
-              return shift;
-            });
-          }
-        );
+        queryClient.invalidateQueries({
+          queryKey: ["forecast-console/popular-shift", filters],
+        });
 
         handleCloseSheet?.();
       },
@@ -297,6 +289,85 @@ const useScheduletHttp = ({
       },
     });
 
+  // clear schedule
+  const { mutate: clearSchedule, isPending: isClearSchedule } = useMutation({
+    mutationKey: ["forecast-console/schedule/clear"],
+    mutationFn: async (data: {
+      branch_id: string;
+      from: string;
+      to: string;
+    }) => {
+      const response = await axiosInstance.post(
+        `/forecast-console/schedule/clear`,
+        data
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["forecast-console/schedule", filters],
+      });
+      handleCloseSheet?.();
+    },
+  });
+
+  // copy schedule to next week
+  const { mutate: copySchedule, isPending: isCopySchedule } = useMutation({
+    mutationKey: ["forecast-console/schedule/replicate-next"],
+    mutationFn: async (data: {
+      branch_id: string;
+      from: string;
+      to: string;
+    }) => {
+      const response = await axiosInstance.post(
+        `/forecast-console/schedule/replicate-next`,
+        data
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["forecast-console/schedule", filters],
+      });
+      handleCloseSheet?.();
+    },
+    onError: ({ data }: { data: { message: string } }) => {
+      toast({
+        description: data?.message || "Something went wrong",
+        variant: "error",
+      });
+    },
+  });
+
+  // show all employees
+  const { mutate: showHideEmployees, isPending: isShowHideEmployees } =
+    useMutation({
+      mutationKey: ["forecast-console/schedule/show-hided "],
+      mutationFn: async (data: {
+        branch_id: string;
+        from: string;
+        to: string;
+      }) => {
+        const response = await axiosInstance.post(
+          `/forecast-console/schedule/show-hided `,
+          data
+        );
+        return response.data;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["forecast-console/schedule", filters],
+        });
+        handleCloseSheet?.();
+      },
+      onError: ({ data }: { data: { message: string } }) => {
+        toast({
+          description: data?.message || "Something went wrong",
+          variant: "error",
+        });
+      },
+    });
+
   return {
     ScheduleData,
     isFetchingSchedule,
@@ -330,6 +401,15 @@ const useScheduletHttp = ({
 
     updateScheduleStatus,
     isUpdateScheduleStatus,
+
+    clearSchedule,
+    isClearSchedule,
+
+    copySchedule,
+    isCopySchedule,
+
+    showHideEmployees,
+    isShowHideEmployees,
   };
 };
 

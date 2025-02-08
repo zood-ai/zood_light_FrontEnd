@@ -23,7 +23,7 @@ const ShiftTypeSection = () => {
         is_paid: false,
         include_employee_working_hours: false,
         employee_need_to_punch: false,
-        deleted_when_schedule_cleared: false
+        deleted_when_schedule_cleared: true
     };
     const form = useForm<z.infer<typeof formShiftTypeSchema>>({
         resolver: zodResolver(formShiftTypeSchema),
@@ -37,7 +37,7 @@ const ShiftTypeSection = () => {
         setModalName('')
         setRowData(undefined)
     };
-    const { ShiftTypesData, isLoadingShiftTypes, shiftTypeAdd, isLoadingAdd, shiftTypeDelete, shiftTypeEdit, isLoadingEdit, isLoadingShiftTypeOne } =
+    const { ShiftTypesData, isLoadingShiftTypes, shiftTypeAdd, isLoadingAdd, shiftTypeDelete, shiftTypeEdit, isLoadingEdit, isLoadingShiftTypeOne,isLoadingDelete } =
         useShiftTypesHttps({
             handleCloseSheet: handleCloseSheet, shiftId: rowData,
             setShiftTypeOne: (data: any) => {
@@ -70,7 +70,12 @@ const ShiftTypeSection = () => {
                 title="Shift types"
                 description="Add new shift type"
                 setIsOpen={setIsOpenShift}
-                Data={ShiftTypesData?.data}
+                Data={ShiftTypesData?.data?.filter((item: any) => item.type =="custom")?.map((item: any) => ({
+                    name: item.name,
+                    type: item.is_paid ? "Paid" : "Unpaid",
+                    id: item.id,
+                    icon: item.icon
+                }))}
                 isLoading={isLoadingShiftTypes}
                 onClick={() => {
                     setIsOpenShift(true);
@@ -102,6 +107,7 @@ const ShiftTypeSection = () => {
                 modalName={modalName}
                 setModalName={setModalName}
                 handleConfirm={handleConfirm}
+                isPending={isLoadingDelete}
                 deletedItemName={rowData?.name || ""}
             />
         </div>

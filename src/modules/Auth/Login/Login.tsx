@@ -6,6 +6,7 @@ import { z } from "zod";
 import { formLoginSchema } from "./schema/Schema";
 import useLoginHttp from "./queriesHttp/useLoginHttp";
 import AuthComp from "@/components/ui/custom/Auth";
+import { PasswordInput } from "@/components/ui/custom/CustomInputPassword";
 
 const Login = () => {
   const form = useForm<z.infer<typeof formLoginSchema>>({
@@ -43,10 +44,9 @@ const Login = () => {
             className="w-[348px]"
             {...form.register("email")}
           />
-          <Input
+          <PasswordInput
             label="Password"
             placeholder="Password"
-            type="password"
             className="w-[348px]"
             {...form.register("password")}
           />

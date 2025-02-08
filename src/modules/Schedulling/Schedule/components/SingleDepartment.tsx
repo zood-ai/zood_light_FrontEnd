@@ -14,6 +14,8 @@ type TSingleDepartment = {
   days: TScheduledDay[];
   isFetchingSchedule: boolean;
   setIsEdit: React.Dispatch<React.SetStateAction<boolean>>;
+  sortBy: string;
+  showAvaliability: boolean;
 };
 const SingleDepartment = ({
   department,
@@ -21,11 +23,10 @@ const SingleDepartment = ({
   days,
   isFetchingSchedule,
   setIsEdit,
+  showAvaliability,
+  sortBy,
 }: TSingleDepartment) => {
   const [showDepartments, setShowDepartments] = useState(true);
-
-
-  
 
   return (
     <>
@@ -68,7 +69,12 @@ const SingleDepartment = ({
       </tr>
       {showDepartments && (
         <>
-          <OpenShiftRow days={days} departmentId={department.id}  />
+          <OpenShiftRow
+            days={days}
+            departmentId={department.id}
+            sortBy={sortBy}
+            fromOpenShift
+          />
           {employees
             .filter((employee) =>
               employee.departments?.find((dep) => dep.id === department.id)
@@ -80,14 +86,15 @@ const SingleDepartment = ({
                 (dep) => dep.id === department.id
               )?.pivot.forecast_position_id;
 
-              
               return (
                 <EmployeeRow
+                  showAvaliability={showAvaliability}
                   key={employee.first_name + employee.last_name}
                   employee={employee}
                   departmentId={department.id}
                   positionId={positionId as number}
                   days={days}
+                  sortBy={sortBy}
                   isFetchingSchedule={isFetchingSchedule}
                   setIsEdit={setIsEdit}
                 />

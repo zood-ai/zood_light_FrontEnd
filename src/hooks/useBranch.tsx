@@ -30,7 +30,7 @@ export const useDefaultBranch = () => {
   ) {
     result["filter[branch_id]"] = filterUrl;
   }
-  if (["items", "batches", "suppliers"].includes(path) && filterUrl) {
+  if (["items", "batches", "suppliers","people"].includes(path) && filterUrl) {
     result["filter[branches][0]"] = filterUrl;
   }
   if ((path == "purchases" || path == "sales-report") && filterUrl) {

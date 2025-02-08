@@ -5,7 +5,7 @@ const ArrowFill: React.FC<PropsIcon> = ({
   className,
 }) => {
   return (
-    <div className={`${className} -z-10`}>
+    <div className={`${className} `}>
       <svg
         width="8"
         height="5"

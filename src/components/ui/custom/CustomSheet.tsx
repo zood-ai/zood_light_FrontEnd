@@ -14,6 +14,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocation } from "react-router-dom";
 import { CustomSplit } from "@/utils";
+import AuthPermission from "@/guards/AuthPermission";
 
 interface CustomSheetProps<T extends FieldValues> {
   headerLeftText?: string | JSX.Element;
@@ -42,9 +43,13 @@ interface CustomSheetProps<T extends FieldValues> {
   isDirty?: boolean;
   isAddTextClick?: () => void;
   inviteComponet?: JSX.Element;
+  permission?: string[];
+  disableSheet?: boolean;
+  hideIcon?: boolean;
 }
 export function CustomSheet<T extends FieldValues>({
   headerLeftText,
+  hideIcon,
   btnText,
   tabs = [],
   children,
@@ -71,6 +76,8 @@ export function CustomSheet<T extends FieldValues>({
   isAddText,
   isAddTextClick,
   inviteComponet,
+  permission,
+  disableSheet,
 }: CustomSheetProps<T>) {
   const { pathname } = useLocation();
   const headerText = CustomSplit(pathname, 2, "/");
@@ -109,9 +116,12 @@ export function CustomSheet<T extends FieldValues>({
                   <div>{iconLeft}</div>
                 ) : (
                   <>
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-popover">
-                      <PenIcon />
-                    </div>
+                    {!hideIcon && (
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-popover">
+                        <PenIcon />
+                      </div>
+                    )}
+
                     <span>
                       {headerLeftText ||
                         `New ${
@@ -129,11 +139,11 @@ export function CustomSheet<T extends FieldValues>({
             <FormProvider {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="h-full space-y-8"
+                className="h-full space-y-8 "
               >
                 {tabs.length > 0 ? (
-                  <Tabs defaultValue={tabs[0].name}>
-                    <TabsList>
+                  <Tabs defaultValue={tabs[0].name} className="">
+                    <TabsList >
                       {tabs.map((tab) => (
                         <TabsTrigger
                           key={tab.name}
@@ -147,13 +157,18 @@ export function CustomSheet<T extends FieldValues>({
 
                     {tabs.map((tab) => (
                       <TabsContent
-                        key={tab.name}
                         value={tab.name}
-                        className="px-4 py-6 overflow-y-auto h-[100vh] pb-40"
+                        className="overflow-y-auto h-[100vh] px-4 py-6 pb-40 relative"
+                        key={tab.name}
                       >
                         {inviteComponet}
-
-                        {tab.content}
+                        {disableSheet ? (
+                          <div className="w-full opacity-50 pointer-events-none">
+                            {tab.content}
+                          </div>
+                        ) : (
+                          <> {tab.content}</>
+                        )}
                       </TabsContent>
                     ))}
                   </Tabs>
@@ -164,64 +179,67 @@ export function CustomSheet<T extends FieldValues>({
                     {children}
                   </div>
                 )}
-
-                {!purchaseHeader && (
-                  <div className="absolute flex gap-2 -top-2 right-4 ">
-                    {isEdit && (
-                      <>
-                        {isAddText && (
+                <AuthPermission permissionRequired={permission}>
+                  {!purchaseHeader && (
+                    <div className="absolute flex gap-2 -top-2 right-4 ">
+                      {isEdit && (
+                        <>
+                          {isAddText && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={isAddTextClick}
+                            >
+                              {isAddText}
+                            </Button>
+                          )}
                           <Button
                             type="button"
+                            disabled={isLoading}
                             variant="outline"
-                            onClick={isAddTextClick}
+                            onClick={() =>
+                              setModalName && setModalName("delete")
+                            }
+                            className="px-4 font-semibold w-fit text-warn border-warn "
                           >
-                            {isAddText}
+                            {DeleteText}
                           </Button>
-                        )}
-                        <Button
-                          type="button"
-                          disabled={isLoading}
-                          variant="outline"
-                          onClick={() => setModalName && setModalName("delete")}
-                          className="px-4 font-semibold w-fit text-warn border-warn "
-                        >
-                          {DeleteText}
-                        </Button>
-                      </>
-                    )}
-
-                    <Button
-                      disabled={
-                        isLoading ||
-                        !form.formState.isValid ||
-                        !form.formState.isDirty
-                      }
-                      type="submit"
-                      className="px-2 font-semibold min-w-20"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="animate-spin" />
-                      ) : isEdit ? (
-                        <>{textEditButton}</>
-                      ) : (
-                        btnText ||
-                        `Add ${
-                          headerText?.charAt(0)?.toUpperCase() +
-                          headerText
-                            ?.slice(1, headerText.length - 1)
-                            ?.split("-")
-                            ?.join(" ")
-                        }`
+                        </>
                       )}
-                    </Button>
-                  </div>
-                )}
 
-                {receiveOrder && (
-                  <div className="absolute flex gap-2 -top-2 right-4 ">
-                    {receiveOrder}
-                  </div>
-                )}
+                      <Button
+                        disabled={
+                          isLoading ||
+                          !form.formState.isValid ||
+                          !form.formState.isDirty
+                        }
+                        type="submit"
+                        className="px-2 font-semibold min-w-20"
+                      >
+                        {isLoading ? (
+                          <Loader2 className="animate-spin" />
+                        ) : isEdit ? (
+                          <>{textEditButton}</>
+                        ) : (
+                          btnText ||
+                          `Add ${
+                            headerText?.charAt(0)?.toUpperCase() +
+                            headerText
+                              ?.slice(1, headerText.length - 1)
+                              ?.split("-")
+                              ?.join(" ")
+                          }`
+                        )}
+                      </Button>
+                    </div>
+                  )}
+
+                  {receiveOrder && (
+                    <div className="absolute flex gap-2 -top-2 right-4 ">
+                      {receiveOrder}
+                    </div>
+                  )}
+                </AuthPermission>
               </form>
             </FormProvider>
           </>
