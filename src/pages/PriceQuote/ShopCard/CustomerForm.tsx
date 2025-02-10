@@ -17,8 +17,8 @@ import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput'
 import { useTranslation } from 'react-i18next';
 
 const CustomerForm = () => {
-  const allService = createCrudService<any>('manage/customers');
-  const allServiceOrder = createCrudService<any>('orders');
+  const allService = createCrudService<any>('manage/customers?perPage=100000');
+  const allServiceOrder = createCrudService<any>('orders?per_page=100000');
   const { t } = useTranslation();
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();

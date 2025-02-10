@@ -17,19 +17,10 @@ import { useTranslation } from 'react-i18next';
 
 const CustomerForms = () => {
   const { t } = useTranslation();
-  const allService = createCrudService<any>('manage/customers');
-  const allServiceOrder = createCrudService<any>('orders');
-  const allServiceOrderPay =
-    createCrudService<any>('order-payments').useCreate();
   const orderSchema = useSelector((state: any) => state.orderSchema);
-  const navigate = useNavigate();
-
-  const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
-
-  const { useGetAll } = allService;
-  const [loading, setLoading] = useState(false);
-
-  const { data: allData, isLoading } = useGetAll();
+  const { data: allData, isLoading } = createCrudService<any>(
+    'manage/customers?perPage=100000'
+  ).useGetAll();
   const [lastCustomerName, setLastCustomerName] = useState(
     allData?.data[0]?.name
   );
