@@ -44,7 +44,7 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
 
   // Fetch services and mutations
   const crudService = createCrudService<any>(
-    'manage/customers?includes=address'
+    'manage/customers?perPage=100000&includes=address'
   );
   const { useGetById, useUpdate, useCreate } = crudService;
   const crudServiceAddress = createCrudService<any>(

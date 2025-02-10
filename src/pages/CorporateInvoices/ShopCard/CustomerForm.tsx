@@ -27,20 +27,22 @@ import { TbMenuDeep } from 'react-icons/tb';
 import { GrMenu } from 'react-icons/gr';
 
 const CustomerForm = () => {
-  const allService = createCrudService<any>('manage/customers');
-  const allServiceOrder = createCrudService<any>('orders');
+  const allService = createCrudService<any>('manage/customers?perPage=100000');
+  const allServiceOrder = createCrudService<any>('orders?per_page=100000');
   const { t } = useTranslation();
 
   const { mutate, isLoading: loadingOrder } = allServiceOrder.useCreate();
   const { useGetAll: fetchAllProducts } = createCrudService<any>(
-    'menu/products?not_default=1&per_page=1000&sort=-updated_at'
+    'menu/products?not_default=1&per_page=100000&sort=-updated_at'
   );
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
-  const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const { data: taxes } = createCrudService<any>(
+    'manage/taxes?per_page=100000'
+  ).useGetAll();
 
   const { data: defaultProduct } = createCrudService<any>(
-    'menu/products?filter[name]=sku-zood-20001'
+    'menu/products?per_page=100000&filter[name]=sku-zood-20001'
   ).useGetAll();
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
   const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';

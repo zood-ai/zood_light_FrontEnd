@@ -23,7 +23,7 @@ import { useDispatch } from 'react-redux';
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const crudService = createCrudService<any>('manage/customers');
+  const crudService = createCrudService<any>('manage/customers?perPage=100000');
   const { useRemove } = crudService;
   const { mutate: remove } = useRemove();
   const [loading, setLoading] = useState(false);
