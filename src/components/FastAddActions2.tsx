@@ -44,7 +44,7 @@ export default function FastAddActions2({ isOpen, onClose }) {
 
   // Fetch services and mutations
   const crudService = createCrudService<any>(
-    'manage/customers?includes=address'
+    'manage/customers?perPage=100000&includes=address'
   );
   const { useGetById, useUpdate, useCreate } = crudService;
   const crudServiceAddress = createCrudService<any>(

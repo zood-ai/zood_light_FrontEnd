@@ -31,7 +31,7 @@ export const ShopCardCo: React.FC<ShopCardProps> = () => {
 
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const orderSchema = useSelector((state: any) => state.orderSchema);
-  const allService = createCrudService<any>('manage/customers');
+  const allService = createCrudService<any>('manage/customers?perPage=100000');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();

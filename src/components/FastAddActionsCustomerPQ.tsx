@@ -53,7 +53,7 @@ export default function FastAddActionsCustomerPQ({
   const isEditMode = modalType !== 'add';
   const navigate = useNavigate();
   const crudService1 = createCrudService<any>(
-    'manage/customers?includes=address'
+    'manage/customers?perPage=100000&includes=address'
   );
   const {
     useGetById: useGetById1,

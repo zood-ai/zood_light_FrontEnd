@@ -14,8 +14,8 @@ import FastAddActionsCustomerPQ from '@/components/FastAddActionsCustomerPQ';
 import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
 import { useTranslation } from 'react-i18next';
 const CustomerForms = () => {
-  const allService = createCrudService<any>('manage/customers');
-  const allServiceOrder = createCrudService<any>('orders');
+  const allService = createCrudService<any>('manage/customers?perPage=100000');
+  const allServiceOrder = createCrudService<any>('orders?per_page=100000');
   const { t } = useTranslation();
   const allServiceOrderPay =
     createCrudService<any>('order-payments').useCreate();

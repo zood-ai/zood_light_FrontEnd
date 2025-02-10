@@ -76,8 +76,10 @@ function Prompt({ when, message, ...props }) {
 
 const CustomerForm = forwardRef(
   ({ newCustomer, setNewCustomer, setLoading, loading }: any, ref) => {
-    const allService = createCrudService<any>('manage/customers');
-    const allServiceOrder = createCrudService<any>('orders');
+    const allService = createCrudService<any>(
+      'manage/customers?perPage=100000'
+    );
+    const allServiceOrder = createCrudService<any>('orders?per_page=100000');
     const params = useParams();
     const { t } = useTranslation();
     const allServiceOrderPay =
@@ -237,7 +239,7 @@ const CustomerForm = forwardRef(
           }
           setTimeout(async () => {
             console.log(customer?.data?.data?.id);
-            
+
             const res = await mutate(
               {
                 ...orderSchema,

@@ -58,8 +58,8 @@ export const Customers: React.FC<CustomersProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allService = createCrudService<any>('manage/customers');
-  const [allUrl, setAllUrl] = useState('manage/customers');
+  const allService = createCrudService<any>('manage/customers?perPage=100000');
+  const [allUrl, setAllUrl] = useState('manage/customers?perPage=100000');
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
@@ -82,12 +82,8 @@ export const Customers: React.FC<CustomersProps> = () => {
           setSearchedData(allData); // Reset if search is cleared
           return;
         }
-        setAllUrl(
-          `manage/customers${date}`
-        );
-        const res = await axiosInstance.get(
-          `manage/customers${date}`
-        );
+        setAllUrl(`manage/customers${date}`);
+        const res = await axiosInstance.get(`manage/customers${date}`);
 
         setSearchedData(res.data);
         return;

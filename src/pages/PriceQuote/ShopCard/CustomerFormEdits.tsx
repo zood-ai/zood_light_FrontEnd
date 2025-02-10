@@ -12,8 +12,8 @@ import { useTranslation } from 'react-i18next';
 
 const CustomerFormEdits = () => {
   const { t } = useTranslation();
-  const allService = createCrudService<any>('manage/customers');
-  const allServiceOrder = createCrudService<any>('orders');
+  const allService = createCrudService<any>('manage/customers?perPage=100000');
+  const allServiceOrder = createCrudService<any>('orders?per_page=100000');
   const allServiceOrderPay =
     createCrudService<any>('order-payments').useCreate();
   const orderSchema = useSelector((state: any) => state.orderSchema);

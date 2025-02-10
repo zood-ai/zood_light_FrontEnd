@@ -18,8 +18,8 @@ import { useTranslation } from 'react-i18next';
 
 const CustomerFormEdit = () => {
   const { t } = useTranslation();
-  const allService = createCrudService<any>('manage/customers');
-  const allServiceOrder = createCrudService<any>('orders');
+  const allService = createCrudService<any>('manage/customers?perPage=100000');
+  const allServiceOrder = createCrudService<any>('orders?per_page=100000');
   const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
   const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
   // const ShowCar = true;
