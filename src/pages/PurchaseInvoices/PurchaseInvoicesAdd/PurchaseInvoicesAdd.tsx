@@ -188,6 +188,8 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           items: items.map((item) => ({
             id: item.item || defaultProduct?.data?.[0]?.id || '',
             kitchen_notes: item.kitchen_notes,
+            total_cost: item.total,
+            quantity: item.qty
           })),
           invoice_number:
             Number(invoice.invoice_number) ||
