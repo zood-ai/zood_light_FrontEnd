@@ -100,6 +100,7 @@
   "PURCHASE_INVOICES": "فواتير الشراء",
   "CHOOSE_A_CHOOSE": "اختر خيار.....",
   "CANCEL": "الغاء",
+  "accountRemovalDismissed": "سيتم حذف حسابك في يوم",
   "OK": "حسنا!",
   "ARE_YOU_SURE_YOU_WANT_TO_STOP_EDITING": "هل أنت متأكد أنك تريد التوقف عن التعديل؟",
   "UNCHANGE_MESSAGE": "لديك تغييرات غير محفوظة. إذا خرجت الآن، فسوف تفقد تغييراتك",
