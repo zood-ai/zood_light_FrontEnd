@@ -40,7 +40,6 @@ const ProtectedRoute = ({
   }, []);
 
   const handleOk = () => {
-    localStorage.setItem('accountRemovalDismissed', 'true');
     setOpen(false);
   };
 
@@ -67,7 +66,7 @@ const ProtectedRoute = ({
                 </DialogTitle>
               </DialogHeader>
               <p className="flex gap-2">
-                {t('accountRemovalDismissed')} <strong>28/2/2025</strong>.
+                {t('accountRemovalDismissed')} <strong>10/3/2025</strong>.
               </p>
               <DialogFooter className="justify-center mt-4 gap-4">
                 <Button
