@@ -74,7 +74,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                   margin: 'auto',
                   padding: '20px',
                 }}
-                className={`${"size === 'A4' ? 'a4-size' : 'small-receipt'"} flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
+                className={`${size === 'A4' ? 'a4-size' : 'small-receipt'} flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
               >
                 {size === 'A4' ? (
                   <div className="flex print-content flex-col px-3 pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg-lg  text-zinc-800 max-md:mt-10 max-md:max-w-full">
@@ -486,7 +486,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                     </p>
                   </div>
                 ) : (
-                  <div className="flex print-content2 flex-col w-[500px]  mx-auto text-righ text-sm p-1 px-10">
+                  <div className="flex print-content2 flex-col w-[80mm]  mx-auto text-righ text-sm p-1 px-10">
                     <p className="text-center mb-2">
                       {allSettings.settings?.data?.receipt_header}
                     </p>
