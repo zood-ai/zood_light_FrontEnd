@@ -224,7 +224,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label={t('TAX_REGISTRATION_NUMBER')}
+                          label={t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
                           inputClassName="w-[278px]"
                         />
                       </FormControl>
@@ -240,7 +240,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label={t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
+                          label={t('TAX_REGISTRATION_NUMBER')}
                           inputClassName="w-[278px]"
                         />
                       </FormControl>

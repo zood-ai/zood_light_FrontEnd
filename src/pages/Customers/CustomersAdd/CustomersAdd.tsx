@@ -84,8 +84,8 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
           if (customerData) {
             form.setValue('name', customerData.name || '');
             form.setValue('phone', customerData.phone || '');
-            form.setValue('taxNum', customerData.vat_registration_number || '');
-            form.setValue('coTax', customerData.tax_registration_number || '');
+            form.setValue('taxNum', customerData.tax_registration_number || '');
+            form.setValue('coTax', customerData.vat_registration_number || '');
             form.setValue('email', customerData.email || '');
             // Check if the addresses array exists and has at least one entry
             const address = customerData.addresses?.[0]?.name || '';
@@ -271,13 +271,13 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="taxNum"
+                  name="coTax"
                   render={({ field }) => (
                     <FormItem className="md:col-span-1 mt-md">
                       <FormControl>
                         <IconInput
                           {...field}
-                          label={t('TAX_REGISTRATION_NUMBER')}
+                          label={t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
                           inputClassName="w-[278px]"
                         />
                       </FormControl>
@@ -287,13 +287,13 @@ export const CustomersAdd: React.FC<CustomersAddProps> = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="coTax"
+                  name="taxNum"
                   render={({ field }) => (
                     <FormItem className="md:col-span-1 mt-md">
                       <FormControl>
                         <IconInput
                           {...field}
-                          label={t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
+                          label={t('TAX_REGISTRATION_NUMBER')}
                           inputClassName="w-[278px]"
                         />
                       </FormControl>

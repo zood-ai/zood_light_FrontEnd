@@ -257,7 +257,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                                 parseFloat(e?.pivot?.quantity)
                             )}
                           </div>
-
+ 
                           {!Corporate && (
                             <div className="w-[120px] flex justify-center items-center">
                               {currencyFormated(
