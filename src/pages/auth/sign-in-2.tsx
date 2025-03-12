@@ -48,10 +48,10 @@ export default function SignIn2() {
     },
   });
 
-  useEffect(() => {
-    const token = getToken();
-    if (token) navigate('/zood-dashboard');
-  }, []);
+  // useEffect(() => {
+  //   const token = getToken();
+  //   if (token) navigate('/zood-dashboard');
+  // }, []);
 
   // Handle SignUp
   const handleSignUp = () => {

@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import useDirection from '@/hooks/useDirection';
 import Logo from '@/assets/SH_LOGO.svg';
+import axiosInstance from '@/api/interceptors';
+import Loader from '@/components/loader';
 
 const Alert = () => {
   return (
@@ -37,7 +39,6 @@ const Alert = () => {
   );
 };
 
-let counter = 0;
 const ProtectedRoute = ({
   children,
   requiredRole,
@@ -46,25 +47,44 @@ const ProtectedRoute = ({
   requiredRole: Roles;
 }) => {
   const [open, setOpen] = useState(false);
+  const [counter, setCounter] = useState(0);
+  const [whoAmI, setWhoAmI] = useState();
   const initialized = useRef(false); // Prevent multiple useEffect runs
 
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
 
+    const fun = async () => {
+      const { data: whoAmI } = await axiosInstance.get('auth/whoami');
+      setWhoAmI(whoAmI.business.reference);
+    };
+
+    fun();
     setOpen(true);
-    counter++;
+    setCounter((prev) => prev + 1);
   }, []);
 
   const { user } = useAuth();
+
   if (!user) {
     return <Navigate to="/" />;
   }
+  if (!whoAmI)
+    return (
+      <div className="bg-white z-[10000000] w-screen h-screen absolute top-0 left-0 flex items-center justify-center text-2xl">
+        <div className="flex gap-10">
+          <p className="text-nowrap">الرجاء الانتظار</p>
+          <Loader />
+        </div>
+      </div>
+    );
+  const validReferences = [239989];
 
   return (
     <>
       {/* remove this after 28/2 */}
-      {counter === 1 && (
+      {whoAmI && !validReferences.includes(whoAmI) && counter === 1 && (
         <div>
           <Dialog open={open} onOpenChange={() => {}}>
             <DialogContent
@@ -92,10 +112,7 @@ const ProtectedRoute = ({
         </div>
       )}
       {/* keep this after 28/2 */}
-      <div className="pointer-events-none relative">
-        <div className="absolute top-0 left-0 w-full h-full"></div>
-        {children}
-      </div>
+      {children}
     </>
   );
 };
