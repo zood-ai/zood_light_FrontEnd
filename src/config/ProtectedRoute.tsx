@@ -14,6 +14,29 @@ import { useTranslation } from 'react-i18next';
 import useDirection from '@/hooks/useDirection';
 import Logo from '@/assets/SH_LOGO.svg';
 
+const Alert = () => {
+  return (
+    <svg
+      width="80"
+      height="80"
+      viewBox="0 0 80 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M40 80C62.0914 80 80 62.0914 80 40C80 17.9086 62.0914 0 40 0C17.9086 0 0 17.9086 0 40C0 62.0914 17.9086 80 40 80Z"
+        fill="var(--white)"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M59.25 40.5C59.25 50.8553 50.8553 59.25 40.5 59.25C30.1447 59.25 21.75 50.8553 21.75 40.5C21.75 30.1447 30.1447 21.75 40.5 21.75C50.8553 21.75 59.25 30.1447 59.25 40.5ZM63 40.5C63 52.9265 52.9265 63 40.5 63C28.0736 63 18 52.9265 18 40.5C18 28.0736 28.0736 18 40.5 18C52.9265 18 63 28.0736 63 40.5ZM38.625 44.25V31.125H42.375V44.25H38.625ZM38.625 49.875V46.125H42.375V49.875H38.625Z"
+        fill="white"
+      />
+    </svg>
+  );
+};
+
 let counter = 0;
 const ProtectedRoute = ({
   children,
@@ -22,32 +45,17 @@ const ProtectedRoute = ({
   children: JSX.Element;
   requiredRole: Roles;
 }) => {
-  // remove this after 28/2
   const [open, setOpen] = useState(false);
   const initialized = useRef(false); // Prevent multiple useEffect runs
-  const { t } = useTranslation();
-  const isRtl = useDirection();
 
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
 
-    const dismissed = localStorage.getItem('accountRemovalDismissed');
-    if (!dismissed) {
-      setOpen(true);
-      counter++;
-    }
+    setOpen(true);
+    counter++;
   }, []);
 
-  const handleOk = () => {
-    setOpen(false);
-  };
-
-  const handleCancel = () => {
-    setOpen(false);
-  };
-
-  // keep this after 28/2
   const { user } = useAuth();
   if (!user) {
     return <Navigate to="/" />;
@@ -57,37 +65,37 @@ const ProtectedRoute = ({
     <>
       {/* remove this after 28/2 */}
       {counter === 1 && (
-        <div dir={isRtl ? 'rtl' : 'ltr'}>
+        <div>
           <Dialog open={open} onOpenChange={() => {}}>
-            <DialogContent className="text-center">
+            <DialogContent
+              showClose={false}
+              className="text-center bg-red-500 outline-none border-none"
+            >
               <DialogHeader>
                 <DialogTitle className="flex justify-center">
-                  <img src={Logo} alt="Logo" width={100} height={100} />
+                  <Alert />
                 </DialogTitle>
               </DialogHeader>
-              <p className="flex gap-2">
-                {t('accountRemovalDismissed')} <strong>10/3/2025</strong>.
+              <p className=" text-white px-4 font-extrabold text-xl">
+                برجاء سداد قيمه الاشتراك
+                <br />
+                <br />
+                في حال السداد ارسال صوره التحويل علي هذا الرقم
+                <br />
+                <p dir="ltr" className="flex justify-center gap-2 pt-2">
+                  <p className=" font-extrabold text-xl">من خلال الواتساب</p>
+                  <p className=" font-extrabold text-xl">+966 56 962 3465</p>
+                </p>
               </p>
-              <DialogFooter className="justify-center mt-4 gap-4">
-                <Button
-                  className="bg-white text-black hover:bg-white"
-                  onClick={handleCancel}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className="bg-main text-white hover:bg-main"
-                  onClick={handleOk}
-                >
-                  OK
-                </Button>
-              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
       )}
       {/* keep this after 28/2 */}
-      {children}
+      <div className="pointer-events-none relative">
+        <div className="absolute top-0 left-0 w-full h-full"></div>
+        {children}
+      </div>
     </>
   );
 };
