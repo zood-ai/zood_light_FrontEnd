@@ -564,10 +564,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           <p>{data?.kitchen_done_at || ''}</p>
                         </div>
                       )}
-                      <div className="flex justify-between">
-                        <p>رقم اللوحة</p>
-                        <p>{data?.kitchen_done_at || ''}</p>
-                      </div>
                     </div>
                     <div className=" py-5">
                       <div className="flex font-semibold justify-between text-black text-xs  mb-2">
