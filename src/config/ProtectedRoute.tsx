@@ -83,8 +83,7 @@ const ProtectedRoute = ({
 
   return (
     <>
-      {/* remove this after 28/2 */}
-      {whoAmI && !validReferences.includes(whoAmI) && counter === 1 && (
+      {/* {whoAmI && !validReferences.includes(whoAmI) && counter === 1 && (
         <div>
           <Dialog open={open} onOpenChange={() => {}}>
             <DialogContent
@@ -110,8 +109,7 @@ const ProtectedRoute = ({
             </DialogContent>
           </Dialog>
         </div>
-      )}
-      {/* keep this after 28/2 */}
+      )} */}
       {children}
     </>
   );
