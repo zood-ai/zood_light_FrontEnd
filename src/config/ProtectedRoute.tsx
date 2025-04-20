@@ -50,22 +50,20 @@ const ProtectedRoute = ({
   requiredRole: Roles;
 }) => {
   const [open, setOpen] = useState(false);
-  // const [counter, setCounter] = useState(0);
-  const [whoAmI, setWhoAmI] = useState();
+  // const [whoAmI, setWhoAmI] = useState();
   const initialized = useRef(false); // Prevent multiple useEffect runs
 
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
 
-    const fun = async () => {
-      const { data: whoAmI } = await axiosInstance.get('auth/whoami');
-      setWhoAmI(whoAmI.business.reference);
-    };
+    // const fun = async () => {
+    //   const { data: whoAmI } = await axiosInstance.get('auth/whoami');
+    //   setWhoAmI(whoAmI.business.reference);
+    // };
 
-    fun();
+    // fun();
     setOpen(true);
-    // setCounter((prev) => prev + 1);
     counter = counter + 1;
   }, []);
 
@@ -74,20 +72,20 @@ const ProtectedRoute = ({
   if (!user) {
     return <Navigate to="/" />;
   }
-  if (!whoAmI)
-    return (
-      <div className="bg-white z-[10000000] w-screen h-screen absolute top-0 left-0 flex items-center justify-center text-2xl">
-        <div className="flex gap-10">
-          <p className="text-nowrap">الرجاء الانتظار</p>
-          <Loader />
-        </div>
-      </div>
-    );
-  const validReferences = [602562, 891535, 932651, 526777];
+  // if (!whoAmI)
+  //   return (
+  //     <div className="bg-white z-[10000000] w-screen h-screen absolute top-0 left-0 flex items-center justify-center text-2xl">
+  //       <div className="flex gap-10">
+  //         <p className="text-nowrap">الرجاء الانتظار</p>
+  //         <Loader />
+  //       </div>
+  //     </div>
+  //   );
+  // const validReferences = [602562, 891535, 932651, 526777];
 
   return (
     <>
-      {whoAmI && !validReferences.includes(whoAmI) && counter === 1 && (
+      {/* {whoAmI && !validReferences.includes(whoAmI) && counter === 1 && (
         <div>
           <Dialog open={open} onOpenChange={() => {}}>
             <DialogContent
@@ -113,7 +111,7 @@ const ProtectedRoute = ({
             </DialogContent>
           </Dialog>
         </div>
-      )}
+      )} */}
       {children}
     </>
   );
