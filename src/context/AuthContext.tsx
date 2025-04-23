@@ -34,7 +34,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const login = async (data: LoginData): Promise<'success' | 'error'> => {
-    const apiUrl = `${baseURL}auth/Login`;
+    const newBaseUrl = localStorage.getItem('d14758f1afd44c09b7992073ccf00b43d');
+    const apiUrl = `${newBaseUrl ? newBaseUrl : baseURL}auth/Login`;
 
     try {
       const { data: responseData } = await axios.post(apiUrl, data, {

@@ -7,10 +7,11 @@ import { toast } from '@/components/ui/use-toast';
 import { setGlobalLoading } from '@/context/LoadingContext';
 import { getToken, removeToken } from '@/utils/auth';
 
+const newBaseUrl = localStorage.getItem('d14758f1afd44c09b7992073ccf00b43d');
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const axiosInstance = axios.create({
-  baseURL: baseURL,
+  baseURL: newBaseUrl ? newBaseUrl : baseURL,
 });
 
 // Helper function to display toast
@@ -56,7 +57,7 @@ axiosInstance.interceptors.response.use(
 
     if (error.response?.status === 401) {
       showToast('Error', 'Unauthorized access - token expired.');
-      removeToken()
+      removeToken();
       window.location.href = '/';
     } else {
       // remove all 404 errors like (customer not found - rout not found - etc)
