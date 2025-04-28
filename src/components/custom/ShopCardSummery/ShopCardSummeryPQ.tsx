@@ -17,9 +17,25 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
   const { data: getTaxes } = createCrudService<any>('manage/taxes').useGetAll();
-  const mainTax = getTaxes?.data[0];
-  const dispatch = useDispatch();
+  const [totalTax, setTotalTax] = useState(0);
+  const [fetchedData, setFetchedData] = useState();
+  const Data = useSelector((state: any) => state.toggleAction.data);
   const { id: orderId } = useParams();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const mainTax = orderId
+    ? {
+        rate: +(
+          ((totalTax * 100) / (Data?.subtotal_price - Data?.discount_amount)) %
+            1 !==
+          0
+            ? (totalTax * 100) /
+                (Data?.subtotal_price - Data?.discount_amount) -
+              1
+            : (totalTax * 100) / (Data?.subtotal_price - Data?.discount_amount)
+        ).toFixed(0),
+      }
+    : getTaxes?.data[0];
+  const dispatch = useDispatch();
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [subTotal, setSubTotal] = useState(0);
@@ -80,6 +96,8 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
     if (orderId) {
       axiosInstance.get(`orders/${orderId}`).then((res) => {
         setDiscountAmount(res?.data?.data?.discount_amount || 0);
+        setTotalTax(res?.data?.data?.total_taxes || 0);
+        setFetchedData(res?.data?.data);
       });
     }
   }, [orderId]);
@@ -151,7 +169,10 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                   <div className="flex flex-col w-full text-sm font-medium text-right whitespace-nowrap max-md:mt-10">
                     <div className="flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {(Math.floor(subTotal * 100) / 100 || 0).toFixed(2)}
+                        {(
+                          fetchedData?.subtotal_price ??
+                          (Math.floor(subTotal * 100) / 100 || 0)
+                        ).toFixed(2)}
                       </div>
                       <div className="self-start text-zinc-500">SR</div>
                     </div>
@@ -180,7 +201,10 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                     {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {(Math.floor(taxAmount * 100) / 100 || 0).toFixed(2)}
+                        {(
+                          fetchedData?.total_taxes ??
+                          (Math.floor(taxAmount * 100) / 100 || 0)
+                        ).toFixed(2)}
                       </div>
                       <div className="text-zinc-500">SR</div>
                     </div>
@@ -204,7 +228,8 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
               <div className="font-bold">
                 SR{' '}
                 {(
-                  Math.floor(totalAmountIncludeAndExclude * 100) / 100 || 0
+                  fetchedData?.total_price?.toFixed(2) ??
+                  (Math.floor(totalAmountIncludeAndExclude * 100) / 100 || 0)
                 ).toFixed(2)}
               </div>
             </div>
@@ -218,12 +243,16 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
               margin: '16px auto',
             }}
           />
-          <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            {t('REMAINING_AMOUNT')}
-          </div>
-          <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            SR {(totalAmountIncludeAndExclude || 0).toFixed(2)}
-          </div>
+          {!orderId ? (
+            <>
+              <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
+                {t('REMAINING_AMOUNT')}
+              </div>
+              <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
+                SR {(totalAmountIncludeAndExclude || 0).toFixed(2)}
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
     </>

@@ -53,9 +53,10 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     (acc, item) => acc + item.price * item.qty,
     0
   );
-  const Data = useSelector((state: any) => state.toggleAction.data);
   const { data: Taxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const Data = useSelector((state: any) => state.toggleAction.data);
   const [totalTax, setTotalTax] = useState(0);
+  const [fetchedData, setFetchedData] = useState();
   const mainTax = params.id
     ? {
         rate: +(
@@ -69,12 +70,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
         ).toFixed(0),
       }
     : Taxes?.data[0];
-  const isIn =
-    Math.abs(
-      Data?.total_price -
-        (Data?.subtotal_price - Data?.discount_amount) -
-        totalTax
-    ) < 0.01;
 
   const { data: settings } =
     createCrudService<any>('manage/settings').useGetAll();
@@ -146,7 +141,6 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
     );
   }, [paymentMethod, taxAmount, discountAmount, totalAmountIncludeAndExclude]);
   const [paymentMethodinit, setPaymentMethodinit] = useState([]);
-
   useEffect(() => {
     if (params.id) {
       setPaymentMethod(Data?.payments || []);
@@ -157,6 +151,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
         setPaymentMethodinit(res?.data?.data?.payments || []);
         setdiscountAmount(res?.data?.data?.discount_amount || 0);
         setTotalTax(res?.data?.data?.total_taxes || 0);
+        setFetchedData(res?.data?.data);
       });
       // setdiscountAmount(orderSchema?.discount_amount || 0);
     }
@@ -188,7 +183,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   const handleIncludeAndExclude = useCallback(() => {
     let finalDiscount = 0;
     let SubTotalAfterDiscount = 0;
-    if (isIn || settings?.data?.tax_inclusive_pricing === 1) {
+    if (settings?.data?.tax_inclusive_pricing === 1) {
       // const totalCostWithTax = totalCost - taxAmount;
       finalDiscount = discountAmount / (1 + mainTax?.rate / 100);
       SubTotalAfterDiscount = subTotal - finalDiscount;
@@ -202,7 +197,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
   }, [subTotal, cardItemValue, discountAmount, mainTax]);
 
   useEffect(() => {
-    if (isIn || settings?.data?.tax_inclusive_pricing === 1) {
+    if (settings?.data?.tax_inclusive_pricing === 1) {
       const holder = totalCost / (1 + mainTax?.rate / 100);
       setSubTotal(holder);
     } else {
@@ -232,7 +227,10 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                   <div className="flex flex-col w-full text-sm font-medium text-right whitespace-nowrap max-md:mt-10">
                     <div className="flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {(Math.floor(Number(subTotal) * 100) / 100)?.toFixed(2)}
+                        {(
+                          fetchedData?.subtotal_price ??
+                          Math.floor(Number(subTotal) * 100) / 100
+                        )?.toFixed(2)}
                       </div>
                       <div className="self-start text-zinc-500">SR</div>
                     </div>
@@ -266,7 +264,7 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
                     {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {taxAmount?.toFixed(2)}
+                        {fetchedData?.total_taxes ?? taxAmount?.toFixed(2)}
                       </div>
                       <div className="text-zinc-500">SR</div>
                     </div>
@@ -289,9 +287,10 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
               <div className="font-medium">{t('TOTAL_AMOUNT')}</div>
               <div className="font-bold">
                 SR{' '}
-                {(
-                  Math.floor(Number(totalAmountIncludeAndExclude) * 100) / 100
-                )?.toFixed(2)}
+                {fetchedData?.total_price?.toFixed(2) ??
+                  (
+                    Math.floor(Number(totalAmountIncludeAndExclude) * 100) / 100
+                  )?.toFixed(2)}
               </div>
             </div>
             <>
@@ -484,14 +483,21 @@ export const ShopCardSummery: React.FC<ShopCardSummeryProps> = () => {
               margin: '0 auto',
             }}
           />
-          <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            {t('REMAINING_AMOUNT')}
-          </div>
-          <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-            {(
-              Number(totalAmountIncludeAndExclude) - Number(totalAmount)
-            )?.toFixed(2)}
-          </div>
+          {!params.id ? (
+            <>
+              {' '}
+              <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
+                {t('REMAINING_AMOUNT')}
+              </div>
+              <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
+                {params.id
+                  ? null
+                  : (
+                      Number(totalAmountIncludeAndExclude) - Number(totalAmount)
+                    )?.toFixed(2)}
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
     </>
