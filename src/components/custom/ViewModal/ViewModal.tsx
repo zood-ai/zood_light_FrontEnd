@@ -74,7 +74,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                   margin: 'auto',
                   padding: '20px',
                 }}
-                className={`${size === 'A4' ? 'a4-size' : 'small-receipt'} flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
+                className={`${
+                  size === 'A4' ? 'a4-size' : 'small-receipt'
+                } flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
               >
                 {size === 'A4' ? (
                   <div className="flex print-content flex-col px-3 pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg-lg  text-zinc-800 max-md:mt-10 max-md:max-w-full">
@@ -257,7 +259,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                                 parseFloat(e?.pivot?.quantity)
                             )}
                           </div>
- 
+
                           {!Corporate && (
                             <div className="w-[120px] flex justify-center items-center">
                               {currencyFormated(
@@ -338,7 +340,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       ) : null}
                       {Data?.data?.tax_exclusive_discount_amount ? (
                         <div className="flex justify-between p-2 rounded-lg items-center">
-                          <div>مجموع ضريبة القيمة المضافة</div>
+                          <div>مجموع ضريبة القيمة المضافة 15%</div>
                           <div>
                             SR{' '}
                             {currencyFormated(
@@ -349,7 +351,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       ) : null}
                       {Corporate ? (
                         <div className="flex justify-between p-2 rounded-lg items-center">
-                          <div>مجموع ضريبة القيمة المضافة</div>
+                          <div>مجموع ضريبة القيمة المضافة 15%</div>
                           <div>
                             SR{' '}
                             {currencyFormated(
@@ -697,7 +699,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         ) : null}
                         {Data?.data?.tax_exclusive_discount_amount ? (
                           <div className="flex justify-between items-center">
-                            <p>مجموع ضريبة القيمة المضافة</p>
+                            <p>مجموع ضريبة القيمة المضافة 15%</p>
                             <p>
                               SR{' '}
                               {currencyFormated(
