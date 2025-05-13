@@ -240,52 +240,40 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded-lg border border-[#ECECEC] border-solid w-[802px] max-w-full max-md:mr-1 px-3 text-right">
-                      {Data?.data?.products?.map((e) => (
-                        <div className="flex font-semibold w-full">
-                          <div className="w-1/3 flex justify-center items-center">
-                            {e?.name === 'sku-zood-20001'
-                              ? e?.pivot?.kitchen_notes
-                              : e?.name}
-                          </div>
-                          <div className="w-[120px] flex justify-center items-center">
-                            {currencyFormated(e?.pivot?.quantity)}
-                          </div>
-                          <div className="w-[120px] flex justify-center items-center">
-                            {currencyFormated(e?.pivot?.unit_price)}
-                          </div>
-                          <div className="w-[230px] flex justify-center items-center">
-                            {currencyFormated(
-                              parseFloat(e?.pivot?.unit_price) *
-                                parseFloat(e?.pivot?.quantity)
-                            )}
-                          </div>
-
-                          {!Corporate && (
+                      {Data?.data?.order_product?.map((e) => {
+                        return (
+                          <div className="flex font-semibold w-full">
+                            <div className="w-1/3 flex justify-center items-center">
+                              {e?.kitchen_notes ? e?.kitchen_notes : e?.name}
+                            </div>
                             <div className="w-[120px] flex justify-center items-center">
+                              {currencyFormated(e?.quantity)}
+                            </div>
+                            <div className="w-[120px] flex justify-center items-center">
+                              {currencyFormated(e?.unit_price)}
+                            </div>
+                            <div className="w-[230px] flex justify-center items-center">
                               {currencyFormated(
-                                Data?.data?.order_product
-                                  ? Data?.data?.order_product.find(
-                                      (el) => el?.product_id === e?.id
-                                    )?.taxes?.[0]?.pivot?.amount || 0
-                                  : 0
+                                parseFloat(e?.unit_price) *
+                                  parseFloat(e?.quantity)
                               )}
                             </div>
-                          )}
-                          <div className="w-[140px] flex justify-center items-center">
-                            {currencyFormated(
-                              parseFloat(e?.pivot?.unit_price) *
-                                parseFloat(e?.pivot?.quantity) -
-                                (Data?.data?.order_product.find(
-                                  (el) => el?.product_id === e?.id
-                                )?.is_tax_included && Data?.data?.order_product
-                                  ? Data?.data?.order_product.find(
-                                      (el) => el?.product_id === e?.id
-                                    )?.taxes?.[0]?.pivot?.amount || 0
-                                  : 0)
+
+                            {!Corporate && (
+                              <div className="w-[120px] flex justify-center items-center">
+                                {currencyFormated(e?.taxes?.[0]?.pivot?.amount)}
+                              </div>
                             )}
+                            <div className="w-[140px] flex justify-center items-center">
+                              {currencyFormated(
+                                parseFloat(e?.unit_price) *
+                                  parseFloat(e?.quantity) -
+                                  e?.taxes?.[0]?.pivot?.amount
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       {Data?.data?.items?.map((e) => (
                         <div className="flex font-semibold w-full">
                           <div className="w-1/2 flex justify-center items-center">
@@ -584,54 +572,56 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           </div>
                         )}
                         <div className="!w-[70px] text-center">
-                          {/* المجموع (غير شامل الضريبة) */}
-                          المجموع (شامل الضريبة)
+                          المجموع (غير شامل الضريبة)
+                          {/* المجموع (شامل الضريبة) */}
                         </div>
                       </div>
                       <div className="flex border-t-2 border-b-black/20 flex-col bg-white rounded-lg py-2   text-sm">
-                        {Data?.data?.products?.map((product, index) => (
-                          <div
-                            key={index}
-                            className="flex justify-between border-b-2 border-b-black/20"
-                          >
-                            <div className="!w-[80px] flex-grow items-center text-[12px]">
-                              {product?.name === 'sku-zood-20001'
-                                ? product?.pivot?.kitchen_notes
-                                : product?.name}
-                            </div>
-                            <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
-                              <p>
-                                {currencyFormated(product?.pivot?.quantity)}
-                              </p>
-                            </div>
-                            <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
-                              <p>
-                                {currencyFormated(product?.pivot?.unit_price)}
-                              </p>
-                            </div>
-                            {!Corporate && (
-                              <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
-                                <p>
-                                  {currencyFormated(
-                                    Data?.data?.order_product
-                                      ? Data?.data?.order_product.find(
-                                          (el) => el?.product_id === product?.id
-                                        )?.taxes?.[0]?.pivot?.amount || 0
-                                      : 0
-                                  )}
-                                </p>
-                              </div>
-                            )}
-                            <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
-                              <p>
-                                {currencyFormated(
-                                  product?.pivot?.quantity *
-                                    product?.pivot?.unit_price
+                        {Data?.data?.order_product?.map(
+                          (orderProduct, index) => {
+                            return (
+                              <div
+                                key={index}
+                                className="flex justify-between border-b-2 border-b-black/20"
+                              >
+                                <div className="!w-[80px] flex-grow items-center text-[12px]">
+                                  {orderProduct?.kitchen_notes
+                                    ? orderProduct?.kitchen_notes
+                                    : orderProduct?.name}
+                                </div>
+                                <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
+                                  <p>
+                                    {currencyFormated(orderProduct?.quantity)}
+                                  </p>
+                                </div>
+                                <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
+                                  <p>
+                                    {currencyFormated(orderProduct?.unit_price)}
+                                  </p>
+                                </div>
+                                {!Corporate && (
+                                  <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
+                                    <p>
+                                      {currencyFormated(
+                                        orderProduct?.taxes?.[0]?.pivot
+                                          ?.amount || 0
+                                      )}
+                                    </p>
+                                  </div>
                                 )}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                                <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
+                                  <p>
+                                    {currencyFormated(
+                                      parseFloat(orderProduct?.unit_price) *
+                                        parseFloat(orderProduct?.quantity) -
+                                        orderProduct?.taxes?.[0]?.pivot?.amount
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          }
+                        )}
                         {Data?.data?.items?.map((product, index) => (
                           <div
                             key={index}
