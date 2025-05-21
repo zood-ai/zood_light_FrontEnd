@@ -241,6 +241,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                     </div>
                     <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded-lg border border-[#ECECEC] border-solid w-[802px] max-w-full max-md:mr-1 px-3 text-right">
                       {Data?.data?.order_product?.map((e) => {
+                        console.log(e);
                         return (
                           <div className="flex font-semibold w-full">
                             <div className="w-1/3 flex justify-center items-center">
@@ -267,8 +268,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                             <div className="w-[140px] flex justify-center items-center">
                               {currencyFormated(
                                 parseFloat(e?.unit_price) *
-                                  parseFloat(e?.quantity) -
-                                  e?.taxes?.[0]?.pivot?.amount
+                                  parseFloat(e?.quantity) +
+                                  e?.taxes?.[0]?.pivot?.amount *
+                                    (e?.is_tax_included ? -1 : 0)
                               )}
                             </div>
                           </div>
@@ -613,8 +615,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                                   <p>
                                     {currencyFormated(
                                       parseFloat(orderProduct?.unit_price) *
-                                        parseFloat(orderProduct?.quantity) -
-                                        orderProduct?.taxes?.[0]?.pivot?.amount
+                                        parseFloat(orderProduct?.quantity) +
+                                        orderProduct?.taxes?.[0]?.pivot
+                                          ?.amount *
+                                          (orderProduct?.is_tax_included
+                                            ? -1
+                                            : 0)
                                     )}
                                   </p>
                                 </div>
