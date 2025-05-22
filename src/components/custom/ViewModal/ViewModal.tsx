@@ -241,11 +241,14 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                     </div>
                     <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded-lg border border-[#ECECEC] border-solid w-[802px] max-w-full max-md:mr-1 px-3 text-right">
                       {Data?.data?.order_product?.map((e) => {
-                        console.log(e);
                         return (
                           <div className="flex font-semibold w-full">
                             <div className="w-1/3 flex justify-center items-center">
-                              {e?.kitchen_notes ? e?.kitchen_notes : e?.name}
+                              {e?.kitchen_notes
+                                ? e?.kitchen_notes
+                                : Data?.data?.products?.find(
+                                    (test) => test.id === e.product_id
+                                  )?.name}
                             </div>
                             <div className="w-[120px] flex justify-center items-center">
                               {currencyFormated(e?.quantity)}
@@ -589,7 +592,10 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                                 <div className="!w-[80px] flex-grow items-center text-[12px]">
                                   {orderProduct?.kitchen_notes
                                     ? orderProduct?.kitchen_notes
-                                    : orderProduct?.name}
+                                    : Data?.data?.products?.find(
+                                        (test) =>
+                                          test.id === orderProduct.product_id
+                                      )?.name}
                                 </div>
                                 <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
                                   <p>
