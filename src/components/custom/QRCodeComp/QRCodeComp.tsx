@@ -61,6 +61,7 @@ export const QRCodeComp: React.FC<QRCodeCompProps> = ({
     `${data?.tax_exclusive_discount_amount?.toFixed(2) || '0.00'}`
   );
   const [qrCodeData, setQRCodeData] = useState('/icons/ParCode.webp');
+  const [backednQrCodeData, setBackednQRCodeData] = useState('');
 
   useEffect(() => {
     const encodedData = encodeZATCA(
@@ -71,15 +72,22 @@ export const QRCodeComp: React.FC<QRCodeCompProps> = ({
       vatAmount
     );
 
+    if (Data?.data?.qrcode)
+      QRCode.toDataURL(Data?.data?.qrcode)
+        .then((url) => setBackednQRCodeData(url))
+        .catch((err) => console.error(err));
     QRCode.toDataURL(encodedData)
       .then((url) => setQRCodeData(url))
       .catch((err) => console.error(err));
-  }, [
-    settings,
-    data,
-    Data,
-  ]);
-  return (
+  }, [settings, data, Data]);
+  return Data?.data?.qrcode ? (
+    <img
+      loading="lazy"
+      src={backednQrCodeData}
+      alt="ZATCA QR Code"
+      className="object-contain aspect-square w-[100px] h-[100px]"
+    />
+  ) : (
     <img
       loading="lazy"
       src={qrCodeData}

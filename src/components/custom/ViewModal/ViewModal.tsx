@@ -58,8 +58,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
     }
   };
 
-  console.log({ allSettings });
-
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-lg-none h-[90vh] max-w-[80vw] overflow-y-auto relative bg-white">
