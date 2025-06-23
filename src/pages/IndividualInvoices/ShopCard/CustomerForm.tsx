@@ -38,6 +38,7 @@ import PlusIcon from '@/components/Icons/PlusIcon';
 import XIcons from '@/components/Icons/XIcons';
 import FastAddActionsCustomerPQ from '@/components/FastAddActionsCustomerPQ';
 import { useTranslation } from 'react-i18next';
+import CustomInputDate from '@/components/custom/CustomInputDate';
 
 function usePrompt(message, { beforeUnload } = {}) {
   const blocker = useBlocker(
@@ -103,6 +104,7 @@ const CustomerForm = forwardRef(
     const { mutate: mutateOrderPay } = allServiceOrderPay;
 
     const { useGetAll } = allService;
+    const [businessDate, setBusinessDate] = useState(new Date().toISOString());
 
     const { data: allData, isLoading } = useGetAll();
     const initialValue = {
@@ -536,7 +538,28 @@ const CustomerForm = forwardRef(
               </div>
             </div>
           ))}
+        {!params.id && (
+          <div className="my-md space-y-2">
+            <p className="self-start text-sm font-medium text-right text-secText mb-xs">
+              {t('DATE')}
+            </p>
+            <CustomInputDate
+              date={businessDate}
+              onSelect={(date) => {
+                setBusinessDate(date);
+                dispatch(
+                  updateField({
+                    field: 'business_date',
+                    value: date,
+                  })
+                );
+              }}
+              className="w-full lg:w-[250px]"
+            />
+          </div>
+        )}
         <ShopCardSummery />
+
         <FastAddActionsCustomerPQ
           setInvoice={() => {}}
           isOpen={fastActionBtn}

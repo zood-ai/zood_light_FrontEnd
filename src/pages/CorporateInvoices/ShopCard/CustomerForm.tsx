@@ -25,6 +25,7 @@ import {
 } from '@/store/slices/toggleAction';
 import { TbMenuDeep } from 'react-icons/tb';
 import { GrMenu } from 'react-icons/gr';
+import CustomInputDate from '@/components/custom/CustomInputDate';
 
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers?perPage=100000');
@@ -58,6 +59,7 @@ const CustomerForm = () => {
   const [loading, setLoading] = useState(false);
   const { data: getAllPro } = fetchAllProducts();
   dispatch(updateField({ field: 'is_sales_order', value: 0 }));
+  const [businessDate, setBusinessDate] = useState(new Date().toISOString());
   const { showToast } = useToast();
   const handleSubmitOrder = async () => {
     setLoading(true);
@@ -242,6 +244,25 @@ const CustomerForm = () => {
       <div className="w-full xl:w-[500px] max-w-full">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
+
+          <div className="mb-md space-y-2">
+            <p className="self-start text-sm font-medium text-right text-secText mb-xs">
+              {t('DATE')}
+            </p>
+            <CustomInputDate
+              date={businessDate}
+              onSelect={(date) => {
+                setBusinessDate(date);
+                dispatch(
+                  updateField({
+                    field: 'business_date',
+                    value: date,
+                  })
+                );
+              }}
+              className="w-full lg:w-[250px]"
+            />
+          </div>
           {orderSchema.products.map((item, index) => (
             <div key={index} className="flex flex-col flex-wrap gap-x-5">
               <div className="flex md:w-fit max-md:flex-grow gap-x-2 mb-5">
@@ -441,11 +462,11 @@ const CustomerForm = () => {
             disabled={params.id}
             name="kitchen_notes"
             value={orderSchema.kitchen_notes}
-            onChange={(e) =>
+            onChange={(e) => {
               dispatch(
                 updateField({ field: 'kitchen_notes', value: e.target.value })
-              )
-            }
+              );
+            }}
             className="lg:w-full my-sm"
             label={t('NOTES')}
           />

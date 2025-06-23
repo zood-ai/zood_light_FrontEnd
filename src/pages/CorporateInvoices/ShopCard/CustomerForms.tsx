@@ -14,6 +14,7 @@ import FastAddActionsCustomerPQ from '@/components/FastAddActionsCustomerPQ';
 import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
 import { all } from 'axios';
 import { useTranslation } from 'react-i18next';
+import CustomInputDate from '@/components/custom/CustomInputDate';
 
 const CustomerForms = () => {
   const { t } = useTranslation();
@@ -37,7 +38,6 @@ const CustomerForms = () => {
   const dispatch = useDispatch();
   const params = useParams();
   const [fastActionBtn, setFastActionBtn] = useState(false);
-
   const handleInputChange = (field: string, value: any) => {
     if (lastCustomerName !== allData?.data[0]?.name) {
       setFormState((prevState) => ({ ...prevState, [field]: value }));
@@ -144,7 +144,6 @@ const CustomerForms = () => {
           </div>
         )}
       </div>
-
       <FastAddActionsCustomerPQ
         setInvoice={() => {}}
         isOpen={fastActionBtn}

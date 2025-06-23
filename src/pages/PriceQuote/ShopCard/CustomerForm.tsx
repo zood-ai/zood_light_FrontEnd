@@ -15,6 +15,7 @@ import CustomerForms from './CustomerForms';
 import { Textarea } from '@/components/ui/textarea';
 import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
 import { useTranslation } from 'react-i18next';
+import CustomInputDate from '@/components/custom/CustomInputDate';
 
 const CustomerForm = () => {
   const allService = createCrudService<any>('manage/customers?perPage=100000');
@@ -196,14 +197,36 @@ const CustomerForm = () => {
       dispatch(addProduct(updatedProducts));
     }
   };
+  const [businessDate, setBusinessDate] = useState(new Date().toISOString());
 
   return (
     <div className="mt-5 flex xl:justify-between max-xl:flex-col gap-x-4 space-y-5">
       <div className="w-full xl:w-[500px] max-w-full">
         <div className="col-span-10 my-2 gap-y-md  ">
           <CustomerForms />
+
+          {!params.id && (
+            <div className="my-md space-y-2">
+              <p className="self-start text-sm font-medium text-right text-secText mb-xs">
+                {t('DATE')}
+              </p>
+              <CustomInputDate
+                date={businessDate}
+                onSelect={(date) => {
+                  setBusinessDate(date);
+                  dispatch(
+                    updateField({
+                      field: 'business_date',
+                      value: date,
+                    })
+                  );
+                }}
+                className="w-full lg:w-[21vw]"
+              />
+            </div>
+          )}
           {orderSchema.products.map((item, index) => (
-            <div key={index} className="flex flex-wrap">
+            <div key={index} className="my-2">
               <SelectCompInput
                 disabled={params.id}
                 className="md:w-[327px]  "
