@@ -48,26 +48,14 @@ export const useDataTableColumns = () => {
         );
       },
     },
-    // {
-    //   accessorKey: 'invoice_number',
-    //   header: ({ column }) => (
-    //     <DataTableColumnHeader remove={true} column={column} title={t('INVOICE_NUMBER')} />
-    //   ),
-    //   cell: ({ row }) => {
-    //     return (
-    //       <div className="flex space-x-2">
-    //         {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-    //         <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-    //           {row.getValue('invoice_number') || '-'}
-    //         </span>
-    //       </div>
-    //     );
-    //   },
-    // },
     {
       accessorKey: 'get_supplier',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('SUPPLIER_NAME')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('SUPPLIER_NAME')}
+        />
       ),
       cell: ({ row }: any) => {
         return (
@@ -84,7 +72,11 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'total_cost',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('TOTAL_PRICE')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('TOTAL_PRICE')}
+        />
       ),
       cell: ({ row }: any) => {
         const sum = row?.original?.items.reduce(
@@ -105,7 +97,11 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'business_date',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('DATE')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('DATE')}
+        />
       ),
       cell: ({ row }) => {
         return (
@@ -123,7 +119,11 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'zatca_report_status',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'Zatca Reporting'} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={'Zatca Reporting'}
+        />
       ),
       cell: ({ row }) => {
         return (
@@ -144,7 +144,11 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'id',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('INVOICE')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('INVOICE')}
+        />
       ),
       cell: ({ row }) => {
         return (

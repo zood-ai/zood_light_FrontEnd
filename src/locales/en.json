@@ -13,6 +13,9 @@
   "WELCOME_BACK_DESC": "Here's a list of your ",
   "TASKS": "Tasks",
   "CREATE": "Create",
+  "TOTAL_WITHOUT_TAX": "Total without tax",
+  "TOTAL_WITH_TAX": "Total with tax",
+  "TAX_RATE": "Tax rate",
   "EXPORT": "Export",
   "VIEW": "View",
   "FAST_CREATE": "Fast create",
@@ -36,7 +39,7 @@
   "CANCEL_ADD": "Cancel add",
   "Inactive": "Inactive",
   "Active": "Active",
- 
+
   "INDIVIDUAL": "Individual",
   "CORPORATE": "Corporate",
   "PURCHASE": "Purchase",

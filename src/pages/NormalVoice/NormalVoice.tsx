@@ -92,9 +92,7 @@ export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
           setSearchedData(allData); // Reset if search is cleared
           return;
         }
-        setAllUrl(
-          `orders?filter[type]=1${date}`
-        );
+        setAllUrl(`orders?filter[type]=1${date}`);
         const res = await axiosInstance.get(`/orders?filter[type]=1${date}`);
 
         setSearchedData(res.data);
@@ -110,7 +108,7 @@ export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
       //     ?.includes(searchTerm.toLowerCase());
       //   return referenceMatch || customerName;
       // });
-      
+
       setAllUrl(`orders?filter[type]=1&search=${searchTerm}${date}`);
       const res = await axiosInstance.get(
         `/orders?filter[type]=1&search=${searchTerm}${date}`
@@ -123,7 +121,7 @@ export const NormalVoiceReport: React.FC<NormalVoiceProps> = () => {
     }, 300), // 300ms debounce delay
     [allData]
   );
-
+  console.log({ data: searchedData?.data });
   const handleSearch = (e: string, date: string) => {
     handleDebounce(e, date);
   };
