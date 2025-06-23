@@ -79,7 +79,7 @@ export const useDataTableColumns = () => {
       },
     },
     {
-      accessorKey: 'total_price',
+      accessorKey: 'subtotal_price',
       header: ({ column }) => {
         return (
           <DataTableColumnHeader
@@ -93,7 +93,7 @@ export const useDataTableColumns = () => {
         return (
           <div className="flex space-x-2">
             <span className="min-w-28 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('total_price') || '0'}
+              {row.getValue('subtotal_price')}
             </span>
           </div>
         );
@@ -147,7 +147,7 @@ export const useDataTableColumns = () => {
       },
     },
     {
-      accessorKey: 'total_with_tax',
+      accessorKey: 'total_price',
       header: ({ column }) => {
         return (
           <DataTableColumnHeader
@@ -158,14 +158,10 @@ export const useDataTableColumns = () => {
         );
       },
       cell: ({ row }) => {
-        // Calculate total with tax from total_price + tax_value
-        const totalPrice = row.getValue('total_price') || 0;
-        const taxValue =
-          row.original?.order_product?.[0]?.taxes?.[0]?.pivot?.amount || 0;
         return (
           <div className="flex space-x-2">
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {Number(totalPrice) + Number(taxValue)}
+            <span className="min-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('total_price')}
             </span>
           </div>
         );
@@ -197,26 +193,6 @@ export const useDataTableColumns = () => {
               ) : (
                 '-'
               )}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: 'total_cost',
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          remove={true}
-          column={column}
-          title={t('TOTAL_PRICE')}
-        />
-      ),
-      cell: ({ row }: any) => {
-        return (
-          <div className="flex space-x-2">
-            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <span className="min-w-20 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('total_cost') || '0'}
             </span>
           </div>
         );
