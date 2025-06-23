@@ -204,26 +204,6 @@ export const useDataTableColumns = () => {
       },
     },
     {
-      accessorKey: 'total_cost',
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          remove={true}
-          column={column}
-          title={t('TOTAL_PRICE')}
-        />
-      ),
-      cell: ({ row }: any) => {
-        return (
-          <div className="flex space-x-2">
-            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <span className="min-w-20 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('total_cost') || '0'}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
       accessorKey: 'business_date',
       header: ({ column }) => (
         <DataTableColumnHeader
