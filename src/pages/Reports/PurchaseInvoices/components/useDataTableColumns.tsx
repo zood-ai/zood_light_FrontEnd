@@ -1,33 +1,22 @@
-// useDataTableColumns.js
 import { useTranslation } from 'react-i18next';
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
-import { labels, priorities, statuses } from '../data/data';
-import { Task } from '../data/schema';
 import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-table-column-header';
 import { StatusBadge } from '@/components/custom/StatusBadge';
 import { Button } from '@/components/custom/button';
-import { format } from 'path';
+import dayjs from 'dayjs';
 import { formatDateTime } from '@/utils/formatDateTime';
-import { useNavigate } from 'react-router-dom';
-import createCrudService from '@/api/services/crudService';
-import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
-import { use } from 'i18next';
-import { useDispatch } from 'react-redux';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
-  let navigate = useNavigate();
   let dispatch = useDispatch();
-  const crudService = createCrudService<any>('inventory/purchasing');
-  const { useRemove } = crudService;
-  const { mutate: remove } = useRemove();
-  const [loading, setLoading] = useState(false);
-  const columns: ColumnDef<Task>[] = [
+
+  const columns: ColumnDef<any>[] = [
     {
       accessorKey: 'reference',
       header: ({ column }) => (
@@ -48,55 +37,186 @@ export const useDataTableColumns = () => {
         );
       },
     },
-    // {
-    //   accessorKey: 'invoice_number',
-    //   header: ({ column }) => (
-    //     <DataTableColumnHeader remove={true} column={column} title={t('INVOICE_NUMBER')} />
-    //   ),
-    //   cell: ({ row }) => {
-    //     return (
-    //       <div className="flex space-x-2">
-    //         {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-    //         <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-    //           {row.getValue('invoice_number') || '-'}
-    //         </span>
-    //       </div>
-    //     );
-    //   },
-    // },
     {
-      accessorKey: 'get_supplier',
+      accessorKey: 'customer',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('SUPPLIER_NAME')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('CUSTOMER_NAME')}
+        />
       ),
       cell: ({ row }: any) => {
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('get_supplier')?.name || '-'}
+              {row.getValue('customer')?.name || '-'}
             </span>
           </div>
         );
       },
     },
-
+    {
+      accessorKey: 'discount_amount',
+      header: ({ column }) => {
+        return (
+          <DataTableColumnHeader
+            remove={true}
+            column={column}
+            title={t('DISCOUNT')}
+          />
+        );
+      },
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2">
+            <span className="min-w-[45px] truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('discount_amount') || '0'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'total_price',
+      header: ({ column }) => {
+        return (
+          <DataTableColumnHeader
+            remove={true}
+            column={column}
+            title={t('TOTAL_WITHOUT_TAX')}
+          />
+        );
+      },
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2">
+            <span className="min-w-28 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('total_price') || '0'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'tax_value',
+      header: ({ column }) => {
+        return (
+          <DataTableColumnHeader
+            remove={true}
+            column={column}
+            title={t('TAX')}
+          />
+        );
+      },
+      cell: ({ row }) => {
+        // Access tax_value from order_product[0].taxes[0].pivot.amount
+        return (
+          <div className="flex space-x-2">
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.original?.order_product?.[0]?.taxes?.[0]?.pivot?.amount ||
+                '0'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'tax',
+      header: ({ column }) => {
+        return (
+          <DataTableColumnHeader
+            remove={true}
+            column={column}
+            title={t('TAX_RATE')}
+          />
+        );
+      },
+      cell: ({ row }) => {
+        // Access tax rate from order_product[0].taxes[0].rate
+        return (
+          <div className="flex space-x-2">
+            <span className="min-w-20 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.original?.order_product?.[0]?.taxes?.[0]?.rate
+                ? `${row.original.order_product[0].taxes[0].rate}%`
+                : '0%'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'total_with_tax',
+      header: ({ column }) => {
+        return (
+          <DataTableColumnHeader
+            remove={true}
+            column={column}
+            title={t('TOTAL_WITH_TAX')}
+          />
+        );
+      },
+      cell: ({ row }) => {
+        // Calculate total with tax from total_price + tax_value
+        const totalPrice = row.getValue('total_price') || 0;
+        const taxValue =
+          row.original?.order_product?.[0]?.taxes?.[0]?.pivot?.amount || 0;
+        return (
+          <div className="flex space-x-2">
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {Number(totalPrice) + Number(taxValue)}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'payment_status',
+      header: ({ column }) => {
+        return (
+          <DataTableColumnHeader
+            remove={true}
+            column={column}
+            title={t('PAYMENT_STATUS')}
+          />
+        );
+      },
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2">
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row?.original.return_reason ? (
+                <StatusBadge status="pending" text={t('RETURN_PAYMENT')} />
+              ) : row.getValue('payment_status') == 'partial' ? (
+                <StatusBadge status="Inactive" text={t('PARTIALLY_PAID')} />
+              ) : row.getValue('payment_status') == 'unpaid' ? (
+                <StatusBadge status="error" text={t('UNPAID')} />
+              ) : row.getValue('payment_status') == 'fully' ? (
+                <StatusBadge status="active" text={t('PAID')} />
+              ) : (
+                '-'
+              )}
+            </span>
+          </div>
+        );
+      },
+    },
     {
       accessorKey: 'total_cost',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('TOTAL_PRICE')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('TOTAL_PRICE')}
+        />
       ),
       cell: ({ row }: any) => {
-        const sum = row?.original?.items.reduce(
-          (acc: any, item: any) =>
-            acc + item?.pivot?.quantity * item?.pivot?.cost,
-          0
-        );
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {sum || '0'}
+            <span className="min-w-20 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {row.getValue('total_cost') || '0'}
             </span>
           </div>
         );
@@ -105,16 +225,19 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'business_date',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('DATE')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('DATE')}
+        />
       ),
       cell: ({ row }) => {
         return (
-          <div className="flex space-x-2 ">
+          <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('business_date')
-                ? formatDateTime(row.getValue('business_date'))
-                : '-'}
+              {/* {dayjs(row.getValue('business_date')).format('MMMM D, YYYY h:mm A')} */}
+              {formatDateTime(row.getValue('business_date'))}
             </span>
           </div>
         );
@@ -123,7 +246,11 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'zatca_report_status',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={'Zatca Reporting'} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={'Zatca Reporting'}
+        />
       ),
       cell: ({ row }) => {
         return (
@@ -140,11 +267,14 @@ export const useDataTableColumns = () => {
         );
       },
     },
-
     {
       accessorKey: 'id',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('INVOICE')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('INVOICE')}
+        />
       ),
       cell: ({ row }) => {
         return (
