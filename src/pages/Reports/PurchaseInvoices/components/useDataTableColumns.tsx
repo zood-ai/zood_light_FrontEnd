@@ -1,22 +1,33 @@
+// useDataTableColumns.js
 import { useTranslation } from 'react-i18next';
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
+import { labels, priorities, statuses } from '../data/data';
+import { Task } from '../data/schema';
 import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-table-column-header';
 import { StatusBadge } from '@/components/custom/StatusBadge';
 import { Button } from '@/components/custom/button';
-import dayjs from 'dayjs';
+import { format } from 'path';
 import { formatDateTime } from '@/utils/formatDateTime';
-import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import createCrudService from '@/api/services/crudService';
+import { useState } from 'react';
 import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
+import { use } from 'i18next';
+import { useDispatch } from 'react-redux';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
+  let navigate = useNavigate();
   let dispatch = useDispatch();
-
-  const columns: ColumnDef<any>[] = [
+  const crudService = createCrudService<any>('inventory/purchasing');
+  const { useRemove } = crudService;
+  const { mutate: remove } = useRemove();
+  const [loading, setLoading] = useState(false);
+  const columns: ColumnDef<Task>[] = [
     {
       accessorKey: 'reference',
       header: ({ column }) => (
@@ -38,12 +49,12 @@ export const useDataTableColumns = () => {
       },
     },
     {
-      accessorKey: 'customer',
+      accessorKey: 'get_supplier',
       header: ({ column }) => (
         <DataTableColumnHeader
           remove={true}
           column={column}
-          title={t('CUSTOMER_NAME')}
+          title={t('SUPPLIER_NAME')}
         />
       ),
       cell: ({ row }: any) => {
@@ -51,157 +62,13 @@ export const useDataTableColumns = () => {
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('customer')?.name || '-'}
+              {row.getValue('get_supplier')?.name || '-'}
             </span>
           </div>
         );
       },
     },
-    {
-      accessorKey: 'discount_amount',
-      header: ({ column }) => {
-        return (
-          <DataTableColumnHeader
-            remove={true}
-            column={column}
-            title={t('DISCOUNT')}
-          />
-        );
-      },
-      cell: ({ row }) => {
-        return (
-          <div className="flex space-x-2">
-            <span className="min-w-[45px] truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('discount_amount') || '0'}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: 'total_price',
-      header: ({ column }) => {
-        return (
-          <DataTableColumnHeader
-            remove={true}
-            column={column}
-            title={t('TOTAL_WITHOUT_TAX')}
-          />
-        );
-      },
-      cell: ({ row }) => {
-        return (
-          <div className="flex space-x-2">
-            <span className="min-w-28 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('total_price') || '0'}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: 'tax_value',
-      header: ({ column }) => {
-        return (
-          <DataTableColumnHeader
-            remove={true}
-            column={column}
-            title={t('TAX')}
-          />
-        );
-      },
-      cell: ({ row }) => {
-        // Access tax_value from order_product[0].taxes[0].pivot.amount
-        return (
-          <div className="flex space-x-2">
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.original?.order_product?.[0]?.taxes?.[0]?.pivot?.amount ||
-                '0'}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: 'tax',
-      header: ({ column }) => {
-        return (
-          <DataTableColumnHeader
-            remove={true}
-            column={column}
-            title={t('TAX_RATE')}
-          />
-        );
-      },
-      cell: ({ row }) => {
-        // Access tax rate from order_product[0].taxes[0].rate
-        return (
-          <div className="flex space-x-2">
-            <span className="min-w-20 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.original?.order_product?.[0]?.taxes?.[0]?.rate
-                ? `${row.original.order_product[0].taxes[0].rate}%`
-                : '0%'}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: 'total_with_tax',
-      header: ({ column }) => {
-        return (
-          <DataTableColumnHeader
-            remove={true}
-            column={column}
-            title={t('TOTAL_WITH_TAX')}
-          />
-        );
-      },
-      cell: ({ row }) => {
-        // Calculate total with tax from total_price + tax_value
-        const totalPrice = row.getValue('total_price') || 0;
-        const taxValue =
-          row.original?.order_product?.[0]?.taxes?.[0]?.pivot?.amount || 0;
-        return (
-          <div className="flex space-x-2">
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {Number(totalPrice) + Number(taxValue)}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: 'payment_status',
-      header: ({ column }) => {
-        return (
-          <DataTableColumnHeader
-            remove={true}
-            column={column}
-            title={t('PAYMENT_STATUS')}
-          />
-        );
-      },
-      cell: ({ row }) => {
-        return (
-          <div className="flex space-x-2">
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row?.original.return_reason ? (
-                <StatusBadge status="pending" text={t('RETURN_PAYMENT')} />
-              ) : row.getValue('payment_status') == 'partial' ? (
-                <StatusBadge status="Inactive" text={t('PARTIALLY_PAID')} />
-              ) : row.getValue('payment_status') == 'unpaid' ? (
-                <StatusBadge status="error" text={t('UNPAID')} />
-              ) : row.getValue('payment_status') == 'fully' ? (
-                <StatusBadge status="active" text={t('PAID')} />
-              ) : (
-                '-'
-              )}
-            </span>
-          </div>
-        );
-      },
-    },
+
     {
       accessorKey: 'total_cost',
       header: ({ column }) => (
@@ -212,11 +79,16 @@ export const useDataTableColumns = () => {
         />
       ),
       cell: ({ row }: any) => {
+        const sum = row?.original?.items.reduce(
+          (acc: any, item: any) =>
+            acc + item?.pivot?.quantity * item?.pivot?.cost,
+          0
+        );
         return (
           <div className="flex space-x-2">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <span className="min-w-20 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('total_cost') || '0'}
+            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
+              {sum || '0'}
             </span>
           </div>
         );
@@ -233,11 +105,12 @@ export const useDataTableColumns = () => {
       ),
       cell: ({ row }) => {
         return (
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 ">
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {/* {dayjs(row.getValue('business_date')).format('MMMM D, YYYY h:mm A')} */}
-              {formatDateTime(row.getValue('business_date'))}
+              {row.getValue('business_date')
+                ? formatDateTime(row.getValue('business_date'))
+                : '-'}
             </span>
           </div>
         );
@@ -267,6 +140,7 @@ export const useDataTableColumns = () => {
         );
       },
     },
+
     {
       accessorKey: 'id',
       header: ({ column }) => (
