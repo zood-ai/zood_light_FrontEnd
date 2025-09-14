@@ -48,56 +48,48 @@ const ProtectedRoute = ({
   children: JSX.Element;
   requiredRole: Roles;
 }) => {
-  // const [open, setOpen] = useState(false);
-  // // const [counter, setCounter] = useState(0);
-  // const [whoAmI, setWhoAmI] = useState();
-  // const initialized = useRef(false); // Prevent multiple useEffect runs
+  const [open, setOpen] = useState(false);
+  // const [counter, setCounter] = useState(0);
+  const [whoAmI, setWhoAmI] = useState();
+  const initialized = useRef(false); // Prevent multiple useEffect runs
 
-  // useEffect(() => {
-  //   if (initialized.current) return;
-  //   initialized.current = true;
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
 
-  //   const fun = async () => {
-  //     const { data: whoAmI } = await axiosInstance.get('auth/whoami');
-  //     setWhoAmI(whoAmI.business.reference);
-  //   };
+    const fun = async () => {
+      const { data: whoAmI } = await axiosInstance.get('auth/whoami');
+      setWhoAmI(whoAmI.business.reference);
+    };
 
-  //   fun();
-  //   setOpen(true);
-  //   counter++;
-  // }, []);
+    fun();
+    setOpen(true);
+    counter++;
+  }, []);
 
   const { user } = useAuth();
 
   if (!user) {
     return <Navigate to="/" />;
   }
-  // if (!whoAmI)
-  //   return (
-  //     <div className="bg-white z-[10000000] w-screen h-screen absolute top-0 left-0 flex items-center justify-center text-2xl">
-  //       <div className="flex gap-10">
-  //         <p className="text-nowrap">الرجاء الانتظار</p>
-  //         <Loader />
-  //       </div>
-  //     </div>
-  //   );
-  // const validReferences = [
-  //   987884, 131764, 619467, 872412, 691610, 987824, 154734, 357348, 195390,
-  //   177050, 123358, 322324, 589503, 981382, 215742, 421994, 322331, 497155,
-  //   142367, 891678, 820366, 268152, 635219, 947509, 107550, 457632, 906751,
-  //   685322, 983388, 909630, 176730, 566829, 997778, 293383, 317584, 583391,
-  //   721113, 356314, 165543, 510458, 280979, 932061, 128652, 708836, 940209,
-  //   176934, 457632, 906751, 685322, 997778, 293383, 165543, 510458, 280979,
-  //   176934, 150581, 795271, 258425, 619467, 540491, 212882, 260477, 681801,
-  //   590796, 674933, 868249, 519472, 643709, 282921, 973304,
-  // ];
+  if (!whoAmI)
+    return (
+      <div className="bg-white z-[10000000] w-screen h-screen absolute top-0 left-0 flex items-center justify-center text-2xl">
+        <div className="flex gap-10">
+          <p className="text-nowrap">الرجاء الانتظار</p>
+          <Loader />
+        </div>
+      </div>
+    );
 
+  const isPaid = false;
   return (
     <>
-      {/* {whoAmI && validReferences.includes(whoAmI) && counter === 1 && (
+      {whoAmI && !isPaid && (
         <div>
           <Dialog open={open} onOpenChange={() => {}}>
             <DialogContent
+              counter={counter}
               showClose={false}
               className="text-center bg-red-500 outline-none border-none"
             >
@@ -106,21 +98,41 @@ const ProtectedRoute = ({
                   <Alert />
                 </DialogTitle>
               </DialogHeader>
-              <p className=" text-white px-4 font-extrabold text-xl">
-                برجاء سداد قيمه الاشتراك
-                <br />
-                <br />
-                في حال السداد ارسال صوره التحويل علي هذا الرقم
-                <br />
-                <p dir="ltr" className="flex justify-center gap-2 pt-2">
-                  <p className=" font-extrabold text-xl">من خلال الواتساب</p>
-                  <p className=" font-extrabold text-xl">+966 56 962 3465</p>
+              <div>
+                <p className=" text-white px-4 font-extrabold text-xl">
+                  برجاء سداد قيمه الاشتراك
+                  <br />
+                  <br />
+                  <p className="font-extrabold">
+                    اضغط{' '}
+                    <a
+                      className="text-blue-400 border-b"
+                      href="https://checkout.tap.company/?mode=page&themeMode=&language=en&token=eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjY4YzJhZDI2YjgyYzMzNjljZGIwYTBhYSJ9.iwlJZda2xU4KcER7lCP_3qgxN_SIjM3xAuJk1iiSiGA"
+                    >
+                      هنا
+                    </a>{' '}
+                    للسداد الآن
+                  </p>
+                  <br />
+                  <p dir="ltr" className="flex justify-center flex-wrap gap-2">
+                    <p className=" font-extrabold text-xl">
+                      أو تواصل مع هذا الرقم من خلال الواتساب
+                    </p>
+                    <p className=" font-extrabold text-xl">+966 56 962 3465</p>
+                  </p>
+                  {/* <br />
+                  في حال السداد ارسال صوره التحويل علي هذا الرقم
+                  <br />
+                  <p dir="ltr" className="flex justify-center gap-2 pt-2">
+                    <p className=" font-extrabold text-xl">من خلال الواتساب</p>
+                    <p className=" font-extrabold text-xl">+966 56 962 3465</p>
+                  </p> */}
                 </p>
-              </p>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
-      )} */}
+      )}
       {children}
     </>
   );
