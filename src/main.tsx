@@ -1,4 +1,3 @@
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import { Provider } from 'react-redux';
@@ -21,7 +20,6 @@ const queryClient = new QueryClient({
 });
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
     <Provider store={store}>
       <GlobalDialogProvider>
         <QueryClientProvider client={queryClient}>
@@ -37,5 +35,4 @@ createRoot(document.getElementById('root')!).render(
         </QueryClientProvider>
       </GlobalDialogProvider>
     </Provider>
-  </StrictMode>
 );

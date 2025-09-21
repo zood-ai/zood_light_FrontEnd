@@ -11,6 +11,7 @@ import back from '/icons/arrow-right-circle.svg';
 import logo from '/icons/Logo.svg';
 import dashboard from '/icons/Dashboard.png';
 import { AuthForm } from './AuthForm';
+import PayDialog from '@/config/PayDialog';
 
 export const LoginForm: React.FC<LoginFormProps> = () => {
   const navigate = useNavigate();

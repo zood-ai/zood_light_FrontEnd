@@ -56,7 +56,7 @@ export const AuthForm: React.FC<AuthFormProps> = () => {
 
     const x = await login(data);
 
-    if (x === 'success') {
+    if (x.success === true) {
       navigate('/zood-dashboard');
     }
     const timeout = setTimeout(() => {

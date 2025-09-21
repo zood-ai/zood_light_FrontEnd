@@ -153,6 +153,13 @@ const router = createBrowserRouter([
     }),
   },
   {
+    path: '/active-account-asdahkljasldmaskldjaklsjdlajskldjaaksdasdasdsmdkasjdk',
+    lazy: async () => ({
+      Component: (await import('./pages/ActiveAccount/ActiveAccount.tsx'))
+        .default,
+    }),
+  },
+  {
     path: '/reset-password',
     lazy: async () => ({
       Component: (await import('./pages/auth/reset-password.tsx')).default,

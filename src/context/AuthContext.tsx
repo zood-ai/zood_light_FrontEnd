@@ -7,7 +7,9 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 interface AuthContextType {
   user: string | null;
-  login: (data: LoginData) => Promise<'success' | 'error'>;
+  login: (
+    data: LoginData
+  ) => Promise<{ success: boolean; error: boolean; errorCode?: number }>;
   logout: () => void;
 }
 
@@ -33,8 +35,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     Cookies.get('accessToken') || null
   );
 
-  const login = async (data: LoginData): Promise<'success' | 'error'> => {
-    const newBaseUrl = localStorage.getItem('d14758f1afd44c09b7992073ccf00b43d');
+  const login = async (
+    data: LoginData
+  ): Promise<{ success: boolean; error: boolean; errorCode?: number }> => {
+    const newBaseUrl = localStorage.getItem(
+      'd14758f1afd44c09b7992073ccf00b43d'
+    );
     const apiUrl = `${newBaseUrl ? newBaseUrl : baseURL}auth/Login`;
 
     try {
@@ -53,18 +59,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         Cookies.set('name', name, { expires: 1, path: '/' });
         Cookies.set('userId', userId, { expires: 1 });
         setUser(token);
-        return 'success';
+        return { success: true, error: false };
       }
 
       showToast('Login Error', 'Invalid token received');
-      return 'error';
+      return { error: true, success: false };
     } catch (error: any) {
       console.error('Login failed', error);
       const errorMessage =
         error.response?.data?.message || 'An unexpected error occurred';
       const errorCode = error.response?.status || 'Unknown';
-      showToast(errorMessage, `Error: ${errorCode} - ${errorMessage}`);
-      return 'error';
+      if (errorCode !== 401)
+        showToast(errorMessage, `Error: ${errorCode} - ${errorMessage}`);
+      return { error: true, success: false, errorCode };
     }
   };
 
