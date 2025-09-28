@@ -1,35 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import axiosInstance from '@/api/interceptors';
 
-const Alert = () => {
-  return (
-    <svg
-      width="80"
-      height="80"
-      viewBox="0 0 80 80"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M40 80C62.0914 80 80 62.0914 80 40C80 17.9086 62.0914 0 40 0C17.9086 0 0 17.9086 0 40C0 62.0914 17.9086 80 40 80Z"
-        fill="var(--white)"
-      />
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M59.25 40.5C59.25 50.8553 50.8553 59.25 40.5 59.25C30.1447 59.25 21.75 50.8553 21.75 40.5C21.75 30.1447 30.1447 21.75 40.5 21.75C50.8553 21.75 59.25 30.1447 59.25 40.5ZM63 40.5C63 52.9265 52.9265 63 40.5 63C28.0736 63 18 52.9265 18 40.5C18 28.0736 28.0736 18 40.5 18C52.9265 18 63 28.0736 63 40.5ZM38.625 44.25V31.125H42.375V44.25H38.625ZM38.625 49.875V46.125H42.375V49.875H38.625Z"
-        fill="white"
-      />
-    </svg>
-  );
-};
-let payDialogRendered = false;
 const PayDialog = ({ showRemaining = false }) => {
   const [open, setOpen] = useState(true);
   const [endDate, setEndDate] = useState('');
@@ -83,12 +55,6 @@ const PayDialog = ({ showRemaining = false }) => {
   }, [endDate]);
 
   if (showRemaining && !timeLeft) return;
-  if (payDialogRendered) return null;
-  payDialogRendered = true;
-
-  if (window.location.href === '/zood-login') {
-    payDialogRendered = false;
-  }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
