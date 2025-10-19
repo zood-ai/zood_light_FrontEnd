@@ -48,8 +48,8 @@ export function DataTableToolbar<TData>({
   ];
 
   const exportExcel = async () => {
-    const exportedColumnsAR = `is_exporting_excel=1&headings[]=رقم الفاتورة&columns[]=reference&headings[]=اسم العميل&columns[]=customer.name&headings[]=الخصم&columns[]=discount_amount&headings[]=الضريبة&columns[]=tax_exclusive_discount_amount&headings[]=التاريخ&columns[]=business_date&headings[]=المبلغ الإجمالي&columns[]=total_price&headings[]=حالة الدفع&columns[]=payment_status`;
-    const exportedColumnsEn = `is_exporting_excel=1&headings[]=Invoice Number&columns[]=reference&headings[]=Customer Name&columns[]=customer.name&headings[]=Discount&columns[]=discount_amount&headings[]=Tax&columns[]=tax_exclusive_discount_amount&headings[]=Date&columns[]=business_date&headings[]=Amount&columns[]=total_price&headings[]=Payment Status&columns[]=payment_status`;
+    const exportedColumnsAR = `is_exporting_excel=1&headings[]=رقم الفاتورة&columns[]=reference&headings[]=اسم العميل&columns[]=customer.name&headings[]=الخصم&columns[]=discount_amount&headings[]=الضريبة&columns[]=tax_exclusive_discount_amount&headings[]=التاريخ&columns[]=business_date&headings[]=المبلغ الإجمالي&columns[]=total_price&headings[]=حالة الدفع&columns[]=payment_status&headings[]=مرتجع؟&columns[]=return_reason`;
+    const exportedColumnsEn = `is_exporting_excel=1&headings[]=Invoice Number&columns[]=reference&headings[]=Customer Name&columns[]=customer.name&headings[]=Discount&columns[]=discount_amount&headings[]=Tax&columns[]=tax_exclusive_discount_amount&headings[]=Date&columns[]=business_date&headings[]=Amount&columns[]=total_price&headings[]=Payment Status&columns[]=payment_status&headings[]=Refunded&columns[]=return_reason`;
 
     const holder =
       i18n.language === 'ar' ? exportedColumnsAR : exportedColumnsEn;

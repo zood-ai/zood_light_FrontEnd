@@ -176,8 +176,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
         const { data: defaultProduct } = await axiosInstance.get(
           'inventory/items?filter[name]=sku-zood-20001'
         );
-        console.log(1234, { defaultProduct });
-
+        console.log(1234, { items });  
         const { data } = await axiosInstance.post('inventory/purchasing', {
           branch_id: branchData?.data?.[0]?.id,
           supplier_id: invoice.supplier_id,
@@ -185,12 +184,20 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           notes: invoice.purchaseDescription,
           attached_file: fileBase64,
           paid_tax: invoice.paid_tax,
-          items: items.map((item) => ({
-            id: item.item || defaultProduct?.data?.[0]?.id || '',
-            kitchen_notes: item.kitchen_notes,
-            total_cost: item.total,
-            quantity: item.qty
-          })),
+          items: items.map((item) =>
+            item.kitchen_notes
+              ? {
+                  id: item.item ?? item.id ?? defaultProduct?.data?.[0]?.id ?? '',
+                  kitchen_notes: item.kitchen_notes,
+                  total_cost: item.total,
+                  quantity: item.qty,
+                }
+              : {
+                  id: item.item ?? item.id ?? defaultProduct?.data?.[0]?.id ?? '',
+                  total_cost: item.total,
+                  quantity: item.qty,
+                }
+          ),
           invoice_number:
             Number(invoice.invoice_number) ||
             Math.floor(Math.random() * 100000),
@@ -198,7 +205,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
         await axiosInstance.post(
           `inventory/purchasing/update_purchasing_item/${data?.data?.id}`,
           items.map((item) => ({
-            id: item.item || defaultProduct?.data?.[0]?.id || '',
+            id: item.item ?? item.id ?? (defaultProduct?.data?.[0]?.id || ''),
             quantity: item.qty,
             total_cost: Number(item.price) * Number(item.qty),
           }))
