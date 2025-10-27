@@ -124,7 +124,7 @@ const PayDialog = ({ showRemaining = false }) => {
             </div>
             <br />
             في حال السداد ارسال صوره التحويل من خلال الواتساب علي هذا الرقم
-            <p className="font-extrabold text-xl">+966 56 962 3465</p>
+            <p className="font-extrabold text-xl">+966 56 200 9030</p>
           </p>
         </div>
       </DialogContent>
