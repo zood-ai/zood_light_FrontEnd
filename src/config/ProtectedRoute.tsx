@@ -18,6 +18,7 @@ const ProtectedRoute = ({
   // counter++;
   return (
     <>
+      <PayDialog showRemaining={true}/>
       {children}
     </>
   );

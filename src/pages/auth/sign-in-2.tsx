@@ -22,6 +22,7 @@ import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { getToken } from '@/utils/auth';
 import PayDialog from '@/config/PayDialog';
+import moment from 'moment';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -84,7 +85,7 @@ export default function SignIn2() {
 
   return (
     <div className="min-h-[100vh] overflow-hidden px-4 flex flex-col items-center sm:px-[52px]">
-      {expired && <PayDialog />}
+      {expired && <PayDialog showAllTime={1}/>}
       <div className="w-full flex flex-row gap-5 justify-between mt-[46px]  items-center ">
         <div className="w-[213px]">
           <Link to="/">

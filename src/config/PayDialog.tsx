@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import axiosInstance from '@/api/interceptors';
 
-const PayDialog = ({ showRemaining = false }) => {
+let times = 1;
+
+const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
   const [open, setOpen] = useState(true);
   const [endDate, setEndDate] = useState('');
   const [timeLeft, setTimeLeft] = useState<string>('');
@@ -10,9 +12,20 @@ const PayDialog = ({ showRemaining = false }) => {
   useEffect(() => {
     if (!showRemaining) return;
     const fun = async () => {
-      const { data: whoAmI } = await axiosInstance.get('auth/whoami');
+      const {
+        data: whoAmI,
+      }: {
+        data: {
+          business: {
+            end_at: string;
+          };
+        };
+      } = await axiosInstance.get('auth/whoami');
+      console.log({ whoAmI });
+
       if (whoAmI) {
-        setEndDate(whoAmI?.business?.end_at ?? '2025-10-01T01:00:00');
+        console.log({ remaining: whoAmI?.business?.end_at });
+        setEndDate(whoAmI?.business?.end_at);
       }
     };
     fun();
@@ -37,7 +50,7 @@ const PayDialog = ({ showRemaining = false }) => {
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-      if (days < 10) {
+      if (days < 16) {
         if (days > 0) {
           setTimeLeft(`متبقي ${days} يوم`);
         } else if (hours > 0) {
@@ -54,7 +67,12 @@ const PayDialog = ({ showRemaining = false }) => {
     return () => clearInterval(interval);
   }, [endDate]);
 
+  useEffect(() => {
+    times = 1;
+  }, [showAllTime]);
   if (showRemaining && !timeLeft) return;
+  if (!showAllTime && times !== 1) return;
+  times++;
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
