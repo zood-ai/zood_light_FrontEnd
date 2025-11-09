@@ -37,7 +37,7 @@ const formSchema = z.object({
     .optional(),
   coTax: z
     .string()
-    .min(15, { message: 'Tax number is must be 15 number' })
+    .min(15, { message: 'Commercial number is must be 15 number' })
     .optional(),
 });
 export default function FastAddActionsCustomerPQ({
@@ -97,7 +97,7 @@ export default function FastAddActionsCustomerPQ({
 
   // Handle form submission for both add and edit scenarios
   const queryKey = ['manage/customers'];
-
+  console.log({ errro: form?.formState.errors });
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
 

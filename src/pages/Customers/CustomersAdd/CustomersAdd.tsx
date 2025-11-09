@@ -30,8 +30,14 @@ const formSchema = z.object({
   phone: z.string().nullable().optional(),
   address: z.string().nullable().optional(),
   email: z.string().nullable().optional(),
-  taxNum: z.string().nullable().optional(),
-  coTax: z.string().nullable().optional(),
+  taxNum: z
+    .string()
+    .min(15, { message: 'Tax number is must be 15 number' })
+    .optional(),
+  coTax: z
+    .string()
+    .min(15, { message: 'Commercial number is must be 15 number' })
+    .optional(),
 });
 
 export const CustomersAdd: React.FC<CustomersAddProps> = () => {
