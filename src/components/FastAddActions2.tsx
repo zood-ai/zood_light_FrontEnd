@@ -31,8 +31,11 @@ const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
   phone: z.string().nonempty('Phone is required'),
   address: z.string().nonempty('Address is required'),
-  taxNum: z.string().min(15, { message: 'Tax number is must be 15 number' }),
-  coTax: z.string().min(15, { message: 'Tax number is must be 15 number' }),
+  taxNum: z
+    .string()
+    .min(15, { message: 'Tax number is must be 15 number' })
+    .optional(),
+  coTax: z.string().optional().nullable(),
 });
 export default function FastAddActions2({ isOpen, onClose }) {
   const { t } = useTranslation();

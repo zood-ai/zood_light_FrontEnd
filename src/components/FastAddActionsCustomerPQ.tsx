@@ -31,14 +31,8 @@ const formSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
   email: z.string().email({ message: 'Invalid email address' }).optional(),
-  taxNum: z
-    .string()
-    .min(15, { message: 'Tax number is must be 15 number' })
-    .optional(),
-  coTax: z
-    .string()
-    .min(15, { message: 'Commercial number is must be 15 number' })
-    .optional(),
+  taxNum: z.string().min(15, { message: 'Tax number is must be 15 number' }).optional(),
+  coTax: z.string().optional().nullable(),
 });
 export default function FastAddActionsCustomerPQ({
   isOpen,
