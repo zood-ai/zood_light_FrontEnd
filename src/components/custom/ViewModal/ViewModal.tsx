@@ -10,13 +10,29 @@ import axiosInstance from '@/api/interceptors';
 import { toast } from '@/components/ui/use-toast';
 import { toggleActionView } from '@/store/slices/toggleAction';
 import { useQueryClient } from '@tanstack/react-query';
+import { Button } from 'antd';
+import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 
 export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const dispatch = useDispatch();
   const data = useSelector((state: any) => state.toggleAction.data);
   const allSettings = useSelector((state: any) => state.allSettings.value);
   const contentRef = useRef<HTMLDivElement>(null);
-  const reactToPrintFn = useReactToPrint({ contentRef });
+  const reactToPrintFn = useReactToPrint({ contentRef }); 
+    const { openDialog } = useGlobalDialog();
+  const [isConnectedLoading, setIsConnectedLoading] = useState(false);
+  const handleSendToZatca = async () => {
+    try {
+      setIsConnectedLoading(true);
+      const res = await axiosInstance.post(`zatca/orders/${data?.id}/report`);
+      console.log('Zatca Response: ', res); 
+      openDialog('added')
+    } catch (err) {
+      console.error('Zatca Error: ', err);
+    } finally {
+      setIsConnectedLoading(false);
+    }
+  };
   const customerInfo = { data: data.customer };
   const supplierInfo = { data: data?.get_supplier };
   const { pathname } = useLocation();
@@ -130,14 +146,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           {Another ? customerInfo?.data?.phone : ''}
                         </div>
                       </div>
-                      {Another && (
-                        <div className="flex z-10 flex-col flex-1   min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-[#ECECEC] border-solid   justify-between">
-                          <div className="self-center">عنوان العميل</div>
-                          <div className="self-start mt-4 w-full text-center font-semibold">
-                            {Another ? data?.customer?.addresses[0]?.name : ''}
-                          </div>
-                        </div>
-                      )}
+
                       <div className="flex flex-col flex-1  min-w-fit pt-4 pb-2 bg-white rounded-lg border border-[#ECECEC] border-solid max-md:pl-5 justify-between">
                         <div className="self-center">الرقم الضريبي</div>
                         <div className="mt-4 text-center font-semibold">
@@ -178,6 +187,16 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           {data?.reference || ''}
                         </div>
                       </div>
+                    </div>
+                    <div className="flex flex-wrap mt-4 text-right bg-white rounded-lg border border-[#ECECEC] border-solid max-md:mr-1 max-md:max-w-full">
+                      {Another && (
+                        <div className="flex z-10 flex-col flex-1   min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-[#ECECEC] border-solid   justify-between">
+                          <div className="self-center">عنوان العميل</div>
+                          <div className="self-start mt-4 w-full text-center font-semibold">
+                            {Another ? data?.customer?.addresses[0]?.name : ''}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="flex">
                       {ShowCar && data?.kitchen_received_at && (
@@ -876,7 +895,16 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       </div>
                     </div>
                     {Another && (
-                      <div className="flex flex-grow flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg-lg  max-md:mt-10">
+                      <div className="flex flex-grow gap-2 flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg-lg  max-md:mt-10">
+                        <button
+                          disabled={isConnectedLoading}
+                          className="px-2.5 py-1 text-[#5951C8] bg-white rounded-lg-lg border border-[#5951C8] border-solid max-md:px-5"
+                          onClick={() => {
+                            handleSendToZatca();
+                          }}
+                        >
+                          Send To Zatca
+                        </button>
                         <button
                           disabled={loading}
                           onClick={handleReturn}

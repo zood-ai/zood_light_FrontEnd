@@ -51,18 +51,6 @@ const CustomerFormEdit = () => {
   const myInputRef = useRef(null);
   const { showToast } = useToast();
   const [isTextArea, setIsTextArea] = useState(false);
-  const [isConnectedLoading, setIsConnectedLoading] = useState(false);
-  const handleSendToZatca = async () => {
-    try {
-      setIsConnectedLoading(true);
-      const res = await axiosInstance.post(`zatca/orders/${params?.id}/report`);
-      console.log('Zatca Response: ', res);
-    } catch (err) {
-      console.error('Zatca Error: ', err);
-    } finally {
-      setIsConnectedLoading(false);
-    }
-  };
 
   const handleSubmitOrder = async () => {
     setLoading(true);
@@ -264,19 +252,6 @@ const CustomerFormEdit = () => {
                 حفظ
               </Button>
             </div>
-          )}
-          {params.id && (
-            <Button
-              loading={isConnectedLoading}
-              disabled={isConnectedLoading}
-              onClick={() => {
-                console.log(params.id);
-                handleSendToZatca();
-              }}
-              className="w-[144px] mt-md"
-            >
-              Send To Zatca
-            </Button>
           )}
         </div>
       </div>
