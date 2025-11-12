@@ -24,6 +24,7 @@ import {
 import { TbMenuDeep } from 'react-icons/tb';
 import { GrMenu } from 'react-icons/gr';
 import { currencyFormated } from '../../../utils/currencyFormated';
+import axios from 'axios';
 const CustomerFormEdit = () => {
   const { t } = useTranslation();
   const params = useParams();
@@ -50,6 +51,18 @@ const CustomerFormEdit = () => {
   const myInputRef = useRef(null);
   const { showToast } = useToast();
   const [isTextArea, setIsTextArea] = useState(false);
+  const [isConnectedLoading, setIsConnectedLoading] = useState(false);
+  const handleSendToZatca = async () => {
+    try {
+      setIsConnectedLoading(true);
+      const res = await axiosInstance.post(`zatca/orders/${params?.id}/report`);
+      console.log('Zatca Response: ', res);
+    } catch (err) {
+      console.error('Zatca Error: ', err);
+    } finally {
+      setIsConnectedLoading(false);
+    }
+  };
 
   const handleSubmitOrder = async () => {
     setLoading(true);
@@ -239,18 +252,33 @@ const CustomerFormEdit = () => {
             label={t('NOTES')}
           />
         </div>
-        {payment !== 'fully' && (
-          <div className="col-span-10">
+        <div className="flex items-center gap-2">
+          {payment !== 'fully' && (
+            <div className="col-span-10">
+              <Button
+                loading={loading}
+                disabled={loading}
+                onClick={handleSubmitOrder}
+                className="w-[144px] mt-md"
+              >
+                حفظ
+              </Button>
+            </div>
+          )}
+          {params.id && (
             <Button
-              loading={loading}
-              disabled={loading}
-              onClick={handleSubmitOrder}
+              loading={isConnectedLoading}
+              disabled={isConnectedLoading}
+              onClick={() => {
+                console.log(params.id);
+                handleSendToZatca();
+              }}
               className="w-[144px] mt-md"
             >
-              حفظ
+              Send To Zatca
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* <ShopCardSummeryPQ /> */}
