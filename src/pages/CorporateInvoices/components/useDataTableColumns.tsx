@@ -131,7 +131,8 @@ export const useDataTableColumns = () => {
               ))} */}
             {/* {row.getValue('zatca_report_status') === 'PASS' && ( */}
             <StatusBadge status="reported" text={t('REPORTED')} />
-            {/* )} */}
+            {/* )} */} 
+            {/* here zatca */}
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
           </div>
         );
