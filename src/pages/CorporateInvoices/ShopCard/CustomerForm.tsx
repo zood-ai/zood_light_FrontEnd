@@ -484,7 +484,6 @@ const CustomerForm = () => {
           </Button>
         </div>
       </div>
-
       {/* <ShopCardSummeryPQ /> */}
       {/* <ShopCardSummery /> */}
       <ShopCardSummeryCi />

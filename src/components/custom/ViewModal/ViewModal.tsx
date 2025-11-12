@@ -22,7 +22,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
   const Another = !Corporate;
-
   const ShowCar =
     allSettings.WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
   const Data = { data };
@@ -57,7 +56,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
       });
     }
   };
-
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-lg-none h-[90vh] max-w-[80vw] overflow-y-auto relative bg-white">
@@ -132,6 +130,14 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           {Another ? customerInfo?.data?.phone : ''}
                         </div>
                       </div>
+                      {Another && (
+                        <div className="flex z-10 flex-col flex-1   min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-[#ECECEC] border-solid   justify-between">
+                          <div className="self-center">عنوان العميل</div>
+                          <div className="self-start mt-4 w-full text-center font-semibold">
+                            {Another ? data?.customer?.addresses[0]?.name : ''}
+                          </div>
+                        </div>
+                      )}
                       <div className="flex flex-col flex-1  min-w-fit pt-4 pb-2 bg-white rounded-lg border border-[#ECECEC] border-solid max-md:pl-5 justify-between">
                         <div className="self-center">الرقم الضريبي</div>
                         <div className="mt-4 text-center font-semibold">
@@ -236,7 +242,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         )}
                         <div className="w-[140px]   py-4">
                           المجموع <br />
-                          <span className="text-[10px] font-bold">(غير شامل الضريبة)</span>
+                          <span className="text-[10px] font-bold">
+                            (غير شامل الضريبة)
+                          </span>
                         </div>
                       </div>
                     </div>
