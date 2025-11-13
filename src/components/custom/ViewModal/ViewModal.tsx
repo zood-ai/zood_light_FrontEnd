@@ -97,10 +97,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                   width: '100%',
                   maxWidth: '800px',
                   margin: 'auto',
-                  paddingRight: 0,
-                  paddingLeft: 0,
-                  paddingTop: 20,
-                  paddingBottom: 20,
+                  padding: '20px',
                 }}
                 className={`${
                   size === 'A4' ? 'a4-size' : 'small-receipt'
