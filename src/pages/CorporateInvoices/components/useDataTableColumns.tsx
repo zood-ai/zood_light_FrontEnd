@@ -16,11 +16,36 @@ import {
 } from '@/store/slices/toggleAction';
 import axiosInstance from '@/api/interceptors';
 import { currencyFormated } from '../../../utils/currencyFormated';
+import { useState } from 'react';
+import { toast } from '@/components/ui/use-toast';
+import createCrudService from '@/api/services/crudService';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
   let dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
+  const [isConnectedLoading, setIsConnectedLoading] = useState(false);
+
+  const handleSendToZatca = async ({ id }) => {
+    try {
+      setIsConnectedLoading(true);
+      const res = await axiosInstance.post(`zatca/orders/${id}/report`);
+      console.log('Zatca Response: ', res);
+      toast({
+        title: 'Reported',
+        description: res.data.message || 'Sent to Zatca successfully',
+        duration: 3000,
+        variant: 'default',
+      });
+    } catch (err) {
+      console.error('Zatca Error: ', err);
+    } finally {
+      setIsConnectedLoading(false);
+     queryClient.invalidateQueries(['/orders']);
+    }
+  };
   const columns: ColumnDef<Task>[] = [
     {
       accessorKey: 'reference',
@@ -124,14 +149,30 @@ export const useDataTableColumns = () => {
       ),
       cell: ({ row }) => {
         return (
-          <div className="flex space-x-2 w-[180px] md:w-auto">
+          <div className="flex space-x-2 w-[180px] md:w-auto mx-auto justify-center">
             {/* {row.getValue('zatca_report_status') === 'pending' ||
               (row.getValue('zatca_report_status') === null && (
                 <StatusBadge status="pending" text={'click to clearance'} />
               ))} */}
             {/* {row.getValue('zatca_report_status') === 'PASS' && ( */}
-            <StatusBadge status="reported" text={t('REPORTED')} />
-            {/* )} */} 
+            {/* <StatusBadge status="reported" text={t('REPORTED')} /> */}
+            {row.getValue('zatca_report_status') === 'PASS' ? (
+              <StatusBadge status="reported" text={t('REPORTED')} />
+            ) : (
+              <Button
+                type="button"
+                disabled={isConnectedLoading}
+                className="px-2.5 py-1 text-[#5951C8] bg-white rounded-lg-lg border border-[#5951C8] border-solid max-md:px-5 hover:text-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSendToZatca({ id: row.original.id });
+                }}
+              >
+                {t('REPORT')}
+              </Button>
+            )}
+
+            {/* )} */}
             {/* here zatca */}
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
           </div>

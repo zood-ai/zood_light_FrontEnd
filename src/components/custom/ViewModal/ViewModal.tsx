@@ -12,28 +12,19 @@ import { toggleActionView } from '@/store/slices/toggleAction';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from 'antd';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
+import { useTranslation } from 'react-i18next';
 
 export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
+
   const data = useSelector((state: any) => state.toggleAction.data);
   const allSettings = useSelector((state: any) => state.allSettings.value);
   const contentRef = useRef<HTMLDivElement>(null);
-  const reactToPrintFn = useReactToPrint({ contentRef }); 
-    const { openDialog } = useGlobalDialog();
+  const reactToPrintFn = useReactToPrint({ contentRef });
   const [isConnectedLoading, setIsConnectedLoading] = useState(false);
-  const handleSendToZatca = async () => {
-    try {
-      setIsConnectedLoading(true);
-      const res = await axiosInstance.post(`zatca/orders/${data?.id}/report`);
-      console.log('Zatca Response: ', res); 
-      openDialog('added')
-    } catch (err) {
-      console.error('Zatca Error: ', err);
-    } finally {
-      setIsConnectedLoading(false);
-    }
-  };
-  const customerInfo = { data: data.customer };
+
+  const customerInfo = { data: data?.customer };
   const supplierInfo = { data: data?.get_supplier };
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
@@ -72,6 +63,28 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
       });
     }
   };
+
+  const handleSendToZatca = async () => {
+    if (!data) return;
+    try {
+      setIsConnectedLoading(true);
+      const res = await axiosInstance.post(`zatca/orders/${data?.id}/report`);
+      console.log('Zatca Response: ', res);
+      toast({
+        title: t('REPORT'),
+        description: res.data.message || 'Sent to Zatca successfully',
+        duration: 3000,
+        variant: 'default',
+      });
+    } catch (err) {
+      console.error('Zatca Error: ', err);
+    } finally {
+      setIsConnectedLoading(false);
+      queryClient.invalidateQueries(['/orders']);
+      dispatch(toggleActionView(false));
+    }
+  };
+
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-lg-none h-[90vh] max-w-[80vw] overflow-y-auto relative bg-white">
@@ -188,16 +201,16 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-wrap mt-4 text-right bg-white rounded-lg border border-[#ECECEC] border-solid max-md:mr-1 max-md:max-w-full">
-                      {Another && (
+                    {Another && data?.customer?.addresses[0]?.name && (
+                      <div className="flex flex-wrap mt-4 text-right bg-white rounded-lg border border-[#ECECEC] border-solid max-md:mr-1 max-md:max-w-full">
                         <div className="flex z-10 flex-col flex-1   min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-[#ECECEC] border-solid   justify-between">
                           <div className="self-center">عنوان العميل</div>
                           <div className="self-start mt-4 w-full text-center font-semibold">
                             {Another ? data?.customer?.addresses[0]?.name : ''}
                           </div>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                     <div className="flex">
                       {ShowCar && data?.kitchen_received_at && (
                         <div className="flex flex-col flex-1 items-center   min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid   justify-between">
@@ -543,6 +556,18 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           {Another ? data?.customer?.name : ''}
                         </p>
                       </div>
+                      {/* <div className="flex justify-between">
+                        <p>
+                          {Another && 'عنوان العميل'}
+                          {Corporate && 'عنوان المورد'}
+                        </p>
+                        <p>
+                          {Corporate
+                            ? data?.get_supplier?.addresses[0]?.name
+                            : ''}
+                          {Another ? data?.customer?.addresses[0]?.name : ''}
+                        </p>
+                      </div> */}
                       <div className="flex justify-between">
                         <p>الجوال </p>
                         <p>
@@ -903,8 +928,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                             handleSendToZatca();
                           }}
                         >
-                          Send To Zatca
+                          {t('REPORT')}
                         </button>
+
                         <button
                           disabled={loading}
                           onClick={handleReturn}
