@@ -28,6 +28,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const supplierInfo = { data: data?.get_supplier };
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
+  const [zatcaStatus, setZatcaStatus] = useState<string | undefined>(
+    data?.zatca_report_status
+  );
   const Another = !Corporate;
   const ShowCar =
     allSettings.WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
@@ -918,15 +921,17 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                     </div>
                     {Another && (
                       <div className="flex flex-grow gap-2 flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg-lg  max-md:mt-10">
-                        <button
-                          disabled={isConnectedLoading}
-                          className="px-2.5 py-1 text-[#5951C8] bg-white rounded-lg-lg border border-[#5951C8] border-solid max-md:px-5"
-                          onClick={() => {
-                            handleSendToZatca();
-                          }}
-                        >
-                          {t('REPORT')}
-                        </button>
+                        {zatcaStatus !== 'PASS' && (
+                          <button
+                            disabled={isConnectedLoading}
+                            className="px-2.5 py-1 text-[#5951C8] bg-white rounded-lg-lg border border-[#5951C8] border-solid max-md:px-5"
+                            onClick={() => {
+                              handleSendToZatca();
+                            }}
+                          >
+                            {t('REPORT')}
+                          </button>
+                        )}
 
                         <button
                           disabled={loading}
