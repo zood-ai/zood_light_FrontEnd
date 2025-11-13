@@ -72,7 +72,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
     try {
       setIsConnectedLoading(true);
       const res = await axiosInstance.post(`zatca/orders/${data?.id}/report`);
-      console.log('Zatca Response: ', res);
       toast({
         title: t('REPORT'),
         description: res.data.message || 'Sent to Zatca successfully',
