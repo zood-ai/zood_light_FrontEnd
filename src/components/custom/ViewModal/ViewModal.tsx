@@ -13,6 +13,39 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Button } from 'antd';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 import { useTranslation } from 'react-i18next';
+import { Pointer } from 'lucide-react';
+
+const animationStyles = `
+    @keyframes buttonPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(89, 81, 200, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(89, 81, 200, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(89, 81, 200, 0);
+      }
+    }
+
+    @keyframes pointerPulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+    }
+
+    .button-send-zatca {
+      animation: buttonPulse 2s infinite;
+    }
+
+    .pointer-icon-animation {
+      animation: pointerPulse 1.5s ease-in-out infinite;
+      display: inline-block;
+    }
+  `;
 
 export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const dispatch = useDispatch();
@@ -919,17 +952,21 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       </div>
                     </div>
                     {Another && (
-                      <div className="flex flex-grow gap-2 flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg-lg  max-md:mt-10">
+                      <div className="flex flex-grow gap-4 flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg-lg  max-md:mt-10">
                         {zatcaStatus !== 'PASS' && (
-                          <button
+                          <Button
                             disabled={isConnectedLoading}
-                            className="px-2.5 py-1 text-[#5951C8] bg-white rounded-lg-lg border border-[#5951C8] border-solid max-md:px-5"
+                            className="px-2.5 py-1 gap-2 text-white bg-[#5951C8] rounded-lg border border-[#5951C8] border-solid max-md:px-5 hover:text-white transition-all duration-200 ease-out hover:scale-105 active:scale-95 cursor-pointer hover:shadow-md hover:shadow-[#5951C8]/30 button-send-zatca"
                             onClick={() => {
                               handleSendToZatca();
                             }}
                           >
-                            {t('REPORT')}
-                          </button>
+                            <Pointer
+                              size={15}
+                              className="pointer-icon-animation"
+                            />
+                            <span>{t('SEND_TO_ZATCA')}</span>
+                          </Button>
                         )}
 
                         <button
