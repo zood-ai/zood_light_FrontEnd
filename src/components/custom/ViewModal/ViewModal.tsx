@@ -120,6 +120,8 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
     }
   };
 
+  const customerAddressLength = data?.customer?.addresses[0]?.name?.length > 35;
+
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-lg-none h-[90vh] max-w-[80vw] overflow-y-auto relative bg-white">
@@ -233,17 +235,33 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         </div>
                       </div>
                     </div>
-                    {Another && data?.customer?.addresses[0]?.name && (
-                      <div className="flex flex-wrap mt-4 text-right bg-white rounded-lg border border-[#ECECEC] border-solid max-md:mr-1 max-md:max-w-full">
-                        <div className="flex z-10 flex-col flex-1   min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-[#ECECEC] border-solid   justify-between">
-                          <div className="self-center">عنوان العميل</div>
-                          <div className="self-start mt-4 w-full text-center font-semibold">
-                            {Another ? data?.customer?.addresses[0]?.name : ''}
+                    {Another &&
+                      customerAddressLength &&
+                      data?.customer?.addresses[0]?.name && (
+                        <div className="flex flex-wrap mt-4 text-right bg-white rounded-lg border border-[#ECECEC] border-solid max-md:mr-1 max-md:max-w-full">
+                          <div className="flex z-10 flex-col flex-1   min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-[#ECECEC] border-solid   justify-between">
+                            <div className="self-center">عنوان العميل</div>
+                            <div className="self-start mt-4 w-full text-center font-semibold">
+                              {Another
+                                ? data?.customer?.addresses[0]?.name
+                                : ''}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                     <div className="flex">
+                      {!customerAddressLength &&
+                        Another &&
+                        data?.customer?.addresses[0]?.name && (
+                          <div className="flex flex-col flex-1 items-center   min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid   justify-between">
+                            <div>عنوان العميل</div>
+                            <div className="mt-4 font-semibold w-full text-center">
+                              {Another
+                                ? data?.customer?.addresses[0]?.name
+                                : '---'}
+                            </div>
+                          </div>
+                        )}
                       {ShowCar && data?.kitchen_received_at && (
                         <div className="flex flex-col flex-1 items-center   min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid   justify-between">
                           <div>نوع السيارة</div>
