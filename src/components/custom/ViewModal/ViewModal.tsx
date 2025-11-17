@@ -12,31 +12,58 @@ import { toggleActionView } from '@/store/slices/toggleAction';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from 'antd';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
+import { useTranslation } from 'react-i18next';
+import { Pointer } from 'lucide-react';
+
+const animationStyles = `
+    @keyframes buttonPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(89, 81, 200, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(89, 81, 200, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(89, 81, 200, 0);
+      }
+    }
+
+    @keyframes pointerPulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+    }
+
+    .button-send-zatca {
+      animation: buttonPulse 2s infinite;
+    }
+
+    .pointer-icon-animation {
+      animation: pointerPulse 1.5s ease-in-out infinite;
+      display: inline-block;
+    }
+  `;
 
 export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
+
   const data = useSelector((state: any) => state.toggleAction.data);
   const allSettings = useSelector((state: any) => state.allSettings.value);
   const contentRef = useRef<HTMLDivElement>(null);
-  const reactToPrintFn = useReactToPrint({ contentRef }); 
-    const { openDialog } = useGlobalDialog();
+  const reactToPrintFn = useReactToPrint({ contentRef });
   const [isConnectedLoading, setIsConnectedLoading] = useState(false);
-  const handleSendToZatca = async () => {
-    try {
-      setIsConnectedLoading(true);
-      const res = await axiosInstance.post(`zatca/orders/${data?.id}/report`);
-      console.log('Zatca Response: ', res); 
-      openDialog('added')
-    } catch (err) {
-      console.error('Zatca Error: ', err);
-    } finally {
-      setIsConnectedLoading(false);
-    }
-  };
-  const customerInfo = { data: data.customer };
+
+  const customerInfo = { data: data?.customer };
   const supplierInfo = { data: data?.get_supplier };
   const { pathname } = useLocation();
   const Corporate = pathname === '/zood-dashboard/purchase-invoices';
+  const [zatcaStatus, setZatcaStatus] = useState<string | undefined>(
+    data?.zatca_report_status
+  );
   const Another = !Corporate;
   const ShowCar =
     allSettings.WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
@@ -72,6 +99,29 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
       });
     }
   };
+
+  const handleSendToZatca = async () => {
+    if (!data) return;
+    try {
+      setIsConnectedLoading(true);
+      const res = await axiosInstance.post(`zatca/orders/${data?.id}/report`);
+      toast({
+        title: t('REPORT'),
+        description: res.data.message || 'Sent to Zatca successfully',
+        duration: 3000,
+        variant: 'default',
+      });
+    } catch (err) {
+      console.error('Zatca Error: ', err);
+    } finally {
+      setIsConnectedLoading(false);
+      queryClient.invalidateQueries(['/orders']);
+      dispatch(toggleActionView(false));
+    }
+  };
+
+  const customerAddressLength = data?.customer?.addresses[0]?.name?.length > 35;
+
   return (
     <>
       <div className="flex flex-wrap gap-4 rounded-lg-none h-[90vh] max-w-[80vw] overflow-y-auto relative bg-white">
@@ -84,10 +134,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                   width: '100%',
                   maxWidth: '800px',
                   margin: 'auto',
-                  paddingRight: 0,
-                  paddingLeft: 0,
-                  paddingTop: 20,
-                  paddingBottom: 20,
+                  padding: '20px',
                 }}
                 className={`${
                   size === 'A4' ? 'a4-size' : 'small-receipt'
@@ -188,17 +235,33 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-wrap mt-4 text-right bg-white rounded-lg border border-[#ECECEC] border-solid max-md:mr-1 max-md:max-w-full">
-                      {Another && (
-                        <div className="flex z-10 flex-col flex-1   min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-[#ECECEC] border-solid   justify-between">
-                          <div className="self-center">عنوان العميل</div>
-                          <div className="self-start mt-4 w-full text-center font-semibold">
-                            {Another ? data?.customer?.addresses[0]?.name : ''}
+                    {Another &&
+                      customerAddressLength &&
+                      data?.customer?.addresses[0]?.name && (
+                        <div className="flex flex-wrap mt-4 text-right bg-white rounded-lg border border-[#ECECEC] border-solid max-md:mr-1 max-md:max-w-full">
+                          <div className="flex z-10 flex-col flex-1   min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-[#ECECEC] border-solid   justify-between">
+                            <div className="self-center">عنوان العميل</div>
+                            <div className="self-start mt-4 w-full text-center font-semibold">
+                              {Another
+                                ? data?.customer?.addresses[0]?.name
+                                : ''}
+                            </div>
                           </div>
                         </div>
                       )}
-                    </div>
                     <div className="flex">
+                      {!customerAddressLength &&
+                        Another &&
+                        data?.customer?.addresses[0]?.name && (
+                          <div className="flex flex-col flex-1 items-center   min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid   justify-between">
+                            <div>عنوان العميل</div>
+                            <div className="mt-4 font-semibold w-full text-center">
+                              {Another
+                                ? data?.customer?.addresses[0]?.name
+                                : '---'}
+                            </div>
+                          </div>
+                        )}
                       {ShowCar && data?.kitchen_received_at && (
                         <div className="flex flex-col flex-1 items-center   min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid   justify-between">
                           <div>نوع السيارة</div>
@@ -543,6 +606,18 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           {Another ? data?.customer?.name : ''}
                         </p>
                       </div>
+                      {/* <div className="flex justify-between">
+                        <p>
+                          {Another && 'عنوان العميل'}
+                          {Corporate && 'عنوان المورد'}
+                        </p>
+                        <p>
+                          {Corporate
+                            ? data?.get_supplier?.addresses[0]?.name
+                            : ''}
+                          {Another ? data?.customer?.addresses[0]?.name : ''}
+                        </p>
+                      </div> */}
                       <div className="flex justify-between">
                         <p>الجوال </p>
                         <p>
@@ -895,16 +970,23 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       </div>
                     </div>
                     {Another && (
-                      <div className="flex flex-grow gap-2 flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg-lg  max-md:mt-10">
-                        <button
-                          disabled={isConnectedLoading}
-                          className="px-2.5 py-1 text-[#5951C8] bg-white rounded-lg-lg border border-[#5951C8] border-solid max-md:px-5"
-                          onClick={() => {
-                            handleSendToZatca();
-                          }}
-                        >
-                          Send To Zatca
-                        </button>
+                      <div className="flex flex-grow gap-4 flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg-lg  max-md:mt-10">
+                        {zatcaStatus !== 'PASS' && (
+                          <Button
+                            disabled={isConnectedLoading}
+                            className="px-2.5 py-1 gap-2 text-white bg-[#5951C8] rounded-lg border border-[#5951C8] border-solid max-md:px-5 hover:text-white transition-all duration-200 ease-out hover:scale-105 active:scale-95 cursor-pointer hover:shadow-md hover:shadow-[#5951C8]/30 button-send-zatca"
+                            onClick={() => {
+                              handleSendToZatca();
+                            }}
+                          >
+                            <Pointer
+                              size={15}
+                              className="pointer-icon-animation"
+                            />
+                            <span>{t('SEND_TO_ZATCA')}</span>
+                          </Button>
+                        )}
+
                         <button
                           disabled={loading}
                           onClick={handleReturn}
