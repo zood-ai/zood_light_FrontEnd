@@ -85,7 +85,7 @@ export default function SignIn2() {
 
   return (
     <div className="min-h-[100vh] overflow-hidden px-4 flex flex-col items-center sm:px-[52px]">
-      {expired && <PayDialog showAllTime={1}/>}
+      {expired && <PayDialog showAllTime={true} />}
       <div className="w-full flex flex-row gap-5 justify-between mt-[46px]  items-center ">
         <div className="w-[213px]">
           <Link to="/">
