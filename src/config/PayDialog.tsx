@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { AlertCircle, Banknote, Clock, Copy, Phone } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import axiosInstance from '@/api/interceptors';
 
 let times = 1;
@@ -70,80 +78,106 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
   useEffect(() => {
     times = 1;
   }, [showAllTime]);
+
   if (showRemaining && !timeLeft) return;
   if (!showAllTime && times !== 1) return;
   times++;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         showClose={false}
-        className="text-center bg-[#ff444e] outline-none border-none"
+        className="max-w-md w-[95%] rounded-xl border-none shadow-2xl p-0 overflow-hidden bg-white"
       >
-        {/* <DialogHeader>
-          <DialogTitle className="flex justify-center">
-            <Alert />
+        {/* Header Section */}
+        <div className="bg-red-500 p-6 text-center text-white">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+            <AlertCircle className="h-8 w-8 text-white" />
+          </div>
+          <DialogTitle className="text-2xl font-bold text-white">
+            تنبيه الاشتراك
           </DialogTitle>
-        </DialogHeader> */}
-        <div>
-          <p dir="ltr" className="text-right text-white font-extrabold text-xl">
-            {showRemaining ? (
-              <>
-                {timeLeft} على انتهاء الاشتراك برجاء سداد قيمة الاشتراك بقيمة
-                500 ريال
-              </>
-            ) : (
-              'تم انتهاء الاشتراك برجاه سداد قيمة الاشتراك بقيمة 500 ريال'
-            )}
-            <br />
-            <br />
-            <div
-              dir="rtl"
-              className="flex gap-3 text-white font-extrabold text-xl"
-            >
-              <span className="text-right text-white font-extrabold text-xl">
-                اسم البنك:
-              </span>
-              <span className="text-right text-white font-extrabold text-xl">
-                بنك الراجحي
-              </span>
+          {showRemaining && timeLeft && (
+            <div className="mt-2 flex items-center justify-center gap-2 rounded-full bg-white/20 py-1 px-3 text-sm font-medium backdrop-blur-sm w-fit mx-auto">
+              <Clock className="h-4 w-4" />
+              <span>{timeLeft}</span>
             </div>
-            <div
-              dir="rtl"
-              className="flex gap-3 text-white font-extrabold text-xl"
+          )}
+        </div>
+
+        <div className="p-6 space-y-6" dir="rtl">
+          {/* Main Message */}
+          <div className="text-center space-y-2">
+            <p className="text-lg font-medium text-gray-900">
+              {showRemaining
+                ? 'اشتراكك على وشك الانتهاء'
+                : 'تم انتهاء فترة الاشتراك الخاصة بك'}
+            </p>
+            <p className="text-gray-500">
+              برجاء سداد قيمة تجديد الاشتراك{' '}
+              <span className="font-bold text-red-500">500 ريال</span> لاستمرار
+              الخدمة
+            </p>
+          </div>
+
+          {/* Bank Details Card */}
+          <Card className="bg-gray-50 border-gray-100">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center gap-2 text-gray-700 font-semibold border-b border-gray-200 pb-2 mb-2">
+                <Banknote className="h-5 w-5 text-gray-500" />
+                <span>بيانات التحويل البنكي</span>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">اسم البنك:</span>
+                  <span className="font-bold text-gray-900">بنك الراجحي</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">اسم الحساب:</span>
+                  <span className="font-bold text-gray-900">
+                    شركة يور مارت للتجارة
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-gray-500 block">رقم الحساب:</span>
+                  <div className="flex items-center justify-between bg-white p-2 rounded border border-gray-200">
+                    <span className="font-mono font-bold text-gray-900 dir-ltr">
+                      622000010006080942546
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-gray-500 block">رقم الآيبان:</span>
+                  <div className="flex items-center justify-between bg-white p-2 rounded border border-gray-200">
+                    <span className="font-mono font-bold text-gray-900 text-xs sm:text-sm break-all">
+                      1680000622608010942546S
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact Section */}
+          <div className="text-center space-y-3">
+            <p className="text-sm text-gray-500">
+              في حال السداد يرجى إرسال صورة التحويل عبر الواتساب
+            </p>
+            <Button
+              variant="outline"
+              className="w-full gap-2 h-12 text-lg font-bold border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
+              onClick={() =>
+                window.open('https://wa.me/966562009030', '_blank')
+              }
             >
-              <span className="text-right text-white font-extrabold text-xl">
-                اسم الحساب:
-              </span>
-              <span className="text-right text-white font-extrabold text-xl">
-                شركة يور مارت للتجارة
-              </span>
-            </div>
-            <div
-              dir="rtl"
-              className="flex gap-3 text-white font-extrabold text-xl"
-            >
-              <span className="text-right text-white font-extrabold text-xl">
-                رقم الحساب:
-              </span>
-              <span className="text-right text-white font-extrabold text-xl">
-                622000010006080942546
-              </span>
-            </div>
-            <div
-              dir="rtl"
-              className="flex gap-3 text-white font-extrabold text-xl"
-            >
-              <span className="text-right text-white font-extrabold text-xl">
-                رقم الآيبان:
-              </span>
-              <span className="text-right text-white font-extrabold text-xl">
-                1680000622608010942546S
-              </span>
-            </div>
-            <br />
-            في حال السداد ارسال صوره التحويل من خلال الواتساب علي هذا الرقم
-            <p className="font-extrabold text-xl">+966 56 200 9030</p>
-          </p>
+              <Phone className="h-5 w-5" />
+              <span dir="ltr">+966 56 200 9030</span>
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
