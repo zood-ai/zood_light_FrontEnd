@@ -22,6 +22,7 @@ export default function Plans() {
   const { t } = useTranslation();
   const isRtl = useDirection();
   const { data } = createCrudService<any>('auth/whoami').useGetAll();
+
   return (
     <>
       <DetailsHeadWithOutFilter />
@@ -55,7 +56,8 @@ export default function Plans() {
               {t('SUBSCRIPTION_END_DATE')}
             </div>
             <div className="  text-[16px] font-semibold l ">
-              {data?.business?.plan[0]?.pivot?.to_date}
+              {/* {data?.business?.plan[0]?.pivot?.to_date}{' '} */}
+              {data?.business?.end_at?.split('T')[0]}
             </div>
           </div>
         </div>
