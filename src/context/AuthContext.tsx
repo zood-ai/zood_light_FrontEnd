@@ -52,12 +52,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       const token = responseData?.data?.token;
       const name = responseData?.data?.user?.name;
+      const business = {
+        businessName: responseData?.data?.user.businessName,
+        businessBusinessRef: responseData?.data?.user.business_reference,
+      };
       const userId = responseData?.data?.user?.id;
       if (token) {
         Cookies.set('accessToken', token, { expires: 1, path: '/' });
         Cookies.set('refreshToken', token, { expires: 1, path: '/' });
         Cookies.set('name', name, { expires: 1, path: '/' });
         Cookies.set('userId', userId, { expires: 1 });
+        Cookies.set('business', JSON.stringify(business), { expires: 1 });
         setUser(token);
         return { success: true, error: false };
       }

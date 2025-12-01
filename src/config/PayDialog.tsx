@@ -1,14 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { AlertCircle, Banknote, Clock, Copy, Phone } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { AlertCircle, Banknote, Clock, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import axiosInstance from '@/api/interceptors';
+import Cookies from 'js-cookie';
 
 let times = 1;
 
@@ -16,6 +12,7 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
   const [open, setOpen] = useState(true);
   const [endDate, setEndDate] = useState('');
   const [timeLeft, setTimeLeft] = useState<string>('');
+  const business = JSON.parse(Cookies?.get('business') || `{}`);
 
   useEffect(() => {
     if (!showRemaining) return;
@@ -30,7 +27,6 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
         };
       } = await axiosInstance.get('auth/whoami');
       console.log({ whoAmI });
-
       if (whoAmI) {
         console.log({ remaining: whoAmI?.business?.end_at });
         setEndDate(whoAmI?.business?.end_at);
@@ -44,20 +40,17 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
     const interval = setInterval(() => {
       const now = new Date().getTime();
       const distance = new Date(endDate).getTime() - now;
-
       if (distance <= 0) {
         clearInterval(interval);
         setTimeLeft('انتهى الوقت ✅');
         return;
       }
-
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
       const hours = Math.floor(
         (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
       );
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
       if (days < 16) {
         if (days > 0) {
           setTimeLeft(`متبقي ${days} يوم`);
@@ -87,7 +80,7 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         showClose={false}
-        className="max-w-md w-[95%] rounded-xl border-none shadow-2xl p-0 overflow-hidden bg-white"
+        className="max-w-md w-[95%] max-h-[90vh] rounded-xl border-none shadow-2xl p-0 overflow-hidden bg-white flex flex-col"
       >
         {/* Header Section */}
         <div className="bg-red-500 p-6 text-center text-white">
@@ -105,7 +98,7 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
           )}
         </div>
 
-        <div className="p-6 space-y-6" dir="rtl">
+        <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1" dir="rtl">
           {/* Main Message */}
           <div className="text-center space-y-2">
             <p className="text-lg font-medium text-gray-900">
@@ -122,25 +115,22 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
 
           {/* Bank Details Card */}
           <Card className="bg-gray-50 border-gray-100">
-            <CardContent className="p-4 space-y-3">
+            <CardContent className="p-3 space-y-2">
               <div className="flex items-center gap-2 text-gray-700 font-semibold border-b border-gray-200 pb-2 mb-2">
                 <Banknote className="h-5 w-5 text-gray-500" />
                 <span>بيانات التحويل البنكي</span>
               </div>
-
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-500">اسم البنك:</span>
                   <span className="font-bold text-gray-900">بنك الراجحي</span>
                 </div>
-
                 <div className="flex justify-between items-center">
                   <span className="text-gray-500">اسم الحساب:</span>
                   <span className="font-bold text-gray-900">
                     شركة يور مارت للتجارة
                   </span>
                 </div>
-
                 <div className="space-y-1">
                   <span className="text-gray-500 block">رقم الحساب:</span>
                   <div className="flex items-center justify-between bg-white p-2 rounded border border-gray-200">
@@ -149,7 +139,6 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
                     </span>
                   </div>
                 </div>
-
                 <div className="space-y-1">
                   <span className="text-gray-500 block">رقم الآيبان:</span>
                   <div className="flex items-center justify-between bg-white p-2 rounded border border-gray-200">
@@ -163,21 +152,47 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
           </Card>
 
           {/* Contact Section */}
-          <div className="text-center space-y-3">
-            <p className="text-sm text-gray-500">
-              في حال السداد يرجى إرسال صورة التحويل عبر الواتساب
-            </p>
-            <Button
-              variant="outline"
-              className="w-full gap-2 h-12 text-lg font-bold border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
-              onClick={() =>
-                window.open('https://wa.me/966562009030', '_blank')
-              }
-            >
-              <Phone className="h-5 w-5" />
-              <span dir="ltr">+966 56 200 9030</span>
-            </Button>
-          </div>
+          <Card className="bg-gray-50 border-gray-100">
+            <CardContent className="p-3 space-y-3">
+              {/* Store Info Header */}
+              <div className="flex items-center gap-2 text-gray-700 font-semibold border-b border-gray-200 pb-2 mb-1">
+                <Phone className="h-5 w-5 text-gray-500" />
+                <span>بيانات المنشأة</span>
+              </div>
+
+              {/* Store Details */}
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">اسم المنشأة:</span>
+                  <span className="font-medium text-gray-900">
+                    {business?.businessName || 'غير محدد'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">الرقم المرجعي:</span>
+                  <span className="font-mono font-bold text-gray-900 text-xs sm:text-sm break-all">
+                    {business?.businessBusinessRef || 'غير محدد'}
+                  </span>
+                </div>
+              </div>
+
+              {/* WhatsApp Contact Info */}
+              <div className="pt-2 border-t border-gray-200 mt-3">
+                <p className="text-xs text-gray-500 text-center mb-2">
+                  في حال السداد يرجى إرسال صورة التحويل عبر الواتساب
+                </p>
+                <Button
+                  className="w-full gap-2 h-10 font-semibold text-base bg-green-500 hover:bg-green-600 text-white"
+                  onClick={() =>
+                    window.open('https://wa.me/966562009030', '_blank')
+                  }
+                >
+                  <Phone className="h-5 w-5" />
+                  <span dir="ltr">+966 56 200 9030</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DialogContent>
     </Dialog>
