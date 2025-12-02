@@ -68,7 +68,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = () => {
               <div className="flex   justify-between px-7 py-1.5 w-full bg-white rounded-lg border border-gray-200 border-solid max-md:px-5 max-md:max-w-full">
                 <div className="flex flex-wrap gap-6 my-auto max-md:max-w-full">
                   <a
-                    href={`https://wa.me/+201080925119`}
+                    href={`https://wa.me/+966551164271`}
                     target="_blank"
                     className="flex gap-2 cursor-pointer px-5 py-3 bg-green-500 rounded-lg"
                   >

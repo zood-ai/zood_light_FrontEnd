@@ -44,7 +44,7 @@ export default function ComingSoon() {
         </h1>
 
         <a
-          href={`https://wa.me/+201080925119`}
+          href={`https://wa.me/+966551164271`}
           target="_blank"
           className="flex items-center justify-center gap-2 px-6 py-3 bg-green-500 rounded-full text-white text-xl hover:bg-green-600 transition duration-300"
         >

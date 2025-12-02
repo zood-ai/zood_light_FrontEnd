@@ -173,7 +173,7 @@ const AppShell = () => {
                 className="fixed bottom-[1.5rem] left-[1.5rem]"
               >
                 <a
-                  href={`https://wa.me/+201080925119`}
+                  href={`https://wa.me/+966551164271`}
                   target="_blank"
                   className="flex gap-2 cursor-pointer justify-center  w-[51px] h-[51px] rounded-full bg-green-500 "
                 >

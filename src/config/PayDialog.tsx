@@ -184,11 +184,11 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
                 <Button
                   className="w-full gap-2 h-10 font-semibold text-base bg-green-500 hover:bg-green-600 text-white"
                   onClick={() =>
-                    window.open('https://wa.me/966562009030', '_blank')
+                    window.open('https://wa.me/+966551164271', '_blank')
                   }
                 >
                   <Phone className="h-5 w-5" />
-                  <span dir="ltr">+966 56 200 9030</span>
+                  <span dir="ltr">+966551164271</span>
                 </Button>
               </div>
             </CardContent>
