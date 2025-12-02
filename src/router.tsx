@@ -2,7 +2,6 @@ import { createBrowserRouter } from 'react-router-dom';
 import GeneralError from './pages/errors/general-error';
 import NotFoundError from './pages/errors/not-found-error';
 
-
 import React, { lazy } from 'react';
 import ProtectedRoute from './config/ProtectedRoute.tsx';
 import { Roles } from './config/roles.ts';
@@ -213,7 +212,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: 'zood-signup-no-one-can-see-me',
+    path: 'zood-signup',
     element: (
       <React.Suspense fallback={<div>Loading register...</div>}>
         <SignUp />

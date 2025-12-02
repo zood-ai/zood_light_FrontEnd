@@ -7,164 +7,164 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@/components/ui/carousel';
 
 import { Button } from '@/components/ui/button';
 import CheckIcon from '/icons/checkIcon.svg';
-import CheckIconWhite from '/icons/checkIconWhite.svg';
+
 export default function Plans({ changeStep }) {
   return (
     <>
-      <div className="flex flex-col items-center gap-6 mt-10">
-        <h3 className="text-center font-bold   place-content-center text-[24px] text-[#26262F]">
-          اختر خطة الاشتراك
-        </h3>
-        <div className="flex flex-wrap justify-center items-center gap-4    h-[50vh]">
-          {/* <Carousel className="relative w-full"> */}
-          {/* <CarouselContent className="flex-shrink-0 w-[350px]"> */}
-          {/* <CarouselItem> */}
-          <Card className="flex flex-col items-center relative border border-[#D2D2D2]    rounded-md w-[317px] h-[335px] ">
-            <CardHeader>
-              <CardTitle className="font-bold text-2xl leading-10  ">
+      <div className="flex flex-col items-center gap-8 mt-10 mb-12">
+        <div className="text-center space-y-2">
+          <h3 className="font-bold text-3xl text-[#26262F]">
+            اختر خطة الاشتراك
+          </h3>
+          <p className="text-gray-600 text-base">
+            اختر الخطة المناسبة لاحتياجات عملك
+          </p>
+        </div>
+
+        <div className="flex flex-wrap justify-center items-stretch gap-6 w-full max-w-6xl px-4">
+          {/* الخطة الممتازة */}
+          <Card className="group flex flex-col items-center relative border-2 border-gray-200 hover:border-[#7272F6] rounded-xl w-full sm:w-[335px] h-[400px] transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white">
+            <CardHeader className="w-full text-center pt-8">
+              <CardTitle className="font-bold text-2xl text-[#26262F]">
                 الممتازة
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-2   justify-center">
-              <Button
-                onClick={changeStep}
-                className="bg-white w-[257px] leading-9 h-[62px] rounded-[8px] text-[#7272F6] text-[36px] font-bold"
-                variant="outline"
-              >
-                <span className="text-[22px] mt-[4px] mr-[2px] font-bold   leading-7">
-                  SR
-                </span>
-                720
-              </Button>
 
-              <p className="text-center   font-[500]">كل 6 شهور</p>
+            <CardContent className="flex flex-col gap-3 justify-center items-center flex-1 w-full px-6">
+              <div className="bg-gradient-to-br from-[#F5F5FF] to-[#E1E0F0] w-full py-4 rounded-xl border-2 border-[#7272F6]/20 group-hover:border-[#7272F6]/40 transition-all duration-300">
+                <div className="flex items-center justify-center gap-1">
+                  <span className="text-[24px] font-bold text-[#7272F6] mt-1">
+                    SR
+                  </span>
+                  <span className="text-5xl font-bold text-[#7272F6]">
+                    627
+                  </span>
+                </div>
+              </div>
+              <p className="text-center text-gray-600 font-medium text-base">
+                كل 6 شهور
+              </p>
             </CardContent>
-            <CardFooter className="flex flex-col gap-4  mt-auto">
-              <div className="flex items-center gap-2 w-[106%]">
-                <p className="font-[400] text-[14px]   leading-6">
-                  جميع الاسعار شاملة ضريبة القيمة المضافه
-                </p>
+
+            <CardFooter className="flex flex-col gap-4 w-full px-6 pb-6">
+              <div className="flex items-center gap-3 justify-center">
                 <img
-                  className="w-[14px] h-[14px]"
-                  src={CheckIconWhite}
-                  alt="icon page"
+                  className="w-4 h-4"
+                  src={CheckIcon}
+                  alt="check icon"
                 />
+                <p className="text-sm text-gray-600">
+                  جميع الأسعار شاملة ضريبة القيمة المضافة
+                </p>
               </div>
 
               <Button
                 onClick={changeStep}
-                className="w-[112%] rounded-md text-white bg-[#7272F6]"
-                variant="outline"
+                className="w-full h-12 rounded-lg text-white bg-[#7272F6] hover:bg-[#5656E8] font-semibold text-base shadow-md hover:shadow-lg transition-all duration-300"
               >
-                شراء
+                اختر الخطة
               </Button>
             </CardFooter>
           </Card>
-          {/* </CarouselItem> */}
-          {/* <CarouselItem> */}
-          <Card className="flex flex-col items-center relative  bg-[#7272F6] rounded-md w-[335px] h-[353px]   ">
-            <CardHeader>
-              <span className="font-bold absolute right-[13px] top-[21px] text-right text-[14px] text-[#FFFFFF]">
-                اكثر بيع
-              </span>
 
-              <CardTitle className="font-bold mt-[16px] text-2xl leading-10 text-[#FFFFFF]">
+          {/* الخطة الشاملة - Featured */}
+          <Card className="group flex flex-col items-center relative bg-gradient-to-br from-[#7272F6] via-[#6363F0] to-[#5656E8] rounded-xl w-full sm:w-[335px] h-[420px] transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 border-0">
+            <div className="absolute -top-4 right-1/2 transform translate-x-1/2">
+              <span className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold px-6 py-2 rounded-full text-sm shadow-lg">
+                الأكثر مبيعاً
+              </span>
+            </div>
+
+            <CardHeader className="w-full text-center pt-10">
+              <CardTitle className="font-bold text-2xl text-white">
                 الشاملة
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-2   justify-center">
-              <Button
-                onClick={changeStep}
-                className="bg-white w-[257px] leading-9 h-[62px] rounded-[8px] text-[#7272F6] text-[36px] font-bold"
-                variant="outline"
-              >
-                <span className="text-[22px] mt-[4px] mr-[2px] font-bold   leading-7">
-                  SR
-                </span>
-                720
-              </Button>
 
-              <p className="text-center text-[#E1E0F0] font-[500]">كل 6 شهور</p>
+            <CardContent className="flex flex-col gap-3 justify-center items-center flex-1 w-full px-6">
+              <div className="bg-white w-full py-4 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center justify-center gap-1">
+                  <span className="text-[24px] font-bold text-[#7272F6] mt-1">
+                    SR
+                  </span>
+                  <span className="text-5xl font-bold text-[#7272F6]">
+                    999
+                  </span>
+                </div>
+              </div>
+              <p className="text-center text-white/90 font-medium text-base">
+                كل 12 شهور
+              </p>
             </CardContent>
-            <CardFooter className="flex flex-col gap-4  mt-auto">
-              <div className="flex items-center w-[106%] gap-2">
-                <p className="font-[400] text-[14px] text-[#F5F5F5] leading-6">
-                  جميع الاسعار شاملة ضريبة القيمة المضافه
-                </p>
+
+            <CardFooter className="flex flex-col gap-4 w-full px-6 pb-6">
+              <div className="flex items-center gap-3 justify-center">
                 <img
-                  className="w-[14px] h-[14px]"
+                  className="w-4 h-4 brightness-0 invert"
                   src={CheckIcon}
-                  alt="icon page"
+                  alt="check icon"
                 />
+                <p className="text-sm text-white/95">
+                  جميع الأسعار شاملة ضريبة القيمة المضافة
+                </p>
               </div>
 
               <Button
                 onClick={changeStep}
-                className="w-[112%] rounded-md bg-white text-[#7272F6]"
-                variant="outline"
+                className="w-full h-12 rounded-lg bg-white text-[#7272F6] hover:bg-gray-50 font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                شراء
+                اختر الخطة
               </Button>
             </CardFooter>
           </Card>
-          {/* </CarouselItem> */}
-          {/* <CarouselItem> */}
-          <Card className="flex flex-col items-center relative  border border-[#D2D2D2] rounded-md w-[317px] h-[335px] ">
-            <CardHeader>
-              <CardTitle className="font-bold text-2xl leading-10">
-                الاساسية{' '}
+
+          {/* الخطة الأساسية */}
+          <Card className="group flex flex-col items-center relative border-2 border-gray-200 hover:border-[#7272F6] rounded-xl w-full sm:w-[335px] h-[400px] transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white">
+            <CardHeader className="w-full text-center pt-8">
+              <CardTitle className="font-bold text-2xl text-[#26262F]">
+                الأساسية
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-2   justify-center">
-              <Button
-                onClick={changeStep}
-                className="bg-white w-[257px] leading-9 h-[62px] rounded-[8px] text-[#7272F6] text-[36px] font-bold"
-                variant="outline"
-              >
-                <span className="text-[22px] mt-[4px] mr-[2px] font-bold   leading-7">
-                  SR
-                </span>
-                720
-              </Button>
 
-              <p className="text-center   font-[500]">كل 3 اشهر</p>
+            <CardContent className="flex flex-col gap-3 justify-center items-center flex-1 w-full px-6">
+              <div className="bg-gradient-to-br from-[#F5F5FF] to-[#E1E0F0] w-full py-4 rounded-xl border-2 border-[#7272F6]/20 group-hover:border-[#7272F6]/40 transition-all duration-300">
+                <div className="flex items-center justify-center gap-1">
+                  <span className="text-[24px] font-bold text-[#7272F6] mt-1">
+                    SR
+                  </span>
+                  <span className="text-5xl font-bold text-[#7272F6]">
+                    373
+                  </span>
+                </div>
+              </div>
+              <p className="text-center text-gray-600 font-medium text-base">
+                كل 3 أشهر
+              </p>
             </CardContent>
-            <CardFooter className="flex flex-col gap-4  mt-auto">
-              <div className="flex items-center w-[106%] gap-2">
-                <p className="font-[400] text-[14px]   leading-6">
-                  جميع الاسعار شاملة ضريبة القيمة المضافه
-                </p>
+
+            <CardFooter className="flex flex-col gap-4 w-full px-6 pb-6">
+              <div className="flex items-center gap-3 justify-center">
                 <img
-                  className="w-[14px] h-[14px]"
-                  src={CheckIconWhite}
-                  alt="icon page"
+                  className="w-4 h-4"
+                  src={CheckIcon}
+                  alt="check icon"
                 />
+                <p className="text-sm text-gray-600">
+                  جميع الأسعار شاملة ضريبة القيمة المضافة
+                </p>
               </div>
 
               <Button
                 onClick={changeStep}
-                className="w-[112%] bg-[#7272F6] rounded-md text-[#FFFFFF]"
-                variant="outline"
+                className="w-full h-12 rounded-lg text-white bg-[#7272F6] hover:bg-[#5656E8] font-semibold text-base shadow-md hover:shadow-lg transition-all duration-300"
               >
-                شراء
+                اختر الخطة
               </Button>
             </CardFooter>
           </Card>
-          {/* </CarouselItem> */}
-          {/* </CarouselContent> */}
-          {/* <CarouselPrevious className="bg-[#7272F6] text-white text-[14px] hover:bg-[#7f7ff0]" /> */}
-          {/* <CarouselNext className="bg-[#7272F6] text-white text-[14px] hover:bg-[#7f7ff0]" /> */}
-          {/* </Carousel> */}
         </div>
       </div>
     </>

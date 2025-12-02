@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import axiosInstance from '@/api/interceptors';
 import { Button } from '@/components/custom/button';
 import { CheckboxWithText } from '@/components/custom/CheckboxWithText';
@@ -32,265 +33,240 @@ export default function SignUpForm({
   const { data: countries } =
     createCrudService<any>('manage/countries').useGetAll();
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="mx-2 my-4">
-        <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
-          <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
-            <Label className="align-right" htmlFor="name">
-              الاسم
+    <form onSubmit={handleSubmit} className="w-full max-w-4xl">
+      <div className="mx-auto my-8 px-4">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-[#26262F] mb-2">
+            أكمل بياناتك
+          </h2>
+          <p className="text-gray-600">قم بملء البيانات التالية لإنشاء حسابك</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8 shadow-sm">
+          {/* الاسم */}
+          <div dir="rtl" className="mb-6">
+            <Label
+              className="text-base font-semibold text-gray-700 mb-2 block"
+              htmlFor="name"
+            >
+              الاسم الكامل
             </Label>
             <Input
-              className="w-full border-[#DCDBDB]"
+              className="h-12 border-gray-300 focus:border-[#7272F6] focus:ring-2 focus:ring-[#7272F6]/20 transition-all duration-200"
               type="text"
               id="name"
+              placeholder="أدخل اسمك الكامل"
               value={formState.name}
               onChange={(e) => handleChange('name', e.target.value)}
             />
           </div>
-          {/* <div
-            dir="rtl"
-            className="flex flex-col flex-grow gap-y-2 max-sm:w-full"
-          >
-            <Label className="align-right" htmlFor="plan">
-              الخطة
-            </Label>
-            <Select
-              dir="rtl"
-              onValueChange={(value) => handleChange('plan', value)}
-            >
-              <SelectTrigger className="border-[#DCDBDB]  sm:w-[327px]">
-                <SelectValue placeholder="" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="a">a</SelectItem>
-                  <SelectItem value="b">b</SelectItem>
-                  <SelectItem value="c">c</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div> */}
-        </div>
-        <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
-          <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
-            <Label className="align-right" htmlFor="email">
-              عنوان البريد الالكتروني
-            </Label>
-            <Input
-              className="w-full border-[#DCDBDB]"
-              type="email"
-              id="email"
-              value={formState.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-            />
-          </div>
-          <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
-            <Label className="align-right" htmlFor="phone">
-              رقم التليفون
-            </Label>
-            <Input
-              className="w-full border-[#DCDBDB]"
-              type="text"
-              id="phone"
-              value={formState.phone}
-              onChange={(e) => handleChange('phone', e.target.value)}
-            />
-          </div>
-        </div>
-        <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
-          <div className="flex gap-6 flex-grow">
-            <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
-              <Label className="align-right" htmlFor="password">
-                الرقم السري
+
+          {/* البريد الإلكتروني و رقم الهاتف */}
+          <div dir="rtl" className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div dir="rtl" className="flex flex-col gap-y-2">
+              <Label
+                className="text-base font-semibold text-gray-700"
+                htmlFor="email"
+              >
+                البريد الإلكتروني
               </Label>
               <Input
-                className="w-full flex-grow border-[#DCDBDB]"
-                type="password"
-                id="password"
-                value={formState.password}
-                onChange={(e) => handleChange('password', e.target.value)}
+                className="h-12 border-gray-300 focus:border-[#7272F6] focus:ring-2 focus:ring-[#7272F6]/20 transition-all duration-200"
+                type="email"
+                id="email"
+                placeholder="example@email.com"
+                value={formState.email}
+                onChange={(e) => handleChange('email', e.target.value)}
               />
             </div>
-            {/* <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
-              <Label className="align-right" htmlFor="confirmPassword">
-                تاكيد الرقم السري
+            <div dir="rtl" className="flex flex-col gap-y-2">
+              <Label
+                className="text-base font-semibold text-gray-700"
+                htmlFor="phone"
+              >
+                رقم الهاتف
               </Label>
               <Input
-                className="w-full border-[#DCDBDB]"
-                type="password"
-                id="confirmPassword"
-                value={formState.confirmPassword}
-                onChange={(e) =>
-                  handleChange('confirmPassword', e.target.value)
-                }
+                className="h-12 border-gray-300 focus:border-[#7272F6] focus:ring-2 focus:ring-[#7272F6]/20 transition-all duration-200"
+                type="text"
+                id="phone"
+                placeholder="+966 5X XXX XXXX"
+                value={formState.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
               />
-            </div> */}
+            </div>
           </div>
-        </div>
-        <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
-          <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
-            <Label className="align-right" htmlFor="business_name">
-              اسم المتجر
+
+          {/* كلمة المرور */}
+          <div dir="rtl" className="mb-6">
+            <Label
+              className="text-base font-semibold text-gray-700 mb-2 block"
+              htmlFor="password"
+            >
+              كلمة المرور
             </Label>
             <Input
-              className="w-full border-[#DCDBDB]"
-              type="text"
-              id="business_name"
-              value={formState.business_name}
-              onChange={(e) => handleChange('business_name', e.target.value)}
+              className="h-12 border-gray-300 focus:border-[#7272F6] focus:ring-2 focus:ring-[#7272F6]/20 transition-all duration-200"
+              type="password"
+              id="password"
+              placeholder="أدخل كلمة مرور قوية"
+              value={formState.password}
+              onChange={(e) => handleChange('password', e.target.value)}
             />
           </div>
-          <div
-            dir="rtl"
-            className="flex flex-col flex-grow gap-y-2 max-sm:w-full"
-          >
-            <Label className="align-right" htmlFor="business_type_id">
-              نوع المتجر
-            </Label>
-            <Select
-              dir="rtl"
-              onValueChange={(value) => handleChange('business_type_id', value)}
-            >
-              <SelectTrigger className="w-full sm:w-[327px] border-[#DCDBDB]">
-                <SelectValue placeholder="" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {businessTypes &&
-                    businessTypes?.data.map((e) => (
-                      <SelectItem value={e.id}>{e.name}</SelectItem>
-                    ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+
+          {/* Divider */}
+          <div className="my-8 border-t border-gray-200"></div>
+
+          {/* اسم المتجر و نوع المتجر */}
+          <div dir="rtl" className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div dir="rtl" className="flex flex-col gap-y-2">
+              <Label
+                className="text-base font-semibold text-gray-700"
+                htmlFor="business_name"
+              >
+                اسم المتجر
+              </Label>
+              <Input
+                className="h-12 border-gray-300 focus:border-[#7272F6] focus:ring-2 focus:ring-[#7272F6]/20 transition-all duration-200"
+                type="text"
+                id="business_name"
+                placeholder="أدخل اسم متجرك"
+                value={formState.business_name}
+                onChange={(e) => handleChange('business_name', e.target.value)}
+              />
+            </div>
+            <div dir="rtl" className="flex flex-col gap-y-2">
+              <Label
+                className="text-base font-semibold text-gray-700"
+                htmlFor="business_type_id"
+              >
+                نوع المتجر
+              </Label>
+              <Combobox
+                dir="rtl"
+                value={formState.business_type_id}
+                onValueChange={(value) =>
+                  handleChange('business_type_id', value)
+                }
+                options={
+                  businessTypes?.data.map((e) => ({
+                    value: e.id,
+                    label: e.name,
+                  })) || []
+                }
+                placeholder="اختر نوع المتجر"
+                searchPlaceholder="ابحث عن نوع المتجر..."
+                emptyText="لا توجد نتائج"
+              />
+            </div>
           </div>
-        </div>
-        <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
-          <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
-            <Label className="align-right" htmlFor="business_location_id">
+
+          {/* الدولة */}
+          <div dir="rtl" className="mb-6">
+            <Label
+              className="text-base font-semibold text-gray-700 mb-2 block"
+              htmlFor="business_location_id"
+            >
               الدولة
             </Label>
-            <Select
+            <Combobox
               dir="rtl"
+              value={
+                formState.business_location_id ||
+                'a2968fb8-28e8-4818-9bf6-33671265c09d'
+              }
               onValueChange={(value) =>
                 handleChange('business_location_id', value)
               }
-            >
-              {/* sm:w-[327px] */}
-              <SelectTrigger className="w-full border-[#DCDBDB] ">
-                <SelectValue placeholder="" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {countries &&
-                    countries?.data.map((e) => (
-                      <SelectItem value={e.id}>{e.name_en}</SelectItem>
-                    ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-          {/* <div
-            dir="rtl"
-            className="flex flex-col flex-grow gap-y-2 max-sm:w-full"
-          >
-            <Label className="align-right" htmlFor="city">
-              المدينة
-            </Label>
-            <Input
-              type="text"
-              id="city"
-              className="w-full border-[#DCDBDB] mt-2"
-              value={formState.city}
-              onChange={(e) => handleChange('city', e.target.value)}
-            />
-          </div> */}
-        </div>
-        {/* <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
-          <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
-            <Label className="align-right" htmlFor="district">
-              الحي
-            </Label>
-            <Input
-              className="w-full border-[#DCDBDB]"
-              type="text"
-              id="district"
-              value={formState.district}
-              onChange={(e) => handleChange('district', e.target.value)}
+              options={
+                countries?.data.map((e) => ({
+                  value: e.id,
+                  label: e.name_en,
+                })) || []
+              }
+              placeholder="اختر الدولة"
+              searchPlaceholder="ابحث عن الدولة..."
+              emptyText="لا توجد نتائج"
             />
           </div>
-          <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
-            <Label className="align-right" htmlFor="streetName">
-             {t('STREAT_NAME')} 
+
+          {/* Divider */}
+          <div className="my-8 border-t border-gray-200"></div>
+
+          {/* تحميل السجل التجاري */}
+          <div dir="rtl" className="mb-6">
+            <Label className="text-base font-semibold text-gray-700 mb-3 block">
+              تحميل السجل التجاري
             </Label>
-            <Input
-              className="w-full border-[#DCDBDB]"
-              type="text"
-              id="streetName"
-              value={formState.streetName}
-              onChange={(e) => handleChange('streetName', e.target.value)}
-            />
-          </div>
-        </div> */}
-        {/* <div dir="rtl" className="flex flex-wrap justify-between gap-6 mb-6">
-          <div dir="rtl" className="flex flex-col flex-grow gap-y-3">
-            <Label className="align-right" htmlFor="postalCode">
-              رمز بريدي
-            </Label>
-            <Input
-              className="w-full border-[#DCDBDB]"
-              type="text"
-              id="postalCode"
-              value={formState.postalCode}
-              onChange={(e) => handleChange('postalCode', e.target.value)}
-            />
-          </div>
-        </div> */}
-        <div className="flex flex-col gap-4">
-          <div dir="rtl">
-            <div className="sm:w-[327px]">
-              <div className="flex flex-col items-start self-start mt-4 max-w-full text-sm text-left w-[223px]">
-                <div className="font-medium text-zinc-500">
-                  تحميل السجل التجاري
-                </div>
-                <div className="flex gap-2   max-w-full items-center">
-                  <label className="flex flex-1 justify-center items-center font-semibold bg-gray-200 rounded border border-solid border-zinc-300 w-[117px] h-[39px] text-mainText cursor-pointer">
-                    <span className="text-[14px]">اختر الملف</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) =>
-                        handleChange(
-                          'tradeRegister',
-                          e.target.files?.[0] || null
-                        )
-                      }
+            <div className="flex flex-col gap-3">
+              <label className="group flex items-center justify-center gap-2 h-12 px-6 font-semibold bg-gradient-to-r from-gray-50 to-gray-100 hover:from-[#7272F6]/5 hover:to-[#7272F6]/10 rounded-lg border-2 border-dashed border-gray-300 hover:border-[#7272F6] text-gray-700 cursor-pointer transition-all duration-200">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                <span className="text-base">اختر الملف</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) =>
+                    handleChange('tradeRegister', e.target.files?.[0] || null)
+                  }
+                />
+              </label>
+              {formState.tradeRegister && (
+                <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-lg">
+                  <svg
+                    className="w-5 h-5 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
-                  </label>
+                  </svg>
+                  <span className="text-sm text-green-700 font-medium">
+                    {formState.tradeRegister?.name}
+                  </span>
                 </div>
-                <span className="text-gray-500 text-md">
-                  {formState.tradeRegister?.name || 'no file chosen'}
-                </span>
-              </div>
+              )}
             </div>
           </div>
-          <div dir="rtl">
+
+          {/* التنبيهات */}
+          <div dir="rtl" className="mb-8">
             <CheckboxWithText
-              className=""
-              label="ارسال تنبيه للبريد الالكتروني"
+              className="text-base"
+              label="إرسال تنبيه للبريد الإلكتروني"
               checked={formState.emailAlert}
               onChange={(e) => handleChange('emailAlert', e)}
             />
           </div>
-          <div dir="rtl">
+
+          {/* زر الإرسال */}
+          <div dir="rtl" className="flex justify-center">
             <Button
               loading={loading}
               disabled={loading}
               type="submit"
-              className="px-4 py-2 w-[150px] text-sm"
+              className="h-12 px-12 text-base font-semibold bg-gradient-to-r from-[#7272F6] to-[#5656E8] hover:from-[#5656E8] hover:to-[#7272F6] shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              {!loading && 'اضافة'}
+              {!loading && 'إنشاء الحساب'}
             </Button>
           </div>
         </div>
