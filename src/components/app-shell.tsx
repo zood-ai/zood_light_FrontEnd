@@ -53,6 +53,20 @@ const AppShell = () => {
     createCrudService<any>('manage/branches').useGetAll();
 
   useEffect(() => {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+    const isMobileUA = /iPhone|iPad|iPod|Android/i.test(userAgent);
+
+    // Feature detection: Check if touch is supported
+    // const isTouchDevice =
+    //   'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    if (isMobileUA) {
+      window.location.href = 'https://zood-e-invoice-flutter.vercel.app/';
+    }
+  }, []);
+
+  useEffect(() => {
     if (userNav === true) {
       navigate(-1);
       openDialog('deleted');
