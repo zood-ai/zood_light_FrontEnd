@@ -27,7 +27,7 @@ export default function Plans({ changeStep }) {
             <h4 className="text-white font-bold text-xl mb-2">
               عروض وخصومات رائعة على جميع الباقات
             </h4>
-            <p className="text-white/90 text-sm">
+            <p className="text-white/60 text-sm">
               لا تفوت الفرصة! ابدأ الآن ووفر الكثير
             </p>
           </div>
@@ -51,7 +51,9 @@ export default function Plans({ changeStep }) {
             <CardContent className="flex flex-col gap-3 w-full px-6 pt-4">
               <div className="bg-gradient-to-br from-[#F5F5FF] to-[#E1E0F0] w-full py-4 rounded-xl border-2 border-[#7272F6]/20 group-hover:border-[#7272F6]/40 transition-all duration-300">
                 <div className="flex flex-col items-center justify-center gap-1">
-
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-sm text-gray-400 line-through">896 ريال</span>
+                  </div>
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-5xl font-bold text-[#7272F6]">627</span>
                     <span className="text-lg font-bold text-[#7272F6]">ريال /  شهرياً</span>
@@ -115,7 +117,9 @@ export default function Plans({ changeStep }) {
             <CardContent className="flex flex-col gap-3 w-full px-6 pt-4">
               <div className="bg-white w-full py-4 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300">
                 <div className="flex flex-col items-center justify-center gap-1">
-
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-sm text-gray-400 line-through">1998 ريال</span>
+                  </div>
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-5xl font-bold text-[#7272F6]">999 </span>
                     <span className="text-lg font-bold text-[#7272F6]">ريال / شهرياً</span>
@@ -127,23 +131,23 @@ export default function Plans({ changeStep }) {
               <div className="flex flex-col gap-2 mt-2" dir="rtl">
                 <div className="flex items-start gap-2">
                   <img className="w-4 h-4 mt-0.5 shrink-0 brightness-0 invert" src={CheckIcon} alt="check" />
-                  <p className="text-xs text-white">إصدار فواتير مبسطة وسريعة </p>
+                  <p className="text-xs text-white opacity-70">إصدار فواتير مبسطة وسريعة </p>
                 </div>
                 <div className="flex items-start gap-2">
                   <img className="w-4 h-4 mt-0.5 shrink-0 brightness-0 invert" src={CheckIcon} alt="check" />
-                  <p className="text-xs text-white">ادارة الفواتير الضريبية بكفاءة </p>
+                  <p className="text-xs text-white opacity-70">ادارة الفواتير الضريبية بكفاءة </p>
                 </div>
                 <div className="flex items-start gap-2">
                   <img className="w-4 h-4 mt-0.5 shrink-0 brightness-0 invert" src={CheckIcon} alt="check" />
-                  <p className="text-xs text-white">إنشاء عروض أسعار احترافية</p>
+                  <p className="text-xs text-white opacity-70">إنشاء عروض أسعار احترافية</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <img className="w-4 h-4 mt-0.5 shrink-0 brightness-0 invert" src={CheckIcon} alt="check" />
-                  <p className="text-xs text-white">تسجيل وإدارة فواتير المشتريات</p>
+                  <p className="text-xs text-white opacity-70">تسجيل وإدارة فواتير المشتريات</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <img className="w-4 h-4 mt-0.5 shrink-0 brightness-0 invert" src={CheckIcon} alt="check" />
-                  <p className="text-xs text-white">نظام متكامل بإدارة المخزون</p>
+                  <p className="text-xs text-white opacity-70">نظام متكامل بإدارة المخزون</p>
                 </div>
               </div>
             </CardContent>
@@ -151,7 +155,7 @@ export default function Plans({ changeStep }) {
             <CardFooter className="flex flex-col gap-3 w-full px-6 pb-6 mt-auto">
               <div className="flex items-center gap-2 justify-center" dir="rtl">
                 <img className="w-3 h-3 brightness-0 invert" src={CheckIcon} alt="check icon" />
-                <p className="text-xs text-white/95">
+                <p className="text-xs text-white opacity-70">
                   جميع الأسعار شاملة ضريبة القيمة المضافة
                 </p>
               </div>
@@ -182,6 +186,9 @@ export default function Plans({ changeStep }) {
             <CardContent className="flex flex-col gap-3 w-full px-6 pt-4">
               <div className="bg-gradient-to-br from-[#F5F5FF] to-[#E1E0F0] w-full py-4 rounded-xl border-2 border-[#7272F6]/20 group-hover:border-[#7272F6]/40 transition-all duration-300">
                 <div className="flex flex-col items-center justify-center gap-1">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-sm text-gray-400 line-through">622 ريال</span>
+                  </div>
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-5xl font-bold text-[#7272F6]">373</span>
                     <span className="text-lg font-bold text-[#7272F6]">ريال / شهرياً</span>

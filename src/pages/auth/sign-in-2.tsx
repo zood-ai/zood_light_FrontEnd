@@ -58,7 +58,7 @@ export default function SignIn2() {
 
   // Handle SignUp
   const handleSignUp = () => {
-    // navigate('/zood-signup-no-one-can-see-me');
+    navigate('/zood-signup');
   };
 
   // Handle form submission
