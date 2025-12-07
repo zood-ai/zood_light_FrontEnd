@@ -13,6 +13,17 @@
   "WELCOME_BACK_DESC": "هناك قائمة الخاصه ب  ",
   "TASKS": "المهام",
   "CREATE": "اضافه",
+  "PIZZERIA": "مطعم بيتزا",
+  "WORKSHOP": "ورشة",
+  "GROCERY": "بقالة",
+  "RETAIL": "تجزئة",
+  "FOOD_TRUCK": "عربة طعام",
+  "QUICK_SERVICE": "خدمة سريعة",
+  "FINE_DINING": "مطعم فاخر",
+  "CATERER": "مقدم طعام (كاترينج)",
+  "COFFEE_SHOP": "مقهى",
+  "OTHER": "أخرى",
+  "BAKERY": "مخبز",
   "EXPORT": "تصدير",
   "VIEW": "عرض",
   "TOTAL_WITHOUT_TAX": "المجموع بدون الضريبة",
@@ -42,16 +53,13 @@
   "TOTAL_AMOUNT": "المبلغ الاجمالي",
   "NOTES": "ملاحظات",
   "CANCEL_ADD": "الغاء الاضافة",
-
   "REMAINING_AMOUNT": "المبلغ المتبقي",
   "TAX": "ضريبة القيمة المضافة",
   "ADD_NEW_ITEM": "اضافة منتج جديد",
   "ENTER_INVOICE_NUMBER": "ادخل الرقم المرجعي للفاتورة أو رقم الفاتورة",
-
   "INDIVIDUAL": "افراد",
   "CORPORATE": "مؤسسة",
   "PURCHASE": "شراء",
-
   "INVOICES": "الفواتير",
   "INVOICE": "الفاتورة",
   "INVOICE_TYPE": "نوع الفاتورة",
@@ -60,14 +68,12 @@
   "TOTAL_PRICE": "المبلغ الاجمالي",
   "AMOUNT": "المبلغ",
   "CONFIRM": "تأكيد",
-
   "PAID": "مدفوع",
   "UNPAID": "غير مدفوع",
   "PARTIALLY_PAID": "مدفوع جزئي",
   "RETURN_PAYMENT": "مرتجع",
   "DRAG_AND_DROP": "اسحب وضع ملفك هنا او اختر ملف",
   "CATEGORY_NAME_EN": "اسم الفئة (EN)",
-
   "PURCHASES": "المشتريات",
   "TOTAL_PAYMENTS": "اجمالي المدفوعات",
   "LATEST_INVOICES": "احدث الفواتير",
@@ -117,7 +123,6 @@
   "YES_DELETE": "نعم, اريد ان احذف!",
   "Inactive": "غير نشط",
   "Active": "نشط",
-
   "INDIVIDUAL_INVOICE": "فاتورة افراد",
   "CORPORATE_INVOICE": "فاتورة المؤسسة",
   "PURCHASE_INVOICE": "فاتورة الشراء",
@@ -139,29 +144,24 @@
   "DRAFT": "مسودة",
   "CLOSED": "مغلق",
   "REPORTED": "تم الابلاغ",
-
   "SEARCH_TABLE_PLACEHOLDER": "بحث عن فاتورة, عميل, تاريخ",
   "START_DATE": "تاريخ البداية",
   "END_DATE": "تاريخ النهاية",
   "SORT_BY": "ترتيب حسب",
   "GO_TO_CART": "اذهب للعربة",
-
   "PRODUCT_NAME": "اسم المنتج",
   "PRODUCT_NAME_EN": "اسم المنتج (EN)",
   "CATEGORY_NAME": "اسم الفئة",
   "CATEGORY_DESCRIPTION": "وصف الفئة",
-
   "SUBSCRIPTION": "الاشتراك",
   "SUBSCRIPTION_PLAN": "الباقة",
   "SUBSCRIPTION_END_DATE": "تاريخ الانتهاء",
   "SUBSCRIPTION_DETAILS": "حالة الاشتراك",
-
   "PAYMENT_METHOD_NAME": "اسم الطريقة",
   "ACTIVE": "تفعيل",
   "SELECT_PAYMENT_METHOD": "اختر طريقة الدفع",
   "PAYMENT_METHOD": "طريقة الدفع",
   "PAYMENT_METHOD_ACTION": "تنفيذ",
-
   "receipt_header": "مقدمة الفاتورة",
   "receipt_footer": "خاتمة الفاتورة",
   "save": "حفظ",
@@ -174,7 +174,6 @@
   "choose_file": "اختر ملف",
   "delete_account": "احذف الحساب",
   "CHOOSE_SUPPLIER": "اختر المورد",
-
   "country": "الدوله",
   "city": "المدينه",
   "citySubdivisionName": "اسم القسم الفرعي للمدينة",
@@ -186,7 +185,6 @@
   "communication_name": "اسم للتواصل",
   "ADD_PAYMENT_METHOD": "اضافة طريقة دفع",
   "UPDATE_PAYMENT_METHOD": "تحديث طريقة الدفع",
-
   "SETTINGS_TITLE": "الاعدادات",
   "SETTINGS_BASIC_INFORMATION": "البيانات الاساسية",
   "SETTINGS_STORE_NAME": "اسم المتجر",
@@ -199,7 +197,6 @@
   "SETTINGS_ADDRESS_PHONE": "العنوان والهاتف",
   "TAX_REGISTRATION_NUMBER": "رقم التسجيل الضريبي",
   "phone": "رقم الهاتف",
-
   "USER_NAME": "الاسم",
   "USER_EMAIL": "البريد الإلكتروني",
   "USER_PHONE": "رقم الهاتف",
@@ -208,7 +205,6 @@
   "UPLOAD_IMAGE": "تحميل الصورة",
   "ERROR_FILE_SIZE": "حجم الملف يتجاوز 2 ميجابايت.",
   "SAVE": "حفظ",
-
   "CHANGE_PASSWORD_TITLE": "تغيير كلمة المرور",
   "CURRENT_PASSWORD": "كلمة المرور الحالية",
   "NEW_PASSWORD": "كلمة المرور الجديدة",

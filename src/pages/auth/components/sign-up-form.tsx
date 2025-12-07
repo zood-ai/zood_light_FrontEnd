@@ -18,6 +18,7 @@ import { CheckboxWithText } from '@/components/custom/CheckboxWithText';
 import createCrudService from '@/api/services/crudService';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 import { useToast } from '@/components/custom/useToastComp';
+import { t } from 'i18next';
 
 export default function SignUpForm({
   changeStep,
@@ -153,7 +154,7 @@ export default function SignUpForm({
                 options={
                   businessTypes?.data.map((e) => ({
                     value: e.id,
-                    label: e.name,
+                    label: e.name.length > 1 ? t(e.name?.split(' ').join('_').toUpperCase()) : t(e.name?.toUpperCase()),
                   })) || []
                 }
                 placeholder="اختر نوع المتجر"
@@ -174,8 +175,7 @@ export default function SignUpForm({
             <Combobox
               dir="rtl"
               value={
-                formState.business_location_id ||
-                'a2968fb8-28e8-4818-9bf6-33671265c09d'
+                formState.business_location_id
               }
               onValueChange={(value) =>
                 handleChange('business_location_id', value)

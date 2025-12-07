@@ -22,7 +22,7 @@ export default function SignUp() {
     streetName: '',
     postalCode: '',
     business_type_id: '',
-    business_location_id: '',
+    business_location_id: 'a2968fb8-28e8-4818-9bf6-33671265c09d',
     tradeRegister: null,
     emailAlert: false,
   });
@@ -38,14 +38,18 @@ export default function SignUp() {
     }));
   };
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); 
+    console.log({businessType:formState.business_location_id});
     const myFormData = new FormData();
     myFormData.append('name', formState.name);
     myFormData.append('email', formState.email);
     myFormData.append('password', formState.password);
     myFormData.append('business_name', formState.business_name);
     myFormData.append('business_type_id', formState.business_type_id);
-    myFormData.append('business_location_id', formState.business_location_id);
+    myFormData.append(
+      'business_location_id',
+      formState.business_location_id ?? 'a2968fb8-28e8-4818-9bf6-33671265c09d'
+    );
     myFormData.append('phone', formState.phone);
     setLoading(true);
     try {
@@ -83,54 +87,118 @@ export default function SignUp() {
         {/* Progress Stepper - Improved */}
         <div className="flex items-center gap-3">
           {/* Step 1 */}
-          <div className={`flex items-center gap-2 transition-all duration-300 ${step >= 1 ? 'opacity-100' : 'opacity-50'}`}>
-            <div className={`flex flex-col items-center gap-1 ${step === 1 ? 'scale-110' : ''} transition-transform duration-300`}>
-              <div className={`flex items-center justify-center rounded-full text-center size-10 font-bold transition-all duration-300 ${step > 1
-                ? 'bg-green-500 text-white shadow-lg'
-                : step === 1
-                  ? 'bg-[#7272F6] text-white shadow-lg ring-4 ring-[#7272F6]/20'
-                  : 'bg-gray-300 text-gray-600'
-                }`}>
+          <div
+            className={`flex items-center gap-2 transition-all duration-300 ${
+              step >= 1 ? 'opacity-100' : 'opacity-50'
+            }`}
+          >
+            <div
+              className={`flex flex-col items-center gap-1 ${
+                step === 1 ? 'scale-110' : ''
+              } transition-transform duration-300`}
+            >
+              <div
+                className={`flex items-center justify-center rounded-full text-center size-10 font-bold transition-all duration-300 ${
+                  step > 1
+                    ? 'bg-green-500 text-white shadow-lg'
+                    : step === 1
+                    ? 'bg-[#7272F6] text-white shadow-lg ring-4 ring-[#7272F6]/20'
+                    : 'bg-gray-300 text-gray-600'
+                }`}
+              >
                 {step > 1 ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
-                ) : '1'}
+                ) : (
+                  '1'
+                )}
               </div>
-              <span className={`text-xs font-medium hidden sm:block ${step === 1 ? 'text-[#7272F6]' : 'text-gray-600'}`}>
+              <span
+                className={`text-xs font-medium hidden sm:block ${
+                  step === 1 ? 'text-[#7272F6]' : 'text-gray-600'
+                }`}
+              >
                 الخطة
               </span>
             </div>
           </div>
 
           {/* Connector Line */}
-          <div className={`w-12 sm:w-20 h-1 rounded-full transition-all duration-500 ${step > 1 ? 'bg-gradient-to-r from-green-500 to-[#7272F6]' : 'bg-gray-300'
-            }`}></div>
+          <div
+            className={`w-12 sm:w-20 h-1 rounded-full transition-all duration-500 ${
+              step > 1
+                ? 'bg-gradient-to-r from-green-500 to-[#7272F6]'
+                : 'bg-gray-300'
+            }`}
+          ></div>
 
           {/* Step 2 */}
-          <div className={`flex items-center gap-2 transition-all duration-300 ${step >= 2 ? 'opacity-100' : 'opacity-50'}`}>
-            <div className={`flex flex-col items-center gap-1 ${step === 2 ? 'scale-110' : ''} transition-transform duration-300`}>
-              <div className={`flex items-center justify-center rounded-full text-center size-10 font-bold transition-all duration-300 ${step > 2
-                ? 'bg-green-500 text-white shadow-lg'
-                : step === 2
-                  ? 'bg-[#7272F6] text-white shadow-lg ring-4 ring-[#7272F6]/20'
-                  : 'bg-gray-300 text-gray-600'
-                }`}>
+          <div
+            className={`flex items-center gap-2 transition-all duration-300 ${
+              step >= 2 ? 'opacity-100' : 'opacity-50'
+            }`}
+          >
+            <div
+              className={`flex flex-col items-center gap-1 ${
+                step === 2 ? 'scale-110' : ''
+              } transition-transform duration-300`}
+            >
+              <div
+                className={`flex items-center justify-center rounded-full text-center size-10 font-bold transition-all duration-300 ${
+                  step > 2
+                    ? 'bg-green-500 text-white shadow-lg'
+                    : step === 2
+                    ? 'bg-[#7272F6] text-white shadow-lg ring-4 ring-[#7272F6]/20'
+                    : 'bg-gray-300 text-gray-600'
+                }`}
+              >
                 {step > 2 ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
-                ) : '2'}
+                ) : (
+                  '2'
+                )}
               </div>
-              <span className={`text-xs font-medium hidden sm:block ${step === 2 ? 'text-[#7272F6]' : 'text-gray-600'}`}>
+              <span
+                className={`text-xs font-medium hidden sm:block ${
+                  step === 2 ? 'text-[#7272F6]' : 'text-gray-600'
+                }`}
+              >
                 البيانات
               </span>
             </div>
           </div>
         </div>
 
-        <Link to="/" className="flex gap-2 items-center text-right hover:opacity-80 transition-opacity duration-200">
-          <div className="text-sm sm:text-base text-gray-700 font-medium">رجوع للصفحة الرئيسية</div>
+        <Link
+          to="/"
+          className="flex gap-2 items-center text-right hover:opacity-80 transition-opacity duration-200"
+        >
+          <div className="text-sm sm:text-base text-gray-700 font-medium">
+            رجوع للصفحة الرئيسية
+          </div>
           <svg
             width="40"
             height="40"

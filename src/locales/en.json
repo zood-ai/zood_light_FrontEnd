@@ -14,13 +14,23 @@
   "WELCOME_BACK_DESC": "Here's a list of your ",
   "TASKS": "Tasks",
   "CREATE": "Create",
-  "SEND_TO_ZATCA": "Send to ZATCA", 
-  "ZATCA_REPORTING": "ZATCA Reporting"
-,
+  "SEND_TO_ZATCA": "Send to ZATCA",
+  "ZATCA_REPORTING": "ZATCA Reporting",
   "TOTAL_WITHOUT_TAX": "Total without tax",
   "TOTAL_WITH_TAX": "Total with tax",
   "TAX_RATE": "Tax rate",
   "EXPORT": "Export",
+  "PIZZERIA": "مطعم بيتزا",
+  "WORKSHOP": "ورشة",
+  "GROCERY": "بقالة",
+  "RETAIL": "تجزئة",
+  "FOOD_TRUCK": "عربة طعام",
+  "QUICK_SERVICE": "خدمة سريعة",
+  "FINE_DINING": "مطعم فاخر",
+  "CATERER": "مقدم طعام (كاترينج)",
+  "COFFEE_SHOP": "مقهى",
+  "OTHER": "أخرى",
+  "BAKERY": "مخبز",
   "VIEW": "View",
   "FAST_CREATE": "Fast create",
   "DAY": "Day",
@@ -43,24 +53,20 @@
   "CANCEL_ADD": "Cancel add",
   "Inactive": "Inactive",
   "Active": "Active",
-
   "INDIVIDUAL": "Individual",
   "CORPORATE": "Corporate",
   "PURCHASE": "Purchase",
   "DRAG_AND_DROP": "Drag and drop a file here or click",
   "CONFIRM": "Confirm",
-
   "INVOICE_TYPE": "Invoice type",
   "INVOICE_NUMBER": "Invoice number",
   "PAYMENT_STATUS": "Payment status",
   "TOTAL_PRICE": "Total price",
   "ANOTHER_ID": "Another ID",
-
   "PAID": "Paid",
   "UNPAID": "Unpaid",
   "PARTIALLY_PAID": "Partially paid",
   "TAX_REGISTRATION_NUMBER": "Tax Registration Number",
-
   "INDIVIDUAL_INVOICE": "Individual Invoice",
   "CORPORATE_INVOICE": "Corporate Invoice",
   "PURCHASE_INVOICE": "Purchase Invoice",
@@ -125,15 +131,12 @@
   "YOU_HAVE_UNSAVED_CHANGES_IF_DELETE": "You have unsaved changes. If you delete",
   "NOW_YOU_WILL_LOSE_THEM": "now, you will lose them.",
   "YES_DELETE": "Yes, I want to delete!",
-
   "SEARCH_TABLE_PLACEHOLDER": "Search for invoice, customer, date",
   "START_DATE": "Start Date",
   "END_DATE": "End Date",
-
   "PRODUCT_NAME": "Product name",
   "PRODUCT_NAME_EN": "Product name (EN)",
   "CATEGORY_NAME": "Category name",
-
   "SUBSCRIPTION": "Subscription",
   "SUBSCRIPTION_PLAN": "Plan",
   "SUBSCRIPTION_END_DATE": "Subscription end date",
@@ -141,16 +144,13 @@
   "DRAFT": "Draft",
   "CLOSED": "Closed",
   "REPORTED": "Reported",
-
   "PAYMENT_METHOD_NAME": "Name",
   "ACTIVE": "Active",
   "PAYMENT_METHOD": "Payment method type",
   "SELECT_PAYMENT_METHOD": "Select Payment Method",
   "PAYMENT_METHOD_ACTION": "Action",
-
   "ADD_PAYMENT_METHOD": "Add Payment Method",
   "UPDATE_PAYMENT_METHOD": "Update Payment Method",
-
   "receipt_header": "Receipt Header",
   "receipt_footer": "Receipt Footer",
   "save": "Save",
@@ -162,7 +162,6 @@
   "upload_logo": "Upload Logo",
   "choose_file": "Choose File",
   "delete_account": "Delete Account",
-
   "country": "Country",
   "city": "City",
   "citySubdivisionName": "City Subdivision Name",
@@ -173,7 +172,6 @@
   "AMOUNT": "Amount",
   "SORT_BY": "Sort By",
   "GO_TO_CART": "Go to Cart",
-
   "SETTINGS_TITLE": "Settings",
   "SETTINGS_BASIC_INFORMATION": "Basic Information",
   "SETTINGS_STORE_NAME": "Store Name",
@@ -196,7 +194,6 @@
   "ADD_TO_ZATCA": "Add to ZATCA",
   "SUBTOTAL": "Subtotal",
   "TOTAL": "Total",
-
   "CAR_TYPE": "Car Type",
   "CAR_PLATE": "Car Plate Number",
   "DISCOUNT": "Discount",
