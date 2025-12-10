@@ -162,18 +162,18 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
 
               {/* Store Details */}
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center">
+                {business?.businessName && <div className="flex justify-between items-center">
                   <span className="text-gray-500">اسم المنشأة:</span>
                   <span className="font-medium text-gray-900">
-                    {business?.businessName || 'غير محدد'}
+                    {business?.businessName}
                   </span>
-                </div>
-                <div className="flex justify-between items-center">
+                </div>}
+                {business?.businessBusinessRef && <div className="flex justify-between items-center">
                   <span className="text-gray-500">الرقم المرجعي:</span>
                   <span className="font-mono font-bold text-gray-900 text-xs sm:text-sm break-all">
-                    {business?.businessBusinessRef || 'غير محدد'}
+                    {business?.businessBusinessRef}
                   </span>
-                </div>
+                </div>}
               </div>
 
               {/* WhatsApp Contact Info */}

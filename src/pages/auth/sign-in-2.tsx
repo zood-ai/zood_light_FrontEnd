@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { getToken } from '@/utils/auth';
 import PayDialog from '@/config/PayDialog';
 import moment from 'moment';
+import Cookies from 'js-cookie';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -65,12 +66,19 @@ export default function SignIn2() {
   const handleFormSubmit = async (data: AuthFormValues) => {
     setIsLoading(true);
     setExpired(false);
+    const business = {
+      businessName: '',
+      businessBusinessRef: data.business_reference,
+    };
+    Cookies.set('business', JSON.stringify(business), { expires: 1 });
     const x = await login(data);
     if (x.success === true) {
       navigate('/zood-dashboard');
     }
 
     if (x.errorCode === 401) {
+
+
       setExpired(true);
     }
 
