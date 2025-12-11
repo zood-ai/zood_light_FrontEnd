@@ -10,6 +10,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import CheckIcon from '/icons/checkIcon.svg';
+import { currencyFormated } from '@/utils/currencyFormated';
 
 export default function Plans({ changeStep }) {
   return (
@@ -53,12 +54,12 @@ export default function Plans({ changeStep }) {
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-sm text-gray-400 line-through">
-                      {(896 / 12).toFixed(2)} ريال
+                      {currencyFormated(896 / 12)} ريال
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-5xl font-bold text-[#7272F6]">
-                      {(627 / 12).toFixed(2)}
+                      {currencyFormated(627 / 12)}
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
                       ريال / شهرياً
@@ -144,12 +145,12 @@ export default function Plans({ changeStep }) {
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-sm text-gray-400 line-through">
-                      {(1998 / 12).toFixed(2)} ريال
+                      {currencyFormated(1998 / 12)} ريال
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-5xl font-bold text-[#7272F6]">
-                      {(999 / 12).toFixed(2)}{' '}
+                      {currencyFormated(999 / 12)}{' '}
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
                       ريال / شهرياً
@@ -253,12 +254,12 @@ export default function Plans({ changeStep }) {
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-sm text-gray-400 line-through">
-                      {(622 / 12).toFixed(2)} ريال
+                      {currencyFormated(622 / 12)} ريال
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-5xl font-bold text-[#7272F6]">
-                      {(373 / 12).toFixed(2)}
+                      {currencyFormated(373 / 12)}
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
                       ريال / شهرياً
