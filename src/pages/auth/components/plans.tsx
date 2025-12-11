@@ -116,7 +116,7 @@ export default function Plans({ changeStep }) {
                 onClick={changeStep}
                 className="w-full h-11 rounded-lg text-white bg-[#7272F6] hover:bg-[#5656E8] font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-300"
               >
-                شراء
+                جرب الان مجاناً
               </Button>
             </CardFooter>
           </Card>
@@ -230,7 +230,7 @@ export default function Plans({ changeStep }) {
                 onClick={changeStep}
                 className="w-full h-11 rounded-lg bg-white text-[#7272F6] hover:bg-gray-50 font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                شراء
+                جرب الان مجاناً
               </Button>
             </CardFooter>
           </Card>
@@ -305,7 +305,7 @@ export default function Plans({ changeStep }) {
                 onClick={changeStep}
                 className="w-full h-11 rounded-lg text-white bg-[#7272F6] hover:bg-[#5656E8] font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-300"
               >
-                شراء
+                جرب الان مجاناً
               </Button>
             </CardFooter>
           </Card>
