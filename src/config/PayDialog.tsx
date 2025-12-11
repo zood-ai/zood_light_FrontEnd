@@ -135,7 +135,7 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
                   <span className="text-gray-500 block">رقم الحساب:</span>
                   <div className="flex items-center justify-between bg-white p-2 rounded border border-gray-200">
                     <span className="font-mono font-bold text-gray-900 dir-ltr">
-                      622000010006080942546
+                      622000010006086124677
                     </span>
                   </div>
                 </div>
@@ -143,7 +143,7 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
                   <span className="text-gray-500 block">رقم الآيبان:</span>
                   <div className="flex items-center justify-between bg-white p-2 rounded border border-gray-200">
                     <span className="font-mono font-bold text-gray-900 text-xs sm:text-sm break-all">
-                      1680000622608010942546S
+                      SA3280000622608016124677
                     </span>
                   </div>
                 </div>
@@ -162,18 +162,22 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
 
               {/* Store Details */}
               <div className="space-y-3 text-sm">
-                {business?.businessName && <div className="flex justify-between items-center">
-                  <span className="text-gray-500">اسم المنشأة:</span>
-                  <span className="font-medium text-gray-900">
-                    {business?.businessName}
-                  </span>
-                </div>}
-                {business?.businessBusinessRef && <div className="flex justify-between items-center">
-                  <span className="text-gray-500">الرقم المرجعي:</span>
-                  <span className="font-mono font-bold text-gray-900 text-xs sm:text-sm break-all">
-                    {business?.businessBusinessRef}
-                  </span>
-                </div>}
+                {business?.businessName && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">اسم المنشأة:</span>
+                    <span className="font-medium text-gray-900">
+                      {business?.businessName}
+                    </span>
+                  </div>
+                )}
+                {business?.businessBusinessRef && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">الرقم المرجعي:</span>
+                    <span className="font-mono font-bold text-gray-900 text-xs sm:text-sm break-all">
+                      {business?.businessBusinessRef}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* WhatsApp Contact Info */}
