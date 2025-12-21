@@ -374,7 +374,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                         <IconInput
                           {...field}
                           inputClassName=" w-[253px]"
-                          label={t('QUANTITY')}
+                          label={t('CURRENT_QUANTITY')}
                           // placeholder="ادخل اسم المورد"
                           // iconSrc={personIcon}
                         />

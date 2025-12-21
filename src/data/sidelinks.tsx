@@ -96,22 +96,31 @@ export const sidelinks: SideLink[] = [
     icon2: <PriceQuoteActive />,
   },
   {
-    title: 'المنتجات', // Products
-    i18n: 'PRODUCTS',
+    title: 'المخزون', // Reports
+    i18n: 'STOCK',
     label: '',
-    href: '/zood-dashboard/products',
-    icon: <Products />,
-    icon1: <Products />,
-    icon2: <ProductsActive />,
-  },
-  {
-    title: 'الفئات', // Categories
-    i18n: 'CATEGORIES',
-    label: '',
-    href: '/zood-dashboard/categories',
-    icon: <Categories />,
-    icon1: <Categories />,
-    icon2: <CategoriesActive />,
+    href: '/zood-dashboard',
+    icon: <IconBoxSeam size={18} />,
+    sub: [
+      {
+        title: 'المنتجات', // Products
+        i18n: 'PRODUCTS',
+        label: '',
+        href: '/zood-dashboard/products',
+        icon: <Products />,
+        icon1: <Products />,
+        icon2: <ProductsActive />,
+      },
+      {
+        title: 'الفئات', // Categories
+        i18n: 'CATEGORIES',
+        label: '',
+        href: '/zood-dashboard/categories',
+        icon: <Categories />,
+        icon1: <Categories />,
+        icon2: <CategoriesActive />,
+      }
+    ]
   },
   {
     title: 'العملاء', // Customers
