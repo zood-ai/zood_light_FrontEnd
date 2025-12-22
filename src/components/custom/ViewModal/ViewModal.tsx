@@ -50,7 +50,6 @@ const animationStyles = `
 export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-
   const data = useSelector((state: any) => state.toggleAction.data);
   const allSettings = useSelector((state: any) => state.allSettings.value);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -136,9 +135,8 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                   margin: 'auto',
                   padding: '20px',
                 }}
-                className={`${
-                  size === 'A4' ? 'a4-size' : 'small-receipt'
-                } flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
+                className={`${size === 'A4' ? 'a4-size' : 'small-receipt'
+                  } flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
               >
                 {size === 'A4' ? (
                   <div className="flex print-content flex-col   pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg-lg  text-zinc-800 max-md:mt-10 max-md:max-w-full">
@@ -229,7 +227,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         </div>
                       )}
                       <div className="flex flex-col flex-1 items-center   min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid  justify-between">
-                        <div>رقم الفاتورة</div>
+                        <div>{title === "عرض سعر" ? "رقم عرض السعر" : "رقم الفاتورة"}</div>
                         <div className="mt-4 font-semibold w-full text-center">
                           {data?.reference || ''}
                         </div>
@@ -338,8 +336,8 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               {e?.kitchen_notes
                                 ? e?.kitchen_notes
                                 : Data?.data?.products?.find(
-                                    (test) => test.id === e.product_id
-                                  )?.name}
+                                  (test) => test.id === e.product_id
+                                )?.name}
                             </div>
                             <div className="w-[120px] flex justify-center items-center">
                               {currencyFormated(e?.quantity)}
@@ -350,7 +348,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                             <div className="w-[230px] flex justify-center items-center">
                               {currencyFormated(
                                 parseFloat(e?.unit_price) *
-                                  parseFloat(e?.quantity)
+                                parseFloat(e?.quantity)
                               )}
                             </div>
 
@@ -362,9 +360,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                             <div className="w-[140px] flex justify-center items-center">
                               {currencyFormated(
                                 parseFloat(e?.unit_price) *
-                                  parseFloat(e?.quantity) +
-                                  e?.taxes?.[0]?.pivot?.amount *
-                                    (e?.is_tax_included ? -1 : 0)
+                                parseFloat(e?.quantity) +
+                                e?.taxes?.[0]?.pivot?.amount *
+                                (e?.is_tax_included ? -1 : 0)
                               )}
                             </div>
                           </div>
@@ -460,10 +458,10 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                             SR{' '}
                             {currencyFormated(
                               parseFloat(Data.data.paid_tax || 0) +
-                                Data?.data?.items?.reduce(
-                                  (sum, item) => sum + item?.pivot?.total_cost,
-                                  0
-                                )
+                              Data?.data?.items?.reduce(
+                                (sum, item) => sum + item?.pivot?.total_cost,
+                                0
+                              )
                             )}
                           </div>
                         </div>
@@ -493,11 +491,11 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         </div>
                       ) : null}
                       {Data?.data?.payments?.length > 0 &&
-                      Data?.data?.total_price &&
-                      Data?.data?.payments?.reduce(
-                        (sum, item) => sum + item?.amount,
-                        0
-                      ) -
+                        Data?.data?.total_price &&
+                        Data?.data?.payments?.reduce(
+                          (sum, item) => sum + item?.amount,
+                          0
+                        ) -
                         Data?.data?.total_price >
                         0 ? (
                         <div className="flex justify-between p-2 rounded-lg items-center">
@@ -509,17 +507,17 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               0
                             ) > Data?.data?.total_price
                               ? currencyFormated(
-                                  Data?.data?.payments?.reduce(
-                                    (sum, item) => sum + item?.amount,
-                                    0
-                                  ) - Data?.data?.total_price
-                                )
+                                Data?.data?.payments?.reduce(
+                                  (sum, item) => sum + item?.amount,
+                                  0
+                                ) - Data?.data?.total_price
+                              )
                               : Number(0).toFixed(2)) || 0}
                           </div>
                         </div>
                       ) : null}
                       {Data?.data?.total_price &&
-                      Data.data.total_price -
+                        Data.data.total_price -
                         Data?.data?.payments?.reduce(
                           (sum, item) => sum + item.amount,
                           0
@@ -534,12 +532,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               0
                             ) || 0) <= Data.data.total_price
                               ? currencyFormated(
-                                  Data.data.total_price -
-                                    Data?.data?.payments?.reduce(
-                                      (sum, item) => sum + item.amount,
-                                      0
-                                    )
+                                Data.data.total_price -
+                                Data?.data?.payments?.reduce(
+                                  (sum, item) => sum + item.amount,
+                                  0
                                 )
+                              )
                               : 0) || 0}
                           </div>
                         </div>
@@ -641,7 +639,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <p>{data?.business_date?.split(' ')[0]}</p>
                       </div>
                       <div className="flex justify-between">
-                        <p>رقم الفاتورة </p>
+                        <p> {title === "عرض سعر" ? "رقم عرض السعر" : "رقم الفاتورة"} </p>
                         <p>{data?.reference}</p>
                       </div>
                       {title === 'فاتورة  شراء' && (
@@ -696,9 +694,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                                   {orderProduct?.kitchen_notes
                                     ? orderProduct?.kitchen_notes
                                     : Data?.data?.products?.find(
-                                        (test) =>
-                                          test.id === orderProduct.product_id
-                                      )?.name}
+                                      (test) =>
+                                        test.id === orderProduct.product_id
+                                    )?.name}
                                 </div>
                                 <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
                                   <p>
@@ -724,12 +722,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                                   <p>
                                     {currencyFormated(
                                       parseFloat(orderProduct?.unit_price) *
-                                        parseFloat(orderProduct?.quantity) +
-                                        orderProduct?.taxes?.[0]?.pivot
-                                          ?.amount *
-                                          (orderProduct?.is_tax_included
-                                            ? -1
-                                            : 0)
+                                      parseFloat(orderProduct?.quantity) +
+                                      orderProduct?.taxes?.[0]?.pivot
+                                        ?.amount *
+                                      (orderProduct?.is_tax_included
+                                        ? -1
+                                        : 0)
                                     )}
                                   </p>
                                 </div>
@@ -762,7 +760,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               <p>
                                 {currencyFormated(
                                   product?.pivot?.quantity *
-                                    product?.pivot?.cost
+                                  product?.pivot?.cost
                                 )}
                               </p>
                             </div>
@@ -839,11 +837,11 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         ) : null}
                       </div>
                       {Data?.data?.payments?.length > 0 &&
-                      Data?.data?.total_price &&
-                      Data?.data?.payments?.reduce(
-                        (sum, item) => sum + item?.amount,
-                        0
-                      ) -
+                        Data?.data?.total_price &&
+                        Data?.data?.payments?.reduce(
+                          (sum, item) => sum + item?.amount,
+                          0
+                        ) -
                         Data?.data?.total_price >
                         0 ? (
                         <div className="flex justify-between items-center">
@@ -855,18 +853,18 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               0
                             ) > Data?.data?.total_price
                               ? currencyFormated(
-                                  Data?.data?.payments?.reduce(
-                                    (sum, item) => sum + item?.amount,
-                                    0
-                                  ) - Data?.data?.total_price
-                                )
+                                Data?.data?.payments?.reduce(
+                                  (sum, item) => sum + item?.amount,
+                                  0
+                                ) - Data?.data?.total_price
+                              )
                               : Number(0).toFixed(2)}
                           </p>
                         </div>
                       ) : null}
                       {Data?.data?.payments?.length > 0 &&
-                      Data?.data?.total_price &&
-                      Data?.data?.total_price -
+                        Data?.data?.total_price &&
+                        Data?.data?.total_price -
                         Data?.data?.payments?.reduce(
                           (sum, item) => sum + item?.amount,
                           0
@@ -881,12 +879,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               0
                             ) <= Data?.data?.total_price
                               ? currencyFormated(
-                                  Data?.data?.total_price -
-                                    Data?.data?.payments?.reduce(
-                                      (sum, item) => sum + item?.amount,
-                                      0
-                                    )
+                                Data?.data?.total_price -
+                                Data?.data?.payments?.reduce(
+                                  (sum, item) => sum + item?.amount,
+                                  0
                                 )
+                              )
                               : 0) || 0}
                           </div>
                         </div>
@@ -939,9 +937,8 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                             </button>
                             <div
                               onClick={() => handleSizeChange('80mm')}
-                              className={`flex shrink-0 self-stretch my-auto w-3 h-3 ${
-                                size == '80mm' ? 'bg-indigo-900' : 'bg-white'
-                              } rounded-lg-full border-4 border-gray-200 border-solid`}
+                              className={`flex shrink-0 self-stretch my-auto w-3 h-3 ${size == '80mm' ? 'bg-indigo-900' : 'bg-white'
+                                } rounded-lg-full border-4 border-gray-200 border-solid`}
                             />
                           </div>
                           <div className="flex gap-2 items-center self-stretch my-auto">
@@ -954,9 +951,8 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                             </button>
                             <div
                               onClick={() => handleSizeChange('A4')}
-                              className={`flex shrink-0 self-stretch my-auto w-3 h-3 ${
-                                size == 'A4' && 'bg-indigo-900'
-                              } rounded-lg-full border-4 border-gray-200 border-solid`}
+                              className={`flex shrink-0 self-stretch my-auto w-3 h-3 ${size == 'A4' && 'bg-indigo-900'
+                                } rounded-lg-full border-4 border-gray-200 border-solid`}
                             />
                           </div>
                         </div>
