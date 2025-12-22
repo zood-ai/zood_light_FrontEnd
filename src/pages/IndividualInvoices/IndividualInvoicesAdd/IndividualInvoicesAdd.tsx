@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 
 import { IndividualInvoicesAddProps } from './IndividualInvoicesAdd.types';
 
@@ -11,6 +11,7 @@ import createCrudService from '@/api/services/crudService';
 import { useDispatch } from 'react-redux';
 import ConfirmBk from '@/components/custom/ConfimBk';
 import { resetOrder } from '@/store/slices/orderSchema';
+import { CardGridSkeleton } from '@/components/CardItem/components/CardGridSkeleton';
 
 export const IndividualInvoicesAdd: React.FC<
   IndividualInvoicesAddProps
@@ -45,7 +46,7 @@ export const IndividualInvoicesAdd: React.FC<
       data: myData,
     });
   }, [searchInput, allUserData]);
-
+  console.log({ ddd: myData?.data?.length });
   return (
     <>
       <DeatilsHeaderWithFilter
@@ -54,10 +55,14 @@ export const IndividualInvoicesAdd: React.FC<
         }}
         setSearchInput={setSearchInput}
       />
-      <div className="flex flex-wrap w-fit mx-auto gap-x-4 gap-y-6">
-        {myData?.data?.map((item, index) => (
-          <CardItem key={item.id} index={index} item={item} />
-        ))}
+      <div className="flex flex-wrap justify-between gap-y-6">
+        {myData?.data ? (
+          myData?.data?.map((item: any, index: any) => (
+            <CardItem key={item.id} index={index} item={item} />
+          ))
+        ) : (
+          <CardGridSkeleton count={12} />
+        )}
       </div>
       <ConfirmBk
         isOpen={isOpen}
