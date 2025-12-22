@@ -43,11 +43,10 @@ export const useDataTableColumns = () => {
         );
       },
     },
-
     {
       accessorKey: 'products',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('CURRENT_QUANTITY')} />
+        <DataTableColumnHeader column={column} title={t('PRODUCTS')} />
       ),
       cell: ({ row }) => {
         return (

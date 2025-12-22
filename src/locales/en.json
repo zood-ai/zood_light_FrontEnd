@@ -43,6 +43,7 @@
   "QUANTITY": "Quantity",
   "CURRENT_QUANTITY": "Current Quantity",
   "BARCODE": "Barcode",
+  "PRODUCT": "Product",
   "PHONE_NUMBER": "Phone number",
   "ORDERS_QUANTITY": "Orders quantity",
   "LATEST_ORDER": "Latest order",
