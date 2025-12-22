@@ -90,16 +90,18 @@ const CustomerFormEdits = () => {
         }))}
         placeholder="Select Customer"
         onValueChange={(value) => {
-          if (params.id) {
-            return;
-          } else {
-            handleInputChangex('customer_id', value);
-          }
+          handleInputChangex('customer_id', value);
+          // if (params.id) {
+          //   return;
+          // } else {
+          //   handleInputChangex('customer_id', value);
+          // }
         }}
+        defaultValue={orderSchema?.customer_id}
         label={t('CUSTOMER_NAME')}
         className="flex-grow"
         value={orderSchema?.customer_id}
-        disabled={params.id}
+      // disabled={params.id}
       />
       {/* <IconInput
         disabled

@@ -59,49 +59,13 @@ export const ShopCardEditPQ: React.FC<ShopCardProps> = () => {
           value: getOrdersById.data.discount_amount,
         })
       );
-      updateField({
-        field: 'total_price',
-        value: getOrdersById.data.total_price,
-      });
       dispatch(updateField({ field: 'type', value: 2 }));
-      dispatch(
-        updateField({
-          field: 'customer_id',
-          value: getOrdersById.data.customer?.id,
-        })
-      );
       dispatch(
         updateField({
           field: 'branch_id',
           value: Cookies.get('branch_id') || '',
         })
       );
-
-      const products = getOrdersById?.data?.products?.map((item: any) => ({
-        product_id: item.id || '',
-        quantity: item.quantity || 0,
-        unit_price: item.price || 0,
-        discount_amount: 0,
-        discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
-        discount_type: 2,
-        total_price: item.price * item.quantity || 0,
-        is_tax_included: settings?.data?.tax_inclusive_pricing,
-        taxes: [
-          {
-            id: getTaxes?.data[0]?.id,
-            rate: getTaxes?.data[0]?.rate,
-            amount: !settings?.data?.tax_inclusive_pricing
-              ? (item.price * item.quantity || 0) *
-                ((getTaxes?.data[0]?.rate || 0) / 100)
-              : (item.price * item.quantity || 0) *
-                ((getTaxes?.data[0]?.rate || 0) /
-                  (100 + getTaxes?.data[0]?.rate || 0)),
-          },
-        ],
-      }));
-
-      dispatch(addProduct(products));
-      // dispatch(addTax(products));
     }
   }, [getOrdersById]);
 
