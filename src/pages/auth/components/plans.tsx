@@ -149,7 +149,6 @@ export default function Plans({ changeStep }) {
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1">
-                    <span className='text-[#7272F6] font-bold'>ريال</span>
                     <span className="text-5xl font-bold text-[#7272F6]">
                       {Math.floor(Number(currencyFormated(999 / 12)))}{' '}
                     </span>
