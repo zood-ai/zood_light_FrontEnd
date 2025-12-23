@@ -39,7 +39,7 @@ export default function Plans({ changeStep }) {
           <Card className="group flex flex-col items-center relative border-2 border-gray-200 hover:border-[#7272F6] rounded-xl w-full sm:w-[335px] transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white">
             <div className="absolute -top-3 left-4">
               <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold px-4 py-1 rounded-full text-xs shadow-md">
-                وفر %30
+                وفر %15
               </span>
             </div>
 
@@ -53,16 +53,16 @@ export default function Plans({ changeStep }) {
               <div className="bg-gradient-to-br from-[#F5F5FF] to-[#E1E0F0] w-full py-4 rounded-xl border-2 border-[#7272F6]/20 group-hover:border-[#7272F6]/40 transition-all duration-300">
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center justify-center gap-1">
-                    <span className="text-sm text-gray-400 line-through">
-                      {Math.floor(Number(currencyFormated(896 / 12)))} ريال
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-center gap-1">
                     <span className="text-5xl font-bold text-[#7272F6]">
-                      {Math.floor(Number(currencyFormated(627 / 12)))}
+                      69
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
-                      شهرياً / ريال
+                      ريال / شهرياً
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1 mt-2">
+                    <span className="text-sm text-gray-600">
+                      أو 699 ريال سنوياً
                     </span>
                   </div>
                 </div>
@@ -130,7 +130,7 @@ export default function Plans({ changeStep }) {
             </div>
             <div className="absolute -top-3 left-4">
               <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold px-4 py-1 rounded-full text-xs shadow-md">
-                وفر %50
+                وفر %16
               </span>
             </div>
 
@@ -144,16 +144,16 @@ export default function Plans({ changeStep }) {
               <div className="bg-white w-full py-4 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300">
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center justify-center gap-1">
-                    <span className="text-sm text-gray-400 line-through">
-                      {Math.floor(Number(currencyFormated(1998 / 12)))}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-center gap-1">
                     <span className="text-5xl font-bold text-[#7272F6]">
-                      {Math.floor(Number(currencyFormated(999 / 12)))}{' '}
+                      129
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
-                      شهرياً / ريال
+                      ريال / شهرياً
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1 mt-2">
+                    <span className="text-sm text-gray-600">
+                      أو 1299 ريال سنوياً 
                     </span>
                   </div>
                 </div>
@@ -239,7 +239,7 @@ export default function Plans({ changeStep }) {
           <Card className="group flex flex-col items-center relative border-2 border-gray-200 hover:border-[#7272F6] rounded-xl w-full sm:w-[335px] transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white">
             <div className="absolute -top-3 left-4">
               <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold px-4 py-1 rounded-full text-xs shadow-md">
-                وفر %40
+                وفر %16
               </span>
             </div>
 
@@ -253,16 +253,16 @@ export default function Plans({ changeStep }) {
               <div className="bg-gradient-to-br from-[#F5F5FF] to-[#E1E0F0] w-full py-4 rounded-xl border-2 border-[#7272F6]/20 group-hover:border-[#7272F6]/40 transition-all duration-300">
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center justify-center gap-1">
-                    <span className="text-sm text-gray-400 line-through">
-                      {Math.floor(Number(currencyFormated(622 / 12)))} ريال
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-center gap-1">
                     <span className="text-5xl font-bold text-[#7272F6]">
-                      {Math.floor(Number(currencyFormated(373 / 12)))}
+                      199
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
-                      شهرياً / ريال
+                      ريال / شهرياً
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1 mt-2">
+                    <span className="text-sm text-gray-600">
+                      أو 1999 ريال سنوياً
                     </span>
                   </div>
                 </div>
