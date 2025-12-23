@@ -258,15 +258,15 @@ const CustomerFormEdit = () => {
           <CustomerFormEdits />
 
           <div className="space-y-10 my-2">
-            {orderSchema.products?.map((item: any, index: number) => (
+            {orderSchema?.products?.map((item: any, index: number) => (
               <div key={index} className="my-2">
                 <SelectCompInput
                   className="md:w-[327px]"
                   placeholder={t('PRODUCT_NAME')}
-                  options={getAllPro?.data?.map((product: any) => ({
-                    value: product.id,
-                    label: product.name,
-                  }))}
+                  options={[...(getAllPro?.data || [])?.map((product: any) => ({
+                    value: product?.id,
+                    label: product?.name,
+                  })), { label: item?.kitchen_notes, value: item?.product_id }]}
                   label={t('PRODUCT_NAME')}
                   ref={myInputRef}
                   onValueChange={(value) =>
@@ -275,7 +275,7 @@ const CustomerFormEdit = () => {
                   onInputFieldChange={(value) =>
                     handleItemChange(index, 'name', value)
                   }
-                  value={item.product_id}
+                  value={item?.product_id}
                 />
                 <div className="flex gap-x-md mt-5">
                   <IconInput

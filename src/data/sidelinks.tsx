@@ -100,7 +100,7 @@ export const sidelinks: SideLink[] = [
     i18n: 'STOCK',
     label: '',
     href: '/zood-dashboard',
-    icon: <IconBoxSeam size={18} />,
+    icon: <IconBoxSeam size={20} />,
     sub: [
       {
         title: 'المنتجات', // Products
@@ -145,7 +145,7 @@ export const sidelinks: SideLink[] = [
     i18n: 'REPORTS',
     label: '',
     href: '/zood-dashboard',
-    icon: <IconChartHistogram size={18} />,
+    icon: <IconChartHistogram size={20} />,
     sub: [
       {
         title: 'فاتورة عاديه', // Normal Report

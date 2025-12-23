@@ -110,10 +110,9 @@ function NavLink({
           variant: checkActiveNav(href) ? 'ghost' : 'ghost',
           size: 'sm',
         }),
-        `h-12 justify-start text-wrap rounded-none px-6  ${
-          checkActiveNav(href)
-            ? 'bg-[#EAEBF5] rounded-[8px] mx-2 ps-[16px] hover:bg-[#EAEBF5]'
-            : ''
+        `h-12 justify-start text-wrap rounded-none px-6  ${checkActiveNav(href)
+          ? 'bg-[#EAEBF5] rounded-[8px] mx-2 ps-[16px] hover:bg-[#EAEBF5]'
+          : ''
         }`,
         subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
       )}
@@ -132,9 +131,8 @@ function NavLink({
         </span>
       </div>
       <span
-        className={` ${
-          checkActiveNav(href) ? 'font-bold text-main' : 'text-secText'
-        }`}
+        className={` ${checkActiveNav(href) ? 'font-bold text-main' : 'text-secText'
+          }`}
       >
         {/* {title} */}
         {t(i18n)}
@@ -170,8 +168,14 @@ function NavLinkDropdown({
           'text-secText group h-12 w-full justify-start rounded-none px-6'
         )}
       >
-        <div className={`${isRtl ? 'ml-2' : 'mr-2'}`}>{icon}</div>
-        {t(i18n)}
+        <div className={` ${isRtl ? 'ml-2' : 'mr-2'}`}>
+          {icon}
+        </div>
+        {
+          <p className="text-[15px]">
+            {t(i18n)}
+          </p>
+        }
         {label && (
           <div className="ml-2 rounded-lg bg-primary px-1 text-[0.625rem] text-primary-foreground">
             {label}
@@ -211,10 +215,9 @@ function NavLinkIcon({ title, i18n, icon, label, href }: NavLinkProps) {
               variant: checkActiveNav(href) ? 'secondary' : 'ghost',
               size: 'icon',
             }),
-            `h-12 w-12 ${
-              checkActiveNav(href)
-                ? 'bg-[#EAEBF5] rounded-[8px]  hover:bg-[#EAEBF5]'
-                : ''
+            `h-12 w-12 ${checkActiveNav(href)
+              ? 'bg-[#EAEBF5] rounded-[8px]  hover:bg-[#EAEBF5]'
+              : ''
             } `
           )}
         >
