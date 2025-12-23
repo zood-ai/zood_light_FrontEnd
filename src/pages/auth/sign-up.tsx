@@ -22,7 +22,7 @@ export default function SignUp() {
     streetName: '',
     postalCode: '',
     business_type_id: '',
-    business_location_id: 'a2968fb8-28e8-4818-9bf6-33671265c09d',
+    business_location_id: '70c4bc20-1fe4-48b2-87c5-26407fe09cde',
     tradeRegister: null,
     emailAlert: false,
   });
@@ -38,8 +38,8 @@ export default function SignUp() {
     }));
   };
   const handleSubmit = async (e) => {
-    e.preventDefault(); 
-    console.log({businessType:formState.business_location_id});
+    e.preventDefault();
+    console.log({ businessType: formState.business_location_id });
     const myFormData = new FormData();
     myFormData.append('name', formState.name);
     myFormData.append('email', formState.email);
@@ -88,23 +88,20 @@ export default function SignUp() {
         <div className="flex items-center gap-3">
           {/* Step 1 */}
           <div
-            className={`flex items-center gap-2 transition-all duration-300 ${
-              step >= 1 ? 'opacity-100' : 'opacity-50'
-            }`}
+            className={`flex items-center gap-2 transition-all duration-300 ${step >= 1 ? 'opacity-100' : 'opacity-50'
+              }`}
           >
             <div
-              className={`flex flex-col items-center gap-1 ${
-                step === 1 ? 'scale-110' : ''
-              } transition-transform duration-300`}
+              className={`flex flex-col items-center gap-1 ${step === 1 ? 'scale-110' : ''
+                } transition-transform duration-300`}
             >
               <div
-                className={`flex items-center justify-center rounded-full text-center size-10 font-bold transition-all duration-300 ${
-                  step > 1
-                    ? 'bg-green-500 text-white shadow-lg'
-                    : step === 1
+                className={`flex items-center justify-center rounded-full text-center size-10 font-bold transition-all duration-300 ${step > 1
+                  ? 'bg-green-500 text-white shadow-lg'
+                  : step === 1
                     ? 'bg-[#7272F6] text-white shadow-lg ring-4 ring-[#7272F6]/20'
                     : 'bg-gray-300 text-gray-600'
-                }`}
+                  }`}
               >
                 {step > 1 ? (
                   <svg
@@ -125,9 +122,8 @@ export default function SignUp() {
                 )}
               </div>
               <span
-                className={`text-xs font-medium hidden sm:block ${
-                  step === 1 ? 'text-[#7272F6]' : 'text-gray-600'
-                }`}
+                className={`text-xs font-medium hidden sm:block ${step === 1 ? 'text-[#7272F6]' : 'text-gray-600'
+                  }`}
               >
                 الخطة
               </span>
@@ -136,32 +132,28 @@ export default function SignUp() {
 
           {/* Connector Line */}
           <div
-            className={`w-12 sm:w-20 h-1 rounded-full transition-all duration-500 ${
-              step > 1
-                ? 'bg-gradient-to-r from-green-500 to-[#7272F6]'
-                : 'bg-gray-300'
-            }`}
+            className={`w-12 sm:w-20 h-1 rounded-full transition-all duration-500 ${step > 1
+              ? 'bg-gradient-to-r from-green-500 to-[#7272F6]'
+              : 'bg-gray-300'
+              }`}
           ></div>
 
           {/* Step 2 */}
           <div
-            className={`flex items-center gap-2 transition-all duration-300 ${
-              step >= 2 ? 'opacity-100' : 'opacity-50'
-            }`}
+            className={`flex items-center gap-2 transition-all duration-300 ${step >= 2 ? 'opacity-100' : 'opacity-50'
+              }`}
           >
             <div
-              className={`flex flex-col items-center gap-1 ${
-                step === 2 ? 'scale-110' : ''
-              } transition-transform duration-300`}
+              className={`flex flex-col items-center gap-1 ${step === 2 ? 'scale-110' : ''
+                } transition-transform duration-300`}
             >
               <div
-                className={`flex items-center justify-center rounded-full text-center size-10 font-bold transition-all duration-300 ${
-                  step > 2
-                    ? 'bg-green-500 text-white shadow-lg'
-                    : step === 2
+                className={`flex items-center justify-center rounded-full text-center size-10 font-bold transition-all duration-300 ${step > 2
+                  ? 'bg-green-500 text-white shadow-lg'
+                  : step === 2
                     ? 'bg-[#7272F6] text-white shadow-lg ring-4 ring-[#7272F6]/20'
                     : 'bg-gray-300 text-gray-600'
-                }`}
+                  }`}
               >
                 {step > 2 ? (
                   <svg
@@ -182,9 +174,8 @@ export default function SignUp() {
                 )}
               </div>
               <span
-                className={`text-xs font-medium hidden sm:block ${
-                  step === 2 ? 'text-[#7272F6]' : 'text-gray-600'
-                }`}
+                className={`text-xs font-medium hidden sm:block ${step === 2 ? 'text-[#7272F6]' : 'text-gray-600'
+                  }`}
               >
                 البيانات
               </span>

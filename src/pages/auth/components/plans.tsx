@@ -54,15 +54,15 @@ export default function Plans({ changeStep }) {
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-sm text-gray-400 line-through">
-                      {currencyFormated(896 / 12)} ريال
+                      {Math.floor(Number(currencyFormated(896 / 12)))} ريال
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-5xl font-bold text-[#7272F6]">
-                      {currencyFormated(627 / 12)}
+                      {Math.floor(Number(currencyFormated(627 / 12)))}
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
-                      ريال / شهرياً
+                      شهرياً / ريال
                     </span>
                   </div>
                 </div>
@@ -145,16 +145,16 @@ export default function Plans({ changeStep }) {
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-sm text-gray-400 line-through">
-                      {currencyFormated(1998 / 12)} ريال
+                      {Math.floor(Number(currencyFormated(1998 / 12)))}
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1">
                     <span className='text-[#7272F6] font-bold'>ريال</span>
                     <span className="text-5xl font-bold text-[#7272F6]">
-                      {currencyFormated(999 / 12)}{' '}
+                      {Math.floor(Number(currencyFormated(999 / 12)))}{' '}
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
-                      شهرياً
+                      شهرياً / ريال
                     </span>
                   </div>
                 </div>
@@ -255,15 +255,15 @@ export default function Plans({ changeStep }) {
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-sm text-gray-400 line-through">
-                      {currencyFormated(622 / 12)} ريال
+                      {Math.floor(Number(currencyFormated(622 / 12)))} ريال
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-5xl font-bold text-[#7272F6]">
-                      {currencyFormated(373 / 12)}
+                      {Math.floor(Number(currencyFormated(373 / 12)))}
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
-                      ريال / شهرياً
+                      شهرياً / ريال
                     </span>
                   </div>
                 </div>
