@@ -108,7 +108,7 @@ const PayDialog = ({ showRemaining = false, showAllTime = false }) => {
             </p>
             <p className="text-gray-500">
               برجاء سداد قيمة تجديد الاشتراك{' '}
-              <span className="font-bold text-red-500">627 ريال</span> لاستمرار
+              <span className="font-bold text-red-500">699 ريال</span> لاستمرار
               الخدمة
             </p>
           </div>
