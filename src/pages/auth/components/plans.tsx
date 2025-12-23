@@ -77,7 +77,7 @@ export default function Plans({ changeStep }) {
                     alt="check"
                   />
                   <p className="text-xs text-gray-700">
-                    إصدار فواتير مبسطة مع خيارات تخصيص
+                    إصدار فواتير مبسطة للعملاء بسهولة
                   </p>
                 </div>
                 <div className="flex items-start gap-2">
@@ -87,7 +87,7 @@ export default function Plans({ changeStep }) {
                     alt="check"
                   />
                   <p className="text-xs text-gray-700">
-                    إعداد فواتير ضريبية مفصلة{' '}
+                    إصدار فواتير ضريبية متوافقة مع الانظمة
                   </p>
                 </div>
                 <div className="flex items-start gap-2">
@@ -149,11 +149,12 @@ export default function Plans({ changeStep }) {
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1">
+                    <span className='text-[#7272F6] font-bold'>ريال</span>
                     <span className="text-5xl font-bold text-[#7272F6]">
                       {currencyFormated(999 / 12)}{' '}
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
-                      ريال / شهرياً
+                      شهرياً
                     </span>
                   </div>
                 </div>
@@ -163,27 +164,27 @@ export default function Plans({ changeStep }) {
               <div className="flex flex-col gap-2 mt-2" dir="rtl">
                 <div className="flex items-start gap-2">
                   <img
-                    className="w-4 h-4 mt-0.5 shrink-0 brightness-0 invert"
+                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
                     src={CheckIcon}
                     alt="check"
                   />
                   <p className="text-xs text-white opacity-70">
-                    إصدار فواتير مبسطة وسريعة{' '}
+                    إصدار فواتير مبسطة للعملاء بسهولة
                   </p>
                 </div>
                 <div className="flex items-start gap-2">
                   <img
-                    className="w-4 h-4 mt-0.5 shrink-0 brightness-0 invert"
+                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
                     src={CheckIcon}
                     alt="check"
                   />
                   <p className="text-xs text-white opacity-70">
-                    ادارة الفواتير الضريبية بكفاءة{' '}
+                    إصدار فواتير ضريبية متوافقة مع الانظمة
                   </p>
                 </div>
                 <div className="flex items-start gap-2">
                   <img
-                    className="w-4 h-4 mt-0.5 shrink-0 brightness-0 invert"
+                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
                     src={CheckIcon}
                     alt="check"
                   />
@@ -193,7 +194,7 @@ export default function Plans({ changeStep }) {
                 </div>
                 <div className="flex items-start gap-2">
                   <img
-                    className="w-4 h-4 mt-0.5 shrink-0 brightness-0 invert"
+                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
                     src={CheckIcon}
                     alt="check"
                   />
@@ -203,7 +204,7 @@ export default function Plans({ changeStep }) {
                 </div>
                 <div className="flex items-start gap-2">
                   <img
-                    className="w-4 h-4 mt-0.5 shrink-0 brightness-0 invert"
+                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
                     src={CheckIcon}
                     alt="check"
                   />
@@ -217,7 +218,7 @@ export default function Plans({ changeStep }) {
             <CardFooter className="flex flex-col gap-3 w-full px-6 pb-6 mt-auto">
               <div className="flex items-center gap-2 justify-center" dir="rtl">
                 <img
-                  className="w-3 h-3 brightness-0 invert"
+                  className="w-3 h-3 brightness-10"
                   src={CheckIcon}
                   alt="check icon"
                 />
