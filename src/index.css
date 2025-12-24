@@ -268,3 +268,67 @@ body {
 [data-collapsed='false'] {
   transition: all 0.5s ease;
 }
+
+
+@font-face {
+  font-family: 'arabic-font';
+  src: url('./assets/fonts/alfont_com_TheYearofTheCamel-Regular.otf')
+    format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+.sybmol-currency {
+  font-family: 'arabic-font', sans-serif !important;
+  font-size: 17px;
+  color: '#374151';
+}
+
+@font-face {
+  font-family: 'saudi_riyal';
+  src: url('./assets/fonts/regular/saudi_riyal.woff2') format('woff2'),
+    url('./assets/fonts/regular/saudi_riyal.woff') format('woff'),
+    url('./assets/fonts/regular/saudi_riyal.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'saudi_riyal_bold';
+  src: url('./assets/fonts/bold/saudi_riyal.woff2') format('woff2'),
+    url('./assets/fonts/bold/saudi_riyal.woff') format('woff'),
+    url('./assets/fonts/bold/saudi_riyal.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Ensure the icon class correctly loads the Riyal symbol */
+.icon-saudi_riyal::before {
+  content: '\e900';
+  font-family: 'saudi_riyal' !important;
+  font-size: inherit;
+  color: inherit;
+}
+
+.icon-saudi_riyal_bold::before {
+  content: '\e900';
+  font-family: 'saudi_riyal_bold' !important;
+  font-size: inherit;
+  color: inherit;
+}
+
+.icon-saudi_riyal_new::after {
+  content: '\20c1';
+  font-family: 'saudi_riyal' !important;
+  font-size: inherit;
+  color: inherit;
+}
+
+.icon-saudi_riyal_bold_new::after {
+  content: '\20c1';
+  font-family: 'saudi_riyal_bold' !important;
+  font-size: inherit;
+  color: inherit;
+}

@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import CheckIcon from '/icons/checkIcon.svg';
 import { currencyFormated } from '@/utils/currencyFormated';
+import CurrencySybmole from './CurrencyIcon';
 
 export default function Plans({ changeStep }) {
   return (
@@ -35,15 +36,15 @@ export default function Plans({ changeStep }) {
         </div>
 
         <div className="flex flex-wrap justify-center items-stretch gap-6 w-full max-w-6xl px-4">
-     
 
-                    {/* الخطة الممتازة */}
+
+          {/* الخطة الممتازة */}
           <Card className="group flex flex-col items-center relative border-2 border-gray-200 hover:border-[#7272F6] rounded-xl w-full sm:w-[335px] transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white">
-            <div className="absolute -top-3 left-4">
+            {/* <div className="absolute -top-3 left-4">
               <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold px-4 py-1 rounded-full text-xs shadow-md">
                 وفر %16
               </span>
-            </div>
+            </div> */}
 
             <CardHeader className="w-full text-center pt-8">
               <CardTitle className="font-bold text-2xl text-[#26262F]">
@@ -58,13 +59,24 @@ export default function Plans({ changeStep }) {
                     <span className="text-5xl font-bold text-[#7272F6]">
                       199
                     </span>
+
                     <span className="text-lg font-bold text-[#7272F6]">
-                      ريال / شهرياً
+                      شهرياً
+                    </span>
+                    <span className="text-lg font-bold text-[#7272F6]">
+                      /  <CurrencySybmole size="24px" />
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1 mt-2">
                     <span className="text-sm text-gray-600">
-                      أو 1999 ريال سنوياً
+                      سنوياً
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      <CurrencySybmole className='text-gray-600' size="16px" /> 1999
+                    </span>
+
+                    <span className="text-sm text-gray-600">
+                      أو
                     </span>
                   </div>
                 </div>
@@ -150,11 +162,11 @@ export default function Plans({ changeStep }) {
                 الأكثر مبيعاً
               </span>
             </div>
-            <div className="absolute -top-3 left-4">
+            {/* <div className="absolute -top-3 left-4">
               <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold px-4 py-1 rounded-full text-xs shadow-md">
                 وفر %16
               </span>
-            </div>
+            </div> */}
 
             <CardHeader className="w-full text-center pt-10">
               <CardTitle className="font-bold text-2xl text-white">
@@ -169,13 +181,23 @@ export default function Plans({ changeStep }) {
                     <span className="text-5xl font-bold text-[#7272F6]">
                       129
                     </span>
+
                     <span className="text-lg font-bold text-[#7272F6]">
-                      ريال / شهرياً
+                      شهرياً
+                    </span>
+                    <span className="text-lg font-bold text-[#7272F6]">
+                      /   <CurrencySybmole size="24px" />
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1 mt-2">
                     <span className="text-sm text-gray-600">
-                      أو 1299 ريال سنوياً
+                      سنوياً
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      <CurrencySybmole className='text-gray-600' size="16px" /> 1299
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      أو
                     </span>
                   </div>
                 </div>
@@ -237,13 +259,13 @@ export default function Plans({ changeStep }) {
             </CardFooter>
           </Card>
 
-               {/* الخطة الأساسية */}
+          {/* الخطة الأساسية */}
           <Card className="group flex flex-col items-center relative border-2 border-gray-200 hover:border-[#7272F6] rounded-xl w-full sm:w-[335px] transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white">
-            <div className="absolute -top-3 left-4">
+            {/* <div className="absolute -top-3 left-4">
               <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold px-4 py-1 rounded-full text-xs shadow-md">
                 وفر %15
               </span>
-            </div>
+            </div> */}
 
             <CardHeader className="w-full text-center pt-8">
               <CardTitle className="font-bold text-2xl text-[#26262F]">
@@ -259,12 +281,21 @@ export default function Plans({ changeStep }) {
                       69
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
-                      ريال / شهرياً
+                      شهرياً
+                    </span>
+                    <span className="text-lg font-bold text-[#7272F6]">
+                      / <CurrencySybmole size="24px" />
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1 mt-2">
                     <span className="text-sm text-gray-600">
-                      أو 699 ريال سنوياً
+                      سنوياً
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      <CurrencySybmole className='text-gray-600' size="16px" /> 699
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      أو
                     </span>
                   </div>
                 </div>
