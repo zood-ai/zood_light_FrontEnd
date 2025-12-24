@@ -56,16 +56,16 @@ export default function Plans({ changeStep }) {
               <div className="bg-gradient-to-br from-[#F5F5FF] to-[#E1E0F0] w-full py-4 rounded-xl border-2 border-[#7272F6]/20 group-hover:border-[#7272F6]/40 transition-all duration-300">
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center justify-center gap-1">
-                    <span className="text-5xl font-bold text-[#7272F6]">
-                      199
-                    </span>
-
-                    <span className="text-lg font-bold text-[#7272F6]">
+                      <span className="text-lg font-bold text-[#7272F6]">
                       شهرياً
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
                       /  <CurrencySybmole size="24px" />
                     </span>
+                    <span className="text-5xl font-bold text-[#7272F6]">
+                      199
+                    </span>
+                  
                   </div>
                   <div className="flex items-center justify-center gap-1 mt-2">
                     <span className="text-sm text-gray-600">
@@ -178,15 +178,14 @@ export default function Plans({ changeStep }) {
               <div className="bg-white w-full py-4 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300">
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center justify-center gap-1">
-                    <span className="text-5xl font-bold text-[#7272F6]">
-                      129
-                    </span>
-
-                    <span className="text-lg font-bold text-[#7272F6]">
+                     <span className="text-lg font-bold text-[#7272F6]">
                       شهرياً
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
                       /   <CurrencySybmole size="24px" />
+                    </span>
+                    <span className="text-5xl font-bold text-[#7272F6]">
+                      129
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1 mt-2">
@@ -277,14 +276,14 @@ export default function Plans({ changeStep }) {
               <div className="bg-gradient-to-br from-[#F5F5FF] to-[#E1E0F0] w-full py-4 rounded-xl border-2 border-[#7272F6]/20 group-hover:border-[#7272F6]/40 transition-all duration-300">
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center justify-center gap-1">
-                    <span className="text-5xl font-bold text-[#7272F6]">
-                      69
-                    </span>
                     <span className="text-lg font-bold text-[#7272F6]">
                       شهرياً
                     </span>
                     <span className="text-lg font-bold text-[#7272F6]">
                       / <CurrencySybmole size="24px" />
+                    </span>
+                    <span className="text-5xl font-bold text-[#7272F6]">
+                      69
                     </span>
                   </div>
                   <div className="flex items-center justify-center gap-1 mt-2">

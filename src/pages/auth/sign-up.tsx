@@ -85,7 +85,7 @@ export default function SignUp() {
         </div>
 
         {/* Progress Stepper - Improved */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-row-reverse items-center gap-3">
           {/* Step 1 */}
           <div
             className={`flex items-center gap-2 transition-all duration-300 ${step >= 1 ? 'opacity-100' : 'opacity-50'
@@ -133,7 +133,7 @@ export default function SignUp() {
           {/* Connector Line */}
           <div
             className={`w-12 sm:w-20 h-1 rounded-full transition-all duration-500 ${step > 1
-              ? 'bg-gradient-to-r from-green-500 to-[#7272F6]'
+              ? 'bg-gradient-to-l from-green-500 to-[#7272F6]'
               : 'bg-gray-300'
               }`}
           ></div>
