@@ -35,7 +35,209 @@ export default function Plans({ changeStep }) {
         </div>
 
         <div className="flex flex-wrap justify-center items-stretch gap-6 w-full max-w-6xl px-4">
-          {/* الخطة الأساسية */}
+     
+
+                    {/* الخطة الممتازة */}
+          <Card className="group flex flex-col items-center relative border-2 border-gray-200 hover:border-[#7272F6] rounded-xl w-full sm:w-[335px] transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white">
+            <div className="absolute -top-3 left-4">
+              <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold px-4 py-1 rounded-full text-xs shadow-md">
+                وفر %16
+              </span>
+            </div>
+
+            <CardHeader className="w-full text-center pt-8">
+              <CardTitle className="font-bold text-2xl text-[#26262F]">
+                المتقدمة
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="flex flex-col gap-3 w-full px-6 pt-4">
+              <div className="bg-gradient-to-br from-[#F5F5FF] to-[#E1E0F0] w-full py-4 rounded-xl border-2 border-[#7272F6]/20 group-hover:border-[#7272F6]/40 transition-all duration-300">
+                <div className="flex flex-col items-center justify-center gap-1">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-5xl font-bold text-[#7272F6]">
+                      199
+                    </span>
+                    <span className="text-lg font-bold text-[#7272F6]">
+                      ريال / شهرياً
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1 mt-2">
+                    <span className="text-sm text-gray-600">
+                      أو 1999 ريال سنوياً
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Features List */}
+              <div className="flex flex-col gap-2 mt-2" dir="rtl">
+                <div className="flex items-start gap-2">
+                  <img
+                    className="w-4 h-4 mt-0.5 shrink-0"
+                    src={CheckIcon}
+                    alt="check"
+                  />
+                  <p className="text-xs text-gray-700">
+                    إصدار فواتير مبسطة للعملاء بسهولة
+                  </p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <img
+                    className="w-4 h-4 mt-0.5 shrink-0"
+                    src={CheckIcon}
+                    alt="check"
+                  />
+                  <p className="text-xs text-gray-700">
+                    إصدار فواتير ضريبية متوافقة مع الانظمة
+                  </p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <img
+                    className="w-4 h-4 mt-0.5 shrink-0"
+                    src={CheckIcon}
+                    alt="check"
+                  />
+                  <p className="text-xs text-gray-700">
+                    انشاء عروض اسعار احترافية
+                  </p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <img
+                    className="w-4 h-4 mt-0.5 shrink-0"
+                    src={CheckIcon}
+                    alt="check"
+                  />
+                  <p className="text-xs text-gray-700">
+                    تسجيل وإدارة فواتير المشتريات
+                  </p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <img
+                    className="w-4 h-4 mt-0.5 shrink-0"
+                    src={CheckIcon}
+                    alt="check"
+                  />
+                  <p className="text-xs text-gray-700">
+                    نظام ادارة المخزون
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+
+            <CardFooter className="flex flex-col gap-3 w-full px-6 pb-6 mt-auto">
+              <div className="flex items-center gap-2 justify-center" dir="rtl">
+                <img className="w-3 h-3" src={CheckIcon} alt="check icon" />
+                <p className="text-xs text-gray-500">
+                  جميع الأسعار شاملة ضريبة القيمة المضافة
+                </p>
+              </div>
+
+              <Button
+                onClick={changeStep}
+                className="w-full h-11 rounded-lg text-white bg-[#7272F6] hover:bg-[#5656E8] font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-300"
+              >
+                جرب الان مجاناً
+              </Button>
+            </CardFooter>
+          </Card>
+
+
+          {/* الخطة الشاملة - Featured */}
+          <Card className="group flex flex-col items-center relative bg-gradient-to-br from-[#7272F6] via-[#6363F0] to-[#5656E8] rounded-xl w-full sm:w-[335px] transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 border-0">
+            <div className="absolute -top-3 right-4">
+              <span className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold px-4 py-1 rounded-full text-xs shadow-lg">
+                الأكثر مبيعاً
+              </span>
+            </div>
+            <div className="absolute -top-3 left-4">
+              <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold px-4 py-1 rounded-full text-xs shadow-md">
+                وفر %16
+              </span>
+            </div>
+
+            <CardHeader className="w-full text-center pt-10">
+              <CardTitle className="font-bold text-2xl text-white">
+                المتوسطة
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="flex flex-col gap-3 w-full px-6 pt-4">
+              <div className="bg-white w-full py-4 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300">
+                <div className="flex flex-col items-center justify-center gap-1">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-5xl font-bold text-[#7272F6]">
+                      129
+                    </span>
+                    <span className="text-lg font-bold text-[#7272F6]">
+                      ريال / شهرياً
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1 mt-2">
+                    <span className="text-sm text-gray-600">
+                      أو 1299 ريال سنوياً
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Features List */}
+              <div className="flex flex-col gap-2 mt-2" dir="rtl">
+                <div className="flex items-start gap-2">
+                  <img
+                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
+                    src={CheckIcon}
+                    alt="check"
+                  />
+                  <p className="text-xs text-white opacity-70">
+                    إصدار فواتير مبسطة للعملاء بسهولة
+                  </p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <img
+                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
+                    src={CheckIcon}
+                    alt="check"
+                  />
+                  <p className="text-xs text-white opacity-70">
+                    إصدار فواتير ضريبية متوافقة مع الانظمة
+                  </p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <img
+                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
+                    src={CheckIcon}
+                    alt="check"
+                  />
+                  <p className="text-xs text-white opacity-70">
+                    إنشاء عروض أسعار احترافية
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+
+            <CardFooter className="flex flex-col gap-3 w-full px-6 pb-6 mt-auto">
+              <div className="flex items-center gap-2 justify-center" dir="rtl">
+                <img
+                  className="w-3 h-3 brightness-10"
+                  src={CheckIcon}
+                  alt="check icon"
+                />
+                <p className="text-xs text-white opacity-70">
+                  جميع الأسعار شاملة ضريبة القيمة المضافة
+                </p>
+              </div>
+
+              <Button
+                onClick={changeStep}
+                className="w-full h-11 rounded-lg bg-white text-[#7272F6] hover:bg-gray-50 font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                جرب الان مجاناً
+              </Button>
+            </CardFooter>
+          </Card>
+
+               {/* الخطة الأساسية */}
           <Card className="group flex flex-col items-center relative border-2 border-gray-200 hover:border-[#7272F6] rounded-xl w-full sm:w-[335px] transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white">
             <div className="absolute -top-3 left-4">
               <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold px-4 py-1 rounded-full text-xs shadow-md">
@@ -90,17 +292,6 @@ export default function Plans({ changeStep }) {
                     إصدار فواتير ضريبية متوافقة مع الانظمة
                   </p>
                 </div>
-                <div className="flex items-start gap-2">
-                  <img
-                    className="w-4 h-4 mt-0.5 shrink-0"
-                    src={CheckIcon}
-                    alt="check"
-                  />
-                  <p className="text-xs text-gray-700">
-                    {' '}
-                    تقديم عروض اسعار جذابة للعملاء{' '}
-                  </p>
-                </div>
               </div>
             </CardContent>
 
@@ -121,194 +312,8 @@ export default function Plans({ changeStep }) {
             </CardFooter>
           </Card>
 
-          {/* الخطة الشاملة - Featured */}
-          <Card className="group flex flex-col items-center relative bg-gradient-to-br from-[#7272F6] via-[#6363F0] to-[#5656E8] rounded-xl w-full sm:w-[335px] transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 border-0">
-            <div className="absolute -top-3 right-4">
-              <span className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold px-4 py-1 rounded-full text-xs shadow-lg">
-                الأكثر مبيعاً
-              </span>
-            </div>
-            <div className="absolute -top-3 left-4">
-              <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold px-4 py-1 rounded-full text-xs shadow-md">
-                وفر %16
-              </span>
-            </div>
 
-            <CardHeader className="w-full text-center pt-10">
-              <CardTitle className="font-bold text-2xl text-white">
-                الشاملة
-              </CardTitle>
-            </CardHeader>
 
-            <CardContent className="flex flex-col gap-3 w-full px-6 pt-4">
-              <div className="bg-white w-full py-4 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300">
-                <div className="flex flex-col items-center justify-center gap-1">
-                  <div className="flex items-center justify-center gap-1">
-                    <span className="text-5xl font-bold text-[#7272F6]">
-                      129
-                    </span>
-                    <span className="text-lg font-bold text-[#7272F6]">
-                      ريال / شهرياً
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-center gap-1 mt-2">
-                    <span className="text-sm text-gray-600">
-                      أو 1299 ريال سنوياً 
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Features List */}
-              <div className="flex flex-col gap-2 mt-2" dir="rtl">
-                <div className="flex items-start gap-2">
-                  <img
-                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
-                    src={CheckIcon}
-                    alt="check"
-                  />
-                  <p className="text-xs text-white opacity-70">
-                    إصدار فواتير مبسطة للعملاء بسهولة
-                  </p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <img
-                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
-                    src={CheckIcon}
-                    alt="check"
-                  />
-                  <p className="text-xs text-white opacity-70">
-                    إصدار فواتير ضريبية متوافقة مع الانظمة
-                  </p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <img
-                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
-                    src={CheckIcon}
-                    alt="check"
-                  />
-                  <p className="text-xs text-white opacity-70">
-                    إنشاء عروض أسعار احترافية
-                  </p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <img
-                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
-                    src={CheckIcon}
-                    alt="check"
-                  />
-                  <p className="text-xs text-white opacity-70">
-                    تسجيل وإدارة فواتير المشتريات
-                  </p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <img
-                    className="w-4 h-4 mt-0.5 shrink-0 brightness-10"
-                    src={CheckIcon}
-                    alt="check"
-                  />
-                  <p className="text-xs text-white opacity-70">
-                    نظام متكامل بإدارة المخزون
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-
-            <CardFooter className="flex flex-col gap-3 w-full px-6 pb-6 mt-auto">
-              <div className="flex items-center gap-2 justify-center" dir="rtl">
-                <img
-                  className="w-3 h-3 brightness-10"
-                  src={CheckIcon}
-                  alt="check icon"
-                />
-                <p className="text-xs text-white opacity-70">
-                  جميع الأسعار شاملة ضريبة القيمة المضافة
-                </p>
-              </div>
-
-              <Button
-                onClick={changeStep}
-                className="w-full h-11 rounded-lg bg-white text-[#7272F6] hover:bg-gray-50 font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                جرب الان مجاناً
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {/* الخطة الممتازة */}
-          <Card className="group flex flex-col items-center relative border-2 border-gray-200 hover:border-[#7272F6] rounded-xl w-full sm:w-[335px] transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white">
-            <div className="absolute -top-3 left-4">
-              <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold px-4 py-1 rounded-full text-xs shadow-md">
-                وفر %16
-              </span>
-            </div>
-
-            <CardHeader className="w-full text-center pt-8">
-              <CardTitle className="font-bold text-2xl text-[#26262F]">
-                الممتازة
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent className="flex flex-col gap-3 w-full px-6 pt-4">
-              <div className="bg-gradient-to-br from-[#F5F5FF] to-[#E1E0F0] w-full py-4 rounded-xl border-2 border-[#7272F6]/20 group-hover:border-[#7272F6]/40 transition-all duration-300">
-                <div className="flex flex-col items-center justify-center gap-1">
-                  <div className="flex items-center justify-center gap-1">
-                    <span className="text-5xl font-bold text-[#7272F6]">
-                      199
-                    </span>
-                    <span className="text-lg font-bold text-[#7272F6]">
-                      ريال / شهرياً
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-center gap-1 mt-2">
-                    <span className="text-sm text-gray-600">
-                      أو 1999 ريال سنوياً
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Features List */}
-              <div className="flex flex-col gap-2 mt-2" dir="rtl">
-                <div className="flex items-start gap-2">
-                  <img
-                    className="w-4 h-4 mt-0.5 shrink-0"
-                    src={CheckIcon}
-                    alt="check"
-                  />
-                  <p className="text-xs text-gray-700">
-                    إصدار فواتير مبسطة للعملاء بسهولة
-                  </p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <img
-                    className="w-4 h-4 mt-0.5 shrink-0"
-                    src={CheckIcon}
-                    alt="check"
-                  />
-                  <p className="text-xs text-gray-700">
-                    إصدار فواتير ضريبية متوافقة مع الانظمة
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-
-            <CardFooter className="flex flex-col gap-3 w-full px-6 pb-6 mt-auto">
-              <div className="flex items-center gap-2 justify-center" dir="rtl">
-                <img className="w-3 h-3" src={CheckIcon} alt="check icon" />
-                <p className="text-xs text-gray-500">
-                  جميع الأسعار شاملة ضريبة القيمة المضافة
-                </p>
-              </div>
-
-              <Button
-                onClick={changeStep}
-                className="w-full h-11 rounded-lg text-white bg-[#7272F6] hover:bg-[#5656E8] font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-300"
-              >
-                جرب الان مجاناً
-              </Button>
-            </CardFooter>
-          </Card>
         </div>
       </div>
     </>
