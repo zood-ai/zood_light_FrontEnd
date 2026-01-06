@@ -546,11 +546,25 @@ const CustomerForm = forwardRef(
             <CustomInputDate
               date={businessDate}
               onSelect={(date) => {
-                setBusinessDate(date);
+                // Create a new Date with selected date but current time
+                const now = new Date();
+                const selectedDate = new Date(date);
+                const dateWithCurrentTime = new Date(
+                  selectedDate.getFullYear(),
+                  selectedDate.getMonth(),
+                  selectedDate.getDate(),
+                  now.getHours(),
+                  now.getMinutes(),
+                  now.getSeconds(),
+                  now.getMilliseconds()
+                );
+                
+                const fullTimestamp = dateWithCurrentTime.toISOString();
+                setBusinessDate(fullTimestamp);
                 dispatch(
                   updateField({
                     field: 'business_date',
-                    value: date,
+                    value: fullTimestamp,
                   })
                 );
               }}
