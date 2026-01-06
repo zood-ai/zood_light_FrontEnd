@@ -366,7 +366,21 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
               <CustomInputDate
                 date={businessDate}
                 onSelect={(date) => {
-                  setBusinessDate(date);
+                  // Create a new Date with selected date but current time
+                  const now = new Date();
+                  const selectedDate = new Date(date);
+                  const dateWithCurrentTime = new Date(
+                    selectedDate.getFullYear(),
+                    selectedDate.getMonth(),
+                    selectedDate.getDate(),
+                    now.getHours(),
+                    now.getMinutes(),
+                    now.getSeconds(),
+                    now.getMilliseconds()
+                  );
+
+                  const fullTimestamp = dateWithCurrentTime.toISOString();
+                  setBusinessDate(fullTimestamp);
                 }}
                 className="w-full lg:w-[274px]"
                 label={t('DATE')}
@@ -490,7 +504,9 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                           directValue={
                             currentItem.name === 'sku-zood-20001'
                               ? currentItem?.kitchen_notes
-                              : getAllPro?.data?.find((product) => product.id === currentItem.id)?.name || ''
+                              : getAllPro?.data?.find(
+                                  (product) => product.id === currentItem.id
+                                )?.name || ''
                           }
                         />
                         {
