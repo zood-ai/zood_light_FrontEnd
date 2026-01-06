@@ -189,6 +189,12 @@ export function DataTable<TData, TValue>({
     background-color: #7272F6 !important; /* Change this to your desired color */
   }
 `;
+
+  const footerValues = table.getFooterGroups().map((fg) => {
+    return fg.headers.map((header) => Boolean(header.column.columnDef.footer));
+  });
+  const checkFooterAppear = footerValues.flat().some((footer) => footer);
+
   return (
     <>
       {/* <style>{customDatePickerClass}</style> */}
@@ -316,6 +322,27 @@ export function DataTable<TData, TValue>({
                       </TableRow>
                     )}
                   </TableBody>
+                  {checkFooterAppear && data && data.length > 0 && (
+                    <tfoot>
+                      {table.getFooterGroups().map((footerGroup) => (
+                        <TableRow
+                          key={footerGroup.id}
+                          className="bg-muted/50 font-bold"
+                        >
+                          {footerGroup.headers.map((header) => (
+                            <TableCell key={header.id} className="h-[50px]">
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.footer,
+                                    header.getContext()
+                                  )}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </tfoot>
+                  )}
                 </Table>
               </div>
             </div>

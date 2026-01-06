@@ -157,6 +157,7 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
           actionText={'ADD_INVOICE'}
           loading={isLoading}
           handleSearch={handleSearch}
+          dashBoard={false}
         />
       </div>
     </>

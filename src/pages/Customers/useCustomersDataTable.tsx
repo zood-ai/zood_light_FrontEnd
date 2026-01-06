@@ -3,14 +3,18 @@ import { formatDateTime } from '@/utils/formatDateTime'; // A utility to format 
 import { DataTableColumnHeader } from '@/components/custom/DataTableComp/data-table-column-header';
 import { StatusBadge } from '@/components/custom/StatusBadge';
 import { useTranslation } from 'react-i18next'; // A hook for translations
-import {currencyFormated} from '../../utils/currencyFormated'
+import { currencyFormated } from '../../utils/currencyFormated';
 export const useCustomersDataTable = () => {
   const { t } = useTranslation();
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader remove={true} column={column} title={t('INVOICE_NUMBER')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('INVOICE_NUMBER')}
+        />
       ),
       cell: ({ row }) => (
         <span className="font-medium">{row.getValue('reference')}</span>
@@ -41,6 +45,20 @@ export const useCustomersDataTable = () => {
           <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
             {currencyFormated(row.getValue('total_price')) || '-'}
           </span>
+        );
+      },
+      footer: ({ table }) => {
+        const total = table.getFilteredRowModel().rows.reduce((sum, row) => {
+          const value = row.getValue('total_price');
+          return sum + (typeof value === 'number' ? value : 0);
+        }, 0);
+        console.log('Total in footer:', total);
+        return (
+          <div className="flex space-x-2 font-bold">
+            <span className="max-w-32 truncate font-bold sm:max-w-72 md:max-w-[31rem]">
+              {currencyFormated(total)}
+            </span>
+          </div>
         );
       },
     },
@@ -81,7 +99,10 @@ export const useCustomersDataTable = () => {
             </span>
           </div>
         );
+        
       },
+      
+      
     },
   ];
 

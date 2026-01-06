@@ -93,6 +93,24 @@ export const useDataTableColumns = () => {
           </div>
         );
       },
+      footer: ({ table }) => {
+        const total = table.getFilteredRowModel().rows.reduce((sum, row) => {
+          const rowSum = row?.original?.items.reduce(
+            (acc: any, item: any) =>
+              acc + item?.pivot?.quantity * item?.pivot?.cost,
+            0
+          );
+          return sum + (rowSum || 0);
+        }, 0);
+
+        return (
+          <div className="flex space-x-2 font-bold">
+            <span className="max-w-32 truncate font-bold sm:max-w-72 md:max-w-[31rem]">
+              {total}
+            </span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'business_date',
@@ -169,6 +187,18 @@ export const useDataTableColumns = () => {
                 {t('OPEN_INVOICE')}
               </Button>
             </div>
+          </div>
+        );
+      },
+      footer: () => {
+        return (
+          <div className="space-x-2 font-bold flex  justify-end">
+            <span
+              dir="ltr"
+              className="max-w-32   truncate font-bold sm:max-w-72 md:max-w-[31rem]"
+            >
+              Total:
+            </span>
           </div>
         );
       },

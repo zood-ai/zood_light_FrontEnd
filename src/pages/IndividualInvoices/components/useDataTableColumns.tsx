@@ -131,6 +131,20 @@ export const useDataTableColumns = () => {
           </div>
         );
       },
+      footer: ({ table }) => {
+        const total = table.getFilteredRowModel().rows.reduce((sum, row) => {
+          const value = row.getValue('total_price');
+          return sum + (typeof value === 'number' ? value : 0);
+        }, 0);
+
+        return (
+          <div className="flex space-x-2 font-bold">
+            <span className="max-w-32 truncate font-bold sm:max-w-72 md:max-w-[31rem]">
+              {currencyFormated(total)}
+            </span>
+          </div>
+        );
+      },
     },
 
     {
@@ -231,6 +245,18 @@ export const useDataTableColumns = () => {
                 {t('OPEN_INVOICE')}
               </Button>
             </div>
+          </div>
+        );
+      },
+      footer: () => {
+        return (
+          <div className="space-x-2 font-bold flex  justify-end">
+            <span
+              dir="ltr"
+              className="max-w-32   truncate font-bold sm:max-w-72 md:max-w-[31rem]"
+            >
+              Total:
+            </span>
           </div>
         );
       },
