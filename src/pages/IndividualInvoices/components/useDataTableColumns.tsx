@@ -9,17 +9,18 @@ import { StatusBadge } from '@/components/custom/StatusBadge';
 import { Button } from '@/components/custom/button';
 import dayjs from 'dayjs';
 import { formatDateTime } from '@/utils/formatDateTime';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
 import { currencyFormated } from '../../../utils/currencyFormated';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axiosInstance from '@/api/interceptors';
 import { toast } from '@/components/ui/use-toast';
 import { Pointer } from 'lucide-react';
+import { useIsZatcaConnected } from '@/hooks/use-is-zatca-connected';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
@@ -78,7 +79,7 @@ export const useDataTableColumns = () => {
       queryClient.invalidateQueries(['/orders']);
     }
   };
-  const columns: ColumnDef<Task>[] = [
+  let columns: ColumnDef<Task>[] = [
     {
       accessorKey: 'reference',
       header: ({ column }) => (
@@ -262,6 +263,6 @@ export const useDataTableColumns = () => {
       },
     },
   ];
-
-  return { columns };
+  const { columns: filteredColumns } = useIsZatcaConnected(columns);
+  return { columns: filteredColumns };
 };

@@ -56,7 +56,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
   const [isConnectedLoading, setIsConnectedLoading] = useState(false);
-
+  const isConnectedToZatca = useSelector(
+    (state: any) => state?.allSettings?.value?.WhoAmI?.is_connected_to_zatca
+  );
   const customerInfo = { data: data?.customer };
   const supplierInfo = { data: data?.get_supplier };
   const { pathname } = useLocation();
@@ -1001,21 +1003,22 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                     </div>
                     {Another && (
                       <div className="flex flex-grow gap-4 flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg-lg  max-md:mt-10">
-                        {zatcaStatus !== 'PASS' && (
-                          <Button
-                            disabled={isConnectedLoading}
-                            className="px-2.5 py-1 gap-2 text-white bg-[#5951C8] rounded-lg border border-[#5951C8] border-solid max-md:px-5 hover:text-white transition-all duration-200 ease-out hover:scale-105 active:scale-95 cursor-pointer hover:shadow-md hover:shadow-[#5951C8]/30 button-send-zatca"
-                            onClick={() => {
-                              handleSendToZatca();
-                            }}
-                          >
-                            <Pointer
-                              size={15}
-                              className="pointer-icon-animation"
-                            />
-                            <span>{t('SEND_TO_ZATCA')}</span>
-                          </Button>
-                        )}
+                        {zatcaStatus !== 'PASS' &&
+                          Boolean(isConnectedToZatca) && (
+                            <Button
+                              disabled={isConnectedLoading}
+                              className="px-2.5 py-1 gap-2 text-white bg-[#5951C8] rounded-lg border border-[#5951C8] border-solid max-md:px-5 hover:text-white transition-all duration-200 ease-out hover:scale-105 active:scale-95 cursor-pointer hover:shadow-md hover:shadow-[#5951C8]/30 button-send-zatca"
+                              onClick={() => {
+                                handleSendToZatca();
+                              }}
+                            >
+                              <Pointer
+                                size={15}
+                                className="pointer-icon-animation"
+                              />
+                              <span>{t('SEND_TO_ZATCA')}</span>
+                            </Button>
+                          )}
 
                         <button
                           disabled={loading}

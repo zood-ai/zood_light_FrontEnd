@@ -6,17 +6,19 @@ import { StatusBadge } from '@/components/custom/StatusBadge';
 import { Button } from '@/components/custom/button';
 import dayjs from 'dayjs';
 import { formatDateTime } from '@/utils/formatDateTime';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
+import { useEffect, useState } from 'react';
+import { useIsZatcaConnected } from '@/hooks/use-is-zatca-connected';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
   let dispatch = useDispatch();
 
-  const columns: ColumnDef<any>[] = [
+  let columns: ColumnDef<any>[] = [
     {
       accessorKey: 'reference',
       header: ({ column }) => (
@@ -276,6 +278,6 @@ export const useDataTableColumns = () => {
       },
     },
   ];
-
-  return { columns };
+  const { columns: filteredColumns } = useIsZatcaConnected(columns);
+  return { columns: filteredColumns };
 };

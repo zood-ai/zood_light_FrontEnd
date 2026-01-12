@@ -11,13 +11,14 @@ import { format } from 'path';
 import { formatDateTime } from '@/utils/formatDateTime';
 import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
 import { use } from 'i18next';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useIsZatcaConnected } from '@/hooks/use-is-zatca-connected';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
@@ -27,7 +28,7 @@ export const useDataTableColumns = () => {
   const { useRemove } = crudService;
   const { mutate: remove } = useRemove();
   const [loading, setLoading] = useState(false);
-  const columns: ColumnDef<Task>[] = [
+  let columns: ColumnDef<Task>[] = [
     {
       accessorKey: 'reference',
       header: ({ column }) => (
@@ -204,6 +205,6 @@ export const useDataTableColumns = () => {
       },
     },
   ];
-
-  return { columns };
+  const { columns: filteredColumns } = useIsZatcaConnected(columns);
+  return { columns: filteredColumns };
 };
