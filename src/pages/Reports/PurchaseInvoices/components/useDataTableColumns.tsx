@@ -11,13 +11,14 @@ import { format } from 'path';
 import { formatDateTime } from '@/utils/formatDateTime';
 import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
 import { use } from 'i18next';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useIsZatcaConnected } from '@/hooks/use-is-zatca-connected';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
@@ -27,7 +28,7 @@ export const useDataTableColumns = () => {
   const { useRemove } = crudService;
   const { mutate: remove } = useRemove();
   const [loading, setLoading] = useState(false);
-  const columns: ColumnDef<Task>[] = [
+  let columns: ColumnDef<Task>[] = [
     {
       accessorKey: 'reference',
       header: ({ column }) => (
@@ -89,6 +90,24 @@ export const useDataTableColumns = () => {
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
               {sum || '0'}
+            </span>
+          </div>
+        );
+      },
+      footer: ({ table }) => {
+        const total = table.getFilteredRowModel().rows.reduce((sum, row) => {
+          const rowSum = row?.original?.items.reduce(
+            (acc: any, item: any) =>
+              acc + item?.pivot?.quantity * item?.pivot?.cost,
+            0
+          );
+          return sum + (rowSum || 0);
+        }, 0);
+
+        return (
+          <div className="flex space-x-2 font-bold">
+            <span className="max-w-32 truncate font-bold sm:max-w-72 md:max-w-[31rem]">
+              {total}
             </span>
           </div>
         );
@@ -172,8 +191,20 @@ export const useDataTableColumns = () => {
           </div>
         );
       },
+      footer: () => {
+        return (
+          <div className="space-x-2 font-bold flex  justify-end">
+            <span
+              dir="ltr"
+              className="max-w-32   truncate font-bold sm:max-w-72 md:max-w-[31rem]"
+            >
+              Total:
+            </span>
+          </div>
+        );
+      },
     },
   ];
-
-  return { columns };
+  const { columns: filteredColumns } = useIsZatcaConnected(columns);
+  return { columns: filteredColumns };
 };

@@ -9,17 +9,18 @@ import { StatusBadge } from '@/components/custom/StatusBadge';
 import { Button } from '@/components/custom/button';
 import dayjs from 'dayjs';
 import { formatDateTime } from '@/utils/formatDateTime';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
 import { currencyFormated } from '../../../utils/currencyFormated';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axiosInstance from '@/api/interceptors';
 import { toast } from '@/components/ui/use-toast';
 import { Pointer } from 'lucide-react';
+import { useIsZatcaConnected } from '@/hooks/use-is-zatca-connected';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
@@ -78,7 +79,7 @@ export const useDataTableColumns = () => {
       queryClient.invalidateQueries(['/orders']);
     }
   };
-  const columns: ColumnDef<Task>[] = [
+  let columns: ColumnDef<Task>[] = [
     {
       accessorKey: 'reference',
       header: ({ column }) => (
@@ -127,6 +128,20 @@ export const useDataTableColumns = () => {
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
               {currencyFormated(row.getValue('total_price')) || '-'}
+            </span>
+          </div>
+        );
+      },
+      footer: ({ table }) => {
+        const total = table.getFilteredRowModel().rows.reduce((sum, row) => {
+          const value = row.getValue('total_price');
+          return sum + (typeof value === 'number' ? value : 0);
+        }, 0);
+
+        return (
+          <div className="flex space-x-2 font-bold">
+            <span className="max-w-32 truncate font-bold sm:max-w-72 md:max-w-[31rem]">
+              {currencyFormated(total)}
             </span>
           </div>
         );
@@ -234,8 +249,20 @@ export const useDataTableColumns = () => {
           </div>
         );
       },
+      footer: () => {
+        return (
+          <div className="space-x-2 font-bold flex  justify-end">
+            <span
+              dir="ltr"
+              className="max-w-32   truncate font-bold sm:max-w-72 md:max-w-[31rem]"
+            >
+              Total:
+            </span>
+          </div>
+        );
+      },
     },
   ];
-
-  return { columns };
+  const { columns: filteredColumns } = useIsZatcaConnected(columns);
+  return { columns: filteredColumns };
 };

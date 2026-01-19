@@ -9,8 +9,8 @@ import { StatusBadge } from '@/components/custom/StatusBadge';
 import { Button } from '@/components/custom/button';
 import dayjs from 'dayjs';
 import { formatDateTime } from '@/utils/formatDateTime';
-import { useDispatch } from 'react-redux'; 
-import {currencyFormated} from '../../../utils/currencyFormated'
+import { useDispatch } from 'react-redux';
+import { currencyFormated } from '../../../utils/currencyFormated';
 import {
   toggleActionView,
   toggleActionViewData,
@@ -24,7 +24,11 @@ export const useDataTableColumns = () => {
     {
       accessorKey: 'reference',
       header: ({ column }) => (
-        <DataTableColumnHeader remove={true} column={column} title={t('INVOICE_NUMBER')} />
+        <DataTableColumnHeader
+          remove={true}
+          column={column}
+          title={t('INVOICE_NUMBER')}
+        />
       ),
       cell: ({ row }) => {
         return (
@@ -53,7 +57,7 @@ export const useDataTableColumns = () => {
         );
       },
     },
-    
+
     {
       accessorKey: 'total_price',
       header: ({ column }) => (
@@ -65,6 +69,20 @@ export const useDataTableColumns = () => {
             {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
             <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
               {currencyFormated(row.getValue('total_price')) || '0'}
+            </span>
+          </div>
+        );
+      },
+      footer: ({ table }) => {
+        const total = table.getFilteredRowModel().rows.reduce((sum, row) => {
+          const value = row.getValue('total_price');
+          return sum + (typeof value === 'number' ? value : 0);
+        }, 0);
+
+        return (
+          <div className="flex space-x-2 font-bold">
+            <span className="max-w-32 truncate font-bold sm:max-w-72 md:max-w-[31rem]">
+              {currencyFormated(total)}
             </span>
           </div>
         );
@@ -117,7 +135,6 @@ export const useDataTableColumns = () => {
       cell: ({ row }) => {
         return (
           <div className="flex space-x-2 w-[180px] md:w-auto">
-            
             {row.getValue('status') == '8' && (
               <StatusBadge status="Inactive" text={t('DRAFT')} />
             )}
@@ -150,6 +167,18 @@ export const useDataTableColumns = () => {
                 {t('OPEN_INVOICE')}
               </Button>
             </div>
+          </div>
+        );
+      },
+      footer: () => {
+        return (
+          <div className="space-x-2 font-bold flex  justify-end">
+            <span
+              dir="ltr"
+              className="max-w-32   truncate font-bold sm:max-w-72 md:max-w-[31rem]"
+            >
+              Total:
+            </span>
           </div>
         );
       },

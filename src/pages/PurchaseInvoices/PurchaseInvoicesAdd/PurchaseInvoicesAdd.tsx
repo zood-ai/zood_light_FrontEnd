@@ -27,6 +27,7 @@ import { GrMenu } from 'react-icons/gr';
 import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput';
 import { TbMenuDeep } from 'react-icons/tb';
 import axios from 'axios';
+import CustomInputDate from '@/components/custom/CustomInputDate';
 
 let holder = 0;
 export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
@@ -38,6 +39,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     attached_file: '',
     paid_tax: 0,
   });
+  const [businessDate, setBusinessDate] = useState(new Date().toISOString());
   const [items, setItems] = useState([
     {
       qty: 1,
@@ -51,6 +53,9 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
       priceDisabled: true,
     },
   ]);
+  useEffect(() => {
+    console.log({ itttt: items?.id });
+  }, [items]);
   const [fileBase64, setFileBase64] = useState<any>('');
   const [fileName, setFileName] = useState<string>('');
   const isRtl = useDirection();
@@ -89,26 +94,53 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     if (isEditMode) {
       console.log({ Data });
       const fun = async () => {
+        // Use API data directly instead of Redux state
+        const apiData = allDataId?.data || Data;
+        console.log({ aa: apiData });
         setInvoice({
-          supplier_id: Data?.get_supplier?.id,
-          invoice_number: Data?.invoice_number,
-          purchaseDescription: Data?.notes,
-          attached_file: Data?.attached_file,
-          paid_tax: Data?.paid_tax,
+          supplier_id: apiData?.supplier?.id || Data?.get_supplier?.id,
+          invoice_number: apiData?.invoice_number || Data?.invoice_number,
+          purchaseDescription: apiData?.notes || Data?.notes,
+          attached_file: apiData?.attached_file || Data?.attached_file,
+          paid_tax: apiData?.paid_tax || Data?.paid_tax,
         });
 
+        // Set business date from API data
+        if (apiData?.business_date) {
+          setBusinessDate(apiData.business_date);
+        }
+        //ddddd
         setItems(
-          Data?.items?.map((item) => ({
-            qty: item?.pivot?.quantity ?? 1,
-            total: item?.pivot?.total_cost ?? 0,
-            item: item?.pivot?.item_id ?? '',
-            id: item?.product_id ?? '',
-            itemDescription: item?.product?.description ?? '',
-            kitchen_notes: item?.pivot?.kitchen_notes ?? '',
-            name: item?.name ?? '',
-            price: item?.pivot?.cost ?? 0,
-            priceDisabled: true,
-          }))
+          apiData?.items?.map((item) => {
+            // Find the matching product by item_id
+            const matchingProduct = getAllPro?.data?.find(
+              (product) => product.item_id === item.id
+            );
+
+            return {
+              qty: item?.pivot?.quantity ?? 1,
+              total: item?.pivot?.total_cost ?? 0,
+              item: item?.pivot?.item_id ?? item?.id ?? '',
+              id: matchingProduct?.id || '', // Use the product ID from getAllPro
+              itemDescription: item?.product?.description ?? '',
+              kitchen_notes: item?.pivot?.kitchen_notes ?? '',
+              name: item?.name ?? '',
+              price: item?.pivot?.cost ?? 0,
+              priceDisabled: true,
+            };
+          }) ||
+            Data?.items?.map((item) => ({
+              qty: item?.pivot?.quantity ?? 1,
+              total: item?.pivot?.total_cost ?? 0,
+              item: item?.pivot?.item_id ?? '',
+              id: item?.pivot?.item_id ?? '',
+              itemDescription: item?.product?.description ?? '',
+              kitchen_notes: item?.pivot?.kitchen_notes ?? '',
+              name: item?.name ?? '',
+              price: item?.pivot?.cost ?? 0,
+              priceDisabled: true,
+            })) ||
+            []
         );
       };
       fun();
@@ -121,7 +153,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   };
 
   const handleItemChange = (index: number, field: string, value: any) => {
-    if (isEditMode) return;
     const updatedItems = [...items];
     if (field === 'kitchen_notes') {
       updatedItems[index] = {
@@ -152,25 +183,46 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
 
     try {
       if (isEditMode) {
-        await axiosInstance.post(
-          `inventory/purchasing/create_purchasing_item/${params.objId}`,
-          {
-            type: 'items',
-            notes: invoice.purchaseDescription,
-            items: items.map((item) => ({
-              id: item.item,
-              kitchen_notes: item.kitchen_notes,
-            })),
-          }
+        const { data: defaultProduct } = await axiosInstance.get(
+          'inventory/items?filter[name]=sku-zood-20001'
         );
+
+        // Send complete data like create mode
+        await axiosInstance.put(`inventory/purchasing/${params.objId}`, {
+          branch: branchData?.data?.[0]?.id,
+          supplier: invoice.supplier_id,
+          type: 'items',
+          notes: invoice.purchaseDescription,
+          attached_file: fileBase64 || invoice.attached_file,
+          paid_tax: invoice.paid_tax,
+          business_date: businessDate,
+          items: items.map((item) =>
+            item.kitchen_notes
+              ? {
+                  id:
+                    item.item ?? item.id ?? defaultProduct?.data?.[0]?.id ?? '',
+                  kitchen_notes: item.kitchen_notes,
+                  total_cost: item.total,
+                  quantity: item.qty,
+                }
+              : {
+                  id:
+                    item.item ?? item.id ?? defaultProduct?.data?.[0]?.id ?? '',
+                  total_cost: item.total,
+                  quantity: item.qty,
+                }
+          ),
+          invoice_number:
+            invoice.invoice_number || Math.floor(Math.random() * 100000),
+        });
+
+        // Update items with pricing
         await axiosInstance.post(
           `inventory/purchasing/update_purchasing_item/${params.objId}`,
           items.map((item) => ({
-            // branch_id: branchData?.data?.[0]?.id,
-
-            id: item.item,
+            id: item.item ?? item.id ?? (defaultProduct?.data?.[0]?.id || ''),
             quantity: item.qty,
-            total_cost: Number(item.total),
+            total_cost: Number(item.price) * Number(item.qty),
           }))
         );
       } else {
@@ -185,6 +237,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
           notes: invoice.purchaseDescription,
           attached_file: fileBase64,
           paid_tax: invoice.paid_tax,
+          business_date: businessDate,
           items: items.map((item) =>
             item.kitchen_notes
               ? {
@@ -254,6 +307,8 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   console.log({ items });
 
   // Ensure DetailsHeadWithOutFilter is rendered correctly
+  // console.log({ abdelrahmanPrintCurrentItem: currentItem });
+  console.log({ myAllProduct: getAllPro });
   return (
     <>
       <DetailsHeadWithOutFilter bkAction={handleBkAction} />
@@ -271,14 +326,13 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   onValueChange={(value) =>
                     setInvoice({ ...invoice, supplier_id: value })
                   }
-                  disabled={isEditMode}
                   value={invoice.supplier_id}
                   label={t('SUPPLIER_NAME')}
                   className="w-full"
                 />
               </div>
               <div className="flex items-end">
-                {!isEditMode && (
+                {
                   <Button
                     onClick={(e) => {
                       e.preventDefault();
@@ -296,17 +350,40 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                       </span>
                     </div>
                   </Button>
-                )}
+                }
               </div>
             </div>
             <div className="flex justify-start items-center">
               <IconInput
-                disabled={isEditMode}
                 name="invoice_number"
-                defaultValue={invoice.invoice_number}
+                value={invoice.invoice_number}
                 onChange={handleInputChange}
                 label={t('ENTER_INVOICE_NUMBER')}
                 inputClassName="w-[274px]"
+              />
+            </div>
+            <div className="mb-md space-y-2">
+              <CustomInputDate
+                date={businessDate}
+                onSelect={(date) => {
+                  // Create a new Date with selected date but current time
+                  const now = new Date();
+                  const selectedDate = new Date(date);
+                  const dateWithCurrentTime = new Date(
+                    selectedDate.getFullYear(),
+                    selectedDate.getMonth(),
+                    selectedDate.getDate(),
+                    now.getHours(),
+                    now.getMinutes(),
+                    now.getSeconds(),
+                    now.getMilliseconds()
+                  );
+
+                  const fullTimestamp = dateWithCurrentTime.toISOString();
+                  setBusinessDate(fullTimestamp);
+                }}
+                className="w-full lg:w-[274px]"
+                label={t('DATE')}
               />
             </div>
             {items?.map((currentItem, index) => (
@@ -381,19 +458,17 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                           }
                         /> */}
                         <SelectCompInput
-                          // disabled={isEditMode}
-                          cantDoAnything={isEditMode}
                           className="flex-grow w-full "
                           placeholder={t('PRODUCT_NAME')}
                           options={getAllPro?.data?.map((product) => ({
                             value: product.id,
                             label: product.name,
                           }))}
+                          value={currentItem.id}
                           label={t('PRODUCT_NAME')}
                           ref={myInputRef}
                           onValueChange={(value) => {
                             if (!value) return;
-                            if (isEditMode) return;
 
                             // myInputRef.current.value = '';
                             handleItemChange(
@@ -424,17 +499,17 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                             );
                           }}
                           onInputFieldChange={(value) => {
-                            if (isEditMode) return;
                             handleItemChange(index, 'kitchen_notes', value);
                           }}
-                          value={currentItem.id}
                           directValue={
                             currentItem.name === 'sku-zood-20001'
                               ? currentItem?.kitchen_notes
-                              : ''
+                              : getAllPro?.data?.find(
+                                  (product) => product.id === currentItem.id
+                                )?.name || ''
                           }
                         />
-                        {!isEditMode && (
+                        {
                           <button
                             type="button"
                             onClick={changeToTextArea}
@@ -442,7 +517,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                           >
                             <GrMenu size={25} />
                           </button>
-                        )}
+                        }
                       </div>
                     </>
                   ) : (
@@ -455,10 +530,8 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                               ? currentItem?.kitchen_notes
                               : currentItem?.name
                           }
-                          disabled={isEditMode}
                           ref={myInputRef}
                           onChange={() => {
-                            if (isEditMode) return;
                             handleItemChange(index, 'kitchen_notes', '1');
                           }}
                           label={t('PRODUCT_NAME')}
@@ -520,9 +593,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   <div className="flex gap-10">
                     <IconInput
                       value={currentItem.qty}
-                      disabled={isEditMode}
                       onChange={(e) => {
-                        if (isEditMode) return;
                         if (e.target.value == 0) return;
                         if (!currentItem.kitchen_notes) {
                           handleItemChange(
@@ -542,9 +613,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                     />
                     <IconInput
                       value={currentItem.total}
-                      disabled={params.id === 'edit'}
                       onChange={(e) => {
-                        if (isEditMode) return;
                         handleItemChange(index, 'price', e.target.value);
                         handleItemChange(index, 'total', e.target.value);
                       }}
@@ -553,7 +622,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                       iconSrcLeft={'SR'}
                     />
                   </div>
-                  {!isEditMode && items.length > 1 && (
+                  {items.length > 1 && (
                     <div
                       onClick={() => {
                         const newItems = [...items];
@@ -589,7 +658,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                 /> */}
               </>
             ))}
-            {!isEditMode && (
+            {
               <Button
                 onClick={() => {
                   setItems(() => {
@@ -620,11 +689,10 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   <span className="font-semibold">{t('ADD_NEW_ITEM')}</span>
                 </div>
               </Button>
-            )}
+            }
 
             <div className="flex items-end">
               <IconInput
-                disabled={isEditMode}
                 name="paid_tax"
                 type="number"
                 step="0.0001"
@@ -636,7 +704,6 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
               />
             </div>
             <Textarea
-              disabled={params.id === 'edit'}
               name="notes"
               value={invoice.purchaseDescription}
               onChange={(e) =>
@@ -648,7 +715,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
               className="flex-grow max-w-[500px] my-sm"
               label={t('PURCHASES_DESCRIPTION')}
             />
-            {!isEditMode && (
+            {
               <FileUpload
                 onFileSelect={function (file: File): void {
                   const reader = new FileReader();
@@ -660,7 +727,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                   reader.readAsDataURL(file);
                 }}
               />
-            )}
+            }
             {fileName && (
               <div className="mt-2 text-sm text-gray-600">
                 {`Selected file: ${fileName}`}
@@ -674,22 +741,17 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
               </div>
             )}
             <div className="flex flex-wrap gap-y-5 mt-5">
-              {!isEditMode && (
-                <Button
-                  loading={loading}
-                  disabled={
-                    loading ||
-                    cantClick ||
-                    !(allDataId && allDataId?.data?.status !== 'Closed')
-                      ? true
-                      : false
-                  }
-                  type="submit"
-                  className="px-6 py-1.5 mta-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
-                >
-                  {isEditMode ? t('UPDATE_INVOICE') : t('ADD_INVOICE')}
-                </Button>
-              )}
+              <Button
+                loading={loading}
+                disabled={
+                  loading
+                  // (isEditMode && allDataId?.data?.status === 'Closed')
+                }
+                type="submit"
+                className="px-6 py-1.5 mta-8 text-sm font-semibold rounded min-h-[39px] w-[144px]"
+              >
+                {isEditMode ? t('UPDATE_INVOICE') : t('ADD_INVOICE')}
+              </Button>
               <DelConfirm route={'inventory/purchasing'} />
             </div>
           </div>
