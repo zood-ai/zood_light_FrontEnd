@@ -11,7 +11,7 @@ export default function SignUp() {
   const { showToast } = useToast();
   const [formState, setFormState] = useState({
     name: '',
-    plan: '',
+    package_id: '830f735a-eb95-4592-a61c-e78b2b2e8a4b',
     email: '',
     phone: '',
     password: '',
