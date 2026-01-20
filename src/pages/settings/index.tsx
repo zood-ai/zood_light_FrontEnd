@@ -492,7 +492,11 @@ export default function Settings() {
                   receipt_header: e.target.value,
                 }));
               }}
-              defaultValue={updateAll?.receipt_header}
+              defaultValue={
+                updateAll?.receipt_header?.includes('Dot')
+                  ? 'Welcome'
+                  : updateAll?.receipt_header
+              }
             />
           </div>
 
