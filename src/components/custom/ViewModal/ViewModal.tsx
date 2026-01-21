@@ -145,7 +145,11 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                 {size === 'A4' ? (
                   <div className="flex print-content flex-col   pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg-lg  text-zinc-800 max-md:mt-10 max-md:max-w-full">
                     <p className="text-center mb-2">
-                      {allSettings.settings?.data?.receipt_header}
+                      {allSettings.settings?.data?.receipt_header?.includes(
+                        'Dot'
+                      )
+                        ? 'Welcome'
+                        : allSettings.settings?.data?.receipt_header}
                     </p>
                     <div className="w-full flex justify-between items-center mb-4">
                       <div>
@@ -589,7 +593,11 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                 ) : (
                   <div className="flex print-content2 flex-col w-[80mm]  mx-auto text-righ text-sm p-1  ">
                     <p className="text-center mb-2">
-                      {allSettings.settings?.data?.receipt_header}
+                      {allSettings.settings?.data?.receipt_header?.includes(
+                        'Dot'
+                      )
+                        ? 'Welcome'
+                        : allSettings.settings?.data?.receipt_header}
                     </p>
                     <img
                       className="mx-auto size-[80px]"
