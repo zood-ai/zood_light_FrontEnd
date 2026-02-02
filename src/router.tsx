@@ -23,6 +23,13 @@ import { PriceQuoteAdd } from './pages/PriceQuote/IndividualInvoicesAdd/index.ts
 import { ShopCardPQ } from './pages/PriceQuote/ShopCard/ShopCard.tsx';
 import { ShopCardEditPQ } from './pages/PriceQuote/ShopCard/ShopCardEdit.tsx';
 import Customer from './pages/Customers/Customer.tsx';
+import Users from './pages/users/page.tsx';
+import UsersAdd from './pages/users/Add/page.tsx';
+import Branches from './pages/Branches/page.tsx';
+import BranchesAdd from './pages/Branches/Add/page.tsx';
+import RolesAndPermissions from './pages/Roles/page.tsx';
+import RolesAndPermissionsAdd from './pages/Roles/Add/page.tsx';
+
 const MaintenanceError = lazy(() => import('./pages/errors/maintenance-error'));
 const UnauthorisedError = lazy(
   () => import('./pages/errors/unauthorised-error.tsx')
@@ -247,7 +254,84 @@ const router = createBrowserRouter([
           </React.Suspense>
         ),
       },
-
+      {
+        path: 'users',
+        element: (
+          <React.Suspense
+            fallback={
+              <div className="invoice-loader">
+                <div className="loaderFallBk"></div>
+              </div>
+            }
+          >
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <Users />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'users/:id/:objId?',
+        element: (
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <UsersAdd />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'branches',
+        element: (
+          <React.Suspense
+            fallback={
+              <div className="invoice-loader">
+                <div className="loaderFallBk"></div>
+              </div>
+            }
+          >
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <Branches />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'branches/:id/:objId?',
+        element: (
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <BranchesAdd />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'roles-and-permissions',
+        element: (
+          <React.Suspense
+            fallback={
+              <div className="invoice-loader">
+                <div className="loaderFallBk"></div>
+              </div>
+            }
+          >
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <RolesAndPermissions />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
+      {
+        path: 'roles-and-permissions/:id/:objId?',
+        element: (
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <RolesAndPermissionsAdd />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
       {
         path: 'individual-invoices',
         element: (

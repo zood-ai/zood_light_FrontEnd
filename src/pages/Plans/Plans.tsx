@@ -40,7 +40,7 @@ export default function Plans() {
               {t('SUBSCRIPTION_PLAN')}
             </div>
             <div className="  text-[16px] font-semibold l ">
-              {data?.business?.plan[0]?.name}
+              {data?.business?.plan?.[0]?.name}
             </div>
           </div>
           <div className=" w-[163px] h-[71px] bg-white rounded border border-mainBorder ps-[13px] flex flex-col justify-evenly border-solid max-md:pl-5">
@@ -48,7 +48,7 @@ export default function Plans() {
               {t('SUBSCRIPTION')}
             </div>
             <div className="  text-[16px] font-semibold l ">
-              {data?.business?.plan[0]?.duration}
+              {data?.business?.plan?.[0]?.duration}
             </div>
           </div>
           <div className=" w-[173px] h-[71px] bg-white rounded border border-mainBorder ps-[13px] flex flex-col justify-evenly border-solid max-md:pl-5 ">

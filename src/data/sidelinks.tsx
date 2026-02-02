@@ -14,7 +14,12 @@ import {
   IconUserFilled,
   IconUserEdit,
   IconCreditCardFilled,
+  IconUsersGroup,
+  IconUsers,
+  IconLockCheck,
+  IconGitBranch,
 } from '@tabler/icons-react';
+import { FaUsers } from 'react-icons/fa';
 import Dashboard from './icons/Dashboard';
 import DashboardActive from './icons/DashboardActive';
 import PriceQuote from './icons/PriceQuote';
@@ -119,8 +124,8 @@ export const sidelinks: SideLink[] = [
         icon: <Categories />,
         icon1: <Categories />,
         icon2: <CategoriesActive />,
-      }
-    ]
+      },
+    ],
   },
   {
     title: 'العملاء', // Customers
@@ -193,6 +198,33 @@ export const sidelinks: SideLink[] = [
     icon: <PaymentMethods />,
     icon1: <PaymentMethods />,
     icon2: <PaymentMethodsActive />,
+  },
+  {
+    title: 'المستخدمين',
+    i18n: 'USERS',
+    label: '',
+    href: '/zood-dashboard/users',
+    icon: <IconUsers />,
+    icon1: <IconUsers />,
+    icon2: <IconUsers />,
+  },
+  {
+    title: 'الفروع',
+    i18n: 'BRANCHES',
+    label: '',
+    href: '/zood-dashboard/branches',
+    icon: <IconGitBranch />,
+    icon1: <IconGitBranch />,
+    icon2: <IconGitBranch />,
+  },
+  {
+    title: 'الادوار و الصلاحيات',
+    i18n: 'ROLES_AND_PERMISSIONS',
+    label: '',
+    href: '/zood-dashboard/roles-and-permissions',
+    icon: <IconLockCheck />,
+    icon1: <IconLockCheck />,
+    icon2: <IconLockCheck />,
   },
   {
     title: 'الاعدادات', // Settings
