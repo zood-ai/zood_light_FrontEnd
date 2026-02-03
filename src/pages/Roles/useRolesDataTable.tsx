@@ -30,7 +30,7 @@ export const useRolesDataTable = () => {
 
         return (
           <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-            {users ?? ''}
+            {users?.length ?? ''}
           </span>
         );
       },

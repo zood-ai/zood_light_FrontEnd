@@ -58,16 +58,17 @@ const Roles: React.FC = () => {
   const isRtl = useDirection();
   const { columns } = useRolesDataTable();
 
-  const [allUrl, setAllUrl] = useState('roles');
-  const allService = createCrudService<any>('roles');
+  const [allUrl, setAllUrl] = useState('hr/roles');
+  const allService = createCrudService<any>('hr/roles');
   const { useGetAll } = allService;
   const { data: rolesData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
 
   const [searchedData, setSearchedData] = useState({});
+  console.log({ hh: rolesData?.data });
 
   useEffect(() => {
-    setSearchedData(rolesData);
+    setSearchedData(rolesData?.data);
   }, [rolesData]);
 
   const debounce = (func: Function, delay: number) => {
@@ -82,18 +83,20 @@ const Roles: React.FC = () => {
     debounce(async (searchTerm: string, date: string) => {
       if (!searchTerm) {
         if (!date) {
-          setSearchedData(rolesData);
+          setSearchedData(rolesData?.data);
           return;
         }
-        setAllUrl(`roles?${date}`);
-        const res = await axiosInstance.get(`roles?${date}`);
-        setSearchedData(res.data);
+        setAllUrl(`hr/roles?${date}`);
+        const res = await axiosInstance.get(`hr/roles?${date}`);
+        setSearchedData(res.data?.data);
         return;
       }
 
-      setAllUrl(`roles?search=${searchTerm}${date}`);
-      const res = await axiosInstance.get(`roles?search=${searchTerm}${date}`);
-      setSearchedData(res.data);
+      setAllUrl(`hr/roles?filter[name]=${searchTerm}${date}`);
+      const res = await axiosInstance.get(
+        `hr/roles?filter[name]=${searchTerm}${date}`
+      );
+      setSearchedData(res.data?.data);
     }, 300),
     [rolesData]
   );
@@ -102,6 +105,7 @@ const Roles: React.FC = () => {
     handleDebounce(e, date);
   };
 
+  console.log({ searchedData });
   return (
     <>
       <AddEditModal
@@ -131,7 +135,12 @@ const Roles: React.FC = () => {
           handleEdit={handleOpenEditModal}
           actionBtn={handleCreateRole}
           filterBtn={filterBtn}
-          meta={searchedData?.meta || {}}
+          meta={{
+            current_page: searchedData?.current_page,
+            last_page: searchedData?.last_page,
+            per_page: searchedData?.per_page,
+            total: searchedData?.total,
+          }}
           actionText={'ADD_ROLE'}
           loading={isLoading}
           handleSearch={handleSearch}

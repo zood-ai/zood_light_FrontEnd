@@ -41,7 +41,7 @@ const RolesAdd: React.FC = () => {
   const navigate = useNavigate();
 
   // Fetch services and mutations
-  const crudService = createCrudService<any>('roles');
+  const crudService = createCrudService<any>('hr/roles');
   const { useGetById, useUpdate, useCreate } = crudService;
 
   const { mutate: createNewRole } = useCreate();
@@ -73,13 +73,13 @@ const RolesAdd: React.FC = () => {
   useEffect(() => {
     if (isEditMode && getDataById?.data) {
       axiosInstance
-        .get(`/roles/${params.objId}`)
+        .get(`/hr/roles/${params.objId}`)
         .then((res) => {
           const roleData = res?.data?.data;
           setcurrData(roleData);
           if (roleData) {
             form.setValue('name', roleData.name || '');
-            form.setValue('authorities', roleData.authorities || []);
+            form.setValue('authorities', roleData?.permissions?.map(el=>el.name) || []);
           }
         })
         .catch((err) => {
@@ -101,7 +101,7 @@ const RolesAdd: React.FC = () => {
 
     if (isEditMode) {
       try {
-        await axiosInstance.put(`/roles/${params.objId}`, values);
+        await axiosInstance.put(`/hr/roles/${params.objId}`, values);
 
         openDialog('updated');
         setLoading(false);
@@ -112,7 +112,7 @@ const RolesAdd: React.FC = () => {
       }
     } else {
       try {
-        await axiosInstance.post('/roles', values);
+        await axiosInstance.post('/hr/roles', values);
 
         openDialog('added');
         setLoading(false);
@@ -279,7 +279,7 @@ const RolesAdd: React.FC = () => {
             >
               {isEditMode ? t('UPDATE_ROLE') : t('ADD_ROLE')}
             </Button>
-            <DelConfirm route={'roles'} />
+            <DelConfirm route={'hr/roles'} />
           </form>
         </Form>
       </div>
