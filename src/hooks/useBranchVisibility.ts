@@ -24,13 +24,12 @@ const BRANCH_REQUIRED_ROUTES = [
 export const useBranchVisibility = () => {
   const location = useLocation();
 
-  const shouldShowBranchSelect = BRANCH_VISIBLE_ROUTES.find(
+  const shouldShowBranchSelect = !!BRANCH_VISIBLE_ROUTES.find(
     (route) => location.pathname === route
   );
 
-  const isBranchRequired = BRANCH_REQUIRED_ROUTES.some(
-    (route) =>
-      location.pathname === route || location.pathname.startsWith(route + '/')
+  const isBranchRequired = !!BRANCH_REQUIRED_ROUTES.find(
+    (route) => location.pathname === route
   );
 
   return {

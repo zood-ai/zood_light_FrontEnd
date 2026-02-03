@@ -42,8 +42,7 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
         if (branchData?.data) {
           setBranches(branchData.data);
 
-          // Check if there's a saved branch in cookies
-          const savedBranchId = Cookies.get('branch_id');
+           const savedBranchId = Cookies.get('branch_id');
           
           if (savedBranchId) {
             const savedBranch = branchData.data.find(
@@ -58,9 +57,7 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
                 })
               );
             }
-            // If saved branch not found, don't set any branch - let user choose
           }
-          // If no saved branch, don't set any branch - let user choose
         }
       } catch (error) {
         console.error('Error fetching branches:', error);
@@ -76,8 +73,7 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
     setSelectedBranchState(branch);
     Cookies.set('branch_id', branch.id);
 
-    // Update Redux store
-    dispatch(
+     dispatch(
       updateField({
         field: 'branch_id',
         value: branch.id,

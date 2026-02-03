@@ -117,8 +117,8 @@ const AppShell = () => {
                 ? 'md:ml-14'
                 : 'md:ml-64'
               : isCollapsed
-              ? 'md:mr-14'
-              : 'md:mr-64'
+                ? 'md:mr-14'
+                : 'md:mr-64'
           )}
         >
           <Layout>
@@ -152,20 +152,13 @@ const AppShell = () => {
                     <WelcomeMessage name={`${Cookies.get('name')}`} />
                   </div>
                 </h2>
-                
-                {/* Branch Select */}
-                {shouldShowBranchSelect && (
-                  <div className="flex-1 flex justify-center">
-                    <BranchSelect />
-                  </div>
-                )}
               </div>
-              
+
               <div
                 onClick={() => setFastActionBtn(true)}
                 className={`${
                   isRtl ? 'mr-auto' : 'ml-auto'
-                } flex items-center space-x-4`}
+                } flex items-center gap-2 space-x-4`}
               >
                 <Button
                   style={{
@@ -177,6 +170,12 @@ const AppShell = () => {
                 >
                   <PlusIcon /> <span>{t('FAST_CREATE')}</span>
                 </Button>
+                {/* Branch Select */}
+                {shouldShowBranchSelect && (
+                  <div className="flex-1 flex justify-center items-center mb-1">
+                    <BranchSelect />
+                  </div>
+                )}
                 {/* <ThemeSwitch /> */}
               </div>
               <UserNav />

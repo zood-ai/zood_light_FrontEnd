@@ -24,9 +24,6 @@ const BranchSelect = () => {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm font-medium text-muted-foreground">
-        {t('BRANCH')}:
-      </span>
       <Select
         value={selectedBranch?.id || ''}
         onValueChange={(value) => {

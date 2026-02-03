@@ -40,16 +40,12 @@ axiosInstance.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${token}`;
     }
 
-    // Add branch_id to requests if available
     const branchId = Cookies.get('branch_id');
     if (branchId && config.method !== 'get') {
-      // Add branch_id to request body for POST/PUT requests
       if (config.data && typeof config.data === 'object') {
         config.data = { ...config.data, branch_id: branchId };
       }
     }
-    
-    // For GET requests, add branch_id as query parameter (only if branch_id exists)
     if (branchId && config.method === 'get') {
       config.params = { ...config.params, branch_id: branchId };
     }
