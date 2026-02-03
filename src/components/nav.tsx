@@ -56,12 +56,6 @@ export default function Nav({
               ?.includes(permission)
           )
         : true;
-    console.log({
-      auth: rest.authorities,
-      allAuuths: allSettings?.WhoAmI?.user?.roles?.flatMap((el) =>
-        el?.permissions?.map((el2) => el2.name)
-      ),
-    });
 
     if (!hasPermission) {
       return;
@@ -141,7 +135,7 @@ function NavLink({
             ? 'bg-[#EAEBF5] rounded-[8px] mx-2 ps-[16px] hover:bg-[#EAEBF5]'
             : ''
         }`,
-        subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
+        subLink && 'h-10 w-full px-4'
       )}
       aria-current={checkActiveNav(href) ? 'page' : undefined}
     >
@@ -193,16 +187,19 @@ function NavLinkDropdown({
       <CollapsibleTrigger
         className={cn(
           buttonVariants({ variant: 'ghost', size: 'sm' }),
-          'text-secText group h-12 w-full justify-start rounded-none px-6'
+          'text-secText group h-12 w-full justify-start rounded-none px-6',
+          'flex justify-between'
         )}
       >
-        <div className={` ${isRtl ? 'ml-2' : 'mr-2'}`}>{icon}</div>
-        {<p className="text-[15px]">{t(i18n)}</p>}
-        {label && (
-          <div className="ml-2 rounded-lg bg-primary px-1 text-[0.625rem] text-primary-foreground">
-            {label}
-          </div>
-        )}
+        <div className="flex flex-grow hover:text-black">
+          <div className={` ${isRtl ? 'ml-2' : 'mr-2'}`}>{icon}</div>
+          {<p className="text-[15px]">{t(i18n)}</p>}
+          {label && (
+            <div className="ml-2 rounded-lg bg-primary px-1 text-[0.625rem] text-primary-foreground">
+              {label}
+            </div>
+          )}
+        </div>
         <span
           className={cn(
             'ml-auto transition-all group-data-[state="open"]:-rotate-180'
@@ -212,9 +209,9 @@ function NavLinkDropdown({
         </span>
       </CollapsibleTrigger>
       <CollapsibleContent className="collapsibleDropdown" asChild>
-        <ul>
+        <ul className="border-r border-r-slate-500  mr-8">
           {sub!.map((sublink) => (
-            <li key={sublink.i18n} className="my-1 ml-8">
+            <li key={sublink.i18n} className="my-1">
               <NavLink
                 {...sublink}
                 subLink

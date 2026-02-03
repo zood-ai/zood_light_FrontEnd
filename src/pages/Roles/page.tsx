@@ -65,7 +65,6 @@ const Roles: React.FC = () => {
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
 
   const [searchedData, setSearchedData] = useState({});
-  console.log({ hh: rolesData?.data });
 
   useEffect(() => {
     setSearchedData(rolesData?.data);
