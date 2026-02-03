@@ -218,5 +218,8 @@
   "PASSWORD_MISMATCH_ERROR": "الرقم السري الجديد غير متطابق.",
   "SUCCESS": "نجاح",
   "PASSWORD_CHANGE_SUCCESS": "تم تغيير كلمة المرور بنجاح.",
-  "GENERAL_ERROR": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+  "GENERAL_ERROR": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+  "BRANCH": "الفرع",
+  "SELECT_BRANCH": "اختر الفرع",
+  "PLEASE_SELECT_BRANCH_TO_CONTINUE": "يرجى اختيار فرع من الأعلى للمتابعة"
 }

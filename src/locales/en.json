@@ -215,5 +215,8 @@
   "PASSWORD_MISMATCH_ERROR": "The new password does not match.",
   "SUCCESS": "Success",
   "PASSWORD_CHANGE_SUCCESS": "Your password has been successfully changed.",
-  "GENERAL_ERROR": "An error occurred. Please try again."
+  "GENERAL_ERROR": "An error occurred. Please try again.",
+  "BRANCH": "Branch",
+  "SELECT_BRANCH": "Select Branch",
+  "PLEASE_SELECT_BRANCH_TO_CONTINUE": "Please select a branch from above to continue"
 }

@@ -6,6 +6,7 @@ import axios, {
 import { toast } from '@/components/ui/use-toast';
 import { setGlobalLoading } from '@/context/LoadingContext';
 import { getToken, removeToken } from '@/utils/auth';
+import Cookies from 'js-cookie';
 
 const newBaseUrl = localStorage.getItem('d14758f1afd44c09b7992073ccf00b43d');
 const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -38,6 +39,21 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+
+    // Add branch_id to requests if available
+    const branchId = Cookies.get('branch_id');
+    if (branchId && config.method !== 'get') {
+      // Add branch_id to request body for POST/PUT requests
+      if (config.data && typeof config.data === 'object') {
+        config.data = { ...config.data, branch_id: branchId };
+      }
+    }
+    
+    // For GET requests, add branch_id as query parameter (only if branch_id exists)
+    if (branchId && config.method === 'get') {
+      config.params = { ...config.params, branch_id: branchId };
+    }
+
     return config;
   },
   (error: AxiosError) => {

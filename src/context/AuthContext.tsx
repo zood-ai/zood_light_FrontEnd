@@ -85,6 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     Cookies.remove('refreshToken');
     Cookies.remove('name');
     Cookies.remove('userId');
+    Cookies.remove('business');
     Cookies.remove('branch_id');
     setUser(null);
     window.location.href = '/zood-login';
