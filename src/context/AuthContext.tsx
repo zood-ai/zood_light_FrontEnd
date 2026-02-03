@@ -105,6 +105,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     Cookies.remove('refreshToken');
     Cookies.remove('name');
     Cookies.remove('userId');
+    Cookies.remove('business');
     Cookies.remove('branch_id');
     Cookies.remove('authorities');
     setUser(null);

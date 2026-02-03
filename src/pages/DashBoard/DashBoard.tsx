@@ -22,6 +22,7 @@ import { ConfirmDelModal } from '../../pages/tasks/Modal/ConfirmDelModal';
 import AddEditModal from '../../pages/tasks/Modal/AddEditModal';
 import { DetailsModal } from './Modal/DetailsModal';
 import axiosInstance from '@/api/interceptors';
+import { useBranchRefresh } from '@/hooks/useBranchRefresh';
 
 export const DashBoard: React.FC<DashBoardProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -30,6 +31,9 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
   const [selectedTableRow, setSelectedRow] = useState({});
   const [modalType, setModalType] = useState('Add');
   const [activeFilter, setActiveFilter] = useState('week');
+
+  // Use branch refresh hook to ensure data updates when branch changes
+  const selectedBranch = useBranchRefresh();
 
   // Call useGetAll directly here
   const { data: apiData, isLoading } = createCrudService<any>(
