@@ -24,13 +24,6 @@ import ConfirmBk from '@/components/custom/ConfimBk';
 import DelConfirm from '@/components/custom/DelConfim';
 import { ALL_PERMISSIONS, PERMISSION_GROUPS } from '../constants/Permissions';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { AiOutlineInfoCircle } from 'react-icons/ai';
 
 const formSchema = z.object({
   name: z.string().nonempty('Role name is required'),
@@ -39,9 +32,9 @@ const formSchema = z.object({
     .min(1, 'Please select at least one permission'),
 });
 
- const RolesAdd: React.FC = () => {
-  const { t } = useTranslation();
-  const isRtl = useDirection();
+const RolesAdd: React.FC = () => {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
   const params = useParams();
   const modalType = params.id;
   const isEditMode = modalType !== 'add';
@@ -144,9 +137,8 @@ const formSchema = z.object({
   // Toggle all permissions in a group
   const handleToggleGroup = (groupKey: string, checked: boolean) => {
     const currentAuthorities = form.getValues('authorities') || [];
-    const groupPermissions = PERMISSION_GROUPS[
-      groupKey as keyof typeof PERMISSION_GROUPS
-    ].permissions.map((p) => p.value);
+    const groupPermissions =
+      PERMISSION_GROUPS[groupKey as keyof typeof PERMISSION_GROUPS].permissions;
 
     if (checked) {
       // Add all group permissions
@@ -163,20 +155,6 @@ const formSchema = z.object({
     }
   };
 
-  // Toggle single permission
-  const handleTogglePermission = (permission: string, checked: boolean) => {
-    const currentAuthorities = form.getValues('authorities') || [];
-
-    if (checked) {
-      form.setValue('authorities', [...currentAuthorities, permission]);
-    } else {
-      form.setValue(
-        'authorities',
-        currentAuthorities.filter((auth) => auth !== permission)
-      );
-    }
-  };
-
   // Check if all permissions are selected
   const isAllSelected = () => {
     const currentAuthorities = form.getValues('authorities') || [];
@@ -186,16 +164,9 @@ const formSchema = z.object({
   // Check if all permissions in a group are selected
   const isGroupSelected = (groupKey: string) => {
     const currentAuthorities = form.getValues('authorities') || [];
-    const groupPermissions = PERMISSION_GROUPS[
-      groupKey as keyof typeof PERMISSION_GROUPS
-    ].permissions.map((p) => p.value);
+    const groupPermissions =
+      PERMISSION_GROUPS[groupKey as keyof typeof PERMISSION_GROUPS].permissions;
     return groupPermissions.every((perm) => currentAuthorities.includes(perm));
-  };
-
-  // Check if a permission is selected
-  const isPermissionSelected = (permission: string) => {
-    const currentAuthorities = form.getValues('authorities') || [];
-    return currentAuthorities.includes(permission);
   };
 
   const [isOpen, setIsOpen] = useState(false);
@@ -214,145 +185,103 @@ const formSchema = z.object({
         closeDialog={() => setIsOpen(false)}
         getStatusMessage={undefined}
       />
-      <div className="min-h-[70vh]">
-        <div className="grid grid-cols-1 items-start">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleFormSubmit)}
-              className="px-s4 my-5"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 max-w-[580px]">
-                {/* Name Field */}
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('ROLE_NAME')}
-                          iconSrc={personIcon}
-                          inputClassName="w-[278px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+      <div className="grid grid-cols-1 items-start">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleFormSubmit)}
+            className="px-s4 my-5"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 max-w-[580px]">
+              {/* Name Field */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="col-span-1 mt-md">
+                    <FormControl>
+                      <IconInput
+                        {...field}
+                        label={t('ROLE_NAME')}
+                        iconSrc={personIcon}
+                        inputClassName="w-[278px]"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-              {/* Permissions Section */}
-              <div className="mt-8">
-                <FormField
-                  control={form.control}
-                  name="authorities"
-                  render={() => (
-                    <FormItem>
-                      <div className="mb-4">
-                        <FormLabel className="text-lg font-bold">
-                          {t('AUTHORITIES')}
-                        </FormLabel>
-                        <FormMessage />
+            {/* Permissions Section */}
+            <div className="mt-8">
+              <FormField
+                control={form.control}
+                name="authorities"
+                render={() => (
+                  <FormItem>
+                    <div className="mb-4">
+                      <FormLabel className="text-lg font-bold">
+                        {t('AUTHORITIES')}
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
+
+                    <div className="border rounded-md p-6 bg-white">
+                      {/* Toggle All */}
+                      <div className="flex items-center gap-2 space-x-2 mb-6 pb-4 border-b">
+                        <Checkbox
+                          checked={isAllSelected()}
+                          onCheckedChange={(checked) =>
+                            handleToggleAll(checked as boolean)
+                          }
+                        />
+                        <label className="text-base font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                          {t('TOGGLE_ALL')}
+                        </label>
                       </div>
 
-                      <div className="border rounded-md p-6 bg-white">
-                        {/* Toggle All */}
-                        <div className="flex gap-2 items-center space-x-2 mb-6 pb-4 border-b">
-                          <Checkbox
-                            checked={isAllSelected()}
-                            onCheckedChange={(checked) =>
-                              handleToggleAll(checked as boolean)
-                            }
-                          />
-                          <label className="text-base font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
-                            {t('TOGGLE_ALL')}
-                          </label>
-                        </div>
-
-                        {/* Permission Groups */}
+                      {/* Permission Groups */}
+                      <div className="space-y-3">
                         {Object.entries(PERMISSION_GROUPS).map(
                           ([groupKey, group]) => (
-                            <div key={groupKey} className="mb-8">
-                              {/* Group Header */}
-                              <div className="flex items-center gap-2 space-x-2 mb-4 bg-gray-50 rounded">
-                                <Checkbox
-                                  checked={isGroupSelected(groupKey)}
-                                  onCheckedChange={(checked) =>
-                                    handleToggleGroup(
-                                      groupKey,
-                                      checked as boolean
-                                    )
-                                  }
-                                />
-                                <label className="text-sm font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
-                                  {t(group.name)}
-                                </label>
-                              </div>
-
-                              {/* Group Permissions */}
-                              <div className="ml-8 space-y-3">
-                                {group.permissions.map((permission) => (
-                                  <div
-                                    key={permission.value}
-                                    className="flex items-center space-x-2 gap-2"
-                                  >
-                                    <Checkbox
-                                      checked={isPermissionSelected(
-                                        permission.value
-                                      )}
-                                      onCheckedChange={(checked) =>
-                                        handleTogglePermission(
-                                          permission.value,
-                                          checked as boolean
-                                        )
-                                      }
-                                    />
-                                    <label className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer">
-                                      {t(permission.label)}
-                                      {permission.tooltip && (
-                                        <TooltipProvider>
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <span className="cursor-help">
-                                                <AiOutlineInfoCircle className="w-4 h-4 text-gray-500" />
-                                              </span>
-                                            </TooltipTrigger>
-                                            <TooltipContent
-                                              side="right"
-                                              className="max-w-xs"
-                                            >
-                                              <p>{permission.tooltip}</p>
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        </TooltipProvider>
-                                      )}
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
+                            <div
+                              key={groupKey}
+                              className="flex items-center space-x-2 gap-2 p-4 rounded bg-gray-50 hover:bg-gray-100 transition-colors"
+                            >
+                              <Checkbox
+                                checked={isGroupSelected(groupKey)}
+                                onCheckedChange={(checked) =>
+                                  handleToggleGroup(
+                                    groupKey,
+                                    checked as boolean
+                                  )
+                                }
+                              />
+                              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1">
+                                {isArabic ? group.nameAr : t(group.name)}
+                              </label>
                             </div>
                           )
                         )}
                       </div>
-                    </FormItem>
-                  )}
-                />
-              </div>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
 
-              <Button
-                dir="ltr"
-                type="submit"
-                loading={loading}
-                disabled={loading}
-                className="mt-6 h-[39px] w-[163px]"
-              >
-                {isEditMode ? t('UPDATE_ROLE') : t('ADD_ROLE')}
-              </Button>
-              <DelConfirm route={'roles'} />
-            </form>
-          </Form>
-        </div>
+            <Button
+              dir="ltr"
+              type="submit"
+              loading={loading}
+              disabled={loading}
+              className="mt-6 h-[39px] w-[163px]"
+            >
+              {isEditMode ? t('UPDATE_ROLE') : t('ADD_ROLE')}
+            </Button>
+            <DelConfirm route={'roles'} />
+          </form>
+        </Form>
       </div>
     </>
   );

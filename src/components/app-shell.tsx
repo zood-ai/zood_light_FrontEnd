@@ -24,6 +24,7 @@ import { setSettings } from '@/store/slices/allSettings';
 import createCrudService from '@/api/services/crudService';
 import Cookies from 'js-cookie';
 import axiosInstance from '@/api/interceptors';
+import Loader from './loader';
 interface WelcomeMessageProps {
   name: string;
 }
@@ -48,22 +49,20 @@ const AppShell = () => {
   const dispatch = useDispatch();
 
   const [fastActionBtn, setFastActionBtn] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const { data: branchData } =
     createCrudService<any>('manage/branches').useGetAll();
 
   useEffect(() => {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-
-    const isMobileUA = /iPhone|iPad|iPod|Android/i.test(userAgent);
-
+    // const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    // const isMobileUA = /iPhone|iPad|iPod|Android/i.test(userAgent);
     // Feature detection: Check if touch is supported
     // const isTouchDevice =
     //   'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-    if (isMobileUA) {
-      window.location.href = 'https://zood-e-invoice-flutter.vercel.app/';
-    }
+    // if (isMobileUA) {
+    //   window.location.href = 'https://zood-e-invoice-flutter.vercel.app/';
+    // }
   }, []);
 
   useEffect(() => {
@@ -82,14 +81,21 @@ const AppShell = () => {
 
   useEffect(() => {
     const fun = async () => {
-      const { data: settings } = await axiosInstance.get('manage/settings');
-      const { data: whoAmI } = await axiosInstance.get('auth/whoami');
-      dispatch(
-        setSettings({
-          settings: settings,
-          WhoAmI: whoAmI,
-        })
-      );
+      try {
+        setLoading(true);
+        const { data: settings } = await axiosInstance.get('manage/settings');
+        const { data: whoAmI } = await axiosInstance.get('auth/whoami');
+        dispatch(
+          setSettings({
+            settings: settings,
+            WhoAmI: whoAmI,
+          })
+        );
+      } catch (err) {
+        setLoading(false);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fun();
@@ -103,6 +109,13 @@ const AppShell = () => {
     );
     Cookies.set('branch_id', branchData?.data?.[0]?.id);
   }, [branchData]);
+
+  if (loading)
+    return (
+      <div className="h-screen flex gap-3">
+        <Loader />
+      </div>
+    );
   return (
     <>
       <TopLoadingBar isLoading={isLoading} />

@@ -38,6 +38,7 @@ import Organization from './icons/Organization';
 import OrganizationActive from './icons/OrganizationActive';
 import Categories from './icons/Catogories';
 import CategoriesActive from './icons/CategoriesActive';
+import { Permissions, rolePermissions, Roles } from '@/config/roles';
 
 export interface NavLink {
   title: string;
@@ -51,6 +52,7 @@ export interface NavLink {
 
 export interface SideLink extends NavLink {
   sub?: NavLink[];
+  authorities: Permissions[]
 }
 
 //  Add i18n keys without altering the title field
@@ -63,6 +65,7 @@ export const sidelinks: SideLink[] = [
     icon: <Dashboard />,
     icon1: <Dashboard />,
     icon2: <DashboardActive />,
+    authorities: [],
   },
   {
     title: 'نقطة البيع', // Individual Invoices
@@ -72,6 +75,7 @@ export const sidelinks: SideLink[] = [
     icon: <PriceQuote />,
     icon1: <PriceQuote />,
     icon2: <PriceQuoteActive />,
+    authorities: rolePermissions[Roles.ORDERS],
   },
   {
     title: 'فاتورة المؤسسة', // Corporate Invoice
@@ -81,6 +85,7 @@ export const sidelinks: SideLink[] = [
     icon: <Organization />,
     icon1: <Organization />,
     icon2: <OrganizationActive />,
+    authorities: rolePermissions[Roles.ORDERS],
   },
   {
     title: 'فاتورة الشراء', // Purchase Invoice
@@ -90,6 +95,7 @@ export const sidelinks: SideLink[] = [
     icon: <PriceQuote />,
     icon1: <PriceQuote />,
     icon2: <PriceQuoteActive />,
+    authorities: rolePermissions[Roles.PURCHASING],
   },
   {
     title: 'عرض السعر', // Price Quote
@@ -99,6 +105,7 @@ export const sidelinks: SideLink[] = [
     icon: <PriceQuote />,
     icon1: <PriceQuote />,
     icon2: <PriceQuoteActive />,
+    authorities: rolePermissions[Roles.ORDERS],
   },
   {
     title: 'المخزون', // Reports
@@ -106,6 +113,7 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: '/zood-dashboard',
     icon: <IconBoxSeam size={20} />,
+    authorities: rolePermissions[Roles.INVENTORY],
     sub: [
       {
         title: 'المنتجات', // Products
@@ -135,6 +143,7 @@ export const sidelinks: SideLink[] = [
     icon: <Customers />,
     icon1: <Customers />,
     icon2: <CustomersActive />,
+    authorities: rolePermissions[Roles.CUSTOMERS],
   },
   {
     title: 'الموردين', // Resources
@@ -144,6 +153,7 @@ export const sidelinks: SideLink[] = [
     icon: <Customers />,
     icon1: <Customers />,
     icon2: <CustomersActive />,
+    authorities: rolePermissions[Roles.SUPPLIERS],
   },
   {
     title: 'التقارير', // Reports
@@ -151,6 +161,7 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: '/zood-dashboard',
     icon: <IconChartHistogram size={20} />,
+    authorities: rolePermissions[Roles.ORDERS],
     sub: [
       {
         title: 'فاتورة عاديه', // Normal Report
@@ -189,6 +200,7 @@ export const sidelinks: SideLink[] = [
     icon: <Plan />,
     icon1: <Plan />,
     icon2: <PlanActive />,
+    authorities: rolePermissions[Roles.SETTINGS],
   },
   {
     title: 'طرق الدفع', // Payment Methods
@@ -198,6 +210,7 @@ export const sidelinks: SideLink[] = [
     icon: <PaymentMethods />,
     icon1: <PaymentMethods />,
     icon2: <PaymentMethodsActive />,
+    authorities: rolePermissions[Roles.PAYMENT_METHODS],
   },
   {
     title: 'المستخدمين',
@@ -207,6 +220,7 @@ export const sidelinks: SideLink[] = [
     icon: <IconUsers />,
     icon1: <IconUsers />,
     icon2: <IconUsers />,
+    authorities: rolePermissions[Roles.USERS],
   },
   {
     title: 'الفروع',
@@ -216,6 +230,7 @@ export const sidelinks: SideLink[] = [
     icon: <IconGitBranch />,
     icon1: <IconGitBranch />,
     icon2: <IconGitBranch />,
+    authorities: rolePermissions[Roles.BRANCHES],
   },
   {
     title: 'الادوار و الصلاحيات',
@@ -225,6 +240,7 @@ export const sidelinks: SideLink[] = [
     icon: <IconLockCheck />,
     icon1: <IconLockCheck />,
     icon2: <IconLockCheck />,
+    authorities: rolePermissions[Roles.SETTINGS],
   },
   {
     title: 'الاعدادات', // Settings
@@ -234,5 +250,6 @@ export const sidelinks: SideLink[] = [
     icon: <Settings />,
     icon1: <Settings />,
     icon2: <SettingsActive />,
+    authorities: rolePermissions[Roles.SETTINGS],
   },
 ];
