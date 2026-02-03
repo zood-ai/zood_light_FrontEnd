@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { IconChevronDown } from '@tabler/icons-react';
 import { Button, buttonVariants } from './custom/button';
 import {
@@ -25,6 +25,9 @@ import useCheckActiveNav from '@/hooks/use-check-active-nav';
 import { SideLink } from '@/data/sidelinks';
 import useDirection from '@/hooks/useDirection';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/context/AuthContext';
+import { Permissions } from '@/config/roles';
+import { useSelector } from 'react-redux';
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed: boolean;
@@ -38,8 +41,26 @@ export default function Nav({
   className,
   closeNav,
 }: NavProps) {
+  const { user, logout } = useAuth();
+  const allSettings = useSelector((state: any) => state.allSettings.value);
+  const isRtl = useDirection();
+  if (!user) return;
   const renderLink = ({ sub, ...rest }: SideLink) => {
     const key = `${rest.i18n}-${rest.href}`;
+    // rolePermissions[Roles.PAYMENT_METHODS];
+    const hasPermission =
+      rest.authorities?.length > 0
+        ? rest.authorities.every((permission) =>
+            allSettings?.WhoAmI?.user?.roles
+              ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
+              ?.includes(permission)
+          )
+        : true;
+
+    if (!hasPermission) {
+      logout();
+      return <Navigate to="/" replace />;
+    }
     if (isCollapsed && sub)
       return (
         <NavLinkIconDropdown
@@ -60,7 +81,6 @@ export default function Nav({
 
     return <NavLink {...rest} key={key} closeNav={closeNav} />;
   };
-  const isRtl = useDirection();
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
@@ -95,6 +115,7 @@ function NavLink({
   icon2,
   label,
   href,
+  authorities,
   closeNav,
   subLink = false,
 }: NavLinkProps) {
@@ -110,9 +131,10 @@ function NavLink({
           variant: checkActiveNav(href) ? 'ghost' : 'ghost',
           size: 'sm',
         }),
-        `h-12 justify-start text-wrap rounded-none px-6  ${checkActiveNav(href)
-          ? 'bg-[#EAEBF5] rounded-[8px] mx-2 ps-[16px] hover:bg-[#EAEBF5]'
-          : ''
+        `h-12 justify-start text-wrap rounded-none px-6  ${
+          checkActiveNav(href)
+            ? 'bg-[#EAEBF5] rounded-[8px] mx-2 ps-[16px] hover:bg-[#EAEBF5]'
+            : ''
         }`,
         subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
       )}
@@ -131,8 +153,9 @@ function NavLink({
         </span>
       </div>
       <span
-        className={` ${checkActiveNav(href) ? 'font-bold text-main' : 'text-secText'
-          }`}
+        className={` ${
+          checkActiveNav(href) ? 'font-bold text-main' : 'text-secText'
+        }`}
       >
         {/* {title} */}
         {t(i18n)}
@@ -168,14 +191,8 @@ function NavLinkDropdown({
           'text-secText group h-12 w-full justify-start rounded-none px-6'
         )}
       >
-        <div className={` ${isRtl ? 'ml-2' : 'mr-2'}`}>
-          {icon}
-        </div>
-        {
-          <p className="text-[15px]">
-            {t(i18n)}
-          </p>
-        }
+        <div className={` ${isRtl ? 'ml-2' : 'mr-2'}`}>{icon}</div>
+        {<p className="text-[15px]">{t(i18n)}</p>}
         {label && (
           <div className="ml-2 rounded-lg bg-primary px-1 text-[0.625rem] text-primary-foreground">
             {label}
@@ -193,7 +210,7 @@ function NavLinkDropdown({
         <ul>
           {sub!.map((sublink) => (
             <li key={sublink.i18n} className="my-1 ml-8">
-              <NavLink {...sublink} subLink closeNav={closeNav} />
+              <NavLink {...sublink} subLink closeNav={closeNav} authorities={[]} />
             </li>
           ))}
         </ul>
@@ -215,9 +232,10 @@ function NavLinkIcon({ title, i18n, icon, label, href }: NavLinkProps) {
               variant: checkActiveNav(href) ? 'secondary' : 'ghost',
               size: 'icon',
             }),
-            `h-12 w-12 ${checkActiveNav(href)
-              ? 'bg-[#EAEBF5] rounded-[8px]  hover:bg-[#EAEBF5]'
-              : ''
+            `h-12 w-12 ${
+              checkActiveNav(href)
+                ? 'bg-[#EAEBF5] rounded-[8px]  hover:bg-[#EAEBF5]'
+                : ''
             } `
           )}
         >

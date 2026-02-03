@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import './CustomersAdd.css';
 import { useTranslation } from 'react-i18next';
 import IconInput from '@/components/custom/InputWithIcon';
 import useDirection from '@/hooks/useDirection';
-import { CustomersAddProps } from './CustomersAdd.types';
 import personIcon from '/icons/name person.svg';
 import callIcon from '/icons/call.svg';
 import { Button } from '@/components/custom/button';
@@ -34,7 +32,7 @@ const formSchema = z.object({
   coTax: z.string().optional().nullable(),
 });
 
-export const CustomersAdd: React.FC<CustomersAddProps> = () => {
+export const CustomersAdd: React.FC = () => {
   const { t } = useTranslation();
   const isRtl = useDirection();
   const params = useParams();
