@@ -2,11 +2,12 @@ import { useContext, useState, createContext, ReactNode } from 'react';
 import Cookies from 'js-cookie';
 import { toast } from '@/components/ui/use-toast';
 import axios from 'axios';
+import { Permissions } from '@/config/roles';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 interface AuthContextType {
-  user: string | null;
+  user: AuthUser | null;
   login: (
     data: LoginData
   ) => Promise<{ success: boolean; error: boolean; errorCode?: number }>;
@@ -30,9 +31,20 @@ const showToast = (title: string, description: string) => {
   });
 };
 
+interface AuthUser {
+  token: string;
+  authorities: Permissions[];
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<string | null>(
-    Cookies.get('accessToken') || null
+  const storedPermissions = Cookies.get('authorities');
+  const [user, setUser] = useState<AuthUser | null>(
+    Cookies.get('accessToken')
+      ? {
+          token: Cookies.get('accessToken')!,
+          authorities: storedPermissions ? JSON.parse(storedPermissions) : [],
+        }
+      : null
   );
 
   const login = async (
@@ -51,6 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
       });
       const token = responseData?.data?.token;
+      const authorities = responseData?.data?.authorities || [];
       const name = responseData?.data?.user?.name;
       const business = {
         businessName: responseData?.data?.user.businessName,
@@ -59,11 +72,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const userId = responseData?.data?.user?.id;
       if (token) {
         Cookies.set('accessToken', token, { expires: 1, path: '/' });
+        Cookies.set('authorities', JSON.stringify(authorities), {
+          expires: 1,
+          path: '/',
+        });
         Cookies.set('refreshToken', token, { expires: 1, path: '/' });
         Cookies.set('name', name, { expires: 1, path: '/' });
         Cookies.set('userId', userId, { expires: 1 });
         Cookies.set('business', JSON.stringify(business), { expires: 1 });
-        setUser(token);
+        setUser({
+          token,
+          authorities,
+        });
         return { success: true, error: false };
       }
 
@@ -87,6 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     Cookies.remove('userId');
     Cookies.remove('business');
     Cookies.remove('branch_id');
+    Cookies.remove('authorities');
     setUser(null);
     window.location.href = '/zood-login';
   };

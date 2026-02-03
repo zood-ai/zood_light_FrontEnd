@@ -45,6 +45,9 @@ export function DataTableToolbar<TData>({
     '/zood-dashboard/customers',
     '/zood-dashboard/resources',
     '/zood-dashboard/payment-methods',
+    '/zood-dashboard/users',
+    '/zood-dashboard/branches',
+    '/zood-dashboard/roles-and-permissions',
   ];
 
   const exportExcel = async () => {

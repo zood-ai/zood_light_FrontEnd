@@ -28,6 +28,9 @@ import BranchSelect from './BranchSelect';
 import { useBranchVisibility } from '@/hooks/useBranchVisibility';
 import { useBranch } from '@/context/BranchContext';
 import BranchGuard from './BranchGuard';
+
+import Loader from './loader';
+
 interface WelcomeMessageProps {
   name: string;
 }
@@ -54,20 +57,18 @@ const AppShell = () => {
   const { selectedBranch } = useBranch();
 
   const [fastActionBtn, setFastActionBtn] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-
-    const isMobileUA = /iPhone|iPad|iPod|Android/i.test(userAgent);
-
+    // const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    // const isMobileUA = /iPhone|iPad|iPod|Android/i.test(userAgent);
     // Feature detection: Check if touch is supported
     // const isTouchDevice =
     //   'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-    if (isMobileUA) {
-      window.location.href = 'https://zood-e-invoice-flutter.vercel.app/';
-    }
+    // if (isMobileUA) {
+    //   window.location.href = 'https://zood-e-invoice-flutter.vercel.app/';
+    // }
   }, []);
 
   useEffect(() => {
@@ -86,18 +87,34 @@ const AppShell = () => {
 
   useEffect(() => {
     const fun = async () => {
-      const { data: settings } = await axiosInstance.get('manage/settings');
-      const { data: whoAmI } = await axiosInstance.get('auth/whoami');
-      dispatch(
-        setSettings({
-          settings: settings,
-          WhoAmI: whoAmI,
-        })
-      );
+      try {
+        setLoading(true);
+        const { data: settings } = await axiosInstance.get('manage/settings');
+        const { data: whoAmI } = await axiosInstance.get('auth/whoami');
+        dispatch(
+          setSettings({
+            settings: settings,
+            WhoAmI: whoAmI,
+          })
+        );
+      } catch (err) {
+        setLoading(false);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fun();
   }, [reFetch]);
+ 
+
+  if (loading)
+    return (
+      <div className="h-screen flex gap-3">
+        <Loader />
+      </div>
+    );
+
   return (
     <>
       <TopLoadingBar isLoading={isLoading} />

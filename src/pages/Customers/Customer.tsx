@@ -3,7 +3,6 @@ import React from 'react';
 import { CustomersProps } from './Customers.types';
 
 import './Customers.css';
-import { tasks } from './data/tasks';
 import { useState, useEffect, useCallback } from 'react';
 import { DetailsModal } from './Modal/DetailsModal';
 import { DataTable } from '@/components/custom/DataTableComp/data-table';
