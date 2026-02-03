@@ -56,10 +56,15 @@ export default function Nav({
               ?.includes(permission)
           )
         : true;
+    console.log({
+      auth: rest.authorities,
+      allAuuths: allSettings?.WhoAmI?.user?.roles?.flatMap((el) =>
+        el?.permissions?.map((el2) => el2.name)
+      ),
+    });
 
     if (!hasPermission) {
-      logout();
-      return <Navigate to="/" replace />;
+      return;
     }
     if (isCollapsed && sub)
       return (
@@ -210,7 +215,12 @@ function NavLinkDropdown({
         <ul>
           {sub!.map((sublink) => (
             <li key={sublink.i18n} className="my-1 ml-8">
-              <NavLink {...sublink} subLink closeNav={closeNav} authorities={[]} />
+              <NavLink
+                {...sublink}
+                subLink
+                closeNav={closeNav}
+                authorities={[]}
+              />
             </li>
           ))}
         </ul>

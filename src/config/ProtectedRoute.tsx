@@ -3,8 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import PayDialog from './PayDialog';
 import { Permissions } from './roles';
 import { useSelector } from 'react-redux';
-import { LoadingSkeleton } from '@/components/custom/LoadingSkeleton';
-import Loader from '@/components/loader';
+import { BranchProvider } from '@/context/BranchContext';
 
 type ProtectedRouteProps = {
   children: JSX.Element;
@@ -19,6 +18,7 @@ const ProtectedRoute = ({
   const allSettings = useSelector((state: any) => state.allSettings.value);
 
   if (!user) {
+    logout();
     return <Navigate to="/" replace />;
   }
 
@@ -38,8 +38,10 @@ const ProtectedRoute = ({
 
   return (
     <>
-      <PayDialog showRemaining={true} />
-      {children}
+      <BranchProvider>
+        <PayDialog showRemaining={true} />
+        {children}
+      </BranchProvider>
     </>
   );
 };
