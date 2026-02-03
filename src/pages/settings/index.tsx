@@ -39,7 +39,7 @@ export default function Settings() {
     `auth/users/${userId}`
   ).useUpdate();
   let holder = whoami
-    ? JSON.parse(whoami?.user?.branches[0]?.registered_address)
+    ? JSON.parse(whoami?.user?.branches[0]?.registered_address ?? '{}')
     : {};
   const [updateAll, setUpdateAll] = useState({
     country: settings?.data?.country || '',
@@ -65,7 +65,7 @@ export default function Settings() {
 
   useEffect(() => {
     const holder = whoami
-      ? JSON.parse(whoami?.user?.branches[0]?.registered_address)
+      ? JSON.parse(whoami?.user?.branches[0]?.registered_address ?? '{}')
       : {};
     setUpdateAll({
       country: settings?.data?.country || '',
