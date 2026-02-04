@@ -30,6 +30,7 @@ import { useBranch } from '@/context/BranchContext';
 import BranchGuard from './BranchGuard';
 
 import Loader from './loader';
+import { useBranchRefresh } from '@/hooks/useBranchRefresh';
 
 interface WelcomeMessageProps {
   name: string;
@@ -49,12 +50,13 @@ const AppShell = () => {
   const navigate = useNavigate();
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
+  // Use branch refresh hook to ensure data updates when branch changes
+  const selectedBranch = useBranchRefresh();
   const userNav = useSelector((state: any) => state.usrNavSlice.active);
   const reFetch = useSelector((state: any) => state.allSettings.reFetch);
   const { openDialog, delRoute } = useGlobalDialog();
   const dispatch = useDispatch();
   const { shouldShowBranchSelect, isBranchRequired } = useBranchVisibility();
-  const { selectedBranch } = useBranch();
 
   const [fastActionBtn, setFastActionBtn] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -106,7 +108,6 @@ const AppShell = () => {
 
     fun();
   }, [reFetch]);
- 
 
   if (loading)
     return (
@@ -134,8 +135,8 @@ const AppShell = () => {
                 ? 'md:ml-14'
                 : 'md:ml-64'
               : isCollapsed
-                ? 'md:mr-14'
-                : 'md:mr-64'
+              ? 'md:mr-14'
+              : 'md:mr-64'
           )}
         >
           <Layout>

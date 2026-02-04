@@ -23,6 +23,7 @@ import AddEditModal from '../../pages/tasks/Modal/AddEditModal';
 import { DetailsModal } from './Modal/DetailsModal';
 import axiosInstance from '@/api/interceptors';
 import { useBranchRefresh } from '@/hooks/useBranchRefresh';
+import { useBranch } from '@/context/BranchContext';
 
 export const DashBoard: React.FC<DashBoardProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);

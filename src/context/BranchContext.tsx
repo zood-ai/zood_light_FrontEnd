@@ -9,6 +9,7 @@ import Cookies from 'js-cookie';
 import { useDispatch } from 'react-redux';
 import { updateField } from '@/store/slices/orderSchema';
 import axiosInstance from '@/api/interceptors';
+import { useAuth } from './AuthContext';
 
 interface Branch {
   id: string;
@@ -31,8 +32,14 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const dispatch = useDispatch();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
+    if (!window.location.pathname.includes('/zood-dashboard')) return;
+    if (!user && window.location.pathname.includes('/zood-dashboard')) {
+      logout();
+      window.location.replace('/');
+    }
     const fetchBranches = async () => {
       try {
         setIsLoading(true);
@@ -42,8 +49,8 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
         if (branchData?.data) {
           setBranches(branchData.data);
 
-           const savedBranchId = Cookies.get('branch_id');
-          
+          const savedBranchId = Cookies.get('branch_id');
+
           if (savedBranchId) {
             const savedBranch = branchData.data.find(
               (branch: Branch) => branch.id === savedBranchId
@@ -65,15 +72,15 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
       }
     };
-    
+
     fetchBranches();
-  }, [dispatch]);
+  }, [user, dispatch]);
 
   const setSelectedBranch = (branch: Branch) => {
     setSelectedBranchState(branch);
     Cookies.set('branch_id', branch.id);
 
-     dispatch(
+    dispatch(
       updateField({
         field: 'branch_id',
         value: branch.id,

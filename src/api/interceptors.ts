@@ -47,7 +47,7 @@ axiosInstance.interceptors.request.use(
       }
     }
     if (branchId && config.method === 'get') {
-      config.params = { ...config.params, branch_id: branchId };
+      config.params = { ...config.params, 'filter[branch_id]': branchId };
     }
 
     return config;

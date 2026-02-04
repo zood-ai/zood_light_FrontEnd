@@ -3,7 +3,6 @@ import { useAuth } from '@/context/AuthContext';
 import PayDialog from './PayDialog';
 import { Permissions } from './roles';
 import { useSelector } from 'react-redux';
-import { BranchProvider } from '@/context/BranchContext';
 
 type ProtectedRouteProps = {
   children: JSX.Element;
@@ -32,25 +31,14 @@ const ProtectedRoute = ({
       : true;
 
   if (!hasPermission) {
-    console.log({
-      requiredPermissions,
-      all: allSettings?.WhoAmI?.user?.roles?.flatMap((el) =>
-        el?.permissions?.map((el2) => el2.name)
-      ),
-    });
-    // [
-    //   'settings:manage',
-    // ];
-    // logout();
-    return;
+    logout();
+    return <Navigate to="/" replace />;
   }
 
   return (
     <>
-      <BranchProvider>
-        <PayDialog showRemaining={true} />
-        {children}
-      </BranchProvider>
+      <PayDialog showRemaining={true} />
+      {children}
     </>
   );
 };
