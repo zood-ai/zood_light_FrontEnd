@@ -20,6 +20,7 @@ import { resetOrder } from '@/store/slices/orderSchema';
 import { resetCard } from '@/store/slices/cardItems';
 import { toggleActionView } from '@/store/slices/toggleAction';
 import axiosInstance from '@/api/interceptors';
+import { useBranchRefresh } from '@/hooks/useBranchRefresh';
 
 export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
@@ -28,6 +29,9 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const [selectedTableRow, setSelectedRow] = useState({});
   const [modalType, setModalType] = useState('Add');
   const navigate = useNavigate();
+
+  // Use branch refresh hook to ensure data updates when branch changes
+  const selectedBranch = useBranchRefresh();
   const dispatch = useDispatch();
 
   const handleCreateTask = () => {
