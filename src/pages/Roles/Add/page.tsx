@@ -101,7 +101,7 @@ const RolesAdd: React.FC = () => {
 
     if (isEditMode) {
       try {
-        await axiosInstance.put(`/hr/roles/${params.objId}`, values);
+        await axiosInstance.put(`/roles/${params.objId}`, values);
 
         openDialog('updated');
         setLoading(false);
@@ -112,7 +112,7 @@ const RolesAdd: React.FC = () => {
       }
     } else {
       try {
-        await axiosInstance.post('/hr/roles', values);
+        await axiosInstance.post('/roles', values);
 
         openDialog('added');
         setLoading(false);
@@ -279,7 +279,7 @@ const RolesAdd: React.FC = () => {
             >
               {isEditMode ? t('UPDATE_ROLE') : t('ADD_ROLE')}
             </Button>
-            <DelConfirm route={'hr/roles'} />
+            <DelConfirm route={'roles'} />
           </form>
         </Form>
       </div>

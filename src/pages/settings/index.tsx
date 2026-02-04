@@ -26,15 +26,6 @@ export default function Settings() {
   const { mutate: updateBranch } =
     createCrudService<any>('manage/branches').useUpdate();
 
-  useEffect(() => {
-    dispatch(
-      setSettings({
-        settings: settings,
-        WhoAmI: whoami,
-      })
-    );
-  }, [settings, whoami]);
-
   const { mutate: updateBusiness } = createCrudService<any>(
     `auth/users/${userId}`
   ).useUpdate();

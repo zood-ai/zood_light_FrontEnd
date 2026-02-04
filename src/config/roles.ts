@@ -107,6 +107,8 @@ export const rolePermissions: Record<Roles, Permissions[]> = {
   [Roles.BRANCHES]: [Permissions.BRANCHES_MANAGE],
 
   [Roles.SETTINGS]: [
+    Permissions.USERS_MANAGE,
+    Permissions.BRANCHES_MANAGE,
     Permissions.SETTINGS_MANAGE,
     Permissions.SETTINGS_MANAGE_TAXES_AND_GROUPS,
     Permissions.SETTINGS_MANAGE_CHARGES,

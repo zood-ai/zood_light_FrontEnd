@@ -61,6 +61,13 @@ export const ALL_PERMISSIONS = [
   'purchasing:closed:manage',
   'purchasing_from_po:drafts:manage',
   'direct_purchasing:drafts:manage',
+  'dashboard:inventory',
+  'inventory_count:drafts:manage',
+  'inventory_count:closed:manage',
+  'inventory_items:read',
+  'inventory_items:manage',
+  'menu:read',
+  'menu:manage',
 
   // صلاحيات المخزون
   'dashboard:inventory',
@@ -68,6 +75,8 @@ export const ALL_PERMISSIONS = [
   'inventory_count:closed:manage',
   'inventory_items:read',
   'inventory_items:manage',
+  'menu:read',
+  'menu:manage',
 
   // صلاحيات العملاء
   'customers:read',
@@ -127,8 +136,6 @@ export const ALL_PERMISSIONS = [
   'spot_check:drafts:manage',
   'spot_check:closed:manage',
   'count_sheet:drafts:manage',
-  'menu:read',
-  'menu:manage',
   'ingredients:manage',
   'cost:manage',
   'coupons:manage',
@@ -197,6 +204,13 @@ export const PERMISSION_GROUPS = {
       'purchasing:closed:manage',
       'purchasing_from_po:drafts:manage',
       'direct_purchasing:drafts:manage',
+      'dashboard:inventory',
+      'inventory_count:drafts:manage',
+      'inventory_count:closed:manage',
+      'inventory_items:read',
+      'inventory_items:manage',
+      'menu:read',
+      'menu:manage',
     ],
   },
   inventory: {
@@ -208,6 +222,8 @@ export const PERMISSION_GROUPS = {
       'inventory_count:closed:manage',
       'inventory_items:read',
       'inventory_items:manage',
+      'menu:read',
+      'menu:manage',
     ],
   },
   customers: {
@@ -245,6 +261,8 @@ export const PERMISSION_GROUPS = {
     name: 'SETTINGS_AUTHORITIES',
     nameAr: 'الاعدادات',
     permissions: [
+      'users:manage',
+      'branches:manage',
       'settings:manage',
       'settings:manage_taxes_and_groups',
       'settings:manage_charges',

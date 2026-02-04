@@ -596,7 +596,7 @@ const router = createBrowserRouter([
         element: (
           <React.Suspense fallback={<div>Loading Resources...</div>}>
             <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.INVENTORY]}
+              requiredPermissions={rolePermissions[Roles.SUPPLIERS]}
             >
               <Resources />
             </ProtectedRoute>
@@ -608,7 +608,7 @@ const router = createBrowserRouter([
         element: (
           <React.Suspense fallback={<div>Loading Resources...</div>}>
             <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.INVENTORY]}
+              requiredPermissions={rolePermissions[Roles.SUPPLIERS]}
             >
               <ResourcesAdd />
             </ProtectedRoute>
