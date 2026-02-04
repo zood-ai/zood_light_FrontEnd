@@ -211,6 +211,13 @@ export const PERMISSION_GROUPS = {
       'inventory_items:manage',
       'menu:read',
       'menu:manage',
+      'customers:read',
+      'customers:read_insights',
+      'customers:manage',
+      'customers:manage_house_account',
+      'customers:manage_loyalty',
+      'suppliers:read',
+      'suppliers:manage',
     ],
   },
   inventory: {

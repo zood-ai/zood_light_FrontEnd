@@ -73,6 +73,11 @@ export const rolePermissions: Record<Roles, Permissions[]> = {
     Permissions.INVENTORY_COUNT_CLOSED_MANAGE,
     Permissions.INVENTORY_ITEMS_READ,
     Permissions.INVENTORY_ITEMS_MANAGE,
+    Permissions.CUSTOMERS_READ,
+    Permissions.CUSTOMERS_READ_INSIGHTS,
+    Permissions.CUSTOMERS_MANAGE,
+    Permissions.CUSTOMERS_MANAGE_HOUSE_ACCOUNT,
+    Permissions.CUSTOMERS_MANAGE_LOYALTY,
   ],
 
   [Roles.PURCHASING]: [
@@ -80,6 +85,8 @@ export const rolePermissions: Record<Roles, Permissions[]> = {
     Permissions.PURCHASING_CLOSED_MANAGE,
     Permissions.PURCHASING_FROM_PO_DRAFTS_MANAGE,
     Permissions.DIRECT_PURCHASING_DRAFTS_MANAGE,
+    Permissions.SUPPLIERS_READ,
+    Permissions.SUPPLIERS_MANAGE,
   ],
 
   [Roles.INVENTORY]: [

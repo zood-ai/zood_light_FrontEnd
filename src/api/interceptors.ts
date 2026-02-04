@@ -41,11 +41,6 @@ axiosInstance.interceptors.request.use(
     }
 
     const branchId = Cookies.get('branch_id');
-    if (branchId && config.method !== 'get') {
-      if (config.data && typeof config.data === 'object') {
-        config.data = { ...config.data, branch_id: branchId };
-      }
-    }
     if (branchId && config.method === 'get') {
       config.params = { ...config.params, 'filter[branch_id]': branchId };
     }
