@@ -68,6 +68,11 @@ export const rolePermissions: Record<Roles, Permissions[]> = {
     Permissions.ORDERS_READ,
     Permissions.ORDERS_MANAGE,
     Permissions.ORDERS_MANAGE_TAGS,
+    Permissions.DASHBOARD_INVENTORY,
+    Permissions.INVENTORY_COUNT_DRAFTS_MANAGE,
+    Permissions.INVENTORY_COUNT_CLOSED_MANAGE,
+    Permissions.INVENTORY_ITEMS_READ,
+    Permissions.INVENTORY_ITEMS_MANAGE,
   ],
 
   [Roles.PURCHASING]: [
