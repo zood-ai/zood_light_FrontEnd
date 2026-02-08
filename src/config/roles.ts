@@ -2,9 +2,11 @@ export enum Roles {
   ADMIN = 'admin',
   ORDERS = 'orders',
   PURCHASING = 'purchasing',
+  PRICE_QUOTES = 'price_quotes',
   INVENTORY = 'inventory',
   CUSTOMERS = 'customers',
   SUPPLIERS = 'suppliers',
+  REPORTS = 'reports',
   PAYMENT_METHODS = 'payment_methods',
   USERS = 'users',
   BRANCHES = 'branches',
@@ -23,6 +25,12 @@ export enum Permissions {
   PURCHASING_FROM_PO_DRAFTS_MANAGE = 'purchasing_from_po:drafts:manage',
   DIRECT_PURCHASING_DRAFTS_MANAGE = 'direct_purchasing:drafts:manage',
 
+  // Price Quotes
+  PRICE_QUOTES_DRAFTS_MANAGE = 'po:drafts:manage',
+  PRICE_QUOTES_CLOSED_MANAGE = 'po:posted:manage',
+  PRICE_QUOTES_APPROVED_MANAGE = 'po:approved:manage',
+  PRICE_QUOTES_APPROVED_RECEIVE = 'po:approved:receive',
+
   // Inventory
   DASHBOARD_INVENTORY = 'dashboard:inventory',
   INVENTORY_COUNT_DRAFTS_MANAGE = 'inventory_count:drafts:manage',
@@ -40,6 +48,9 @@ export enum Permissions {
   // Suppliers
   SUPPLIERS_READ = 'suppliers:read',
   SUPPLIERS_MANAGE = 'suppliers:manage',
+
+  // Reports
+  REPORTS_OTHER = 'reports:other',
 
   // Payment Methods
   SETTINGS_MANAGE_PAYMENT_METHODS = 'settings:manage_payment_methods',
@@ -89,6 +100,13 @@ export const rolePermissions: Record<Roles, Permissions[]> = {
     Permissions.SUPPLIERS_MANAGE,
   ],
 
+  [Roles.PRICE_QUOTES]: [
+    Permissions.PRICE_QUOTES_DRAFTS_MANAGE,
+    Permissions.PRICE_QUOTES_CLOSED_MANAGE,
+    Permissions.PRICE_QUOTES_APPROVED_MANAGE,
+    Permissions.PRICE_QUOTES_APPROVED_RECEIVE,
+  ],
+
   [Roles.INVENTORY]: [
     Permissions.DASHBOARD_INVENTORY,
     Permissions.INVENTORY_COUNT_DRAFTS_MANAGE,
@@ -104,6 +122,8 @@ export const rolePermissions: Record<Roles, Permissions[]> = {
     Permissions.CUSTOMERS_MANAGE_HOUSE_ACCOUNT,
     Permissions.CUSTOMERS_MANAGE_LOYALTY,
   ],
+
+  [Roles.REPORTS]: [Permissions.REPORTS_OTHER],
 
   [Roles.SUPPLIERS]: [Permissions.SUPPLIERS_READ, Permissions.SUPPLIERS_MANAGE],
 

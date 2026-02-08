@@ -193,17 +193,13 @@ export const ALL_PERMISSIONS = [
 
 // Grouped permissions for better UX
 export const PERMISSION_GROUPS = {
-  invoicesAndPurchasing: {
+  invoices: {
     name: 'INVOICES_AND_PURCHASING_AUTHORITIES',
     nameAr: 'الفواتير',
     permissions: [
       'orders:read',
       'orders:manage',
       'orders:manage_tags',
-      'purchasing:drafts:manage',
-      'purchasing:closed:manage',
-      'purchasing_from_po:drafts:manage',
-      'direct_purchasing:drafts:manage',
       'dashboard:inventory',
       'inventory_count:drafts:manage',
       'inventory_count:closed:manage',
@@ -216,8 +212,6 @@ export const PERMISSION_GROUPS = {
       'customers:manage',
       'customers:manage_house_account',
       'customers:manage_loyalty',
-      'suppliers:read',
-      'suppliers:manage',
     ],
   },
   inventory: {
@@ -231,6 +225,35 @@ export const PERMISSION_GROUPS = {
       'inventory_items:manage',
       'menu:read',
       'menu:manage',
+    ],
+  },
+  purchasing: {
+    name: 'PURCHASING_AUTHORITIES',
+    nameAr: 'المشتريات',
+    permissions: [
+      'purchasing:drafts:manage',
+      'purchasing:closed:manage',
+      'purchasing_from_po:drafts:manage',
+      'direct_purchasing:drafts:manage',
+      'suppliers:read',
+      'suppliers:manage',
+      'dashboard:inventory',
+      'inventory_count:drafts:manage',
+      'inventory_count:closed:manage',
+      'inventory_items:read',
+      'inventory_items:manage',
+      'menu:read',
+      'menu:manage',
+    ],
+  },
+  priceQuotes: {
+    name: 'PRICE_QUOTES_AUTHORITIES',
+    nameAr: 'عرض السعر',
+    permissions: [
+      'po:drafts:manage',
+      'po:posted:manage',
+      'po:approved:manage',
+      'po:approved:receive',
     ],
   },
   customers: {
@@ -248,6 +271,18 @@ export const PERMISSION_GROUPS = {
     name: 'SUPPLIER_AUTHORITIES',
     nameAr: 'الموردين',
     permissions: ['suppliers:read', 'suppliers:manage'],
+  },
+  reports: {
+    name: 'REPORTS_AUTHORITIES',
+    nameAr: 'التقارير',
+    permissions: [
+      'reports:other',
+      'reports:inventory_control',
+      'reports:inventory_levels',
+      'reports:inventory_transactions',
+      'reports:sales',
+      'reports:cost_adjustment_history',
+    ],
   },
   paymentMethods: {
     name: 'PAYMENT_METHODS_AUTHORITIES',

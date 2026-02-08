@@ -26,7 +26,6 @@ import { SideLink } from '@/data/sidelinks';
 import useDirection from '@/hooks/useDirection';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
-import { Permissions } from '@/config/roles';
 import { useSelector } from 'react-redux';
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -47,7 +46,6 @@ export default function Nav({
   if (!user) return;
   const renderLink = ({ sub, ...rest }: SideLink) => {
     const key = `${rest.i18n}-${rest.href}`;
-    // rolePermissions[Roles.PAYMENT_METHODS];
     const hasPermission =
       rest.authorities?.length > 0
         ? rest.authorities.every((permission) =>
@@ -73,10 +71,26 @@ export default function Nav({
     if (isCollapsed)
       return <NavLinkIcon {...rest} key={key} closeNav={closeNav} />;
 
-    if (sub)
+    if (sub) {
+      let hasSubPermission = false;
+      sub?.forEach((s: any) => {
+        hasSubPermission =
+          s.authorities?.length > 0
+            ? s.authorities.every((permission) =>
+                allSettings?.WhoAmI?.user?.roles
+                  ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
+                  ?.includes(permission)
+              )
+            : true;
+        if (hasSubPermission) return;
+      });
+      if (!hasSubPermission) {
+        return;
+      }
       return (
         <NavLinkDropdown {...rest} sub={sub} key={key} closeNav={closeNav} />
       );
+    }
 
     return <NavLink {...rest} key={key} closeNav={closeNav} />;
   };
@@ -182,6 +196,8 @@ function NavLinkDropdown({
    * if one of child element is active */
   const isChildActive = !!sub?.find((s) => checkActiveNav(s.href));
   const isRtl = useDirection();
+  const allSettings = useSelector((state: any) => state.allSettings.value);
+
   return (
     <Collapsible defaultOpen={isChildActive}>
       <CollapsibleTrigger
@@ -210,16 +226,30 @@ function NavLinkDropdown({
       </CollapsibleTrigger>
       <CollapsibleContent className="collapsibleDropdown" asChild>
         <ul className="border-r border-r-slate-500  mr-8">
-          {sub!.map((sublink) => (
-            <li key={sublink.i18n} className="my-1">
-              <NavLink
-                {...sublink}
-                subLink
-                closeNav={closeNav}
-                authorities={[]}
-              />
-            </li>
-          ))}
+          {sub!.map((sublink: any) => {
+            const hasPermission =
+              sublink?.authorities?.length > 0
+                ? sublink?.authorities.every((permission) =>
+                    allSettings?.WhoAmI?.user?.roles
+                      ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
+                      ?.includes(permission)
+                  )
+                : true;
+
+            if (!hasPermission) {
+              return;
+            }
+            return (
+              <li key={sublink.i18n} className="my-1">
+                <NavLink
+                  {...sublink}
+                  subLink
+                  closeNav={closeNav}
+                  authorities={[]}
+                />
+              </li>
+            );
+          })}
         </ul>
       </CollapsibleContent>
     </Collapsible>

@@ -53,9 +53,9 @@ const IndividualInvoices = lazy(() =>
   )
 );
 const IndividualInvoicesAdd = lazy(() =>
-  import(
-    './pages/IndividualInvoices/IndividualInvoicesAdd/IndividualInvoicesAdd.tsx'
-  ).then((module) => ({ default: module.IndividualInvoicesAdd }))
+  import('./pages/IndividualInvoices/IndividualInvoicesAdd/IndividualInvoicesAdd.tsx').then(
+    (module) => ({ default: module.IndividualInvoicesAdd })
+  )
 );
 
 const PurchaseInvoices = lazy(() =>
@@ -64,9 +64,9 @@ const PurchaseInvoices = lazy(() =>
   }))
 );
 const PurchaseInvoicesAdd = lazy(() =>
-  import(
-    './pages/PurchaseInvoices/PurchaseInvoicesAdd/PurchaseInvoicesAdd.tsx'
-  ).then((module) => ({ default: module.PurchaseInvoicesAdd }))
+  import('./pages/PurchaseInvoices/PurchaseInvoicesAdd/PurchaseInvoicesAdd.tsx').then(
+    (module) => ({ default: module.PurchaseInvoicesAdd })
+  )
 );
 
 const Products = lazy(() =>
@@ -480,7 +480,9 @@ const router = createBrowserRouter([
         path: 'price-quote',
         element: (
           <React.Suspense fallback={<div>Loading Price Quote...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
+            <ProtectedRoute
+              requiredPermissions={rolePermissions[Roles.PRICE_QUOTES]}
+            >
               <PriceQuote />
             </ProtectedRoute>
           </React.Suspense>
@@ -490,7 +492,9 @@ const router = createBrowserRouter([
         path: 'price-quote/add',
         element: (
           <React.Suspense fallback={<div>Loading Price Quote...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
+            <ProtectedRoute
+              requiredPermissions={rolePermissions[Roles.PRICE_QUOTES]}
+            >
               <ShopCardPQ />
             </ProtectedRoute>
           </React.Suspense>
@@ -620,7 +624,9 @@ const router = createBrowserRouter([
         path: 'normal-report',
         element: (
           <React.Suspense fallback={<div>Loading My Plan...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
+            <ProtectedRoute
+              requiredPermissions={rolePermissions[Roles.REPORTS]}
+            >
               <NormalVoiceReport />
             </ProtectedRoute>
           </React.Suspense>
@@ -630,7 +636,9 @@ const router = createBrowserRouter([
         path: 'b2b-report',
         element: (
           <React.Suspense fallback={<div>Loading My Plan...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
+            <ProtectedRoute
+              requiredPermissions={rolePermissions[Roles.REPORTS]}
+            >
               <B2BInvoice />
             </ProtectedRoute>
           </React.Suspense>
@@ -640,7 +648,9 @@ const router = createBrowserRouter([
         path: 'purchase-report',
         element: (
           <React.Suspense fallback={<div>Loading My Plan...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
+            <ProtectedRoute
+              requiredPermissions={rolePermissions[Roles.REPORTS]}
+            >
               <IndividualInvoicesReport />
             </ProtectedRoute>
           </React.Suspense>

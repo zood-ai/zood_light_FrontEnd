@@ -19,7 +19,7 @@ import {
   IconLockCheck,
   IconGitBranch,
 } from '@tabler/icons-react';
-import { FaUsers } from 'react-icons/fa';
+import { BiSolidPurchaseTag } from 'react-icons/bi';
 import Dashboard from './icons/Dashboard';
 import DashboardActive from './icons/DashboardActive';
 import PriceQuote from './icons/PriceQuote';
@@ -48,11 +48,12 @@ export interface NavLink {
   icon: JSX.Element;
   icon1?: JSX.Element;
   icon2?: JSX.Element;
+  authorities?: Permissions[];
 }
 
 export interface SideLink extends NavLink {
   sub?: NavLink[];
-  authorities: Permissions[]
+  authorities: Permissions[];
 }
 
 //  Add i18n keys without altering the title field
@@ -88,16 +89,6 @@ export const sidelinks: SideLink[] = [
     authorities: rolePermissions[Roles.ORDERS],
   },
   {
-    title: 'فاتورة الشراء', // Purchase Invoice
-    i18n: 'PURCHASE_INVOICES',
-    label: '',
-    href: '/zood-dashboard/purchase-invoices',
-    icon: <PriceQuote />,
-    icon1: <PriceQuote />,
-    icon2: <PriceQuoteActive />,
-    authorities: rolePermissions[Roles.PURCHASING],
-  },
-  {
     title: 'عرض السعر', // Price Quote
     i18n: 'PRICE_QUOTE',
     label: '',
@@ -105,7 +96,37 @@ export const sidelinks: SideLink[] = [
     icon: <PriceQuote />,
     icon1: <PriceQuote />,
     icon2: <PriceQuoteActive />,
-    authorities: rolePermissions[Roles.ORDERS],
+    authorities: rolePermissions[Roles.PRICE_QUOTES],
+  },
+  {
+    title: 'المشتريات',
+    i18n: 'المشتريات',
+    label: '',
+    href: '/zood-dashboard',
+    icon: <BiSolidPurchaseTag size={20} />,
+    authorities: [],
+    sub: [
+      {
+        title: 'فاتورة الشراء', // Purchase Invoice
+        i18n: 'PURCHASE_INVOICES',
+        label: '',
+        href: '/zood-dashboard/purchase-invoices',
+        authorities: rolePermissions[Roles.PURCHASING],
+        icon: <PriceQuote />,
+        icon1: <PriceQuote />,
+        icon2: <PriceQuoteActive />,
+      },
+      {
+        title: 'الموردين', // Resources
+        i18n: 'RESOURCES',
+        label: '',
+        href: '/zood-dashboard/resources',
+        authorities: rolePermissions[Roles.SUPPLIERS],
+        icon: <Customers />,
+        icon1: <Customers />,
+        icon2: <CustomersActive />,
+      },
+    ],
   },
   {
     title: 'المخزون', // Reports
@@ -146,22 +167,12 @@ export const sidelinks: SideLink[] = [
     authorities: rolePermissions[Roles.CUSTOMERS],
   },
   {
-    title: 'الموردين', // Resources
-    i18n: 'RESOURCES',
-    label: '',
-    href: '/zood-dashboard/resources',
-    icon: <Customers />,
-    icon1: <Customers />,
-    icon2: <CustomersActive />,
-    authorities: rolePermissions[Roles.SUPPLIERS],
-  },
-  {
     title: 'التقارير', // Reports
     i18n: 'REPORTS',
     label: '',
     href: '/zood-dashboard',
     icon: <IconChartHistogram size={20} />,
-    authorities: rolePermissions[Roles.ORDERS],
+    authorities: rolePermissions[Roles.REPORTS],
     sub: [
       {
         title: 'فاتورة عاديه', // Normal Report
