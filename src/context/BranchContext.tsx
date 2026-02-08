@@ -64,6 +64,8 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
                 })
               );
             }
+          } else {
+            if (branchData?.data?.[0]) setSelectedBranch(branchData?.data?.[0]);
           }
         }
       } catch (error) {

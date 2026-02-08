@@ -105,6 +105,16 @@ export const rolePermissions: Record<Roles, Permissions[]> = {
     Permissions.PRICE_QUOTES_CLOSED_MANAGE,
     Permissions.PRICE_QUOTES_APPROVED_MANAGE,
     Permissions.PRICE_QUOTES_APPROVED_RECEIVE,
+    Permissions.DASHBOARD_INVENTORY,
+    Permissions.INVENTORY_COUNT_DRAFTS_MANAGE,
+    Permissions.INVENTORY_COUNT_CLOSED_MANAGE,
+    Permissions.INVENTORY_ITEMS_READ,
+    Permissions.INVENTORY_ITEMS_MANAGE,
+    Permissions.CUSTOMERS_READ,
+    Permissions.CUSTOMERS_READ_INSIGHTS,
+    Permissions.CUSTOMERS_MANAGE,
+    Permissions.CUSTOMERS_MANAGE_HOUSE_ACCOUNT,
+    Permissions.CUSTOMERS_MANAGE_LOYALTY,
   ],
 
   [Roles.INVENTORY]: [
