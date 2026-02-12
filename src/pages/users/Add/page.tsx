@@ -136,7 +136,7 @@ const UsersAdd: React.FC = () => {
             form.setValue('language', userData?.lang || '');
             form.setValue('email', userData?.email || '');
             form.setValue('password', ''); // Don't pre-fill password in edit mode
-            form.setValue('login_pin', userData?.login_pin || '');
+            form.setValue('login_pin', userData?.pin || '');
             form.setValue('role', userData?.roles?.[0]?.id || '');
             form.setValue(
               'branches',
