@@ -2,23 +2,23 @@ import {
   CaretSortIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-} from '@radix-ui/react-icons'
-import React from 'react'
-import Select, { StylesConfig, components } from 'react-select'
+} from '@radix-ui/react-icons';
+import React from 'react';
+import Select, { StylesConfig, components } from 'react-select';
 
 // Define the type for the option
 interface OptionType {
-  label: string
-  value: string
+  label: string;
+  value: string;
 }
 
 // Define the type for the props
 interface MultiSelectProps {
-  options: OptionType[]
-  value?: any[]
-  onChange?: (values: string[]) => void
-  isMulti?: boolean
-  [key: string]: any // To allow passing other props
+  options: OptionType[];
+  value?: any[];
+  onChange?: (values: string[]) => void;
+  isMulti?: boolean;
+  [key: string]: any; // To allow passing other props
 }
 
 // Define custom styles with type annotations
@@ -87,7 +87,7 @@ const customStyles: StylesConfig<OptionType, true> = {
     ...provided,
     padding: '0.25rem 0', // Adds vertical padding around the list of options
   }),
-}
+};
 
 // Custom dropdown indicator
 const DropdownIndicator = (props: any) => {
@@ -97,8 +97,8 @@ const DropdownIndicator = (props: any) => {
 
       {/* Custom arrow */}
     </components.DropdownIndicator>
-  )
-}
+  );
+};
 
 const MultiSelect: React.FC<MultiSelectProps> = ({
   options,
@@ -107,6 +107,8 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   isMulti = true,
   ...props
 }) => {
+  console.log({ value, options });
+
   return (
     <Select
       components={{ DropdownIndicator }} // Override the default dropdown indicator
@@ -115,19 +117,22 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
       options={options}
       value={
         value?.map((val) => ({
-          label: val,
-          value: val,
+          label:
+            options?.find((el) => el.value === (val?.id ?? val))?.label ??
+            val?.id ??
+            val,
+          value: val?.id ?? val,
         })) || []
       }
       onChange={(selectedOptions) => {
-        onChange(selectedOptions.map((option) => option.value))
+        onChange(selectedOptions.map((option) => option.value));
       }}
       className={'basic-multi-select'}
       classNamePrefix={'select'}
       styles={customStyles}
       {...props}
     />
-  )
-}
+  );
+};
 
-export default MultiSelect
+export default MultiSelect;
