@@ -1,57 +1,3 @@
-// All available permissions in the system
-/* 
-  //////// صلاحيات الفواتير (نقطة بيع - المؤسسة - عرض سعر) و صلاحية الشراء
-  'orders:read',
-  'orders:manage',
-  'orders:manage_tags',
-  'purchasing:drafts:manage',
-  'purchasing:closed:manage',
-  'purchasing_from_po:drafts:manage',
-  'direct_purchasing:drafts:manage',
-
-  //////// صلاحيات المخزون
-  'dashboard:inventory',
-  'inventory_count:drafts:manage',
-  'inventory_count:closed:manage',
-  'inventory_items:read',
-  'inventory_items:manage',
-  
-  //////// صلاحيات العملاء
-  'customers:read',
-  'customers:read_insights',
-  'customers:manage',
-  'customers:manage_house_account',
-  'customers:manage_loyalty',
-
-  //////// صلاحيات الموردين
-  'suppliers:read',
-  'suppliers:manage',
-
-  //////// صلاحيات طرق الدفع
-  'settings:manage_payment_methods',
-  
-  //////// صلاحيات المستخدمين
-  'users:manage',
-
-  //////// صلايحات الفروع
-  'branches:manage',
-
-  //////// صلاحيات الادوار
-  roles only if the user is_owner = 1
-  
-  //////// صلاحيات الاعدادات
-  'settings:manage',
-  'settings:manage_taxes_and_groups',
-  'settings:manage_charges',
-  'settings:manage_tags',
-  'settings:manage_reasons',
-  'settings:manage_kitchen_flows',
-  'settings:manage_reservations',
-  'settings:manage_online_ordering',
-  'settings:manage_price_tags',
-  'settings:manage_notifications',
-*/
-
 export const ALL_PERMISSIONS = [
   // صلاحيات الفواتير و الشراء
   'orders:read',
@@ -110,6 +56,20 @@ export const ALL_PERMISSIONS = [
   'settings:manage_price_tags',
   'settings:manage_notifications',
 
+  // صلاحيات عروض الأسعار (Price Quotes)
+  'po:drafts:manage',
+  'po:posted:manage',
+  'po:approved:manage',
+  'po:approved:receive',
+
+  // صلاحيات التقارير (Reports)
+  'reports:other',
+  'reports:inventory_control',
+  'reports:inventory_levels',
+  'reports:inventory_transactions',
+  'reports:sales',
+  'reports:cost_adjustment_history',
+
   /* 
   // Commented permissions - not used in current implementation
   'delivery-partners:read',
@@ -117,10 +77,6 @@ export const ALL_PERMISSIONS = [
   'delivery-partners:manage',
   'delivery-partners:manage_house_account',
   'delivery-partners:manage_loyalty',
-  'po:drafts:manage',
-  'po:posted:manage',
-  'po:approved:manage',
-  'po:approved:receive',
   'to:drafts:manage',
   'to:approved:manage',
   'transfers:drafts:manage',
@@ -146,12 +102,6 @@ export const ALL_PERMISSIONS = [
   'delivery_zones:manage',
   'timed_events:manage',
   'apps:manage',
-  'reports:inventory_control',
-  'reports:inventory_levels',
-  'reports:inventory_transactions',
-  'reports:other',
-  'reports:sales',
-  'reports:cost_adjustment_history',
   'dashboard:general',
   'dashboard:branches',
   'dashboard:call_center',
