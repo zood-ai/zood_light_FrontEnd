@@ -17,6 +17,7 @@ import {
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
 import { currencyFormated } from '../../../utils/currencyFormated';
+import Barcode from 'react-barcode';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
@@ -82,17 +83,58 @@ export const useDataTableColumns = () => {
       },
     },
     {
+      accessorKey: 'category',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('CATEGORY_NAME')} />
+      ),
+      cell: ({ row }: any) => {
+        const categoryName =
+          row?.original?.category?.name_localized ||
+          row?.original?.category?.name ||
+          '-';
+
+        return (
+          <div className="flex items-center">
+            <span className="max-w-[170px] truncate font-medium">
+              {categoryName}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: 'sku',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('BARCODE')} />
       ),
       cell: ({ row }) => {
+        const sku = row.getValue('sku') as string;
+        const barcodeValue = String(sku || '').trim();
+        const barcodeWidth = Math.max(
+          0.45,
+          Math.min(1.2, 16 / Math.max(barcodeValue.length, 1))
+        );
+
         return (
-          <div className="flex space-x-2 ">
-            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('sku')}
-            </span>
+          <div className="flex min-h-[44px] w-[280px] items-center py-1">
+            {barcodeValue ? (
+              <div className="flex h-[92px] w-[250px] flex-col items-center justify-center gap-1 overflow-hidden rounded-md border bg-white px-3 py-2 shadow-sm">
+                <Barcode
+                  value={barcodeValue}
+                  format="CODE128"
+                  height={36}
+                  width={barcodeWidth}
+                  margin={0}
+                  displayValue={false}
+                  background="transparent"
+                />
+                <span className="max-w-[220px] truncate text-[11px] font-semibold tracking-[0.1em] text-muted-foreground">
+                  {barcodeValue}
+                </span>
+              </div>
+            ) : (
+              <span className="text-sm font-medium">-</span>
+            )}
           </div>
         );
       },

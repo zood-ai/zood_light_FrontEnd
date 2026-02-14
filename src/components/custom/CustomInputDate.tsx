@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { Label } from '@/components/ui/label';
 
 type ICustomInputDate = {
@@ -34,7 +34,7 @@ const CustomInputDate = ({
   width = 'w-[150px]',
   height = 'h-[40px]',
   disabledDate,
-  defaultValue = moment(new Date()).format('YYYY-MM-DD'),
+  defaultValue = dayjs(new Date()).format('YYYY-MM-DD'),
   className = '',
   parentClassName = '',
   labelClassName = '',
@@ -46,8 +46,8 @@ const CustomInputDate = ({
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
       // dont remove this
-      setSelectedDate(moment(date).format('YYYY-MM-DD') as any);
-      onSelect?.(moment(date).format('YYYY-MM-DD') as any);
+      setSelectedDate(dayjs(date).format('YYYY-MM-DD') as any);
+      onSelect?.(dayjs(date).format('YYYY-MM-DD') as any);
     }
   };
 
@@ -75,8 +75,8 @@ const CustomInputDate = ({
             >
               <p>
                 {date
-                  ? moment(date).format('YYYY-MM-DD')
-                  : moment(defaultValue).format('YYYY-MM-DD')}
+                  ? dayjs(date).format('YYYY-MM-DD')
+                  : dayjs(defaultValue).format('YYYY-MM-DD')}
               </p>
               {!disabled && (
                 <CalendarIcon className="h-4 w-4 shrink-0 text-primary" />

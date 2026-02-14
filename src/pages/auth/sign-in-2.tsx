@@ -22,7 +22,6 @@ import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { getToken } from '@/utils/auth';
 import PayDialog from '@/config/PayDialog';
-import moment from 'moment';
 import Cookies from 'js-cookie';
 
 const formSchema = z.object({

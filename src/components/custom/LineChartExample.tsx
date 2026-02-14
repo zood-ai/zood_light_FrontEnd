@@ -10,15 +10,17 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import useDirection from '@/hooks/useDirection';
+import { useTranslation } from 'react-i18next';
 
 const LineChartExample = ({ data }) => {
   const isRtl = useDirection();
+  const { t } = useTranslation();
   const CustomTooltip = ({ payload }: any) => {
     if (payload && payload.length) {
       const value = payload[0].value;
       return (
         <div className="bg-black bg-opacity-70 text-white p-2 rounded-lg text-sm font-bold shadow-lg">
-          <p>{`Sales Value: ${currencyFormated(value)}`}</p>
+          <p>{`${t('AMOUNT')}: ${currencyFormated(value)}`}</p>
         </div>
       );
     }
@@ -26,7 +28,10 @@ const LineChartExample = ({ data }) => {
   };
 
   return (
-    <div dir={!isRtl ? 'rtl': 'ltr'} className="col-span-1  md:col-span-2 w-[120%] md:w-[100%] h-[400px]">
+    <div
+      dir={isRtl ? 'rtl' : 'ltr'}
+      className="col-span-1 md:col-span-2 h-[400px] w-[120%] md:w-[100%]"
+    >
       <ResponsiveContainer width={'100%'} height={'100%'}>
         <BarChart
           data={data?.sum_orders}
@@ -38,12 +43,12 @@ const LineChartExample = ({ data }) => {
           <XAxis dataKey="date" padding={{ left: 10, right: 10 }} />
 
           {/* Y-Axis without Label */}
-          <YAxis tickMargin={!isRtl ? 100 : 30}/> 
+          <YAxis tickMargin={!isRtl ? 100 : 30} />
 
           <Tooltip content={<CustomTooltip />} />
           <Legend />
 
-          <Bar dataKey="value" fill="var(--main)" />
+          <Bar dataKey="value" fill="var(--main)" name={t('AMOUNT')} />
         </BarChart>
       </ResponsiveContainer>
     </div>

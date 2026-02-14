@@ -5,24 +5,6 @@ import NotFoundError from './pages/errors/not-found-error';
 import React, { lazy } from 'react';
 import ProtectedRoute from './config/ProtectedRoute.tsx';
 import { Roles } from './config/roles.ts';
-import DashCards from './components/DashCards.tsx';
-import { IndividualInvoicesReport } from './pages/Reports/PurchaseInvoices/index.ts';
-import { PaymentMethods } from './pages/PaymentMethods/index.ts';
-import { PaymentMethodsAdd } from './pages/PaymentMethods/ResourcesAdd/index.ts';
-import { FastInvoiceAdd } from './pages/FastInvoice/ShopCard/index.ts';
-import { FastInvoice } from './pages/FastInvoice/index.ts';
-import Plans from './pages/Plans/Plans.tsx';
-import UserProfile from './pages/UserProfile/UserProfile.tsx';
-import { ShopCardEdit } from './pages/IndividualInvoices/ShopCard/ShopCardEdit.tsx';
-import { CorporateInvoices } from './pages/CorporateInvoices/index.ts';
-import { ShopCardCo } from './pages/CorporateInvoices/ShopCard/index.ts';
-import { ShopCardEditCo } from './pages/CorporateInvoices/ShopCard/ShopCardEdit.tsx';
-import { CorporateInvoicesAdd } from './pages/FastInvoice/CorporateInvoicesAdd/CorporateInvoicesAdd.tsx';
-import { PriceQuote } from './pages/PriceQuote/index.ts';
-import { PriceQuoteAdd } from './pages/PriceQuote/IndividualInvoicesAdd/index.ts';
-import { ShopCardPQ } from './pages/PriceQuote/ShopCard/ShopCard.tsx';
-import { ShopCardEditPQ } from './pages/PriceQuote/ShopCard/ShopCardEdit.tsx';
-import Customer from './pages/Customers/Customer.tsx';
 const MaintenanceError = lazy(() => import('./pages/errors/maintenance-error'));
 const UnauthorisedError = lazy(
   () => import('./pages/errors/unauthorised-error.tsx')
@@ -48,6 +30,74 @@ const IndividualInvoicesAdd = lazy(() =>
   import(
     './pages/IndividualInvoices/IndividualInvoicesAdd/IndividualInvoicesAdd.tsx'
   ).then((module) => ({ default: module.IndividualInvoicesAdd }))
+);
+const ShopCardEdit = lazy(() =>
+  import('./pages/IndividualInvoices/ShopCard/ShopCardEdit.tsx').then(
+    (module) => ({ default: module.ShopCardEdit })
+  )
+);
+const CorporateInvoices = lazy(() =>
+  import('./pages/CorporateInvoices/index.ts').then((module) => ({
+    default: module.CorporateInvoices,
+  }))
+);
+const ShopCardCo = lazy(() =>
+  import('./pages/CorporateInvoices/ShopCard/index.ts').then((module) => ({
+    default: module.ShopCardCo,
+  }))
+);
+const ShopCardEditCo = lazy(() =>
+  import('./pages/CorporateInvoices/ShopCard/ShopCardEdit.tsx').then(
+    (module) => ({ default: module.ShopCardEditCo })
+  )
+);
+const FastInvoice = lazy(() =>
+  import('./pages/FastInvoice/index.ts').then((module) => ({
+    default: module.FastInvoice,
+  }))
+);
+const FastInvoiceAdd = lazy(() =>
+  import('./pages/FastInvoice/ShopCard/index.ts').then((module) => ({
+    default: module.FastInvoiceAdd,
+  }))
+);
+const Plans = lazy(() => import('./pages/Plans/Plans.tsx'));
+const UserProfile = lazy(() => import('./pages/UserProfile/UserProfile.tsx'));
+const PriceQuote = lazy(() =>
+  import('./pages/PriceQuote/index.ts').then((module) => ({
+    default: module.PriceQuote,
+  }))
+);
+const ShopCardPQ = lazy(() =>
+  import('./pages/PriceQuote/ShopCard/ShopCard.tsx').then((module) => ({
+    default: module.ShopCardPQ,
+  }))
+);
+const ShopCardEditPQ = lazy(() =>
+  import('./pages/PriceQuote/ShopCard/ShopCardEdit.tsx').then((module) => ({
+    default: module.ShopCardEditPQ,
+  }))
+);
+const Customer = lazy(() => import('./pages/Customers/Customer.tsx'));
+const PaymentMethods = lazy(() =>
+  import('./pages/PaymentMethods/index.ts').then((module) => ({
+    default: module.PaymentMethods,
+  }))
+);
+const PaymentMethodsAdd = lazy(() =>
+  import('./pages/PaymentMethods/ResourcesAdd/index.ts').then((module) => ({
+    default: module.PaymentMethodsAdd,
+  }))
+);
+const IndividualInvoicesReport = lazy(() =>
+  import('./pages/Reports/PurchaseInvoices/index.ts').then((module) => ({
+    default: module.IndividualInvoicesReport,
+  }))
+);
+const ItemsReport = lazy(() =>
+  import('./pages/Reports/ItemsReport/index.ts').then((module) => ({
+    default: module.ItemsReport,
+  }))
 );
 
 const PurchaseInvoices = lazy(() =>
@@ -144,9 +194,10 @@ const Notifications = React.lazy(
 const Display = React.lazy(() => import('./pages/settings/display'));
 const ErrorExample = React.lazy(() => import('./pages/settings/error-example'));
 
-const router = createBrowserRouter([
-  // Auth routes
-  {
+const router = createBrowserRouter(
+  [
+    // Auth routes
+    {
     path: '/login',
     lazy: async () => ({
       Component: (await import('./pages/auth/sign-in')).default,
@@ -557,6 +608,16 @@ const router = createBrowserRouter([
           </React.Suspense>
         ),
       },
+      {
+        path: 'items-report',
+        element: (
+          <React.Suspense fallback={<div>Loading My Plan...</div>}>
+            <ProtectedRoute requiredRole={Roles.ADMIN}>
+              <ItemsReport />
+            </ProtectedRoute>
+          </React.Suspense>
+        ),
+      },
 
       {
         path: 'my-plan',
@@ -674,7 +735,13 @@ const router = createBrowserRouter([
   { path: '/401', Component: UnauthorisedError },
 
   // Fallback 404 route
-  { path: '*', Component: NotFoundError },
-]);
+    { path: '*', Component: NotFoundError },
+  ],
+  {
+    future: {
+      v7_startTransition: true,
+    },
+  }
+);
 
 export default router;

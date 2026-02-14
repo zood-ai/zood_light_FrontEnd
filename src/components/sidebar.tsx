@@ -30,63 +30,56 @@ export default function Sidebar({
       document.body.classList.remove('overflow-hidden');
     }
   }, [navOpened]);
-  const [isRtl, setIsRtl] = useState(false);
-  useEffect(() => {
-    setIsRtl(direction === 'rtl');
-  }, [direction]);
+  const isRtl = direction === 'rtl';
 
   return (
-    <aside
-      className={cn(
-        `fixed   z-[10000]  ${
-          isRtl ? 'right-0' : 'left-0'
-        } top-0 z-50   border-r-2 border-r-muted transition-[width] md:bottom-0 md:h-svh ${
-          isCollapsed ? 'md:w-14' : 'md:w-64'
-        } ${isRtl ? 'border-l-2 border-r-0' : ''}`, // Adjust for RTL
-        className
-      )}
-      style={{ direction }} // Apply the direction (ltr or rtl)
-    >
-      {/* Overlay in mobile */}
-      {/* <div
+    <>
+      <div
         onClick={() => setNavOpened(false)}
-        className={`absolute inset-0 transition-[opacity] delay-100 duration-700 ${
-          navOpened ? 'h-svh opacity-50' : 'h-0 opacity-0'
-        } w-[227px] bg-black md:hidden`}
-      /> */}
+        className={cn(
+          'fixed inset-0 z-40 bg-black/40 transition-opacity md:hidden',
+          navOpened ? 'opacity-100' : 'pointer-events-none opacity-0'
+        )}
+      />
+      <aside
+        className={cn(
+          `fixed ${
+            isRtl ? 'right-0' : 'left-0'
+          } top-0 z-50 border-r border-r-muted bg-background shadow-sm transition-[width] md:bottom-0 md:h-svh ${
+            isCollapsed ? 'md:w-14' : 'md:w-64'
+          } ${isRtl ? 'border-l border-r-0' : ''}`,
+          className
+        )}
+        style={{ direction }}
+      >
 
       <Layout
         fixed
         className={
           navOpened
-            ? 'h-svh  w-[100vw] md:w-[227px] transition-all ease-out duration-500'
-            : 'transition-all ease-out w-[100vw] md:w-full duration-500 '
+              ? 'h-svh w-[100vw] transition-all duration-300 ease-out md:w-full'
+              : 'h-svh w-[100vw] transition-all duration-300 ease-out md:w-full'
         }
       >
         {/* Header */}
         <Layout.Header
           sticky
           style={{ direction }}
-          className="z-50 flex justify-between px-4 py-3 shadow-0 md:px-4 bg-background  transition-all ease-out duration-500 "
+          className="z-50 flex h-16 items-center justify-between border-b bg-background px-3 transition-all duration-300 ease-out md:px-3"
         >
           <div
-            className={`flex  items-center mt-[40px]  transition-all ease-out duration-500 ${
+            className={`flex items-center transition-all duration-300 ease-out ${
               !isCollapsed ? 'gap-2' : ''
             }`}
           >
             <Link to="/zood-dashboard">
               <img
                 src={logo || ''}
-                alt=""
-                width={isCollapsed ? 24 : 32}
-                // className={`${
-                //   isCollapsed
-                //     ? 'absolute top-[79px] right-[17px] z-[999999] transition-all ease-out duration-500'
-                //     : 'absolute top-[30px] right-[25px] z-[999999] transition-all ease-out duration-500'
-                // }`}
-                className={`absolute cursor-pointer hover:scale-105
-             md:left-[13px]
-            top-[25%] md:top-[40px] z-50   rounded-ful bg-white border-0 l md:inline-flex`}
+                alt="Zood Logo"
+                className={cn(
+                  'cursor-pointer object-contain transition-transform hover:scale-105',
+                  isCollapsed ? 'h-8 w-8' : 'h-10 w-auto'
+                )}
               />
             </Link>
             <div
@@ -94,8 +87,10 @@ export default function Sidebar({
                 isCollapsed ? 'invisible w-0' : 'visible w-auto'
               }`}
             >
-              {/* <span className="font-medium">Zood Lite</span>
-              <span className="text-xs">E-invoice</span> */}
+              <span className="text-sm font-semibold leading-none text-main">
+                Zood Lite
+              </span>
+              <span className="text-xs text-muted-foreground">E-invoice</span>
             </div>
           </div>
 
@@ -118,7 +113,7 @@ export default function Sidebar({
         {/* Navigation links */}
         <Nav
           id="sidebar-menu"
-          className={`z-40 h-full flex-1 overflow-x-hidden md:mt-[42px] transition-all ease-out duration-500 ${
+          className={`z-40 h-full flex-1 overflow-x-hidden transition-all duration-300 ease-out md:mt-2 ${
             navOpened ? 'max-h-screen' : 'max-h-0 py-0 md:max-h-screen md:py-2'
           }`}
           closeNav={() => setNavOpened(false)}
@@ -127,54 +122,26 @@ export default function Sidebar({
         />
 
         {/* Scrollbar width toggle button */}
-        <div
+        <Button
           onClick={() => setIsCollapsed((prev) => !prev)}
-          // size="icon"
-          // variant="outline"
-          // className={`absolute cursor-pointer hover:scale-105
-          //    ${isRtl ? 'left-[13px]' : '-right-5'}
-          // top-[40px] z-50 hidden rounded-ful bg-white border-0 l md:inline-flex`}
-
-          className={`hidden md:flex cursor-pointer hover:scale-105 ${
-            isCollapsed
-              ? 'absolute top-[79px] right-[17px] z-[999999] transition-all ease-out duration-500'
-              : 'absolute top-[7%] right-[30px] z-[999999] transition-all ease-out duration-500'
-          }`}
+          variant="outline"
+          size="icon"
+          className={cn(
+            'absolute top-20 hidden h-8 w-8 rounded-full border bg-background shadow-sm transition-transform hover:scale-105 md:inline-flex',
+            isRtl ? '-left-4' : '-right-4'
+          )}
+          aria-label="Toggle sidebar width"
         >
-          <svg
-            width="24"
-            height="18"
-            viewBox="0 0 24 18"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g clip-path="url(#clip0_457_2141)">
-              <path
-                d="M22.4987 3.00015H1.49839C0.669939 3.00015 -0.00146484 2.3283 -0.00146484 1.49985C-0.00146484 0.6714 0.669939 0 1.49839 0H22.4987C23.3271 0 23.9985 0.6714 23.9985 1.49985C23.9985 2.3283 23.3271 2.9997 22.4987 2.9997V3.00015Z"
-                fill="#868686"
-              />
-              <path
-                d="M22.4987 17.9999H1.49839C0.669939 17.9999 -0.00146484 17.3285 -0.00146484 16.5001C-0.00146484 15.6716 0.669939 15.0002 1.49839 15.0002H22.4987C23.3271 15.0002 23.9985 15.6716 23.9985 16.5001C23.9985 17.3285 23.3271 17.9999 22.4987 17.9999Z"
-                fill="#868686"
-              />
-              <path
-                d="M22.4987 10.4998H1.49839C0.669939 10.4998 -0.00146484 9.82842 -0.00146484 8.99997C-0.00146484 8.17152 0.669939 7.50012 1.49839 7.50012H22.4987C23.3271 7.50012 23.9985 8.17152 23.9985 8.99997C23.9985 9.82842 23.3271 10.4998 22.4987 10.4998Z"
-                fill="#868686"
-              />
-            </g>
-            <defs>
-              <clipPath id="clip0_457_2141">
-                <rect
-                  width="24"
-                  height="18"
-                  fill="white"
-                  transform="translate(-0.00146484)"
-                />
-              </clipPath>
-            </defs>
-          </svg>
-        </div>
+          <IconChevronsLeft
+            size={16}
+            className={cn(
+              'transition-transform duration-300',
+              isCollapsed ? (isRtl ? 'rotate-0' : 'rotate-180') : isRtl ? 'rotate-180' : 'rotate-0'
+            )}
+          />
+        </Button>
       </Layout>
-    </aside>
+      </aside>
+    </>
   );
 }

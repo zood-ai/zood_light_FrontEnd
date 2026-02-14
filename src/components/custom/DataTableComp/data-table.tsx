@@ -39,10 +39,8 @@ import { LoadingSkeleton } from '../LoadingSkeleton';
 import { useNavigate } from 'react-router-dom';
 import { titleMapping } from '@/constant/constant';
 import { DatePicker } from 'antd';
-import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import useDirection from '@/hooks/useDirection';
-import axiosInstance from '@/api/interceptors';
 
 const { RangePicker } = DatePicker;
 
@@ -60,6 +58,7 @@ interface DataTableProps<TData, TValue> {
   dashBoard: boolean;
   handleSearch: any;
   allUrl: string;
+  searchPlaceholder?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -76,6 +75,7 @@ export function DataTable<TData, TValue>({
   loading,
   handleSearch,
   actionText,
+  searchPlaceholder,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -86,8 +86,9 @@ export function DataTable<TData, TValue>({
   const dispatch = useDispatch();
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
-  const [fromDate, setFromData] = React.useState('');
-  const [endDate, setEndDate] = React.useState('');
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [dateRangeQuery, setDateRangeQuery] = React.useState('');
+  const [dateRangeValue, setDateRangeValue] = React.useState<any>(null);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 50, // Set this to the desired page size
@@ -101,15 +102,21 @@ export function DataTable<TData, TValue>({
     '/zood-dashboard/normal-report',
     '/zood-dashboard/b2b-report',
     '/zood-dashboard/purchase-report',
+    '/zood-dashboard/items-report',
     // '/zood-dashboard/categories',
     // '/zood-dashboard/products',
   ];
   const url = locations.find((location) =>
     window.location.pathname.includes(location)
   );
+  const isDashboardHome = window.location.pathname === '/zood-dashboard';
 
   const { t } = useTranslation();
   const isRtl = useDirection();
+  const buildDateRangeQuery = (startDate: string, endDate: string) => {
+    const rangeValue = `${startDate} - ${endDate}`;
+    return `&business_date=${rangeValue}&from_date=${startDate}&to_date=${endDate}`;
+  };
   // React.useEffect(() => {
   //   if (!fromDate || !endDate) return;
   //   handleSearch('', `&business_date=${fromDate} - ${endDate}`);
@@ -161,11 +168,19 @@ export function DataTable<TData, TValue>({
   const navigate = useNavigate();
   const pagePath = window.location.pathname; // Get the current path
   const title = titleMapping(pagePath);
-  const handleDateChange = (dates: any, dateStrings: [string, string]) => {
-    setFromData(dateStrings[0]);
-    setEndDate(dateStrings[1]);
-    if (!dateStrings[0] || !dateStrings[1]) return;
-    handleSearch('', `&business_date=${dateStrings[0]} - ${dateStrings[1]}`);
+  const handleDateChange = (_dates: any, dateStrings: [string, string]) => {
+    setDateRangeValue(_dates);
+    const nextDateQuery =
+      dateStrings[0] && dateStrings[1]
+        ? buildDateRangeQuery(dateStrings[0], dateStrings[1])
+        : '';
+    setDateRangeQuery(nextDateQuery);
+    handleSearch(searchTerm, nextDateQuery);
+  };
+  const handleClearDateFilter = () => {
+    setDateRangeValue(null);
+    setDateRangeQuery('');
+    handleSearch(searchTerm, '');
   };
   const customDatePickerClass = ` 
   .ant-picker-focused {
@@ -227,20 +242,33 @@ export function DataTable<TData, TValue>({
                   <div className="max-w-[303px] ms-[14px]">
                     <IconInput
                       onChange={(e) => {
-                        // e.preventDefault();
-                        handleSearch(e.target.value, '');
+                        const nextSearchTerm = e.target.value;
+                        setSearchTerm(nextSearchTerm);
+                        handleSearch(nextSearchTerm, dateRangeQuery);
                       }}
                       inputClassName="h-[35px]"
-                      placeholder={t('SEARCH_TABLE_PLACEHOLDER')}
+                      placeholder={searchPlaceholder || t('SEARCH_TABLE_PLACEHOLDER')}
                       iconSrc={search}
                     />
                   </div>
-                  {url ? (
-                    <RangePicker
-                      placeholder={[t('START_DATE'), t('END_DATE')]}
-                      className="max-w-[303px] ms-[14px] text-black"
-                      onChange={handleDateChange}
-                    />
+                  {url || isDashboardHome ? (
+                    <div className="ms-[14px] flex items-center gap-2">
+                      <RangePicker
+                        value={dateRangeValue}
+                        placeholder={[t('START_DATE'), t('END_DATE')]}
+                        className="max-w-[303px] text-black"
+                        onChange={handleDateChange}
+                      />
+                      {dateRangeQuery ? (
+                        <button
+                          type="button"
+                          onClick={handleClearDateFilter}
+                          className="h-[35px] rounded-md border border-mainBorder px-3 text-sm text-mainText hover:bg-slate-50"
+                        >
+                          {t('RESET')}
+                        </button>
+                      ) : null}
+                    </div>
                   ) : (
                     ''
                   )}

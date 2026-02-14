@@ -71,6 +71,16 @@ export const Products: React.FC<ProductsProps> = () => {
     setSearchedData(allData);
   }, [allData]);
 
+  const filterProductsByBarcode = (products: any[] = [], keyword: string) => {
+    const normalizedLower = keyword.toLowerCase();
+    return products.filter((item: any) => {
+      const skuMatch = String(item?.sku || '')
+        .toLowerCase()
+        .includes(normalizedLower);
+      return skuMatch;
+    });
+  };
+
   const debounce = (func: Function, delay: number) => {
     let timer: NodeJS.Timeout;
     return (...args: any[]) => {
@@ -80,7 +90,9 @@ export const Products: React.FC<ProductsProps> = () => {
   };
   const handleDebounce = useCallback(
     debounce(async (searchTerm: string, date: string) => {
-      if (!searchTerm) {
+      const normalizedSearchTerm = searchTerm?.trim();
+
+      if (!normalizedSearchTerm) {
         if (!date) {
           setSearchedData(allData); // Reset if search is cleared
           return;
@@ -96,21 +108,26 @@ export const Products: React.FC<ProductsProps> = () => {
         return;
       }
 
-      // const holder = allData?.data.filter((item: any) => {
-      //   const referenceMatch = item?.sku?.includes(searchTerm);
-      //   const customerMatch = item?.name?.includes(searchTerm);
-      //   return referenceMatch || customerMatch;
-      // });
-      setAllUrl(
-        `menu/products?not_default=1&sort=-created_at&filter[name]=${searchTerm}${date}`
-      );
-      const res = await axiosInstance.get(
-        `/menu/products?not_default=1&sort=-created_at&filter[name]=${searchTerm}${date}`
-      );
+      const encodedSearchTerm = encodeURIComponent(normalizedSearchTerm);
+      const searchUrl = `menu/products?not_default=1&sort=-created_at&filter[sku]=${encodedSearchTerm}${date}`;
+      setAllUrl(searchUrl);
 
-      // setSearchedData({ ...allData, data: holder });
-      setSearchedData(res.data);
-      // setSearchedData({ ...allData, data: holder });
+      try {
+        const res = await axiosInstance.get(`/${searchUrl}`);
+        const filteredServerData = filterProductsByBarcode(
+          res?.data?.data || [],
+          normalizedSearchTerm
+        );
+        setSearchedData({ ...res.data, data: filteredServerData });
+      } catch {
+        // Fallback local filtering in case API search params change.
+        const holder = filterProductsByBarcode(
+          allData?.data || [],
+          normalizedSearchTerm
+        );
+
+        setSearchedData({ ...allData, data: holder });
+      }
     }, 300), // 300ms debounce delay
     [allData]
   );
@@ -151,6 +168,7 @@ export const Products: React.FC<ProductsProps> = () => {
           actionText={'ADD_PRODUCT'}
           loading={isLoading}
           handleSearch={handleSearch}
+          searchPlaceholder={t('SCAN_BARCODE_PLACEHOLDER')}
         />
       </div>
     </>

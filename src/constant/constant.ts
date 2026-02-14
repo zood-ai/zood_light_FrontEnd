@@ -218,6 +218,10 @@ export const titleMapping = (path) => {
       en: 'Contact via WhatsApp',
       ar: 'تواصل عبر الواتساب',
     },
+    '/zood-dashboard/items-report': {
+      en: 'Items Report',
+      ar: 'تقرير الأصناف',
+    },
     '/logout': {
       en: 'Logout',
       ar: 'تسجيل الخروج',

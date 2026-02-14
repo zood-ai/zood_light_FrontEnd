@@ -2,13 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 
 import { DashBoardProps } from './DashBoard.types';
 
-import './DashBoard.css';
 import DashCards from '@/components/DashCards';
 import DashSalesCard from '@/components/DashSalesCard';
 import LineChartExample from '@/components/custom/LineChartExample';
-import { RegisterForm } from '@/components/custom/RegisterForm';
 import Loading from '../../components/loader';
-import Cookies from 'js-cookie';
 import createCrudService from '@/api/services/crudService';
 import { DataTable } from '@/components/custom/DataTableComp/data-table';
 //import { useDataTableColumns } from '../../pages/tasks/components/useDataTableColumns';
@@ -22,21 +19,37 @@ import { ConfirmDelModal } from '../../pages/tasks/Modal/ConfirmDelModal';
 import AddEditModal from '../../pages/tasks/Modal/AddEditModal';
 import { DetailsModal } from './Modal/DetailsModal';
 import axiosInstance from '@/api/interceptors';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const DashBoard: React.FC<DashBoardProps> = () => {
+  type PeriodFilter = 'day' | 'week' | 'month';
+  const queryClient = useQueryClient();
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDelModalOpen, setIsDelModalOpen] = useState(false);
   const [selectedTableRow, setSelectedRow] = useState({});
   const [modalType, setModalType] = useState('Add');
-  const [activeFilter, setActiveFilter] = useState('week');
+  const [activeFilter, setActiveFilter] = useState<PeriodFilter>('week');
+  const [dashboardDateRange, setDashboardDateRange] = useState<{
+    value: any;
+    query: string;
+    label: string;
+  }>({
+    value: null,
+    query: '',
+    label: '',
+  });
+  const isCustomRangeActive = Boolean(dashboardDateRange.query);
+  const dashboardOverviewEndpoint = isCustomRangeActive
+    ? `/reports/overview/light?${dashboardDateRange.query.replace(/^&/, '')}`
+    : `/reports/overview/light?groupby=${activeFilter}`;
 
   // Call useGetAll directly here
   const { data: apiData, isLoading } = createCrudService<any>(
-    `/reports/overview/light?groupby=${activeFilter}`
+    dashboardOverviewEndpoint
   ).useGetAll();
 
-  const data = apiData?.data || [];
+  const data = apiData?.data || {};
   const handleOpenViewModal = (row: any) => {
     setSelectedRow(row);
     setIsViewModalOpen(true);
@@ -60,16 +73,36 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
     dispatch(toggleActionView(false));
   };
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
-  const filterBtn = () => {};
+  const filterBtn = () => undefined;
   const { columns } = useOrderDataTableColumns();
-  const allService = createCrudService<any>('/orders?sort=-status');
-  const [allUrl, setAllUrl] = useState('/orders?sort=-status');
+  const ordersBaseSort = '/orders?sort=-business_date';
+  const allService = createCrudService<any>(ordersBaseSort);
+  const [allUrl, setAllUrl] = useState(ordersBaseSort);
   const { useGetAll } = allService;
   const { data: lastOrderData, isLoading: isLoadingOrder } = useGetAll();
   const [searchedData, setSearchedData] = useState<any>(lastOrderData);
   useEffect(() => {
     setSearchedData(lastOrderData);
   }, [lastOrderData]);
+
+  useEffect(() => {
+    if (isCustomRangeActive) return;
+    const periods: PeriodFilter[] = ['day', 'week', 'month'];
+    const missingPeriods = periods.filter((period) => period !== activeFilter);
+
+    missingPeriods.forEach((period) => {
+      queryClient.prefetchQuery({
+        queryKey: ['dashboard-overview', period, dashboardDateRange.query],
+        queryFn: async () => {
+          const response = await axiosInstance.get(
+            `/reports/overview/light?groupby=${period}${dashboardDateRange.query}`
+          );
+          return response?.data?.data;
+        },
+        staleTime: 1000 * 60 * 5,
+      });
+    });
+  }, [activeFilter, dashboardDateRange.query, isCustomRangeActive, queryClient]);
 
   const debounce = (func: Function, delay: number) => {
     let timer: NodeJS.Timeout;
@@ -85,14 +118,13 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
           setSearchedData(lastOrderData); // Reset if search is cleared
           return;
         }
-        setAllUrl(
-          `orders?sort=-status${date}`
-        );
-        const res = await axiosInstance.get(
-          `/orders?sort=-status${date}`
-        );
-
-        setSearchedData(res.data);
+        setAllUrl(`${ordersBaseSort}${date}`);
+        try {
+          const res = await axiosInstance.get(`${ordersBaseSort}${date}`);
+          setSearchedData(res.data);
+        } catch {
+          setSearchedData(lastOrderData);
+        }
         return;
       }
 
@@ -105,13 +137,16 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
       //     ?.includes(searchTerm.toLowerCase());
       //   return referenceMatch || customerName;
       // });
-      setAllUrl(`/orders?sort=-status&search=${searchTerm}${date}`);
-      const res = await axiosInstance.get(
-        `/orders?sort=-status&search=${searchTerm}${date}`
-      );
-
-      // setSearchedData({ ...allData, data: holder });
-      setSearchedData(res.data);
+      setAllUrl(`${ordersBaseSort}&search=${searchTerm}${date}`);
+      try {
+        const res = await axiosInstance.get(
+          `${ordersBaseSort}&search=${searchTerm}${date}`
+        );
+        // setSearchedData({ ...allData, data: holder });
+        setSearchedData(res.data);
+      } catch {
+        setSearchedData(lastOrderData);
+      }
 
       // setSearchedData({ ...lastOrderData, data: holder });
     }, 300), // 300ms debounce delay
@@ -132,10 +167,18 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
               data={data}
               activeFilter={activeFilter}
               setActiveFilter={setActiveFilter}
+              dashboardDateRange={dashboardDateRange}
+              setDashboardDateRange={setDashboardDateRange}
             />
             <div className="grid grid-cols-1 md:grid-cols-3 mt-8 bg-blacka">
               <LineChartExample data={data} />
-              <DashSalesCard data={data} />
+              <DashSalesCard
+                data={data}
+                activeFilter={activeFilter}
+                dashboardDateQuery={dashboardDateRange.query}
+                isCustomRangeActive={isCustomRangeActive}
+                customRangeLabel={dashboardDateRange.label}
+              />
             </div>
             <>
               <AddEditModal

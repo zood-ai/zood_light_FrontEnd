@@ -1,7 +1,8 @@
+import { lazy, Suspense } from 'react';
 import { Roles } from './roles';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import PayDialog from './PayDialog';
+const PayDialog = lazy(() => import('./PayDialog'));
 
 let counter = 0;
 const ProtectedRoute = ({
@@ -18,7 +19,9 @@ const ProtectedRoute = ({
   // counter++;
   return (
     <>
-      <PayDialog showRemaining={true}/>
+      <Suspense fallback={null}>
+        <PayDialog showRemaining={true} />
+      </Suspense>
       {children}
     </>
   );

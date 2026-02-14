@@ -12,23 +12,44 @@ import {
 } from '@radix-ui/react-icons';
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { set } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 export function DataTablePagination({
   current_page,
   per_page,
   total,
   last_page,
-  onPageSizeChange,
+  onPageSizeChange: _onPageSizeChange,
 }: any) {
   const isRTL = useDirection();
+  const { t } = useTranslation();
   const [currentPageState, setCurrentPageState] = useState(current_page);
   const [searchParams, setSearchParams] = useSearchParams();
+  const safeTotal = Number(total) || 0;
+  const safePerPage = Math.max(Number(per_page) || 0, 1);
+  const safeLastPage = Math.max(Number(last_page) || 1, 1);
+  const safeCurrentPage = Math.min(
+    Math.max(Number(current_page) || 1, 1),
+    safeLastPage
+  );
+  const fromRecord =
+    safeTotal === 0 ? 0 : (safeCurrentPage - 1) * safePerPage + 1;
+  const toRecord =
+    safeTotal === 0 ? 0 : Math.min(safeCurrentPage * safePerPage, safeTotal);
+
+  const firstButtonTarget = isRTL ? safeLastPage : 1;
+  const lastButtonTarget = isRTL ? 1 : safeLastPage;
+  const previousPageTarget = isRTL ? safeCurrentPage + 1 : safeCurrentPage - 1;
+  const nextPageTarget = isRTL ? safeCurrentPage - 1 : safeCurrentPage + 1;
+
+  const clampPage = (page: number) => Math.min(Math.max(page, 1), safeLastPage);
 
   const handlePageChange = (page: number) => {
-    if (page < 1 || page > last_page) return;
-    searchParams.set('page', page.toString());
-    setSearchParams(searchParams);
+    const nextPage = clampPage(page);
+    if (nextPage === safeCurrentPage) return;
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('page', nextPage.toString());
+    setSearchParams(nextParams);
   };
 
   useEffect(() => {
@@ -36,97 +57,125 @@ export function DataTablePagination({
   }, [current_page]);
 
   return (
-    <div
-      className={`flex items-center justify-center overflow-auto px-2 ${
-        isRTL ? 'flex-row-reverse' : ''
-      }`}
-    >
+    <div className="mt-2 flex w-full flex-col items-center gap-1.5 px-1">
       <div
-        className={`flex items-center ${
-          isRTL ? 'sm:space-x-reverse' : 'sm:space-x-6'
-        } lg:space-x-8`}
+        className={`flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
       >
-        <div
-          className={`flex items-center space-x-2 ${
-            isRTL ? 'space-x-reverse' : ''
-          }`}
-        >
-          <div
-            className="hidden h-8 w-8 p-0 lg:flex mx-1 rounded-full"
-            // onClick={() => handlePageChange(1)}
-            onClick={() => handlePageChange(last_page)}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            className="hidden h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring lg:flex disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:opacity-30"
+            onClick={() => handlePageChange(firstButtonTarget)}
+            disabled={safeCurrentPage === firstButtonTarget}
+            aria-label="First page"
           >
             {isRTL ? (
               <DoubleArrowLeftRTLIcon
-                // isActive={currentPageState !== 1}
-                isActive={currentPageState !== last_page}
+                isActive={safeCurrentPage !== firstButtonTarget}
               />
             ) : (
-              <DoubleArrowLeftIcon />
+              <DoubleArrowLeftIcon className="h-7 w-7 text-mainText" />
             )}
-          </div>
+          </button>
 
-          <div
-            className="h-8 w-8 p-0"
-            onClick={() => handlePageChange(currentPageState + 1)}
+          <button
+            type="button"
+            className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:opacity-30"
+            onClick={() => handlePageChange(previousPageTarget)}
+            disabled={
+              previousPageTarget < 1 || previousPageTarget > safeLastPage
+            }
+            aria-label="Previous page"
           >
             {isRTL ? (
               <SingleLeftArrowRTLIcon
-                // isActive={currentPageState !== 1}
-                isActive={currentPageState !== last_page}
+                isActive={previousPageTarget >= 1 && previousPageTarget <= safeLastPage}
               />
             ) : (
-              <ChevronLeftIcon />
+              <ChevronLeftIcon className="h-7 w-7 text-mainText" />
             )}
-          </div>
+          </button>
 
           <div
             dir="ltr"
-            className={`flex text-sm text-muted-foreground justify-center items-center gap-md bg-black0 px-2`}
+            className="flex items-center gap-2 rounded-md px-1"
           >
             <Input
+              onBlur={() => {
+                const parsed = parseInt(String(currentPageState), 10);
+                const clamped = clampPage(parsed || safeCurrentPage);
+                setCurrentPageState(clamped);
+                handlePageChange(clamped);
+              }}
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter') return;
+                const parsed = parseInt(String(currentPageState), 10);
+                const clamped = clampPage(parsed || safeCurrentPage);
+                setCurrentPageState(clamped);
+                handlePageChange(clamped);
+              }}
               onChange={(e) => {
-                setCurrentPageState(
-                  parseInt(e.target.value) || currentPageState
-                );
-                handlePageChange(parseInt(e.target.value) || currentPageState);
+                const value = e.target.value;
+                if (!value) {
+                  setCurrentPageState('');
+                  return;
+                }
+                const parsed = parseInt(value, 10);
+                if (!Number.isNaN(parsed)) {
+                  setCurrentPageState(parsed);
+                }
               }}
               autoComplete="off"
               type="number"
               value={currentPageState}
               min={1}
-              max={last_page}
-              className="text-center text-main h-8 w-[60px] px-0 border rounded-sm border-mainBorde outline-none focus-visible:ring-12"
+              max={safeLastPage}
+              className="h-8 w-[56px] border-0 bg-transparent px-0 text-center font-medium text-mainText shadow-none [appearance:textfield] focus-visible:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
-            <div className="text-mainText">
-              {currentPageState}-{last_page} of {last_page}
+            <div className="min-w-[70px] text-center text-sm font-medium text-mainText">
+              {safeCurrentPage} / {safeLastPage}
             </div>
           </div>
 
-          <div
-            className="h-8 w-8 p-0 mx-1"
-            onClick={() => handlePageChange(currentPageState - 1)}
+          <button
+            type="button"
+            className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:opacity-30"
+            onClick={() => handlePageChange(nextPageTarget)}
+            disabled={nextPageTarget < 1 || nextPageTarget > safeLastPage}
+            aria-label="Next page"
           >
             {isRTL ? (
-              <SingleRightArrowRTLIcon isActive={currentPageState !== 1} />
+              <SingleRightArrowRTLIcon
+                isActive={nextPageTarget >= 1 && nextPageTarget <= safeLastPage}
+              />
             ) : (
-              <ChevronRightIcon />
+              <ChevronRightIcon className="h-7 w-7 text-mainText" />
             )}
-          </div>
+          </button>
 
-          <div
-            className="  h-8 w-8 p-0 flex "
-            onClick={() => handlePageChange(1)}
+          <button
+            type="button"
+            className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:opacity-30"
+            onClick={() => handlePageChange(lastButtonTarget)}
+            disabled={safeCurrentPage === lastButtonTarget}
+            aria-label="Last page"
           >
             {isRTL ? (
-              <div className="mx-1">
-                <DoubleArrowRightRTLIcon isActive={currentPageState !== 1} />
+              <div className="mx-1 flex items-center justify-center">
+                <DoubleArrowRightRTLIcon isActive={safeCurrentPage !== lastButtonTarget} />
               </div>
             ) : (
-              <DoubleArrowRightIcon />
+              <DoubleArrowRightIcon className="h-7 w-7 text-mainText" />
             )}
-          </div>
+          </button>
         </div>
+      </div>
+      <div className="text-center text-xs text-muted-foreground">
+        {t('PAGINATION_RESULTS_LABEL', {
+          from: fromRecord,
+          to: toRecord,
+          total: safeTotal,
+        })}
       </div>
     </div>
   );

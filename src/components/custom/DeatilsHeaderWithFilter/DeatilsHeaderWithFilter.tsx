@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { DeatilsHeaderWithFilterProps } from './DeatilsHeaderWithFilter.types';
 
@@ -7,7 +7,6 @@ import { QRCodeComp } from '../QRCodeComp';
 import { BackBtn } from '../BackBtn';
 import { SelectComp } from '../SelectItem';
 import IconInput from '../InputWithIcon';
-import { useNavigate } from 'react-router-dom';
 import useDirection from '@/hooks/useDirection';
 import { GoToShop } from '../GoToShop';
 import search from '/icons/search.svg';
@@ -15,8 +14,12 @@ import { useTranslation } from 'react-i18next';
 
 export const DeatilsHeaderWithFilter: React.FC<
   DeatilsHeaderWithFilterProps
-> = ({ bkAction, setSearchInput = '' }) => {
-  const navigate = useNavigate();
+> = ({
+  bkAction,
+  setSearchInput = '',
+  hideSort = false,
+  hideCartAction = false,
+}) => {
   const isRtl = useDirection();
   const { t } = useTranslation();
 
@@ -33,17 +36,17 @@ export const DeatilsHeaderWithFilter: React.FC<
             placeholder={t('SEARCH_TABLE_PLACEHOLDER')}
             iconSrc={search}
           />
-          <div className={`w-[250px]`} dir={isRtl ? 'rtl' : 'ltr'}>
-            <SelectComp
-              placeholder={t('SORT_BY')}
-              options={[{ value: 'all', label: 'All' }]}
-              onValueChange={function (value: string): any {}}
-            />
-          </div>
+          {!hideSort && (
+            <div className={`w-[250px]`} dir={isRtl ? 'rtl' : 'ltr'}>
+              <SelectComp
+                placeholder={t('SORT_BY')}
+                options={[{ value: 'all', label: 'All' }]}
+                onValueChange={function (value: string): any {}}
+              />
+            </div>
+          )}
         </div>
-        <div className="flex justify-end">
-          <GoToShop />
-        </div>
+        <div className="flex justify-end">{!hideCartAction && <GoToShop />}</div>
         <div className="flex justify-end">{/* <QRCodeComp /> */}</div>
       </div>
     </>

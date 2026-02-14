@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/custom/button';
-import { use } from 'i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '@/api/interceptors';
 import { useDispatch } from 'react-redux';
