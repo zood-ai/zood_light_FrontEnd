@@ -26,6 +26,8 @@ export default function CustomSearchInbox({
   placeholder = 'CHOOSE_A_CHOOSE',
   label,
   className,
+  triggerClassName = '',
+  hideChevron = false,
   disabled = false,
 }: any) {
   const [open, setOpen] = React.useState(false);
@@ -59,7 +61,7 @@ export default function CustomSearchInbox({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between"
+            className={cn('w-full justify-between', triggerClassName)}
           >
             {directValue
               ? directValue
@@ -68,7 +70,7 @@ export default function CustomSearchInbox({
               : placeholder
               ? t(placeholder)
               : ''}
-            <ChevronsUpDown className="opacity-50 ms-auto" />
+            {!hideChevron && <ChevronsUpDown className="opacity-50 ms-auto" />}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full flex-grow p-0">

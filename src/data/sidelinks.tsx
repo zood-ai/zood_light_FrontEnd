@@ -3,21 +3,19 @@ import {
   IconChartHistogram,
   IconSettings,
   IconTruck,
-  IconLock,
-  IconBrandWhatsapp,
   IconBuildingSkyscraper,
   IconReceipt,
   IconTargetArrow,
-  IconLayoutGridFilled,
+  IconLayoutDashboardFilled,
   IconReceiptFilled,
   IconLayout2Filled,
   IconUserFilled,
-  IconUserEdit,
   IconCreditCardFilled,
   IconUsersGroup,
   IconUsers,
   IconLockCheck,
   IconGitBranch,
+  IconCategory,
 } from '@tabler/icons-react';
 import { BiSolidPurchaseTag } from 'react-icons/bi';
 import Dashboard from './icons/Dashboard';
@@ -39,6 +37,8 @@ import OrganizationActive from './icons/OrganizationActive';
 import Categories from './icons/Catogories';
 import CategoriesActive from './icons/CategoriesActive';
 import { Permissions, rolePermissions, Roles } from '@/config/roles';
+
+const navIconProps = { size: 18, stroke: 1.9 } as const;
 
 export interface NavLink {
   title: string;
@@ -63,9 +63,7 @@ export const sidelinks: SideLink[] = [
     i18n: 'DASHBOARD',
     label: '',
     href: '/zood-dashboard',
-    icon: <Dashboard />,
-    icon1: <Dashboard />,
-    icon2: <DashboardActive />,
+    icon: <IconLayoutDashboardFilled {...navIconProps} />,
     authorities: [],
   },
   {
@@ -73,9 +71,7 @@ export const sidelinks: SideLink[] = [
     i18n: 'INDIVIDUAL_INVOICES',
     label: '',
     href: '/zood-dashboard/individual-invoices',
-    icon: <PriceQuote />,
-    icon1: <PriceQuote />,
-    icon2: <PriceQuoteActive />,
+    icon: <IconReceiptFilled {...navIconProps} />,
     authorities: rolePermissions[Roles.ORDERS],
   },
   {
@@ -83,20 +79,16 @@ export const sidelinks: SideLink[] = [
     i18n: 'CORPORATE_INVOICES',
     label: '',
     href: '/zood-dashboard/corporate-invoices',
-    icon: <Organization />,
-    icon1: <Organization />,
-    icon2: <OrganizationActive />,
     authorities: rolePermissions[Roles.ORDERS],
+    icon: <IconBuildingSkyscraper {...navIconProps} />,
   },
   {
     title: 'عرض السعر', // Price Quote
     i18n: 'PRICE_QUOTE',
     label: '',
     href: '/zood-dashboard/price-quote',
-    icon: <PriceQuote />,
-    icon1: <PriceQuote />,
-    icon2: <PriceQuoteActive />,
     authorities: rolePermissions[Roles.PRICE_QUOTES],
+    icon: <IconTargetArrow {...navIconProps} />,
   },
   {
     title: 'المشتريات',
@@ -112,9 +104,7 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/zood-dashboard/purchase-invoices',
         authorities: rolePermissions[Roles.PURCHASING],
-        icon: <PriceQuote />,
-        icon1: <PriceQuote />,
-        icon2: <PriceQuoteActive />,
+        icon: <IconReceipt {...navIconProps} />,
       },
       {
         title: 'الموردين', // Resources
@@ -122,9 +112,7 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/zood-dashboard/resources',
         authorities: rolePermissions[Roles.SUPPLIERS],
-        icon: <Customers />,
-        icon1: <Customers />,
-        icon2: <CustomersActive />,
+        icon: <IconTruck {...navIconProps} />,
       },
     ],
   },
@@ -133,7 +121,7 @@ export const sidelinks: SideLink[] = [
     i18n: 'STOCK',
     label: '',
     href: '/zood-dashboard',
-    icon: <IconBoxSeam size={20} />,
+    icon: <IconBoxSeam {...navIconProps} />,
     authorities: rolePermissions[Roles.INVENTORY],
     sub: [
       {
@@ -141,18 +129,14 @@ export const sidelinks: SideLink[] = [
         i18n: 'PRODUCTS',
         label: '',
         href: '/zood-dashboard/products',
-        icon: <Products />,
-        icon1: <Products />,
-        icon2: <ProductsActive />,
+        icon: <IconBoxSeam {...navIconProps} />,
       },
       {
         title: 'الفئات', // Categories
         i18n: 'CATEGORIES',
         label: '',
         href: '/zood-dashboard/categories',
-        icon: <Categories />,
-        icon1: <Categories />,
-        icon2: <CategoriesActive />,
+        icon: <IconCategory {...navIconProps} />,
       },
     ],
   },
@@ -161,9 +145,7 @@ export const sidelinks: SideLink[] = [
     i18n: 'CUSTOMERS',
     label: '',
     href: '/zood-dashboard/customers',
-    icon: <Customers />,
-    icon1: <Customers />,
-    icon2: <CustomersActive />,
+    icon: <IconUserFilled {...navIconProps} />,
     authorities: rolePermissions[Roles.CUSTOMERS],
   },
   {
@@ -179,27 +161,28 @@ export const sidelinks: SideLink[] = [
         i18n: 'NORMAL_REPORT',
         label: '',
         href: '/zood-dashboard/normal-report',
-        icon: <PriceQuote />,
-        icon1: <PriceQuote />,
-        icon2: <PriceQuoteActive />,
+        icon: <IconReceipt {...navIconProps} />,
       },
       {
         title: 'فاتورة B2B', // B2B Report
         i18n: 'B2B_REPORT',
         label: '',
         href: '/zood-dashboard/b2b-report',
-        icon: <PriceQuote />,
-        icon1: <PriceQuote />,
-        icon2: <PriceQuoteActive />,
+        icon: <IconBuildingSkyscraper {...navIconProps} />,
       },
       {
         title: 'فاتورة الشراء', // Purchase Report
         i18n: 'PURCHASE_REPORT',
         label: '',
         href: '/zood-dashboard/purchase-report',
-        icon: <PriceQuote />,
-        icon1: <PriceQuote />,
-        icon2: <PriceQuoteActive />,
+        icon: <IconTruck {...navIconProps} />,
+      },
+      {
+        title: 'تقرير الأصناف', // Items Report
+        i18n: 'ITEMS_REPORT',
+        label: '',
+        href: '/zood-dashboard/items-report',
+        icon: <IconBoxSeam {...navIconProps} />,
       },
     ],
   },
@@ -218,9 +201,7 @@ export const sidelinks: SideLink[] = [
     i18n: 'PAYMENT_METHODS',
     label: '',
     href: '/zood-dashboard/payment-methods',
-    icon: <PaymentMethods />,
-    icon1: <PaymentMethods />,
-    icon2: <PaymentMethodsActive />,
+    icon: <IconCreditCardFilled {...navIconProps} />,
     authorities: rolePermissions[Roles.PAYMENT_METHODS],
   },
   {
@@ -258,9 +239,7 @@ export const sidelinks: SideLink[] = [
     i18n: 'SETTINGS',
     label: '',
     href: '/zood-dashboard/settings',
-    icon: <Settings />,
-    icon1: <Settings />,
-    icon2: <SettingsActive />,
+    icon: <IconSettings {...navIconProps} />,
     authorities: rolePermissions[Roles.SETTINGS],
   },
 ];

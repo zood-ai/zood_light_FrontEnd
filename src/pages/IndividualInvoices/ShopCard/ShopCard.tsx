@@ -17,6 +17,8 @@ import { setCardItem } from '@/store/slices/cardItems';
 import CustomerForm from './CustomerForm';
 import { Button } from '@/components/custom/button';
 import { useTranslation } from 'react-i18next';
+import POSPaymentPanel from './POSPaymentPanel';
+import POSCartPanel from './POSCartPanel';
 
 export const ShopCard: React.FC<ShopCardProps> = () => {
   const isRtl = useDirection();
@@ -24,6 +26,7 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const [isOpen, setIsOpen] = useState(false);
   const params = useParams();
+  const isCreateMode = !params.id;
   const { t } = useTranslation();
   const ref = useRef<{ submitOrder: (newCustomer: any) => void }>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -110,41 +113,48 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
 
   // Calculate and update total price based on external dependencies
   useEffect(() => {
+    if (isCreateMode) return;
     dispatch(
       updateField({ field: 'total_price', value: totalCost - taxAmount })
     );
-  }, [totalCost, taxAmount]);
+  }, [dispatch, isCreateMode, totalCost, taxAmount]);
 
   const handleBkAction = () => setIsOpen(true);
   return (
     <>
-      <DetailsHeadWithOutFilter bkAction={handleBkAction} />
+      {!isCreateMode && <DetailsHeadWithOutFilter bkAction={handleBkAction} />}
       <div className="flex gap-5 max-xl:flex-col">
-        <div className="w-[55%] max-xl:w-full">
-          <ShopCardTable />
+        <div className={isCreateMode ? 'w-[48%] max-xl:w-full' : 'w-[55%] max-xl:w-full'}>
+          {isCreateMode ? <POSCartPanel /> : <ShopCardTable />}
 
-          <Button
-            dir="ltr"
-            loading={loading}
-            disabled={loading || (params.id ? true : false)}
-            onClick={() => {
-              if (ref.current) {
-                ref.current.submitOrder({ newCustomer }); // Call the child's function
-              }
-            }}
-            className="w-[144px] mt-10"
-          >
-            {!params.id ? t('ADD_INVOICE') : t('SAVE')}
-          </Button>
+          {!isCreateMode && (
+            <Button
+              dir="ltr"
+              loading={loading}
+              disabled={loading || (params.id ? true : false)}
+              onClick={() => {
+                if (ref.current) {
+                  ref.current.submitOrder({ newCustomer });
+                }
+              }}
+              className="mt-10 w-[144px]"
+            >
+              {!params.id ? t('ADD_INVOICE') : t('SAVE')}
+            </Button>
+          )}
         </div>
-        <div className="w-[45%] max-xl:w-full xl:mt-[-70px]">
-          <CustomerForm
-            newCustomer={newCustomer}
-            setNewCustomer={setNewCustomer}
-            setLoading={setLoading}
-            loading={loading}
-            ref={ref}
-          />
+        <div className={isCreateMode ? 'w-[52%] max-xl:w-full' : 'w-[45%] max-xl:w-full xl:mt-[-70px]'}>
+          {isCreateMode ? (
+            <POSPaymentPanel />
+          ) : (
+            <CustomerForm
+              newCustomer={newCustomer}
+              setNewCustomer={setNewCustomer}
+              setLoading={setLoading}
+              loading={loading}
+              ref={ref}
+            />
+          )}
         </div>
       </div>
 

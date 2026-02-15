@@ -9,7 +9,7 @@ const ConfirmBk = ({ isOpen, setIsOpen, closeDialog, getStatusMessage }) => {
   let navigate = useNavigate();
 
   const handleBack = () => {
-    navigate(-1);
+    navigate('/zood-dashboard/individual-invoices');
   };
 
   return (

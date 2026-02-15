@@ -7,23 +7,8 @@ import React, { lazy } from 'react';
 import ProtectedRoute from './config/ProtectedRoute.tsx';
 import { Roles } from './config/roles.ts';
 import DashCards from './components/DashCards.tsx';
-import { IndividualInvoicesReport } from './pages/Reports/PurchaseInvoices/index.ts';
-import { PaymentMethods } from './pages/PaymentMethods/index.ts';
-import { PaymentMethodsAdd } from './pages/PaymentMethods/ResourcesAdd/index.ts';
-import { FastInvoiceAdd } from './pages/FastInvoice/ShopCard/index.ts';
-import { FastInvoice } from './pages/FastInvoice/index.ts';
-import Plans from './pages/Plans/Plans.tsx';
-import UserProfile from './pages/UserProfile/UserProfile.tsx';
-import { ShopCardEdit } from './pages/IndividualInvoices/ShopCard/ShopCardEdit.tsx';
-import { CorporateInvoices } from './pages/CorporateInvoices/index.ts';
-import { ShopCardCo } from './pages/CorporateInvoices/ShopCard/index.ts';
-import { ShopCardEditCo } from './pages/CorporateInvoices/ShopCard/ShopCardEdit.tsx';
 import { CorporateInvoicesAdd } from './pages/FastInvoice/CorporateInvoicesAdd/CorporateInvoicesAdd.tsx';
-import { PriceQuote } from './pages/PriceQuote/index.ts';
 import { PriceQuoteAdd } from './pages/PriceQuote/IndividualInvoicesAdd/index.ts';
-import { ShopCardPQ } from './pages/PriceQuote/ShopCard/ShopCard.tsx';
-import { ShopCardEditPQ } from './pages/PriceQuote/ShopCard/ShopCardEdit.tsx';
-import Customer from './pages/Customers/Customer.tsx';
 import Users from './pages/users/page.tsx';
 import UsersAdd from './pages/users/Add/page.tsx';
 import Branches from './pages/Branches/page.tsx';
@@ -56,6 +41,74 @@ const IndividualInvoicesAdd = lazy(() =>
   import('./pages/IndividualInvoices/IndividualInvoicesAdd/IndividualInvoicesAdd.tsx').then(
     (module) => ({ default: module.IndividualInvoicesAdd })
   )
+);
+const ShopCardEdit = lazy(() =>
+  import('./pages/IndividualInvoices/ShopCard/ShopCardEdit.tsx').then(
+    (module) => ({ default: module.ShopCardEdit })
+  )
+);
+const CorporateInvoices = lazy(() =>
+  import('./pages/CorporateInvoices/index.ts').then((module) => ({
+    default: module.CorporateInvoices,
+  }))
+);
+const ShopCardCo = lazy(() =>
+  import('./pages/CorporateInvoices/ShopCard/index.ts').then((module) => ({
+    default: module.ShopCardCo,
+  }))
+);
+const ShopCardEditCo = lazy(() =>
+  import('./pages/CorporateInvoices/ShopCard/ShopCardEdit.tsx').then(
+    (module) => ({ default: module.ShopCardEditCo })
+  )
+);
+const FastInvoice = lazy(() =>
+  import('./pages/FastInvoice/index.ts').then((module) => ({
+    default: module.FastInvoice,
+  }))
+);
+const FastInvoiceAdd = lazy(() =>
+  import('./pages/FastInvoice/ShopCard/index.ts').then((module) => ({
+    default: module.FastInvoiceAdd,
+  }))
+);
+const Plans = lazy(() => import('./pages/Plans/Plans.tsx'));
+const UserProfile = lazy(() => import('./pages/UserProfile/UserProfile.tsx'));
+const PriceQuote = lazy(() =>
+  import('./pages/PriceQuote/index.ts').then((module) => ({
+    default: module.PriceQuote,
+  }))
+);
+const ShopCardPQ = lazy(() =>
+  import('./pages/PriceQuote/ShopCard/ShopCard.tsx').then((module) => ({
+    default: module.ShopCardPQ,
+  }))
+);
+const ShopCardEditPQ = lazy(() =>
+  import('./pages/PriceQuote/ShopCard/ShopCardEdit.tsx').then((module) => ({
+    default: module.ShopCardEditPQ,
+  }))
+);
+const Customer = lazy(() => import('./pages/Customers/Customer.tsx'));
+const PaymentMethods = lazy(() =>
+  import('./pages/PaymentMethods/index.ts').then((module) => ({
+    default: module.PaymentMethods,
+  }))
+);
+const PaymentMethodsAdd = lazy(() =>
+  import('./pages/PaymentMethods/ResourcesAdd/index.ts').then((module) => ({
+    default: module.PaymentMethodsAdd,
+  }))
+);
+const IndividualInvoicesReport = lazy(() =>
+  import('./pages/Reports/PurchaseInvoices/index.ts').then((module) => ({
+    default: module.IndividualInvoicesReport,
+  }))
+);
+const ItemsReport = lazy(() =>
+  import('./pages/Reports/ItemsReport/index.ts').then((module) => ({
+    default: module.ItemsReport,
+  }))
 );
 
 const PurchaseInvoices = lazy(() =>
@@ -152,623 +205,671 @@ const Notifications = React.lazy(
 const Display = React.lazy(() => import('./pages/settings/display'));
 const ErrorExample = React.lazy(() => import('./pages/settings/error-example'));
 
-const router = createBrowserRouter([
-  // Auth routes
-  {
-    path: '/login',
-    lazy: async () => ({
-      Component: (await import('./pages/auth/sign-in')).default,
-    }),
-  },
-  {
-    path: '/active-account-asdahkljasldmaskldjaklsjdlajskldjaaksdasdasdsmdkasjdk',
-    lazy: async () => ({
-      Component: (await import('./pages/ActiveAccount/ActiveAccount.tsx'))
-        .default,
-    }),
-  },
-  {
-    path: '/reset-password',
-    lazy: async () => ({
-      Component: (await import('./pages/auth/reset-password.tsx')).default,
-    }),
-  },
+const router = createBrowserRouter(
+  [
+    // Auth routes
+    {
+      path: '/login',
+      lazy: async () => ({
+        Component: (await import('./pages/auth/sign-in')).default,
+      }),
+    },
+    {
+      path: '/active-account-asdahkljasldmaskldjaklsjdlajskldjaaksdasdasdsmdkasjdk',
+      lazy: async () => ({
+        Component: (await import('./pages/ActiveAccount/ActiveAccount.tsx'))
+          .default,
+      }),
+    },
+    {
+      path: '/reset-password',
+      lazy: async () => ({
+        Component: (await import('./pages/auth/reset-password.tsx')).default,
+      }),
+    },
+    // {
+    //   path: '/sign-in-2',
+    //   lazy: async () => ({
+    //     Component: (await import('./pages/auth/sign-in-2')).default,
+    //   }),
+    // },
+    {
+      path: '/sign-up',
+      lazy: async () => ({
+        Component: (await import('./pages/auth/sign-up')).default,
+      }),
+    },
+    {
+      path: '/forgot-password',
+      lazy: async () => ({
+        Component: (await import('./pages/auth/forgot-password.tsx')).default,
+      }),
+    },
+    {
+      path: '/otp',
+      lazy: async () => ({
+        Component: (await import('./pages/auth/otp')).default,
+      }),
+    },
+    {
+      path: '/otp',
+      lazy: async () => ({
+        Component: (await import('./pages/auth/otp')).default,
+      }),
+    },
+    {
+      path: '/',
+      element: (
+        <React.Suspense fallback={<div>Loading register...</div>}>
+          <RegisterForm />
+        </React.Suspense>
+      ),
+    },
+    {
+      path: 'zood-login',
+      element: (
+        <React.Suspense fallback={<div>Loading register...</div>}>
+          <SignIn2 />
+        </React.Suspense>
+      ),
+    },
+    {
+      path: 'zood-signup',
+      element: (
+        <React.Suspense fallback={<div>Loading register...</div>}>
+          <SignUp />
+        </React.Suspense>
+      ),
+    },
+    // {
+    //   path: 'zood-reset-password',
+    //   element: (
+    //     <React.Suspense fallback={<div>Loading register...</div>}>
+    //       <SignUp />
+    //     </React.Suspense>
+    //   ),
+    // },
+    // Main routes
+    {
+      path: '/zood-dashboard',
+      element: (
+        <ProtectedRoute requiredPermissions={[]}>
+          <AppShell />
+        </ProtectedRoute>
+      ),
+      errorElement: <GeneralError />,
+      children: [
+        {
+          index: true,
+          element: (
+            <React.Suspense fallback={<div>Loading Dashboard...</div>}>
+              <ProtectedRoute requiredPermissions={[]}>
+                <DashBoard />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'users',
+          element: (
+            <React.Suspense
+              fallback={
+                <div className="invoice-loader">
+                  <div className="loaderFallBk"></div>
+                </div>
+              }
+            >
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.USERS]}
+              >
+                <Users />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'users/:id/:objId?',
+          element: (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.USERS]}
+              >
+                <UsersAdd />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'branches',
+          element: (
+            <React.Suspense
+              fallback={
+                <div className="invoice-loader">
+                  <div className="loaderFallBk"></div>
+                </div>
+              }
+            >
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.BRANCHES]}
+              >
+                <Branches />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'branches/:id/:objId?',
+          element: (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.BRANCHES]}
+              >
+                <BranchesAdd />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'roles-and-permissions',
+          element: (
+            <React.Suspense
+              fallback={
+                <div className="invoice-loader">
+                  <div className="loaderFallBk"></div>
+                </div>
+              }
+            >
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.SETTINGS]}
+              >
+                <RolesAndPermissions />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'roles-and-permissions/:id/:objId?',
+          element: (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.SETTINGS]}
+              >
+                <RolesAndPermissionsAdd />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'individual-invoices',
+          element: (
+            <React.Suspense
+              fallback={
+                <div className="invoice-loader">
+                  <div className="loaderFallBk"></div>
+                </div>
+              }
+            >
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.ORDERS]}
+              >
+                <IndividualInvoices />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'individual-invoices/add',
+          element: (
+            <React.Suspense
+              fallback={<div>Loading Individual Invoices...</div>}
+            >
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.ORDERS]}
+              >
+                <IndividualInvoicesAdd />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'individual-invoices/add/shop-card',
+          element: (
+            <React.Suspense
+              fallback={<div>Loading Individual Invoices...</div>}
+            >
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.ORDERS]}
+              >
+                <ShopCard />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'individual-invoices/edit/:id',
+          element: (
+            <React.Suspense
+              fallback={<div>Loading Individual Invoices...</div>}
+            >
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.ORDERS]}
+              >
+                <ShopCardEdit />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'corporate-invoices',
+          element: (
+            <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.ORDERS]}
+              >
+                <CorporateInvoices />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'corporate-invoices/add',
+          element: (
+            <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.ORDERS]}
+              >
+                <ShopCardCo />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'corporate-invoices/add/shop-card',
+          element: (
+            <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.ORDERS]}
+              >
+                <ShopCardCo />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'corporate-invoices/edit/:id',
+          element: (
+            <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.ORDERS]}
+              >
+                <ShopCardEditCo />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'my-plan',
+          element: (
+            <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.SETTINGS]}
+              >
+                <Plans />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'profile',
+          element: (
+            <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.SETTINGS]}
+              >
+                <UserProfile />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+
+        {
+          path: 'purchase-invoices',
+          element: (
+            <React.Suspense fallback={<div>Loading Purchase Invoices...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.PURCHASING]}
+              >
+                <PurchaseInvoices />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'purchase-invoices/:id/:objId?',
+          element: (
+            <React.Suspense fallback={<div>Loading Purchase Invoices...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.PURCHASING]}
+              >
+                <PurchaseInvoicesAdd />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'price-quote',
+          element: (
+            <React.Suspense fallback={<div>Loading Price Quote...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.PRICE_QUOTES]}
+              >
+                <PriceQuote />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'price-quote/add',
+          element: (
+            <React.Suspense fallback={<div>Loading Price Quote...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.PRICE_QUOTES]}
+              >
+                <ShopCardPQ />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'customer-profile/:id',
+          element: (
+            <React.Suspense fallback={<div>Loading Customers...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.CUSTOMERS]}
+              >
+                <Customer />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'price-quote/edit/:id',
+          element: (
+            <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.ORDERS]}
+              >
+                <ShopCardEditPQ />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'products',
+          element: (
+            <React.Suspense fallback={<div>Loading Products...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.INVENTORY]}
+              >
+                <Products />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'products/:id/:objId?',
+          element: (
+            <React.Suspense fallback={<div>Loading Products...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.INVENTORY]}
+              >
+                <ProductsAdd />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'categories',
+          element: (
+            <React.Suspense fallback={<div>Loading Categories...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.INVENTORY]}
+              >
+                <Categories />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'categories/:id/:objId?',
+          element: (
+            <React.Suspense fallback={<div>Loading Categories...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.INVENTORY]}
+              >
+                <CategoriesAdd />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'customers',
+          element: (
+            <React.Suspense fallback={<div>Loading Customers...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.CUSTOMERS]}
+              >
+                <Customers />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+
+        {
+          path: 'customers/:id/:objId?',
+          element: (
+            <React.Suspense fallback={<div>Loading Customers...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.CUSTOMERS]}
+              >
+                <CustomersAdd />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'resources',
+          element: (
+            <React.Suspense fallback={<div>Loading Resources...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.SUPPLIERS]}
+              >
+                <Resources />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'resources/:id/:objId?',
+          element: (
+            <React.Suspense fallback={<div>Loading Resources...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.SUPPLIERS]}
+              >
+                <ResourcesAdd />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+
+        {
+          path: 'normal-report',
+          element: (
+            <React.Suspense fallback={<div>Loading My Plan...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.REPORTS]}
+              >
+                <NormalVoiceReport />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'b2b-report',
+          element: (
+            <React.Suspense fallback={<div>Loading My Plan...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.REPORTS]}
+              >
+                <B2BInvoice />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'purchase-report',
+          element: (
+            <React.Suspense fallback={<div>Loading My Plan...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.REPORTS]}
+              >
+                <IndividualInvoicesReport />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'items-report',
+          element: (
+            <React.Suspense fallback={<div>Loading My Plan...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.REPORTS]}
+              >
+                <ItemsReport />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+
+        {
+          path: 'payment-methods',
+          element: (
+            <React.Suspense fallback={<div>Loading Payment Methods...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.PAYMENT_METHODS]}
+              >
+                <PaymentMethods />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'payment-methods/:id/:objId?',
+          element: (
+            <React.Suspense fallback={<div>Loading Payment Methods...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.PAYMENT_METHODS]}
+              >
+                <PaymentMethodsAdd />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'settings',
+          element: (
+            <React.Suspense fallback={<div>Loading Settings...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.SETTINGS]}
+              >
+                <Settings />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+          errorElement: <GeneralError />,
+          children: [
+            {
+              index: true,
+              element: (
+                <React.Suspense fallback={<div>Loading Profile...</div>}>
+                  <Profile />
+                </React.Suspense>
+              ),
+            },
+            {
+              path: 'account',
+              element: (
+                <React.Suspense fallback={<div>Loading Account...</div>}>
+                  <Account />
+                </React.Suspense>
+              ),
+            },
+            {
+              path: 'appearance',
+              element: (
+                <React.Suspense fallback={<div>Loading Appearance...</div>}>
+                  <Appearance />
+                </React.Suspense>
+              ),
+            },
+            {
+              path: 'notifications',
+              element: (
+                <React.Suspense fallback={<div>Loading Notifications...</div>}>
+                  <Notifications />
+                </React.Suspense>
+              ),
+            },
+            {
+              path: 'display',
+              element: (
+                <React.Suspense fallback={<div>Loading Display...</div>}>
+                  <Display />
+                </React.Suspense>
+              ),
+            },
+            {
+              path: 'error-example',
+              element: (
+                <React.Suspense fallback={<div>Loading Error Example...</div>}>
+                  <ErrorExample />
+                </React.Suspense>
+              ),
+              errorElement: <GeneralError className="h-[50svh]" minimal />,
+            },
+          ],
+        },
+        {
+          path: 'contact-whatsapp',
+          element: (
+            <React.Suspense fallback={<div>Loading WhatsApp Contact...</div>}>
+              <ProtectedRoute requiredPermissions={[]}>
+                <ComingSoon />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'logout',
+          element: <ComingSoon />,
+        },
+      ],
+    },
+
+    // Error routes
+    { path: '/500', Component: GeneralError },
+    { path: '/404', Component: NotFoundError },
+    { path: '/503', Component: MaintenanceError },
+    { path: '/401', Component: UnauthorisedError },
+
+    // Fallback 404 route
+    { path: '*', Component: NotFoundError },
+  ],
   // {
-  //   path: '/sign-in-2',
-  //   lazy: async () => ({
-  //     Component: (await import('./pages/auth/sign-in-2')).default,
-  //   }),
-  // },
-  {
-    path: '/sign-up',
-    lazy: async () => ({
-      Component: (await import('./pages/auth/sign-up')).default,
-    }),
-  },
-  {
-    path: '/forgot-password',
-    lazy: async () => ({
-      Component: (await import('./pages/auth/forgot-password.tsx')).default,
-    }),
-  },
-  {
-    path: '/otp',
-    lazy: async () => ({
-      Component: (await import('./pages/auth/otp')).default,
-    }),
-  },
-  {
-    path: '/otp',
-    lazy: async () => ({
-      Component: (await import('./pages/auth/otp')).default,
-    }),
-  },
-  {
-    path: '/',
-    element: (
-      <React.Suspense fallback={<div>Loading register...</div>}>
-        <RegisterForm />
-      </React.Suspense>
-    ),
-  },
-  {
-    path: 'zood-login',
-    element: (
-      <React.Suspense fallback={<div>Loading register...</div>}>
-        <SignIn2 />
-      </React.Suspense>
-    ),
-  },
-  {
-    path: 'zood-signup',
-    element: (
-      <React.Suspense fallback={<div>Loading register...</div>}>
-        <SignUp />
-      </React.Suspense>
-    ),
-  },
-  // {
-  //   path: 'zood-reset-password',
-  //   element: (
-  //     <React.Suspense fallback={<div>Loading register...</div>}>
-  //       <SignUp />
-  //     </React.Suspense>
-  //   ),
-  // },
-  // Main routes
-  {
-    path: '/zood-dashboard',
-    element: (
-      <ProtectedRoute requiredPermissions={[]}>
-        <AppShell />
-      </ProtectedRoute>
-    ),
-    errorElement: <GeneralError />,
-    children: [
-      {
-        index: true,
-        element: (
-          <React.Suspense fallback={<div>Loading Dashboard...</div>}>
-            <ProtectedRoute requiredPermissions={[]}>
-              <DashBoard />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'users',
-        element: (
-          <React.Suspense
-            fallback={
-              <div className="invoice-loader">
-                <div className="loaderFallBk"></div>
-              </div>
-            }
-          >
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.USERS]}>
-              <Users />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'users/:id/:objId?',
-        element: (
-          <React.Suspense fallback={<div>Loading...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.USERS]}>
-              <UsersAdd />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'branches',
-        element: (
-          <React.Suspense
-            fallback={
-              <div className="invoice-loader">
-                <div className="loaderFallBk"></div>
-              </div>
-            }
-          >
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.BRANCHES]}
-            >
-              <Branches />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'branches/:id/:objId?',
-        element: (
-          <React.Suspense fallback={<div>Loading...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.BRANCHES]}
-            >
-              <BranchesAdd />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'roles-and-permissions',
-        element: (
-          <React.Suspense
-            fallback={
-              <div className="invoice-loader">
-                <div className="loaderFallBk"></div>
-              </div>
-            }
-          >
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.SETTINGS]}
-            >
-              <RolesAndPermissions />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'roles-and-permissions/:id/:objId?',
-        element: (
-          <React.Suspense fallback={<div>Loading...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.SETTINGS]}
-            >
-              <RolesAndPermissionsAdd />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'individual-invoices',
-        element: (
-          <React.Suspense
-            fallback={
-              <div className="invoice-loader">
-                <div className="loaderFallBk"></div>
-              </div>
-            }
-          >
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
-              <IndividualInvoices />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'individual-invoices/add',
-        element: (
-          <React.Suspense fallback={<div>Loading Individual Invoices...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
-              <IndividualInvoicesAdd />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'individual-invoices/add/shop-card',
-        element: (
-          <React.Suspense fallback={<div>Loading Individual Invoices...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
-              <ShopCard />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'individual-invoices/edit/:id',
-        element: (
-          <React.Suspense fallback={<div>Loading Individual Invoices...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
-              <ShopCardEdit />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'corporate-invoices',
-        element: (
-          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
-              <CorporateInvoices />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'corporate-invoices/add',
-        element: (
-          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
-              <ShopCardCo />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'corporate-invoices/add/shop-card',
-        element: (
-          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
-              <ShopCardCo />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'corporate-invoices/edit/:id',
-        element: (
-          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
-              <ShopCardEditCo />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'my-plan',
-        element: (
-          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.SETTINGS]}
-            >
-              <Plans />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'profile',
-        element: (
-          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.SETTINGS]}
-            >
-              <UserProfile />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-
-      {
-        path: 'purchase-invoices',
-        element: (
-          <React.Suspense fallback={<div>Loading Purchase Invoices...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.PURCHASING]}
-            >
-              <PurchaseInvoices />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'purchase-invoices/:id/:objId?',
-        element: (
-          <React.Suspense fallback={<div>Loading Purchase Invoices...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.PURCHASING]}
-            >
-              <PurchaseInvoicesAdd />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'price-quote',
-        element: (
-          <React.Suspense fallback={<div>Loading Price Quote...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.PRICE_QUOTES]}
-            >
-              <PriceQuote />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'price-quote/add',
-        element: (
-          <React.Suspense fallback={<div>Loading Price Quote...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.PRICE_QUOTES]}
-            >
-              <ShopCardPQ />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'customer-profile/:id',
-        element: (
-          <React.Suspense fallback={<div>Loading Customers...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.CUSTOMERS]}
-            >
-              <Customer />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'price-quote/edit/:id',
-        element: (
-          <React.Suspense fallback={<div>Loading Corporate Invoices...</div>}>
-            <ProtectedRoute requiredPermissions={rolePermissions[Roles.ORDERS]}>
-              <ShopCardEditPQ />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'products',
-        element: (
-          <React.Suspense fallback={<div>Loading Products...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.INVENTORY]}
-            >
-              <Products />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'products/:id/:objId?',
-        element: (
-          <React.Suspense fallback={<div>Loading Products...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.INVENTORY]}
-            >
-              <ProductsAdd />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'categories',
-        element: (
-          <React.Suspense fallback={<div>Loading Categories...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.INVENTORY]}
-            >
-              <Categories />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'categories/:id/:objId?',
-        element: (
-          <React.Suspense fallback={<div>Loading Categories...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.INVENTORY]}
-            >
-              <CategoriesAdd />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'customers',
-        element: (
-          <React.Suspense fallback={<div>Loading Customers...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.CUSTOMERS]}
-            >
-              <Customers />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-
-      {
-        path: 'customers/:id/:objId?',
-        element: (
-          <React.Suspense fallback={<div>Loading Customers...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.CUSTOMERS]}
-            >
-              <CustomersAdd />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'resources',
-        element: (
-          <React.Suspense fallback={<div>Loading Resources...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.SUPPLIERS]}
-            >
-              <Resources />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'resources/:id/:objId?',
-        element: (
-          <React.Suspense fallback={<div>Loading Resources...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.SUPPLIERS]}
-            >
-              <ResourcesAdd />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-
-      {
-        path: 'normal-report',
-        element: (
-          <React.Suspense fallback={<div>Loading My Plan...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.REPORTS]}
-            >
-              <NormalVoiceReport />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'b2b-report',
-        element: (
-          <React.Suspense fallback={<div>Loading My Plan...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.REPORTS]}
-            >
-              <B2BInvoice />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'purchase-report',
-        element: (
-          <React.Suspense fallback={<div>Loading My Plan...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.REPORTS]}
-            >
-              <IndividualInvoicesReport />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'payment-methods',
-        element: (
-          <React.Suspense fallback={<div>Loading Payment Methods...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.PAYMENT_METHODS]}
-            >
-              <PaymentMethods />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'payment-methods/:id/:objId?',
-        element: (
-          <React.Suspense fallback={<div>Loading Payment Methods...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.PAYMENT_METHODS]}
-            >
-              <PaymentMethodsAdd />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'settings',
-        element: (
-          <React.Suspense fallback={<div>Loading Settings...</div>}>
-            <ProtectedRoute
-              requiredPermissions={rolePermissions[Roles.SETTINGS]}
-            >
-              <Settings />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-        errorElement: <GeneralError />,
-        children: [
-          {
-            index: true,
-            element: (
-              <React.Suspense fallback={<div>Loading Profile...</div>}>
-                <Profile />
-              </React.Suspense>
-            ),
-          },
-          {
-            path: 'account',
-            element: (
-              <React.Suspense fallback={<div>Loading Account...</div>}>
-                <Account />
-              </React.Suspense>
-            ),
-          },
-          {
-            path: 'appearance',
-            element: (
-              <React.Suspense fallback={<div>Loading Appearance...</div>}>
-                <Appearance />
-              </React.Suspense>
-            ),
-          },
-          {
-            path: 'notifications',
-            element: (
-              <React.Suspense fallback={<div>Loading Notifications...</div>}>
-                <Notifications />
-              </React.Suspense>
-            ),
-          },
-          {
-            path: 'display',
-            element: (
-              <React.Suspense fallback={<div>Loading Display...</div>}>
-                <Display />
-              </React.Suspense>
-            ),
-          },
-          {
-            path: 'error-example',
-            element: (
-              <React.Suspense fallback={<div>Loading Error Example...</div>}>
-                <ErrorExample />
-              </React.Suspense>
-            ),
-            errorElement: <GeneralError className="h-[50svh]" minimal />,
-          },
-        ],
-      },
-      {
-        path: 'contact-whatsapp',
-        element: (
-          <React.Suspense fallback={<div>Loading WhatsApp Contact...</div>}>
-            <ProtectedRoute requiredPermissions={[]}>
-              <ComingSoon />
-            </ProtectedRoute>
-          </React.Suspense>
-        ),
-      },
-      {
-        path: 'logout',
-        element: <ComingSoon />,
-      },
-    ],
-  },
-
-  // Error routes
-  { path: '/500', Component: GeneralError },
-  { path: '/404', Component: NotFoundError },
-  { path: '/503', Component: MaintenanceError },
-  { path: '/401', Component: UnauthorisedError },
-
-  // Fallback 404 route
-  { path: '*', Component: NotFoundError },
-]);
+  //   future: {
+  //     v7_startTransition: true,
+  //   },
+  // }
+);
 
 export default router;

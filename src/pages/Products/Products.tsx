@@ -12,7 +12,7 @@ import AddEditModal from './Modal/AddEditModal';
 import { useTranslation } from 'react-i18next';
 import { useDataTableColumns } from './components/useDataTableColumns';
 import useDirection from '@/hooks/useDirection';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
 import { toggleActionView } from '@/store/slices/toggleAction';
 import { useDispatch, useSelector } from 'react-redux';
@@ -55,14 +55,20 @@ export const Products: React.FC<ProductsProps> = () => {
   };
   const filterBtn = () => {};
   const { i18n, t } = useTranslation();
+  const [searchParams] = useSearchParams();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
   const allService = createCrudService<any>(
-    'menu/products?not_default=1&sort=-created_at'
+    searchParams.get('category_id')
+      ? `menu/products?not_default=1&sort=-created_at&filter[category_id]=${searchParams.get('category_id')}`
+      : 'menu/products?not_default=1&sort=-created_at'
   );
   const [allUrl, setAllUrl] = useState(
-    'menu/products?not_default=1&sort=-created_at'
+    searchParams.get('category_id')
+      ? `menu/products?not_default=1&sort=-created_at&filter[category_id]=${searchParams.get('category_id')}`
+      : 'menu/products?not_default=1&sort=-created_at'
   );
+
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
@@ -70,6 +76,16 @@ export const Products: React.FC<ProductsProps> = () => {
   useEffect(() => {
     setSearchedData(allData);
   }, [allData]);
+
+  const filterProductsByBarcode = (products: any[] = [], keyword: string) => {
+    const normalizedLower = keyword.toLowerCase();
+    return products.filter((item: any) => {
+      const skuMatch = String(item?.sku || '')
+        .toLowerCase()
+        .includes(normalizedLower);
+      return skuMatch;
+    });
+  };
 
   const debounce = (func: Function, delay: number) => {
     let timer: NodeJS.Timeout;
@@ -80,37 +96,51 @@ export const Products: React.FC<ProductsProps> = () => {
   };
   const handleDebounce = useCallback(
     debounce(async (searchTerm: string, date: string) => {
-      if (!searchTerm) {
+      const normalizedSearchTerm = searchTerm?.trim();
+
+      if (!normalizedSearchTerm) {
         if (!date) {
           setSearchedData(allData); // Reset if search is cleared
           return;
         }
+
         setAllUrl(
-          `menu/products?not_default=1&sort=-created_at${date}`
+          searchParams.get('category_id')
+            ? `menu/products?not_default=1&sort=-created_at&filter[category_id]=${searchParams.get('category_id')}${date}`
+            : `menu/products?not_default=1&sort=-created_at${date}`
         );
         const res = await axiosInstance.get(
-          `/menu/products?not_default=1&sort=-created_at${date}`
+          searchParams.get('category_id')
+            ? `menu/products?not_default=1&sort=-created_at&filter[category_id]=${searchParams.get('category_id')}${date}`
+            : `menu/products?not_default=1&sort=-created_at${date}`
         );
 
         setSearchedData(res.data);
         return;
       }
 
-      // const holder = allData?.data.filter((item: any) => {
-      //   const referenceMatch = item?.sku?.includes(searchTerm);
-      //   const customerMatch = item?.name?.includes(searchTerm);
-      //   return referenceMatch || customerMatch;
-      // });
-      setAllUrl(
-        `menu/products?not_default=1&sort=-created_at&filter[name]=${searchTerm}${date}`
-      );
-      const res = await axiosInstance.get(
-        `/menu/products?not_default=1&sort=-created_at&filter[name]=${searchTerm}${date}`
-      );
+      const encodedSearchTerm = encodeURIComponent(normalizedSearchTerm);
+      const searchUrl = searchParams.get('category_id')
+        ? `menu/products?not_default=1&sort=-created_at&filter[sku]=${encodedSearchTerm}&filter[category_id]=${searchParams.get('category_id')}${date}`
+        : `menu/products?not_default=1&sort=-created_at&filter[sku]=${encodedSearchTerm}${date}`;
+      setAllUrl(searchUrl);
 
-      // setSearchedData({ ...allData, data: holder });
-      setSearchedData(res.data);
-      // setSearchedData({ ...allData, data: holder });
+      try {
+        const res = await axiosInstance.get(`/${searchUrl}`);
+        const filteredServerData = filterProductsByBarcode(
+          res?.data?.data || [],
+          normalizedSearchTerm
+        );
+        setSearchedData({ ...res.data, data: filteredServerData });
+      } catch {
+        // Fallback local filtering in case API search params change.
+        const holder = filterProductsByBarcode(
+          allData?.data || [],
+          normalizedSearchTerm
+        );
+
+        setSearchedData({ ...allData, data: holder });
+      }
     }, 300), // 300ms debounce delay
     [allData]
   );
@@ -151,6 +181,7 @@ export const Products: React.FC<ProductsProps> = () => {
           actionText={'ADD_PRODUCT'}
           loading={isLoading}
           handleSearch={handleSearch}
+          searchPlaceholder={t('SCAN_BARCODE_PLACEHOLDER')}
         />
       </div>
     </>

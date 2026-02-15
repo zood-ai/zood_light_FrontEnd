@@ -27,13 +27,15 @@ const LanguageDropdown: React.FC = () => {
   useEffect(() => {
     const currentLang = i18n.language || window.localStorage.i18nextLng || 'ar'
     document.documentElement.lang = currentLang
-    document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr'
+    document.documentElement.dir = i18n.dir(currentLang)
+    document.body.dir = i18n.dir(currentLang)
   }, [i18n.language])
 
   const handleLanguageSelect = (code: string) => {
     i18n.changeLanguage(code)
     document.documentElement.lang = code
-    document.documentElement.dir = code === 'ar' ? 'rtl' : 'ltr'
+    document.documentElement.dir = i18n.dir(code)
+    document.body.dir = i18n.dir(code)
   }
 
   // Get the selected language icon using useMemo for optimization

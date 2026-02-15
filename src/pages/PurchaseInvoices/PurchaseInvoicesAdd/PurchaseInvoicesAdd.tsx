@@ -73,15 +73,16 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
   const { useGetAll: useGetAllPro } = createCrudService<any>(
     'menu/products?not_default=1&per_page=1000&sort=-created_at'
   );
-  const { data: defaultProduct } = createCrudService<any>(
-    'inventory/items?filter[name]=sku-zood-20001'
-  ).useGetAll();
+  const { data: defaultProduct, isLoading: loadingDefaultProduct } =
+    createCrudService<any>(
+      'inventory/items?filter[name]=sku-zood-20001'
+    ).useGetAll();
   console.log({ defaultProduct: defaultProduct?.data?.[holder]?.id });
-  const { data: getAllPro } = useGetAllPro();
-  const { data: allData } = createCrudService<any>(
+  const { data: getAllPro, isLoading: loadingProducts } = useGetAllPro();
+  const { data: allData, isLoading: loadingSuppliers } = createCrudService<any>(
     'inventory/suppliers'
   ).useGetAll();
-  const { data: allDataId } = createCrudService<any>(
+  const { data: allDataId, isLoading: loadingInvoice } = createCrudService<any>(
     `inventory/purchasing/${params.objId ?? ''}`
   ).useGetAll();
 
@@ -174,7 +175,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
     console.log({ updatedItems });
     setItems(updatedItems);
   };
-  const { data: branchData } =
+  const { data: branchData, isLoading: loadingBranches } =
     createCrudService<any>('manage/branches').useGetAll();
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -744,7 +745,12 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
               <Button
                 loading={loading}
                 disabled={
-                  loading
+                  loading ||
+                  loadingProducts ||
+                  loadingSuppliers ||
+                  loadingInvoice ||
+                  loadingBranches ||
+                  loadingDefaultProduct
                   // (isEditMode && allDataId?.data?.status === 'Closed')
                 }
                 type="submit"

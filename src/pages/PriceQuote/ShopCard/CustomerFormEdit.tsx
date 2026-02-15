@@ -19,14 +19,17 @@ import { SelectCompInput } from '@/components/custom/SelectItem/SelectCompInput'
 const CustomerFormEdit = () => {
   const { t } = useTranslation();
   const allServiceOrder = createCrudService<any>('orders');
-  const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
+  const { data: WhoAmI, isLoading: loadingWhoAmI } =
+    createCrudService<any>('auth/whoami').useGetAll();
   const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
 
   const { useGetAll: fetchAllProducts } = createCrudService<any>(
     'menu/products?not_default=1&per_page=1000'
   );
-  const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();
-  const { data: settings } = createCrudService<any>('manage/settings').useGetAll();
+  const { data: taxes, isLoading: loadingTaxes } =
+    createCrudService<any>('manage/taxes').useGetAll();
+  const { data: settings, isLoading: loadingSettings } =
+    createCrudService<any>('manage/settings').useGetAll();
   const { openDialog } = useGlobalDialog();
 
   const orderSchema = useSelector((state: any) => state.orderSchema);
@@ -40,39 +43,69 @@ const CustomerFormEdit = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const { data: getAllPro } = fetchAllProducts();
 
-  const { data: getOrdersById, refetch } = createCrudService<any>('orders').useGetById(
-    `${params.id || ''}`
-  );
+  const {
+    data: getOrdersById,
+    refetch,
+    isLoading: loadingOrders,
+  } = createCrudService<any>('orders').useGetById(`${params.id || ''}`);
 
   // Initialize orderSchema with existing order data
   useEffect(() => {
-    if (getOrdersById?.data && !isInitialized && taxes?.data && settings?.data) {
+    if (
+      getOrdersById?.data &&
+      !isInitialized &&
+      taxes?.data &&
+      settings?.data
+    ) {
       const orderData = getOrdersById.data;
 
-      // Update customer info 
-      dispatch(updateField({ field: 'customer_id', value: orderData.customer?.id || '' }));
-      dispatch(updateField({ field: 'kitchen_received_at', value: orderData.kitchen_received_at || '' }));
-      dispatch(updateField({ field: 'kitchen_done_at', value: orderData.kitchen_done_at || '' }));
-      dispatch(updateField({ field: 'kitchen_notes', value: orderData.kitchen_notes || '' }));
+      // Update customer info
+      dispatch(
+        updateField({
+          field: 'customer_id',
+          value: orderData.customer?.id || '',
+        })
+      );
+      dispatch(
+        updateField({
+          field: 'kitchen_received_at',
+          value: orderData.kitchen_received_at || '',
+        })
+      );
+      dispatch(
+        updateField({
+          field: 'kitchen_done_at',
+          value: orderData.kitchen_done_at || '',
+        })
+      );
+      dispatch(
+        updateField({
+          field: 'kitchen_notes',
+          value: orderData.kitchen_notes || '',
+        })
+      );
       dispatch(updateField({ field: 'is_sales_order', value: 1 }));
 
       // Initialize products
-      const products = orderData.products?.map((item: any) => ({
-        product_id: item.id,
-        quantity: item.pivot?.quantity || 1,
-        name: item.name,
-        unit_price: item.pivot?.unit_price || item.unit_price || 0,
-        total_price: (item.pivot?.unit_price || item.unit_price || 0) * (item.pivot?.quantity || 1),
-        kitchen_notes: item.pivot?.kitchen_notes || '',
-        is_tax_included: settings?.data?.tax_inclusive_pricing,
-        taxes: [
-          {
-            id: taxes?.data?.[0]?.id,
-            rate: taxes?.data?.[0]?.rate,
-            amount: 0,
-          },
-        ],
-      })) || [];
+      const products =
+        orderData.products?.map((item: any) => ({
+          product_id: item.id,
+          quantity: item.pivot?.quantity || 1,
+          name: item.name,
+          unit_price: item.pivot?.unit_price || item.unit_price || 0,
+          total_price:
+            (item.pivot?.unit_price || item.unit_price || 0) *
+            (item.pivot?.quantity || 1),
+          kitchen_notes: item.pivot?.kitchen_notes || '',
+          is_tax_included: settings?.data?.tax_inclusive_pricing,
+          taxes: [
+            {
+              id: taxes?.data?.[0]?.id,
+              rate: taxes?.data?.[0]?.rate,
+              amount: 0,
+            },
+          ],
+        })) || [];
 
       if (products.length > 0) {
         dispatch(addProduct(products));
@@ -80,7 +113,13 @@ const CustomerFormEdit = () => {
 
       setIsInitialized(true);
     }
-  }, [getOrdersById?.data, isInitialized, taxes?.data, settings?.data, dispatch]);
+  }, [
+    getOrdersById?.data,
+    isInitialized,
+    taxes?.data,
+    settings?.data,
+    dispatch,
+  ]);
 
   const handleConfirmOrder = async () => {
     setLoading(true);
@@ -116,7 +155,10 @@ const CustomerFormEdit = () => {
         })),
       };
 
-      const res = await axiosInstance.put(`orders/${params.id}`, updatedOrderData);
+      const res = await axiosInstance.put(
+        `orders/${params.id}`,
+        updatedOrderData
+      );
 
       if (res.status === 200) {
         openDialog('updated');
@@ -190,10 +232,10 @@ const CustomerFormEdit = () => {
               rate: taxes?.data?.[0]?.rate,
               amount: !settings?.data?.tax_inclusive_pricing
                 ? (productData.price * 1 || productData.price) *
-                ((taxes?.data?.[0]?.rate || 0) / 100)
+                  ((taxes?.data?.[0]?.rate || 0) / 100)
                 : (productData.price * 1 || productData.price) *
-                ((taxes?.data?.[0]?.rate || 0) /
-                  (100 + taxes?.data?.[0]?.rate || 0)),
+                  ((taxes?.data?.[0]?.rate || 0) /
+                    (100 + taxes?.data?.[0]?.rate || 0)),
             },
           ],
         });
@@ -201,52 +243,54 @@ const CustomerFormEdit = () => {
         console.error('Failed to fetch product data', error);
       }
     } else if (field === 'quantity') {
-      const updatedProducts = orderSchema.products.map((item: any, i: number) =>
-        i === index
-          ? {
-            ...item,
-            quantity: parseInt(value) || 1,
-            total_price: (parseInt(value) || 1) * item.unit_price || 0,
-            taxes: [
-              {
-                id: taxes?.data?.[0]?.id,
-                rate: taxes?.data?.[0]?.rate,
-                amount: !settings?.data?.tax_inclusive_pricing
-                  ? item.unit_price *
-                  (parseInt(value) || 1) *
-                  ((taxes?.data?.[0]?.rate || 0) / 100)
-                  : item.unit_price *
-                  (parseInt(value) || 1) *
-                  ((taxes?.data?.[0]?.rate || 0) /
-                    (100 + taxes?.data?.[0]?.rate || 0)),
-              },
-            ],
-          }
-          : item
+      const updatedProducts = orderSchema.products.map(
+        (item: any, i: number) =>
+          i === index
+            ? {
+                ...item,
+                quantity: parseInt(value) || 1,
+                total_price: (parseInt(value) || 1) * item.unit_price || 0,
+                taxes: [
+                  {
+                    id: taxes?.data?.[0]?.id,
+                    rate: taxes?.data?.[0]?.rate,
+                    amount: !settings?.data?.tax_inclusive_pricing
+                      ? item.unit_price *
+                        (parseInt(value) || 1) *
+                        ((taxes?.data?.[0]?.rate || 0) / 100)
+                      : item.unit_price *
+                        (parseInt(value) || 1) *
+                        ((taxes?.data?.[0]?.rate || 0) /
+                          (100 + taxes?.data?.[0]?.rate || 0)),
+                  },
+                ],
+              }
+            : item
       );
       dispatch(addProduct(updatedProducts));
     } else if (field === 'unit_price') {
-      const updatedProducts = orderSchema.products.map((item: any, i: number) =>
-        i === index
-          ? {
-            ...item,
-            unit_price: value,
-            total_price: value * item.quantity || 0,
-            is_tax_included: settings?.data?.tax_inclusive_pricing,
-            taxes: [
-              {
-                id: taxes?.data?.[0]?.id,
-                rate: taxes?.data?.[0]?.rate,
-                amount: !settings?.data?.tax_inclusive_pricing
-                  ? (value * item.quantity || 0) *
-                  ((taxes?.data?.[0]?.rate || 0) / 100)
-                  : (value * item.quantity || 0) *
-                  ((taxes?.data?.[0]?.rate || 0) /
-                    (100 + taxes?.data?.[0]?.rate || 0)),
-              },
-            ],
-          }
-          : item
+      const updatedProducts = orderSchema.products.map(
+        (item: any, i: number) =>
+          i === index
+            ? {
+                ...item,
+                unit_price: value,
+                total_price: value * item.quantity || 0,
+                is_tax_included: settings?.data?.tax_inclusive_pricing,
+                taxes: [
+                  {
+                    id: taxes?.data?.[0]?.id,
+                    rate: taxes?.data?.[0]?.rate,
+                    amount: !settings?.data?.tax_inclusive_pricing
+                      ? (value * item.quantity || 0) *
+                        ((taxes?.data?.[0]?.rate || 0) / 100)
+                      : (value * item.quantity || 0) *
+                        ((taxes?.data?.[0]?.rate || 0) /
+                          (100 + taxes?.data?.[0]?.rate || 0)),
+                  },
+                ],
+              }
+            : item
       );
       dispatch(addProduct(updatedProducts));
     }
@@ -263,10 +307,13 @@ const CustomerFormEdit = () => {
                 <SelectCompInput
                   className="md:w-[327px]"
                   placeholder={t('PRODUCT_NAME')}
-                  options={[...(getAllPro?.data || [])?.map((product: any) => ({
-                    value: product?.id,
-                    label: product?.name,
-                  })), { label: item?.kitchen_notes, value: item?.product_id }]}
+                  options={[
+                    ...(getAllPro?.data || [])?.map((product: any) => ({
+                      value: product?.id,
+                      label: product?.name,
+                    })),
+                    { label: item?.kitchen_notes, value: item?.product_id },
+                  ]}
                   label={t('PRODUCT_NAME')}
                   ref={myInputRef}
                   onValueChange={(value) =>
@@ -427,7 +474,13 @@ const CustomerFormEdit = () => {
         <div className="col-span-10 pb-5 flex gap-3">
           <Button
             loading={saveLoading}
-            disabled={saveLoading}
+            disabled={
+              saveLoading ||
+              loadingOrders ||
+              loadingTaxes ||
+              loadingSettings ||
+              loadingWhoAmI
+            }
             onClick={handleSaveChanges}
             className="w-[144px] mt-md"
             variant="outline"
@@ -436,7 +489,13 @@ const CustomerFormEdit = () => {
           </Button>
           <Button
             loading={loading}
-            disabled={loading}
+            disabled={
+              loading ||
+              loadingOrders ||
+              loadingTaxes ||
+              loadingSettings ||
+              loadingWhoAmI
+            }
             onClick={handleConfirmOrder}
             className="w-[144px] mt-md"
           >

@@ -14,7 +14,7 @@ import { Button } from 'antd';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 import { useTranslation } from 'react-i18next';
 import { Pointer } from 'lucide-react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const animationStyles = `
     @keyframes buttonPulse {
@@ -219,12 +219,10 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               {/* {moment(
                                 data?.business_date?.split(' ')[0]
                               ).format('D/M/YYYY h:mm A')} */}
-                              {moment(
-                                `${moment(data?.business_date).format(
+                              {dayjs(
+                                `${dayjs(data?.business_date).format(
                                   'YYYY-MM-DD'
-                                )} ${moment(data?.created_at)
-                                  .local()
-                                  .format('HH:mm:ss')}`
+                                )} ${dayjs(data?.created_at).format('HH:mm:ss')}`
                               ).format('D/M/YYYY h:mm A')}
                             </div>
                           )}
@@ -666,12 +664,10 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           {/* {moment(data?.business_date?.split(' ')[0]).format(
                             'D/M/YYYY h:mm A'
                           )} */}
-                          {moment(
-                            `${moment(data?.business_date).format(
+                          {dayjs(
+                            `${dayjs(data?.business_date).format(
                               'YYYY-MM-DD'
-                            )} ${moment(data?.created_at)
-                              .local()
-                              .format('HH:mm:ss')}`
+                            )} ${dayjs(data?.created_at).format('HH:mm:ss')}`
                           ).format('D/M/YYYY h:mm A')}
                         </p>
                       </div>

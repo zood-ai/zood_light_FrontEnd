@@ -1,9 +1,7 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import {
   useQuery,
   useMutation,
   useQueryClient,
-  QueryKey,
 } from '@tanstack/react-query';
 import axiosInstance from '../interceptors';
 import { toast } from '@/components/ui/use-toast';
@@ -36,15 +34,13 @@ const createCrudService = <T>(
   page = 1,
   limit = 10
 ): CrudService<T> => {
-  const queryClient: any = useQueryClient();
-  const [searchParams] = useSearchParams();
-  const { openDialog } = useGlobalDialog();
-
-  const queryParams: { [key: string]: string | null } = {};
-  searchParams.forEach((value, key) => {
-    queryParams[key] = value;
-  });
   const useGetAll = () => {
+    const [searchParams] = useSearchParams();
+    const queryParams: { [key: string]: string | null } = {};
+    searchParams.forEach((value, key) => {
+      queryParams[key] = value;
+    });
+
     return useQuery<T[]>({
       queryKey: [endpoint, queryParams],
       queryFn: async () => {
@@ -77,6 +73,7 @@ const createCrudService = <T>(
     });
 
   const useCreate = () =>
+    ((queryClient: any, openDialog: (type: string) => void) =>
     useMutation<T, unknown, T>({
       mutationFn: async (data: T) => {
         const response = await axiosInstance.post<T>(endpoint, data);
@@ -88,8 +85,9 @@ const createCrudService = <T>(
         openDialog('added');
         queryClient.invalidateQueries([endpoint]);
       },
-    });
+    }))(useQueryClient(), useGlobalDialog().openDialog);
   const useCreateNoDialog = () =>
+    ((queryClient: any) =>
     useMutation<T, unknown, T>({
       mutationFn: async (data: T) => {
         const response = await axiosInstance.post<T>(endpoint, data);
@@ -101,8 +99,9 @@ const createCrudService = <T>(
         // openDialog('added')
         queryClient.invalidateQueries([endpoint]);
       },
-    });
+    }))(useQueryClient());
   const useCreateById = () =>
+    ((queryClient: any, openDialog: (type: string) => void) =>
     useMutation<T, unknown, T>({
       mutationFn: async ({ data, id }: any) => {
         const response = await axiosInstance.post<T>(endpoint + `/${id}`, data);
@@ -114,9 +113,10 @@ const createCrudService = <T>(
         openDialog('added');
         queryClient.invalidateQueries([endpoint]);
       },
-    });
+    }))(useQueryClient(), useGlobalDialog().openDialog);
 
   const useUpdate = () =>
+    ((queryClient: any, openDialog: (type: string) => void) =>
     useMutation<T, unknown, { id: string; data: T }>({
       mutationFn: async ({ id, data }) => {
         const response = await axiosInstance.put<T>(`${endpoint}/${id}`, data);
@@ -129,8 +129,9 @@ const createCrudService = <T>(
 
         queryClient.invalidateQueries([endpoint]);
       },
-    });
+    }))(useQueryClient(), useGlobalDialog().openDialog);
   const useUpdateNoDialog = () =>
+    ((queryClient: any) =>
     useMutation<T, unknown, { id: string; data: T }>({
       mutationFn: async ({ id, data }) => {
         const response = await axiosInstance.put<T>(`${endpoint}/${id}`, data);
@@ -143,9 +144,10 @@ const createCrudService = <T>(
 
         queryClient.invalidateQueries([endpoint]);
       },
-    });
+    }))(useQueryClient());
 
   const useRemove = () =>
+    ((queryClient: any, openDialog: (type: string) => void) =>
     useMutation<void, unknown, string>({
       mutationFn: async ({ id }: any) => {
         await axiosInstance.delete(`${endpoint}/${id}`);
@@ -156,7 +158,7 @@ const createCrudService = <T>(
 
         queryClient.invalidateQueries([endpoint]);
       },
-    });
+    }))(useQueryClient(), useGlobalDialog().openDialog);
   return {
     useGetAll,
     useUpdateNoDialog,

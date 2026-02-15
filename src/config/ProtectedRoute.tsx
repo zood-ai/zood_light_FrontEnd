@@ -37,7 +37,7 @@ const ProtectedRoute = ({
 
   return (
     <>
-      <PayDialog showRemaining={true} />
+      {/* <PayDialog showRemaining={true} /> */}
       {children}
     </>
   );
