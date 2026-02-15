@@ -16,6 +16,7 @@ import {
   toggleActionView,
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
+import { Link } from 'react-router-dom';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
@@ -50,11 +51,18 @@ export const useDataTableColumns = () => {
       ),
       cell: ({ row }) => {
         return (
-          <div className="flex space-x-2">
-            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-            <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]">
-              {row.getValue('products') || '0'}
-            </span>
+          <div
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            className="flex space-x-2"
+          >
+            <Link to={`/zood-dashboard/products?category_id=${row.original.id}`}>
+              <span className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem] cursor-pointer text-blue-500 underline">
+                {row.getValue('products') || '0'}
+              </span>
+            </Link>
           </div>
         );
       },

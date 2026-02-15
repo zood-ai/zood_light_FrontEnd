@@ -7,11 +7,13 @@ import axiosInstance from '@/api/interceptors';
 import { ItemsReportProps } from './ItemsReport.types';
 import { useDataTableColumns } from './components/useDataTableColumns';
 import createCrudService from '@/api/services/crudService';
+import { useSearchParams } from 'react-router-dom';
 
 export const ItemsReport: React.FC<ItemsReportProps> = () => {
   const { t } = useTranslation();
   const { columns } = useDataTableColumns();
-  const BASE_URL = 'menu/products?not_default=1&sort=-created_at';
+  const [searchParams] = useSearchParams();
+  const BASE_URL = `menu/products?not_default=1&sort=-created_at&filter[category_id]=${searchParams.get('category_id')}`;
   const [allUrl, setAllUrl] = useState(BASE_URL);
   const allService = createCrudService<any>(allUrl);
   const { useGetAll } = allService;
