@@ -68,7 +68,7 @@ const AppShell = () => {
   const [fastActionBtn, setFastActionBtn] = useState(false);
   const [showTopReminder, setShowTopReminder] = useState(false);
   const [topReminderText, setTopReminderText] = useState('');
-  const [openRenewDialog, setOpenRenewDialog] = useState(false);
+  const [openRenewDialog, setOpenRenewDialog] = useState(true);
   const { data: branchData } = branchesService.useGetAll();
   const isPosRoute =
     location.pathname.includes('/zood-dashboard/individual-invoices/add') ||
@@ -178,6 +178,7 @@ const AppShell = () => {
       if (distance <= 0) {
         setTopReminderText('انتهى الاشتراك');
         setShowTopReminder(true);
+        setOpenRenewDialog(false);
         return;
       }
 
@@ -198,6 +199,7 @@ const AppShell = () => {
           : `متبقي ${hours} ساعة على انتهاء الاشتراك`
       );
       setShowTopReminder(true);
+      setOpenRenewDialog(false);
     };
 
     computeReminder();
