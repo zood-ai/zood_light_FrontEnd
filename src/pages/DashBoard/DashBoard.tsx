@@ -19,6 +19,8 @@ import { ConfirmDelModal } from '../../pages/tasks/Modal/ConfirmDelModal';
 import AddEditModal from '../../pages/tasks/Modal/AddEditModal';
 import { DetailsModal } from './Modal/DetailsModal';
 import axiosInstance from '@/api/interceptors';
+import { useBranchRefresh } from '@/hooks/useBranchRefresh';
+import { useBranch } from '@/context/BranchContext';
 import { useQueryClient } from '@tanstack/react-query';
 
 export const DashBoard: React.FC<DashBoardProps> = () => {
@@ -43,6 +45,9 @@ export const DashBoard: React.FC<DashBoardProps> = () => {
   const dashboardOverviewEndpoint = isCustomRangeActive
     ? `/reports/overview/light?${dashboardDateRange.query.replace(/^&/, '')}`
     : `/reports/overview/light?groupby=${activeFilter}`;
+
+  // Use branch refresh hook to ensure data updates when branch changes
+  const selectedBranch = useBranchRefresh();
 
   // Call useGetAll directly here
   const { data: apiData, isLoading } = createCrudService<any>(

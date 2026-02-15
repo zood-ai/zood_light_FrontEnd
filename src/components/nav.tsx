@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { IconChevronDown } from '@tabler/icons-react';
 import { Button, buttonVariants } from './custom/button';
 import {
@@ -25,6 +25,8 @@ import useCheckActiveNav from '@/hooks/use-check-active-nav';
 import { SideLink } from '@/data/sidelinks';
 import useDirection from '@/hooks/useDirection';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/context/AuthContext';
+import { useSelector } from 'react-redux';
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed: boolean;
@@ -38,8 +40,24 @@ export default function Nav({
   className,
   closeNav,
 }: NavProps) {
+  const { user, logout } = useAuth();
+  const allSettings = useSelector((state: any) => state.allSettings.value);
+  const isRtl = useDirection();
+  if (!user) return;
   const renderLink = ({ sub, ...rest }: SideLink) => {
     const key = `${rest.i18n}-${rest.href}`;
+    const hasPermission =
+      rest.authorities?.length > 0
+        ? rest.authorities.every((permission) =>
+            allSettings?.WhoAmI?.user?.roles
+              ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
+              ?.includes(permission)
+          )
+        : true;
+
+    if (!hasPermission) {
+      return;
+    }
     if (isCollapsed && sub)
       return (
         <NavLinkIconDropdown
@@ -53,14 +71,29 @@ export default function Nav({
     if (isCollapsed)
       return <NavLinkIcon {...rest} key={key} closeNav={closeNav} />;
 
-    if (sub)
+    if (sub) {
+      let hasSubPermission = false;
+      sub?.forEach((s: any) => {
+        hasSubPermission =
+          s.authorities?.length > 0
+            ? s.authorities.every((permission) =>
+                allSettings?.WhoAmI?.user?.roles
+                  ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
+                  ?.includes(permission)
+              )
+            : true;
+        if (hasSubPermission) return;
+      });
+      if (!hasSubPermission) {
+        return;
+      }
       return (
         <NavLinkDropdown {...rest} sub={sub} key={key} closeNav={closeNav} />
       );
+    }
 
     return <NavLink {...rest} key={key} closeNav={closeNav} />;
   };
-  const isRtl = useDirection();
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
@@ -99,6 +132,7 @@ function NavLink({
   icon2,
   label,
   href,
+  authorities,
   closeNav,
   subLink = false,
 }: NavLinkProps) {
@@ -175,6 +209,8 @@ function NavLinkDropdown({
    * if one of child element is active */
   const isChildActive = !!sub?.find((s) => checkActiveNav(s.href));
   const isRtl = useDirection();
+  const allSettings = useSelector((state: any) => state.allSettings.value);
+
   const triggerIcon = isChildActive ? icon2 || icon1 || icon : icon1 || icon2 || icon;
   return (
     <Collapsible defaultOpen={isChildActive}>
@@ -223,11 +259,30 @@ function NavLinkDropdown({
               : 'ml-4 border-l border-l-slate-200 pl-2'
           )}
         >
-          {sub!.map((sublink) => (
-            <li key={sublink.i18n}>
-              <NavLink {...sublink} subLink closeNav={closeNav} />
-            </li>
-          ))}
+          {sub!.map((sublink: any) => {
+            const hasPermission =
+              sublink?.authorities?.length > 0
+                ? sublink?.authorities.every((permission) =>
+                    allSettings?.WhoAmI?.user?.roles
+                      ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
+                      ?.includes(permission)
+                  )
+                : true;
+
+            if (!hasPermission) {
+              return;
+            }
+            return (
+              <li key={sublink.i18n} className="my-1">
+                <NavLink
+                  {...sublink}
+                  subLink
+                  closeNav={closeNav}
+                  authorities={[]}
+                />
+              </li>
+            );
+          })}
         </ul>
       </CollapsibleContent>
     </Collapsible>

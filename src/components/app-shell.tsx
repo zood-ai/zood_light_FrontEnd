@@ -20,7 +20,15 @@ import { setSettings } from '@/store/slices/allSettings';
 import createCrudService from '@/api/services/crudService';
 import Cookies from 'js-cookie';
 import axiosInstance from '@/api/interceptors';
-import { Plus, Clock } from 'lucide-react';
+import BranchSelect from './BranchSelect';
+import { useBranchVisibility } from '@/hooks/useBranchVisibility';
+import { useBranch } from '@/context/BranchContext';
+import BranchGuard from './BranchGuard';
+
+import Loader from './loader';
+import { useBranchRefresh } from '@/hooks/useBranchRefresh';
+
+import { Plus, Clock, PlusIcon } from 'lucide-react';
 import { SUBSCRIPTION_REMINDER_NAV_KEY } from '@/config/PayDialog';
 interface WelcomeMessageProps {
   name: string;
@@ -46,16 +54,21 @@ const AppShell = () => {
   const location = useLocation();
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
+  // Use branch refresh hook to ensure data updates when branch changes
+  const selectedBranch = useBranchRefresh();
   const userNav = useSelector((state: any) => state.usrNavSlice.active);
   const reFetch = useSelector((state: any) => state.allSettings.reFetch);
   const whoAmI = useSelector((state: any) => state.allSettings.value?.WhoAmI);
   const { openDialog } = useGlobalDialog();
   const dispatch = useDispatch();
+  const { shouldShowBranchSelect, isBranchRequired } = useBranchVisibility();
 
+  const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [fastActionBtn, setFastActionBtn] = useState(false);
   const [showTopReminder, setShowTopReminder] = useState(false);
   const [topReminderText, setTopReminderText] = useState('');
-  const [openRenewDialog, setOpenRenewDialog] = useState(false);
+  const [openRenewDialog, setOpenRenewDialog] = useState(true);
   const { data: branchData } = branchesService.useGetAll();
   const isPosRoute =
     location.pathname.includes('/zood-dashboard/individual-invoices/add') ||
@@ -78,10 +91,9 @@ const AppShell = () => {
     // Feature detection: Check if touch is supported
     // const isTouchDevice =
     //   'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-    if (isMobileUA) {
-      window.location.href = 'https://zood-e-invoice-flutter.vercel.app/';
-    }
+    // if (isMobileUA) {
+    //   window.location.href = 'https://zood-e-invoice-flutter.vercel.app/';
+    // }
   }, []);
 
   useEffect(() => {
@@ -166,6 +178,7 @@ const AppShell = () => {
       if (distance <= 0) {
         setTopReminderText('انتهى الاشتراك');
         setShowTopReminder(true);
+        setOpenRenewDialog(false);
         return;
       }
 
@@ -186,6 +199,7 @@ const AppShell = () => {
           : `متبقي ${hours} ساعة على انتهاء الاشتراك`
       );
       setShowTopReminder(true);
+      setOpenRenewDialog(false);
     };
 
     computeReminder();
@@ -222,6 +236,36 @@ const AppShell = () => {
     </div>
   ) : null;
 
+  useEffect(() => {
+    let isMounted = true;
+    const fun = async () => {
+      try {
+        setLoading(true);
+        const { data: settings } = await axiosInstance.get('manage/settings');
+        const { data: whoAmI } = await axiosInstance.get('auth/whoami');
+        dispatch(
+          setSettings({
+            settings: settings,
+            WhoAmI: whoAmI,
+          })
+        );
+      } catch (err) {
+        setLoading(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fun();
+  }, [reFetch]);
+
+  if (loading)
+    return (
+      <div className="h-screen flex gap-3">
+        <Loader />
+      </div>
+    );
+
   return (
     <>
       {!isPosRoute && <TopLoadingBar isLoading={isLoading} />}
@@ -245,16 +289,14 @@ const AppShell = () => {
                   ? 'md:ml-14'
                   : 'md:ml-64'
                 : isCollapsed
-                ? 'md:mr-14'
-                : 'md:mr-64')
+                  ? 'md:mr-14'
+                  : 'md:mr-64')
           )}
         >
           <Layout>
             {/* ===== Top Heading ===== */}
             {!isPosRoute && (
-              <Layout.Header
-                className="border rounded-[8px] max-w-[95.5%] mx-auto mt-8 bg-background z-[10] flex-wrap md:flex-nowrap gap-y-2"
-              >
+              <Layout.Header className="border rounded-[8px] max-w-[95.5%] mx-auto mt-8 bg-background z-[10] flex-wrap md:flex-nowrap gap-y-2">
                 <h2 className="text-2xl font-bold tracking-tight flex items-center align-center gap-2 ">
                   <LanguageDropdown />
                   <div className="animate-shake">
@@ -283,6 +325,12 @@ const AppShell = () => {
                     isRtl ? 'mr-auto' : 'ml-auto'
                   } flex items-center gap-2 min-w-0`}
                 >
+                  {/* Branch Select */}
+                  {shouldShowBranchSelect && (
+                    <div className="flex-1 flex justify-center items-center mb-1">
+                      <BranchSelect />
+                    </div>
+                  )}
                   {isRtl && reminderNode}
                   <Button
                     style={{

@@ -1,27 +1,43 @@
-import { lazy, Suspense } from 'react';
-import { Roles } from './roles';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-const PayDialog = lazy(() => import('./PayDialog'));
+import PayDialog from './PayDialog';
+import { Permissions } from './roles';
+import { useSelector } from 'react-redux';
 
-let counter = 0;
+type ProtectedRouteProps = {
+  children: JSX.Element;
+  requiredPermissions: Permissions[];
+};
+
 const ProtectedRoute = ({
   children,
-}: {
-  children: JSX.Element;
-  requiredRole: Roles;
-}) => {
-  const { user } = useAuth();
+  requiredPermissions,
+}: ProtectedRouteProps) => {
+  const { user, logout } = useAuth();
+  const allSettings = useSelector((state: any) => state.allSettings.value);
 
   if (!user) {
-    return <Navigate to="/" />;
+    logout();
+    return <Navigate to="/" replace />;
   }
-  // counter++;
+
+  const hasPermission =
+    requiredPermissions?.length > 0
+      ? requiredPermissions.every((permission) =>
+          allSettings?.WhoAmI?.user?.roles
+            ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
+            ?.includes(permission)
+        )
+      : true;
+
+  if (!hasPermission) {
+    logout();
+    return <Navigate to="/" replace />;
+  }
+
   return (
     <>
-      <Suspense fallback={null}>
-        <PayDialog showRemaining={true} />
-      </Suspense>
+      {/* <PayDialog showRemaining={true} /> */}
       {children}
     </>
   );
