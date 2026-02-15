@@ -12,7 +12,7 @@ import AddEditModal from './Modal/AddEditModal';
 import { useTranslation } from 'react-i18next';
 import { useDataTableColumns } from './components/useDataTableColumns';
 import useDirection from '@/hooks/useDirection';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
 import { toggleActionView } from '@/store/slices/toggleAction';
 import { useDispatch, useSelector } from 'react-redux';
@@ -55,14 +55,20 @@ export const Products: React.FC<ProductsProps> = () => {
   };
   const filterBtn = () => {};
   const { i18n, t } = useTranslation();
+  const [searchParams] = useSearchParams();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
   const allService = createCrudService<any>(
-    'menu/products?not_default=1&sort=-created_at'
+    searchParams.get('category_id')
+      ? `menu/products?not_default=1&sort=-created_at&filter[category_id]=${searchParams.get('category_id')}`
+      : 'menu/products?not_default=1&sort=-created_at'
   );
   const [allUrl, setAllUrl] = useState(
-    'menu/products?not_default=1&sort=-created_at'
+    searchParams.get('category_id')
+      ? `menu/products?not_default=1&sort=-created_at&filter[category_id]=${searchParams.get('category_id')}`
+      : 'menu/products?not_default=1&sort=-created_at'
   );
+
   const { useGetAll } = allService;
   const { data: allData, isLoading } = useGetAll();
   const toggleActionData = useSelector((state: any) => state?.toggleAction);
@@ -97,11 +103,16 @@ export const Products: React.FC<ProductsProps> = () => {
           setSearchedData(allData); // Reset if search is cleared
           return;
         }
+
         setAllUrl(
-          `menu/products?not_default=1&sort=-created_at${date}`
+          searchParams.get('category_id')
+            ? `menu/products?not_default=1&sort=-created_at&filter[category_id]=${searchParams.get('category_id')}${date}`
+            : `menu/products?not_default=1&sort=-created_at${date}`
         );
         const res = await axiosInstance.get(
-          `/menu/products?not_default=1&sort=-created_at${date}`
+          searchParams.get('category_id')
+            ? `menu/products?not_default=1&sort=-created_at&filter[category_id]=${searchParams.get('category_id')}${date}`
+            : `menu/products?not_default=1&sort=-created_at${date}`
         );
 
         setSearchedData(res.data);
@@ -109,7 +120,9 @@ export const Products: React.FC<ProductsProps> = () => {
       }
 
       const encodedSearchTerm = encodeURIComponent(normalizedSearchTerm);
-      const searchUrl = `menu/products?not_default=1&sort=-created_at&filter[sku]=${encodedSearchTerm}${date}`;
+      const searchUrl = searchParams.get('category_id')
+        ? `menu/products?not_default=1&sort=-created_at&filter[sku]=${encodedSearchTerm}&filter[category_id]=${searchParams.get('category_id')}${date}`
+        : `menu/products?not_default=1&sort=-created_at&filter[sku]=${encodedSearchTerm}${date}`;
       setAllUrl(searchUrl);
 
       try {
