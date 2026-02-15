@@ -13,7 +13,10 @@ export const ItemsReport: React.FC<ItemsReportProps> = () => {
   const { t } = useTranslation();
   const { columns } = useDataTableColumns();
   const [searchParams] = useSearchParams();
-  const BASE_URL = `menu/products?not_default=1&sort=-created_at&filter[category_id]=${searchParams.get('category_id')}`;
+  let BASE_URL = `menu/products?not_default=1&sort=-created_at`;
+  if (searchParams.get('category_id')) {
+    BASE_URL = `menu/products?not_default=1&sort=-created_at&filter[category_id]=${searchParams.get('category_id')}`;
+  }
   const [allUrl, setAllUrl] = useState(BASE_URL);
   const allService = createCrudService<any>(allUrl);
   const { useGetAll } = allService;

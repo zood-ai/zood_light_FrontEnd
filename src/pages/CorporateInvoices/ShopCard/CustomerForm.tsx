@@ -36,16 +36,18 @@ const CustomerForm = () => {
   const { useGetAll: fetchAllProducts } = createCrudService<any>(
     'menu/products?not_default=1&per_page=100000&sort=-updated_at'
   );
-  const { data: settings } =
+  const { data: settings, isLoading: loadingSettings } =
     createCrudService<any>('manage/settings').useGetAll();
-  const { data: taxes } = createCrudService<any>(
+  const { data: taxes, isLoading: loadingTaxes } = createCrudService<any>(
     'manage/taxes?per_page=100000'
   ).useGetAll();
 
-  const { data: defaultProduct } = createCrudService<any>(
-    'menu/products?per_page=100000&filter[name]=sku-zood-20001'
-  ).useGetAll();
-  const { data: WhoAmI } = createCrudService<any>('auth/whoami').useGetAll();
+  const { data: defaultProduct, isLoading: loadingDefaultProduct } =
+    createCrudService<any>(
+      'menu/products?per_page=100000&filter[name]=sku-zood-20001'
+    ).useGetAll();
+  const { data: WhoAmI, isLoading: loadingWhoAmI } =
+    createCrudService<any>('auth/whoami').useGetAll();
   const ShowCar = WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
   // const ShowCar = true;
 
@@ -57,7 +59,7 @@ const CustomerForm = () => {
   const [isTextArea, setIsTextArea] = useState(false);
 
   const [loading, setLoading] = useState(false);
-  const { data: getAllPro } = fetchAllProducts();
+  const { data: getAllPro, isLoading: loadingProducts } = fetchAllProducts();
   dispatch(updateField({ field: 'is_sales_order', value: 0 }));
   const [businessDate, setBusinessDate] = useState(new Date().toISOString());
   const { showToast } = useToast();
@@ -264,7 +266,7 @@ const CustomerForm = () => {
                   now.getSeconds(),
                   now.getMilliseconds()
                 );
-                
+
                 const fullTimestamp = dateWithCurrentTime.toISOString();
                 setBusinessDate(fullTimestamp);
                 dispatch(
@@ -490,7 +492,15 @@ const CustomerForm = () => {
         <div className="col-span-10">
           <Button
             loading={loading}
-            disabled={loading}
+            disabled={
+              loading ||
+              loadingOrder ||
+              loadingWhoAmI ||
+              loadingProducts ||
+              loadingSettings ||
+              loadingTaxes ||
+              loadingDefaultProduct
+            }
             onClick={handleSubmitOrder}
             className="w-[144px] mt-md"
           >
