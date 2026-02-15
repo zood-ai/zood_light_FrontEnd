@@ -33,26 +33,30 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader column={column} title={t('BARCODE')} />
       ),
       cell: ({ row }) => (
-        <div className="max-w-[220px] truncate">{String(row.getValue('sku') || '-')}</div>
+        <div className="max-w-[220px] truncate">
+          {String(row.getValue('sku') || '-')}
+        </div>
       ),
     },
     {
-      accessorKey: 'quantity_sold',
+      accessorKey: 'orders_count',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('SOLD_QUANTITY')} />
       ),
       cell: ({ row }) => (
-        <div className="font-medium">{Number(row.getValue('quantity_sold') || 0)}</div>
+        <div className="font-medium">
+          {Number(row.getValue('orders_count') || 0)}
+        </div>
       ),
     },
     {
-      accessorKey: 'total_sales',
+      accessorKey: 'orders_total_value',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('TOTAL_SALES')} />
       ),
       cell: ({ row }) => (
         <div className="font-semibold">
-          {currencyFormated(Number(row.getValue('total_sales') || 0))}
+          {currencyFormated(Number(row.getValue('orders_total_value') || 0))}
         </div>
       ),
     },
