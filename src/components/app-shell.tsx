@@ -124,6 +124,28 @@ const AppShell = () => {
   }, [userNav, navigate, openDialog, dispatch]);
 
   useEffect(() => {
+    const fun = async () => {
+      try {
+        setLoading(true);
+        const { data: settings } = await axiosInstance.get('manage/settings');
+        const { data: whoAmI } = await axiosInstance.get('auth/whoami');
+        dispatch(
+          setSettings({
+            settings: settings,
+            WhoAmI: whoAmI,
+          })
+        );
+      } catch (err) {
+        setLoading(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fun();
+  }, [reFetch]);
+
+  useEffect(() => {
     const defaultBranchId = branchData?.data?.[0]?.id;
     if (!defaultBranchId) return;
     dispatch(
@@ -223,37 +245,6 @@ const AppShell = () => {
       </div>
     </div>
   ) : null;
-
-  useEffect(() => {
-    let isMounted = true;
-    const fun = async () => {
-      try {
-        setLoading(true);
-        const [{ data: settings }, { data: whoAmI }] = await Promise.all([
-          axiosInstance.get('manage/settings'),
-          axiosInstance.get('auth/whoami'),
-        ]);
-        if (!isMounted) return;
-        dispatch(
-          setSettings({
-            settings: settings,
-            WhoAmI: whoAmI,
-          })
-        );
-      } catch (err) {
-        if (!isMounted) return;
-        setLoading(false);
-      } finally {
-        if (!isMounted) return;
-        setLoading(false);
-      }
-    };
-
-    fun();
-    return () => {
-      isMounted = false;
-    };
-  }, [reFetch, dispatch]);
 
   if (loading)
     return (

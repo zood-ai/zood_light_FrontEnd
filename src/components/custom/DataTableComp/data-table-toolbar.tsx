@@ -34,6 +34,7 @@ export function DataTableToolbar<TData>({
     '/zood-dashboard/normal-report',
     '/zood-dashboard/b2b-report',
     '/zood-dashboard/purchase-report',
+    '/zood-dashboard/items-report',
   ];
   const locationsAdd = [
     '/zood-dashboard/corporate-invoices',
@@ -51,17 +52,30 @@ export function DataTableToolbar<TData>({
   ];
 
   const exportExcel = async () => {
-    const exportedColumnsAR = `is_exporting_excel=1&headings[]=رقم الفاتورة&columns[]=reference&headings[]=اسم العميل&columns[]=customer.name&headings[]=الخصم&columns[]=discount_amount&headings[]=الضريبة&columns[]=tax_exclusive_discount_amount&headings[]=التاريخ&columns[]=business_date&headings[]=المبلغ الإجمالي&columns[]=total_price&headings[]=حالة الدفع&columns[]=payment_status&headings[]=مرتجع؟&columns[]=return_reason`;
-    const exportedColumnsEn = `is_exporting_excel=1&headings[]=Invoice Number&columns[]=reference&headings[]=Customer Name&columns[]=customer.name&headings[]=Discount&columns[]=discount_amount&headings[]=Tax&columns[]=tax_exclusive_discount_amount&headings[]=Date&columns[]=business_date&headings[]=Amount&columns[]=total_price&headings[]=Payment Status&columns[]=payment_status&headings[]=Refunded&columns[]=return_reason`;
+    let holder: string;
 
-    const holder =
-      i18n.language === 'ar' ? exportedColumnsAR : exportedColumnsEn;
+    // Check if current path is items-report
+    if (pathName?.pathname === '/zood-dashboard/items-report') {
+      // Special columns for items-report only
+      const itemsReportColumnsAR = `is_exporting_excel=1&headings[]=الاسم&columns[]=name&headings[]=رمز المنتج&columns[]=sku&headings[]=الكمية المباعة&columns[]=orders_count&headings[]=إجمالي المبيعات&columns[]=orders_total_value`;
+      const itemsReportColumnsEn = `is_exporting_excel=1&headings[]=Name&columns[]=name&headings[]=SKU&columns[]=sku&headings[]=Orders Count&columns[]=orders_count&headings[]=Orders Total Value&columns[]=orders_total_value`;
+
+      holder =
+        i18n.language === 'ar' ? itemsReportColumnsAR : itemsReportColumnsEn;
+    } else {
+      // Default columns for other reports
+      const exportedColumnsAR = `is_exporting_excel=1&headings[]=رقم الفاتورة&columns[]=reference&headings[]=اسم العميل&columns[]=customer.name&headings[]=الخصم&columns[]=discount_amount&headings[]=الضريبة&columns[]=tax_exclusive_discount_amount&headings[]=التاريخ&columns[]=business_date&headings[]=المبلغ الإجمالي&columns[]=total_price&headings[]=حالة الدفع&columns[]=payment_status&headings[]=مرتجع؟&columns[]=return_reason`;
+      const exportedColumnsEn = `is_exporting_excel=1&headings[]=Invoice Number&columns[]=reference&headings[]=Customer Name&columns[]=customer.name&headings[]=Discount&columns[]=discount_amount&headings[]=Tax&columns[]=tax_exclusive_discount_amount&headings[]=Date&columns[]=business_date&headings[]=Amount&columns[]=total_price&headings[]=Payment Status&columns[]=payment_status&headings[]=Refunded&columns[]=return_reason`;
+
+      holder = i18n.language === 'ar' ? exportedColumnsAR : exportedColumnsEn;
+    }
 
     const lastUrl = allUrl.includes('?')
       ? allUrl[allUrl.length - 1] === '?'
         ? `${allUrl}${holder}`
         : `${allUrl}&${holder}`
       : `${allUrl}?${holder}`;
+
     const res = await axiosInstance.get(lastUrl);
     const a = Object.assign(document.createElement('a'), {
       href: res.data,
