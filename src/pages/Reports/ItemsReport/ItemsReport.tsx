@@ -94,6 +94,7 @@ export const ItemsReport: React.FC<ItemsReportProps> = () => {
           handleEdit={() => {}}
           filterBtn={() => {}}
           meta={searchedData?.meta || {}}
+          actionBtn={() => {}}
           dashBoard={true}
           loading={isLoading}
           handleSearch={handleSearch}

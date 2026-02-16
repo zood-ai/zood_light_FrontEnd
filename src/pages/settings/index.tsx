@@ -80,6 +80,18 @@ export default function Settings() {
 
     setUpdatedTaxInclusivePricing(settings?.data?.tax_inclusive_pricing);
   }, [settings, whoami]);
+
+  useEffect(() => {
+    if (!settings) return;
+    if (!whoami) return;
+    dispatch(
+      setSettings({
+        settings: settings,
+        WhoAmI: whoami,
+      })
+    );
+  }, [settings, whoami]);
+
   const taxesData = taxes?.data?.[0];
   const [taxesValue, setTaxesValue] = useState(taxes?.data?.[0]?.rate || 0);
   const brancheId = whoami?.user?.branches[0]?.id;

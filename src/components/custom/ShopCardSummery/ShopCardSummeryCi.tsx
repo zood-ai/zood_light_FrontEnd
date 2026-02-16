@@ -189,15 +189,13 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
 
   const handleIncludeAndExclude = useCallback(() => {
     let finalDiscount = 0;
-    let SubTotalAfterDiscount = 0;
     if (settings?.data?.tax_inclusive_pricing === 1) {
       // const totalCostWithTax = totalCost - taxAmount;
       finalDiscount = discountAmount / (1 + mainTax?.rate / 100);
-      SubTotalAfterDiscount = subTotal - finalDiscount;
     } else {
       finalDiscount = discountAmount;
-      SubTotalAfterDiscount = subTotal - finalDiscount;
     }
+    const SubTotalAfterDiscount = subTotal - finalDiscount;
     const Drepa = SubTotalAfterDiscount * (mainTax?.rate / 100);
     setTaxAmount(Drepa);
     setTotalAmountIncludeAndExclude(SubTotalAfterDiscount + Drepa);
@@ -319,9 +317,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
               <div className="font-bold">
                 SR{' '}
                 {fetchedData?.total_price?.toFixed(2) ??
-                  (
-                    Math.floor(totalAmountIncludeAndExclude * 100) / 100
-                  )?.toFixed(2)}
+                  totalAmountIncludeAndExclude?.toFixed(2)}
               </div>
             </div>
             <>
