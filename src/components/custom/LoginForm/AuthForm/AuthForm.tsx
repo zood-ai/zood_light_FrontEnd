@@ -53,19 +53,14 @@ export const AuthForm: React.FC<AuthFormProps> = () => {
   // Handle form submission
   const handleFormSubmit = async (data: AuthFormValues) => {
     setIsLoading(true);
-
-    const x = await login(data);
-
-    if (x.success === true) {
-      navigate('/zood-dashboard');
-    }
-    const timeout = setTimeout(() => {
+    try {
+      const x = await login(data);
+      if (x.success === true) {
+        navigate('/zood-dashboard');
+      }
+    } finally {
       setIsLoading(false);
-    }, 3000);
-
-    return () => {
-      clearTimeout(timeout);
-    };
+    }
   };
   const [showPassword, setShowPassword] = React.useState(false);
 

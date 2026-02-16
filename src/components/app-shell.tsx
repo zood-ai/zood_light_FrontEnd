@@ -30,6 +30,7 @@ import { useBranchRefresh } from '@/hooks/useBranchRefresh';
 
 import { Plus, Clock, PlusIcon } from 'lucide-react';
 import { SUBSCRIPTION_REMINDER_NAV_KEY } from '@/config/PayDialog';
+import PayDialog from '@/config/PayDialog';
 interface WelcomeMessageProps {
   name: string;
 }
@@ -37,7 +38,6 @@ interface WelcomeMessageProps {
 const branchesService = createCrudService<any>('manage/branches');
 const BottomNavBar = lazy(() => import('./BottomNavBar'));
 const FastAddActions = lazy(() => import('./FastAddActions'));
-const PayDialog = lazy(() => import('@/config/PayDialog'));
 
 export const WelcomeMessage: React.FC<WelcomeMessageProps> = ({ name }) => {
   const { t } = useTranslation();
@@ -73,6 +73,19 @@ const AppShell = () => {
   const isPosRoute =
     location.pathname.includes('/zood-dashboard/individual-invoices/add') ||
     location.pathname.includes('/zood-dashboard/individual-invoices/edit/');
+
+  const getReminderText = (endAt?: string) => {
+    if (!endAt) return '';
+    const distance = new Date(endAt).getTime() - Date.now();
+    if (distance <= 0) return 'انتهى الاشتراك';
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    if (days >= 16) return '';
+    return days > 0
+      ? `متبقي ${days} يوم على انتهاء الاشتراك`
+      : `متبقي ${hours} ساعة على انتهاء الاشتراك`;
+  };
 
   useLayoutEffect(() => {
     const storedLang = window.localStorage.i18nextLng;
@@ -194,11 +207,7 @@ const AppShell = () => {
         return;
       }
 
-      setTopReminderText(
-        days > 0
-          ? `متبقي ${days} يوم على انتهاء الاشتراك`
-          : `متبقي ${hours} ساعة على انتهاء الاشتراك`
-      );
+      setTopReminderText(getReminderText(endAt));
       setShowTopReminder(true);
       setOpenRenewDialog(false);
     };
@@ -372,15 +381,19 @@ const AppShell = () => {
           onClose={() => setFastActionBtn(false)}
         />
       </Suspense>
-      <Suspense fallback={null}>
-        {openRenewDialog && (
-          <PayDialog
-            showRemaining={true}
-            ignoreSnooze={true}
-            onClose={() => setOpenRenewDialog(false)}
-          />
-        )}
-      </Suspense>
+      {openRenewDialog && (
+        <PayDialog
+          showRemaining={true}
+          ignoreSnooze={true}
+          endAt={whoAmI?.business?.end_at}
+          onSnooze={() => {
+            setTopReminderText(getReminderText(whoAmI?.business?.end_at));
+            setShowTopReminder(true);
+            setOpenRenewDialog(false);
+          }}
+          onClose={() => setOpenRenewDialog(false)}
+        />
+      )}
     </>
   );
 };

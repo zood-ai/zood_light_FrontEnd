@@ -222,6 +222,10 @@ export const titleMapping = (path) => {
       en: 'Items Report',
       ar: 'تقرير الأصناف',
     },
+    '/zood-dashboard/payment-report': {
+      en: 'Payments Report',
+      ar: 'تقرير المدفوعات',
+    },
     '/logout': {
       en: 'Logout',
       ar: 'تسجيل الخروج',

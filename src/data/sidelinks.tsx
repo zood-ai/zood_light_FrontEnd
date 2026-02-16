@@ -184,6 +184,13 @@ export const sidelinks: SideLink[] = [
         href: '/zood-dashboard/items-report',
         icon: <IconBoxSeam {...navIconProps} />,
       },
+      {
+        title: 'تقرير المدفوعات', // Payments Report
+        i18n: 'PAYMENT_REPORT',
+        label: '',
+        href: '/zood-dashboard/payment-report',
+        icon: <IconCreditCardFilled {...navIconProps} />,
+      },
     ],
   },
   {

@@ -110,6 +110,11 @@ const ItemsReport = lazy(() =>
     default: module.ItemsReport,
   }))
 );
+const PaymentsReport = lazy(() =>
+  import('./pages/Reports/PaymentsReport/index.ts').then((module) => ({
+    default: module.PaymentsReport,
+  }))
+);
 
 const PurchaseInvoices = lazy(() =>
   import('./pages/PurchaseInvoices/PurchaseInvoices.tsx').then((module) => ({
@@ -746,6 +751,18 @@ const router = createBrowserRouter(
                 requiredPermissions={rolePermissions[Roles.REPORTS]}
               >
                 <ItemsReport />
+              </ProtectedRoute>
+            </React.Suspense>
+          ),
+        },
+        {
+          path: 'payment-report',
+          element: (
+            <React.Suspense fallback={<div>Loading My Plan...</div>}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.REPORTS]}
+              >
+                <PaymentsReport />
               </ProtectedRoute>
             </React.Suspense>
           ),
