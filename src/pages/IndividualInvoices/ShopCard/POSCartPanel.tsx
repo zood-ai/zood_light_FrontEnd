@@ -39,11 +39,12 @@ export default function POSCartPanel() {
             >
               <div className="mb-2 flex items-center justify-between gap-2">
                 <p className="line-clamp-1 text-sm font-medium">{item.name}</p>
+                <Counter item={item} />
                 <span className="text-sm font-semibold">
-                  SR {(Number(item.price || 0) * Number(item.qty || 0)).toFixed(2)}
+                  SR{' '}
+                  {(Number(item.price || 0) * Number(item.qty || 0)).toFixed(2)}
                 </span>
               </div>
-              <Counter item={item} />
             </div>
           ))
         )}
