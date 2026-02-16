@@ -40,8 +40,20 @@ axiosInstance.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${token}`;
     }
 
+    const reportRoutes = [
+      '/zood-dashboard/normal-report',
+      '/zood-dashboard/b2b-report',
+      '/zood-dashboard/purchase-report',
+      '/zood-dashboard/items-report',
+      '/zood-dashboard/payment-report',
+    ];
+    const currentPath = window.location.pathname;
+    const isReportRoute = reportRoutes.includes(currentPath);
+    const isAllBranchesReports =
+      Cookies.get('report_all_branches') === '1' && isReportRoute;
+
     const branchId = Cookies.get('branch_id');
-    if (branchId && config.method === 'get') {
+    if (!isAllBranchesReports && branchId && config.method === 'get') {
       config.params = { ...config.params, 'filter[branch_id]': branchId };
     }
 
@@ -63,9 +75,13 @@ axiosInstance.interceptors.response.use(
     setGlobalLoading(false);
 
     if (error.response?.status === 401) {
-      showToast('Error', 'Unauthorized access - token expired.');
+      if (!window.location.pathname.includes('/zood-login')) {
+        showToast('Error', 'Unauthorized access - token expired.');
+      }
       removeToken();
-      window.location.href = '/';
+      if (!window.location.pathname.includes('/zood-login')) {
+        window.location.href = '/zood-login';
+      }
     } else {
       // remove all 404 errors like (customer not found - rout not found - etc)
       if (error.response?.status !== 404) {

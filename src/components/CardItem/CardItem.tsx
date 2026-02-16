@@ -8,6 +8,29 @@ import imagePLaceHolder from '/icons/imagePLaceHolder.svg';
 export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
   const dispatch = useDispatch();
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
+  const productImage = useMemo(() => {
+    const directImage = item?.image;
+    const imagesField = item?.images;
+
+    const candidate =
+      directImage ||
+      (Array.isArray(imagesField)
+        ? imagesField[0]
+        : typeof imagesField === 'string'
+          ? imagesField
+          : imagesField?.url || imagesField?.path);
+
+    const normalized = String(candidate || '').trim();
+    if (
+      !normalized ||
+      normalized.toLowerCase() === 'null' ||
+      normalized.toLowerCase() === 'undefined'
+    ) {
+      return imagePLaceHolder;
+    }
+
+    return normalized;
+  }, [item?.image, item?.images]);
 
   const cardItem = useMemo(
     () => cardItemValue.find((i: { id: string }) => i.id === item.id),
@@ -71,7 +94,7 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
         className="flex cursor-pointer flex-col rounded border border-gray-200 border-solid bg-white w-full"
         onClick={incrementCount}
       >
-        <div className="relative flex w-full self-stretch justify-center rounded border border-gray-200 border-solid bg-white px-5 pt-4">
+        <div className="relative flex w-full self-stretch justify-center rounded border border-gray-200 border-solid bg-white px-4 pt-1">
           {qty > 0 && (
             <div className="absolute right-2 top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-main px-1.5 text-xs font-bold text-white">
               {qty}
@@ -85,9 +108,13 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
           </div>
           <img
             loading="lazy"
-            src={item?.image || imagePLaceHolder}
+            src={productImage}
             className="object-contain aspect-[1.07] w-[165px]"
             alt={item?.name}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = imagePLaceHolder;
+            }}
           />
         </div>
       </div>

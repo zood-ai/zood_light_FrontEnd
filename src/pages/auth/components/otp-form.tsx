@@ -29,8 +29,13 @@ export function OtpForm({ className, ...props }: any) {
     defaultValues: { otp: '' },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
+    try {
+      // Placeholder for API integration.
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

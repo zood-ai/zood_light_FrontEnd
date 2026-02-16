@@ -51,10 +51,10 @@ export default function SignIn2() {
     },
   });
 
-  // useEffect(() => {
-  //   const token = getToken();
-  //   if (token) navigate('/zood-dashboard');
-  // }, []);
+  useEffect(() => {
+    const token = getToken();
+    if (token) navigate('/zood-dashboard', { replace: true });
+  }, [navigate]);
 
   // Handle SignUp
   const handleSignUp = () => {
@@ -76,17 +76,9 @@ export default function SignIn2() {
     }
 
     if (x.errorCode === 401) {
-
-
       setExpired(true);
     }
-
-    const timeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-    return () => {
-      clearTimeout(timeout);
-    };
+    setIsLoading(false);
   };
   const [showPassword, setShowPassword] = React.useState(false);
 

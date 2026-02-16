@@ -27,9 +27,14 @@ interface Tax {
   rate: number;
   amount: number;
 }
+export interface OrderTag {
+  id: string;
+}
+
 interface OrderSchemaState {
   type: number;
   branch_id: string;
+  tags: OrderTag[];
   discount_amount: number;
   taxes: Tax[];
   customer_id: string;
@@ -51,6 +56,7 @@ interface OrderSchemaState {
 const initialState: OrderSchemaState = {
   type: 0,
   branch_id: '',
+  tags: [],
   discount_amount: 0,
   customer_id: '',
   discount_type: 2,

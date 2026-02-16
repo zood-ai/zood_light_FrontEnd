@@ -11,6 +11,14 @@ import { useToast } from '@/components/custom/useToastComp';
 import { useTranslation } from 'react-i18next';
 import { Buffer } from 'buffer';
 import QRCode from 'qrcode';
+import {
+  AlertDialogComp,
+  AlertDialogContentComp,
+  AlertDialogDescriptionComp,
+  AlertDialogTitleComp,
+} from '@/components/ui/alert-dialog2';
+import XIcons from '@/components/Icons/XIcons';
+import { Input } from '@/components/ui/input';
 
 type PaymentRow = {
   payment_method_id: string;
@@ -33,6 +41,21 @@ export default function POSPaymentPanel() {
   const [autoPrintTriggered, setAutoPrintTriggered] = useState(false);
   const [showWhatsappDialog, setShowWhatsappDialog] = useState(false);
   const [whatsappPhoneInput, setWhatsappPhoneInput] = useState('');
+  const [isCreateCustomerOpen, setIsCreateCustomerOpen] = useState(false);
+  const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
+  const [isEditCustomerMode, setIsEditCustomerMode] = useState(false);
+  const [editingCustomerId, setEditingCustomerId] = useState('');
+  const [extraCustomers, setExtraCustomers] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [newCustomerForm, setNewCustomerForm] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    email: '',
+    tax_registration_number: '',
+    vat_registration_number: '',
+  });
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const allSettings = useSelector((state: any) => state.allSettings?.value);
@@ -50,9 +73,24 @@ export default function POSPaymentPanel() {
   const { data: taxesData } = createCrudService<any>('manage/taxes').useGetAll();
 
   const selectedCustomerId = orderSchema?.customer_id;
+  const customerOptions = useMemo(() => {
+    const apiCustomers = Array.isArray(customersData?.data)
+      ? customersData.data.map((customer: any) => ({
+          value: String(customer?.id ?? ''),
+          label: customer?.name ?? '',
+        }))
+      : [];
+    return apiCustomers.filter(
+      (o: { value: string; label: string }) => o.value && o.label
+    );
+  }, [customersData?.data]);
+  const allCustomerOptions = useMemo(
+    () => [...customerOptions, ...extraCustomers],
+    [customerOptions, extraCustomers]
+  );
   const selectedCustomerName =
-    customersData?.data?.find((customer: any) => customer.id === selectedCustomerId)
-      ?.name || '';
+    allCustomerOptions.find((customer: any) => customer.value === selectedCustomerId)
+      ?.label || '';
 
   const baseAmount = useMemo(
     () =>
@@ -994,6 +1032,128 @@ export default function POSPaymentPanel() {
   const paidDecimal = formattedPaid[1];
   const canSubmitWhatsapp = isValidWhatsappPhone(whatsappPhoneInput);
 
+  const saveCustomer = async () => {
+    const payloadName = newCustomerForm.name.trim();
+    if (!payloadName) {
+      showToast({
+        description: t('CUSTOMER_NAME'),
+        duration: 1800,
+        variant: 'destructive',
+      });
+      return;
+    }
+    try {
+      setIsCreatingCustomer(true);
+      const response = isEditCustomerMode && editingCustomerId
+        ? await axiosInstance.put(`/manage/customers/${editingCustomerId}`, {
+            name: payloadName,
+            phone: newCustomerForm.phone.trim(),
+            email: newCustomerForm.email.trim(),
+            notes: '-',
+            tax_registration_number: newCustomerForm.tax_registration_number.trim(),
+            vat_registration_number: newCustomerForm.vat_registration_number.trim(),
+          })
+        : await axiosInstance.post('/manage/customers', {
+            name: payloadName,
+            phone: newCustomerForm.phone.trim(),
+            email: newCustomerForm.email.trim(),
+            notes: '-',
+            tax_registration_number: newCustomerForm.tax_registration_number.trim(),
+            vat_registration_number: newCustomerForm.vat_registration_number.trim(),
+          });
+      const createdCustomer = response?.data?.data ?? response?.data ?? null;
+      const newCustomerId = createdCustomer?.id
+        ? String(createdCustomer.id)
+        : editingCustomerId;
+      if (!newCustomerId) throw new Error('Invalid customer response');
+
+      if (!isEditCustomerMode && newCustomerForm.address.trim()) {
+        await axiosInstance.post(`/manage/customers/addAddress/${newCustomerId}`, {
+          name: newCustomerForm.address.trim(),
+          description: '-',
+        });
+      }
+      setExtraCustomers((prev) =>
+        prev.some((customer) => customer.value === newCustomerId)
+          ? prev
+          : [...prev, { value: newCustomerId, label: payloadName }]
+      );
+      dispatch(updateField({ field: 'customer_id', value: newCustomerId }));
+      setNewCustomerForm({
+        name: '',
+        phone: '',
+        address: '',
+        email: '',
+        tax_registration_number: '',
+        vat_registration_number: '',
+      });
+      setIsCreateCustomerOpen(false);
+      setIsEditCustomerMode(false);
+      setEditingCustomerId('');
+      showToast({
+        description: t('ADDED_SUCCESSFULLY'),
+        duration: 1600,
+      });
+    } catch {
+      showToast({
+        description: t('GENERAL_ERROR'),
+        duration: 2500,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCreatingCustomer(false);
+    }
+  };
+
+  const openCreateCustomerDialog = () => {
+    (document.activeElement as HTMLElement | null)?.blur?.();
+    setIsEditCustomerMode(false);
+    setEditingCustomerId('');
+    setNewCustomerForm({
+      name: '',
+      phone: '',
+      address: '',
+      email: '',
+      tax_registration_number: '',
+      vat_registration_number: '',
+    });
+    setTimeout(() => setIsCreateCustomerOpen(true), 0);
+  };
+
+  const openEditCustomerDialog = () => {
+    const selectedId = selectedCustomerId ? String(selectedCustomerId) : '';
+    if (!selectedId) {
+      showToast({
+        description: t('NO_CUSTOMER_SELECTED_EDIT'),
+        duration: 2000,
+        variant: 'destructive',
+      });
+      return;
+    }
+    const selectedCustomer = Array.isArray(customersData?.data)
+      ? customersData.data.find((customer: any) => String(customer?.id) === selectedId)
+      : null;
+    (document.activeElement as HTMLElement | null)?.blur?.();
+    setIsEditCustomerMode(true);
+    setEditingCustomerId(selectedId);
+    setNewCustomerForm({
+      name: selectedCustomer?.name || selectedCustomerName || '',
+      phone: selectedCustomer?.phone || '',
+      address:
+        selectedCustomer?.address?.name ||
+        selectedCustomer?.addresses?.[0]?.name ||
+        '',
+      email: selectedCustomer?.email || '',
+      tax_registration_number: selectedCustomer?.tax_registration_number || '',
+      vat_registration_number: selectedCustomer?.vat_registration_number || '',
+    });
+    setTimeout(() => setIsCreateCustomerOpen(true), 0);
+  };
+
+  const clearCustomerSelection = () => {
+    dispatch(updateField({ field: 'customer_id', value: '' }));
+  };
+
   if (completedOrderData) {
     return (
       <div
@@ -1101,10 +1261,7 @@ export default function POSPaymentPanel() {
         <div className="rounded-xl border border-mainBorder bg-background p-3">
           <div className="mb-3">
             <CustomSearchInbox
-              options={customersData?.data?.map((customer: any) => ({
-                value: customer.id,
-                label: customer.name,
-              }))}
+              options={allCustomerOptions}
               placeholder="CUSTOMER_NAME"
               onValueChange={(value: string) =>
                 dispatch(updateField({ field: 'customer_id', value }))
@@ -1112,6 +1269,24 @@ export default function POSPaymentPanel() {
               className="h-[40px] w-full"
               value={selectedCustomerId}
               directValue={selectedCustomerName}
+              footerActions={[
+                {
+                  id: 'create-customer',
+                  label: t('ADD_CUSTOMER'),
+                  onClick: openCreateCustomerDialog,
+                },
+                {
+                  id: 'edit-customer',
+                  label: t('EDIT_CURRENT_CUSTOMER'),
+                  onClick: openEditCustomerDialog,
+                  disabled: !selectedCustomerId,
+                },
+                {
+                  id: 'clear-customer',
+                  label: t('CLEAR_CUSTOMER'),
+                  onClick: clearCustomerSelection,
+                },
+              ]}
             />
           </div>
           <div className="space-y-2">
@@ -1207,6 +1382,130 @@ export default function POSPaymentPanel() {
           </div>
         </div>
       </div>
+      <AlertDialogComp
+        open={isCreateCustomerOpen}
+        onOpenChange={(open) => {
+          setIsCreateCustomerOpen(open);
+          if (!open) {
+            setIsEditCustomerMode(false);
+            setEditingCustomerId('');
+          }
+        }}
+      >
+        <AlertDialogContentComp className="right-0 w-fit border-0 bg-transparent p-0 shadow-none">
+          <button
+            onClick={() => setIsCreateCustomerOpen(false)}
+            className="absolute -left-5 top-6 z-[100] flex h-10 w-10 items-center justify-center rounded-full border border-mainBorder bg-white text-mainText shadow-sm transition hover:scale-105"
+          >
+            <XIcons />
+          </button>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative h-[100dvh] w-[390px] max-w-[calc(100vw-48px)] overflow-y-auto bg-white"
+          >
+            <AlertDialogTitleComp className="sr-only">
+              {isEditCustomerMode ? t('UPDATE_CUSTOMER') : t('ADD_CUSTOMER')}
+            </AlertDialogTitleComp>
+            <AlertDialogDescriptionComp className="sr-only">
+              {t('CUSTOMER_NAME')}
+            </AlertDialogDescriptionComp>
+            <div className="border-b border-mainBorder px-7 py-6 text-center text-3xl font-semibold text-mainText">
+              {isEditCustomerMode ? t('UPDATE_CUSTOMER') : t('ADD_CUSTOMER')}
+            </div>
+            <div className="space-y-4 px-7 py-6">
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('CUSTOMER_NAME')}
+                </label>
+                <Input
+                  value={newCustomerForm.name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewCustomerForm((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('PHONE')}
+                </label>
+                <Input
+                  value={newCustomerForm.phone}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewCustomerForm((prev) => ({ ...prev, phone: e.target.value }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('ADDRESS')}
+                </label>
+                <Input
+                  value={newCustomerForm.address}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewCustomerForm((prev) => ({ ...prev, address: e.target.value }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('EMAIL')}
+                </label>
+                <Input
+                  value={newCustomerForm.email}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewCustomerForm((prev) => ({ ...prev, email: e.target.value }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('TAX_REGISTRATION_NUMBER')}
+                </label>
+                <Input
+                  value={newCustomerForm.tax_registration_number}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewCustomerForm((prev) => ({
+                      ...prev,
+                      tax_registration_number: e.target.value,
+                    }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
+                </label>
+                <Input
+                  value={newCustomerForm.vat_registration_number}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewCustomerForm((prev) => ({
+                      ...prev,
+                      vat_registration_number: e.target.value,
+                    }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+            </div>
+            <div className="sticky bottom-0 border-t border-mainBorder bg-white px-7 py-4">
+              <Button
+                type="button"
+                loading={isCreatingCustomer}
+                disabled={isCreatingCustomer}
+                onClick={saveCustomer}
+                className="h-11 w-full rounded-md text-base font-semibold"
+              >
+                {isEditCustomerMode ? t('UPDATE_CUSTOMER') : t('ADD_CUSTOMER')}
+              </Button>
+            </div>
+          </div>
+        </AlertDialogContentComp>
+      </AlertDialogComp>
     </div>
   );
 }

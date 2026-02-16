@@ -29,6 +29,7 @@ export default function CustomSearchInbox({
   triggerClassName = '',
   hideChevron = false,
   disabled = false,
+  footerActions = [],
 }: any) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState(''); // For managing search input
@@ -43,10 +44,19 @@ export default function CustomSearchInbox({
   }, [search, options]);
 
   const handleSelect = (currentValue) => {
-    if (currentValue !== value) {
-      onValueChange(currentValue); // Update value if it's different
-    }
     setOpen(false); // Close the popover
+    // Close popover first to avoid aria-hidden/focus conflicts with dialogs.
+    if (currentValue !== value) {
+      window.setTimeout(() => onValueChange(currentValue), 0);
+    }
+  };
+
+  const handleFooterAction = (action: any) => {
+    if (action?.disabled || disabled) return;
+    setOpen(false);
+    if (typeof action?.onClick === 'function') {
+      window.setTimeout(() => action.onClick(), 0);
+    }
   };
   // if (options?.length === 0 || !options) return null;
 
@@ -107,6 +117,32 @@ export default function CustomSearchInbox({
               )}
             </CommandList>
           </Command>
+          {Array.isArray(footerActions) && footerActions.length > 0 && (
+            <div
+              className="grid gap-1 border-t border-mainBorder bg-background p-2"
+              style={{
+                gridTemplateColumns: `repeat(${Math.min(
+                  Math.max(footerActions.length, 1),
+                  4
+                )}, minmax(0, 1fr))`,
+              }}
+            >
+              {footerActions.map((action: any) => (
+                <button
+                  key={action?.id || action?.label}
+                  type="button"
+                  disabled={Boolean(action?.disabled) || disabled}
+                  onClick={() => handleFooterAction(action)}
+                  className={cn(
+                    'h-8 rounded-md border border-mainBorder bg-background px-2 text-xs text-mainText hover:bg-mainBg disabled:cursor-not-allowed disabled:opacity-50',
+                    action?.className || ''
+                  )}
+                >
+                  {action?.label}
+                </button>
+              ))}
+            </div>
+          )}
         </PopoverContent>
       </Popover>
     </div>

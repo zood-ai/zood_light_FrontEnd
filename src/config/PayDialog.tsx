@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import axiosInstance from '@/api/interceptors';
 import Cookies from 'js-cookie';
 
-let times = 1;
 export const SUBSCRIPTION_REMINDER_NAV_KEY = 'subscription_reminder_in_nav';
 const SUBSCRIPTION_REMINDER_SNOOZE_MS = 12 * 60 * 60 * 1000;
 
@@ -15,6 +14,8 @@ interface PayDialogProps {
   showAllTime?: boolean;
   ignoreSnooze?: boolean;
   onClose?: () => void;
+  onSnooze?: () => void;
+  endAt?: string;
 }
 
 const PayDialog = ({
@@ -22,9 +23,11 @@ const PayDialog = ({
   showAllTime = false,
   ignoreSnooze = false,
   onClose,
+  onSnooze,
+  endAt,
 }: PayDialogProps) => {
   const [open, setOpen] = useState(true);
-  const [endDate, setEndDate] = useState('');
+  const [endDate, setEndDate] = useState(endAt || '');
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [copiedField, setCopiedField] = useState<'account' | 'iban' | null>(null);
   const [isSnoozed, setIsSnoozed] = useState(false);
@@ -78,7 +81,11 @@ const PayDialog = ({
   }, []);
 
   useEffect(() => {
-    if (!showRemaining) return;
+    if (endAt) setEndDate(endAt);
+  }, [endAt]);
+
+  useEffect(() => {
+    if (!showRemaining || endAt) return;
     const fun = async () => {
       const {
         data: whoAmI,
@@ -94,7 +101,7 @@ const PayDialog = ({
       }
     };
     fun();
-  }, []);
+  }, [showRemaining, endAt]);
 
   useEffect(() => {
     if (!endDate) return;
@@ -138,14 +145,8 @@ const PayDialog = ({
     };
   }, [endDate]);
 
-  useEffect(() => {
-    times = 1;
-  }, [showAllTime]);
-
   if (showRemaining && !timeLeft) return;
   if (showRemaining && isSnoozed && !ignoreSnooze) return;
-  if (!showAllTime && times !== 1) return;
-  times++;
 
   return (
     <Dialog
@@ -304,6 +305,7 @@ const PayDialog = ({
                   })
                 );
                 setIsSnoozed(true);
+                onSnooze?.();
                 setOpen(false);
                 onClose?.();
               }}

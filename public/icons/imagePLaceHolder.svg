@@ -1,5 +1,31 @@
+<svg width="120" height="96" viewBox="0 0 120 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="16" y1="10" x2="104" y2="86" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#EDF2F7"/>
+    </linearGradient>
+    <linearGradient id="hill1" x1="24" y1="70" x2="70" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D8E7F8"/>
+      <stop offset="1" stop-color="#C4D9F3"/>
+    </linearGradient>
+    <linearGradient id="hill2" x1="56" y1="76" x2="100" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#CBEAD6"/>
+      <stop offset="1" stop-color="#B3DFC3"/>
+    </linearGradient>
+  </defs>
 
-<svg width="79" height="68" viewBox="0 0 79 68" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M59.2514 28.2137C63.9244 28.2137 67.7157 24.4224 67.7157 19.7494C67.7157 15.0765 63.9244 11.2852 59.2514 11.2852C54.5784 11.2852 50.7871 15.0765 50.7871 19.7494C50.7871 24.4224 54.5784 28.2137 59.2514 28.2137Z" fill="#26262F"/>
-<path d="M74.0625 0H4.9375C2.18661 0 0 2.23951 0 4.9904V62.7239C0 65.4748 2.18661 67.7143 4.9375 67.7143H74.0625C76.8134 67.7143 79 65.4748 79 62.7239V4.9904C79 2.23951 76.8134 0 74.0625 0ZM55.8819 34.8623C55.3529 34.2451 54.5417 33.769 53.6248 33.769C52.7254 33.769 52.0906 34.1922 51.3676 34.7741L48.0701 37.5603C47.3824 38.054 46.8357 38.3891 46.0422 38.3891C45.2839 38.3891 44.5962 38.1069 44.1025 37.6661C43.9261 37.5074 43.6087 37.2076 43.3442 36.9431L33.8571 26.6801C33.1518 25.869 32.0938 25.3576 30.9123 25.3576C29.7308 25.3576 28.6375 25.9395 27.9498 26.733L5.64286 53.6424V7.70603C5.8192 6.50692 6.75379 5.64286 7.9529 5.64286H71.0295C72.2462 5.64286 73.2337 6.54219 73.3042 7.75893L73.3571 53.6777L55.8819 34.8623Z" fill="#26262F"/>
+  <rect x="8" y="8" width="104" height="80" rx="14" fill="url(#bg)" stroke="#D6DEE8" stroke-width="2"/>
+  <rect x="20" y="20" width="80" height="10" rx="5" fill="#E7ECF3"/>
+  <circle cx="89" cy="47" r="8" fill="#F8DDB5"/>
+
+  <path d="M22 74C22 74 33 59 42 59C50 59 57 66 63 70C67 73 72 74 72 74H22Z" fill="url(#hill1)"/>
+  <path d="M50 74C50 74 62 54 73 54C83 54 90 65 98 74H50Z" fill="url(#hill2)"/>
+
+  <g opacity="0.95">
+    <rect x="48" y="36" width="24" height="18" rx="3" fill="#FFFFFF" stroke="#C5D3E3" stroke-width="1.6"/>
+    <path d="M48 42L60 47L72 42" stroke="#B1C2D7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M60 47V54" stroke="#B1C2D7" stroke-width="1.6" stroke-linecap="round"/>
+  </g>
+
+  <rect x="20" y="74" width="80" height="4" rx="2" fill="#DAE3EE"/>
 </svg>

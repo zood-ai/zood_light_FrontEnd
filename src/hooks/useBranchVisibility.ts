@@ -10,6 +10,8 @@ const BRANCH_VISIBLE_ROUTES = [
   '/zood-dashboard/normal-report', // Reports
   '/zood-dashboard/b2b-report',
   '/zood-dashboard/purchase-report',
+  '/zood-dashboard/items-report',
+  '/zood-dashboard/payment-report',
 ];
 
 // Pages where branch selection is required (user cannot access without selecting branch)
@@ -19,6 +21,8 @@ const BRANCH_REQUIRED_ROUTES = [
   '/zood-dashboard/corporate-invoices', // Corporate
   '/zood-dashboard/purchase-invoices', // Purchase
   '/zood-dashboard/price-quote', // Price Quote
+  '/zood-dashboard/items-report',
+  '/zood-dashboard/payment-report',
 ];
 
 export const useBranchVisibility = () => {

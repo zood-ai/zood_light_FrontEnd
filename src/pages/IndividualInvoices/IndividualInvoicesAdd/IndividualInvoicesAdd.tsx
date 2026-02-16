@@ -18,6 +18,43 @@ import { Button } from '@/components/custom/button';
 import { useNavigate } from 'react-router-dom';
 import createCrudService from '@/api/services/crudService';
 import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
+import {
+  AlertDialogComp,
+  AlertDialogContentComp,
+  AlertDialogDescriptionComp,
+  AlertDialogTitleComp,
+} from '@/components/ui/alert-dialog2';
+import XIcons from '@/components/Icons/XIcons';
+
+const CATEGORY_COLOR_PALETTE = [
+  { bg: '#BDEAE8', border: '#A2D7D4', activeBg: '#A6D9D5', activeBorder: '#86C6C1' },
+  { bg: '#EBCBA3', border: '#DCB686', activeBg: '#E1BC8E', activeBorder: '#D3A96F' },
+  { bg: '#BFE3C1', border: '#A1CFA3', activeBg: '#A9D3AC', activeBorder: '#89BE8D' },
+  { bg: '#E9A7A7', border: '#D98F8F', activeBg: '#DE9595', activeBorder: '#CC7474' },
+  { bg: '#C7D7F0', border: '#ACBFDF', activeBg: '#B4C8E8', activeBorder: '#96ADD5' },
+  { bg: '#E4C8EB', border: '#D3ADDC', activeBg: '#D9B6E2', activeBorder: '#C595D2' },
+] as const;
+
+const CATEGORY_TEXT_COLOR = '#1D2735';
+
+const getCategoryStyle = (category: string) => {
+  if (category === 'all') {
+    return {
+      bg: '#EEF2F7',
+      border: '#D4DDE8',
+      activeBg: '#DDE7F4',
+      activeBorder: '#B8C8DE',
+    };
+  }
+
+  const normalized = category.trim().toLowerCase();
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i += 1) {
+    hash = (hash * 31 + normalized.charCodeAt(i)) >>> 0;
+  }
+
+  return CATEGORY_COLOR_PALETTE[hash % CATEGORY_COLOR_PALETTE.length];
+};
 
 export const IndividualInvoicesAdd: React.FC<
   IndividualInvoicesAddProps
@@ -39,9 +76,49 @@ export const IndividualInvoicesAdd: React.FC<
   const [hasMore, setHasMore] = useState(true);
   const [isScanningBarcode, setIsScanningBarcode] = useState(false);
   const [parkedOrders, setParkedOrders] = useState<any[]>([]);
+  const [isCreateTagOpen, setIsCreateTagOpen] = useState(false);
+  const [newTagName, setNewTagName] = useState('');
+  const [isCreatingTag, setIsCreatingTag] = useState(false);
+  const [isEditTagMode, setIsEditTagMode] = useState(false);
+  const [editingTagId, setEditingTagId] = useState('');
+  const [isCreateCustomerOpen, setIsCreateCustomerOpen] = useState(false);
+  const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
+  const [isEditCustomerMode, setIsEditCustomerMode] = useState(false);
+  const [editingCustomerId, setEditingCustomerId] = useState('');
+  const [newCustomerForm, setNewCustomerForm] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    email: '',
+    tax_registration_number: '',
+    vat_registration_number: '',
+  });
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
-  const selectedCustomerId = useSelector((state: any) => state.orderSchema.customer_id);
+  const orderSchema = useSelector((state: any) => state.orderSchema);
+  const selectedCustomerId = orderSchema?.customer_id;
   const { showToast } = useToast();
+
+  const { data: tagsData } = createCrudService<any>(
+    'manage/tags?perPage=100'
+  ).useGetAll();
+  const [extraTags, setExtraTags] = useState<{ value: string; label: string }[]>([]);
+
+  const tagOptions = useMemo(() => {
+    const list = tagsData?.data;
+    if (!Array.isArray(list)) return [];
+    return list
+      .map((item: any) => ({
+        value: String(item?.id ?? ''),
+        label: item?.name ?? item?.name_ar ?? item?.name_en ?? String(item?.id ?? ''),
+      }))
+      .filter((o: { value: string }) => o.value);
+  }, [tagsData?.data]);
+
+  const allTagOptions = useMemo(
+    () => [...tagOptions, ...extraTags],
+    [tagOptions, extraTags]
+  );
+
   const scannerBufferRef = useRef('');
   const scannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -58,7 +135,7 @@ export const IndividualInvoicesAdd: React.FC<
   const MAX_CONCURRENT_SCANS = 3;
   const SCAN_REQUEST_TIMEOUT_MS = 3000;
   const NOT_FOUND_CACHE_TTL_MS = 15000;
-  const store = useStore();
+  const store = useStore<any>();
   const navigate = useNavigate();
   const cartItemsCount = cardItemValue.reduce(
     (acc: number, item: any) => acc + Number(item?.qty || 0),
@@ -115,9 +192,30 @@ export const IndividualInvoicesAdd: React.FC<
   const { data: customersData } = createCrudService<any>(
     'manage/customers?perPage=100000'
   ).useGetAll();
+  const [extraCustomers, setExtraCustomers] = useState<
+    { value: string; label: string }[]
+  >([]);
+
+  const customerOptions = useMemo(() => {
+    const apiCustomers = Array.isArray(customersData?.data)
+      ? customersData.data.map((customer: any) => ({
+          value: String(customer?.id ?? ''),
+          label: customer?.name ?? '',
+        }))
+      : [];
+    return apiCustomers.filter(
+      (o: { value: string; label: string }) => o.value && o.label
+    );
+  }, [customersData?.data]);
+
+  const allCustomerOptions = useMemo(
+    () => [...customerOptions, ...extraCustomers],
+    [customerOptions, extraCustomers]
+  );
+
   const selectedCustomerName =
-    customersData?.data?.find((customer: any) => customer.id === selectedCustomerId)
-      ?.name || '';
+    allCustomerOptions.find((customer: any) => customer.value === selectedCustomerId)
+      ?.label || '';
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['individual-invoices-products', debouncedSearch, page],
@@ -407,6 +505,7 @@ export const IndividualInvoicesAdd: React.FC<
     createdAt: new Date().toISOString(),
     customer_id: selectedCustomerId || '',
     customer_name: selectedCustomerName || '',
+    tags: Array.isArray(orderSchema?.tags) ? [...orderSchema.tags] : [],
     discount_amount: Number(discountAmount || 0),
     items,
     total: items.reduce(
@@ -456,10 +555,247 @@ export const IndividualInvoicesAdd: React.FC<
         value: parkedOrder.customer_id || '',
       })
     );
+    if (Array.isArray(parkedOrder.tags) && parkedOrder.tags.length > 0) {
+      dispatch(updateField({ field: 'tags', value: parkedOrder.tags }));
+    }
     setDiscountAmount(Number(parkedOrder.discount_amount || 0));
   };
   const deleteParkedOrder = (parkedId: string) => {
     setParkedOrders((prev) => prev.filter((order) => order.id !== parkedId));
+  };
+
+  const saveTag = async () => {
+    const trimmed = newTagName.trim();
+    if (!trimmed) {
+      showToast({
+        description: t('ENTER_NEW_ORDER_TAG_NAME'),
+        duration: 1800,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setIsCreatingTag(true);
+      const sampleTag = Array.isArray(tagsData?.data) ? tagsData.data[0] : null;
+      const payload: Record<string, any> = {};
+      if (sampleTag && 'title' in sampleTag) {
+        payload.title = trimmed;
+      } else {
+        payload.name = trimmed;
+      }
+      if (sampleTag && 'type' in sampleTag && sampleTag?.type) {
+        payload.type = sampleTag.type;
+      }
+      if (sampleTag && 'name_ar' in sampleTag) payload.name_ar = trimmed;
+      if (sampleTag && 'name_en' in sampleTag) payload.name_en = trimmed;
+
+      const response = isEditTagMode && editingTagId
+        ? await axiosInstance.put(`manage/tags/${editingTagId}`, payload)
+        : await axiosInstance.post('manage/tags', payload);
+      const created = response?.data?.data ?? response?.data ?? null;
+      const newId = created?.id ? String(created.id) : editingTagId;
+      const newLabel =
+        created?.name ?? created?.name_ar ?? created?.name_en ?? trimmed;
+      if (!newId) throw new Error('Invalid tag response');
+
+      setExtraTags((prev) =>
+        prev.some((tag) => tag.value === newId)
+          ? prev.map((tag) => (tag.value === newId ? { ...tag, label: newLabel } : tag))
+          : [...prev, { value: newId, label: newLabel }]
+      );
+      dispatch(
+        updateField({
+          field: 'tags',
+          value: [{ id: newId }],
+        })
+      );
+      setNewTagName('');
+      setIsCreateTagOpen(false);
+      setIsEditTagMode(false);
+      setEditingTagId('');
+      showToast({
+        description: t('ADDED_SUCCESSFULLY'),
+        duration: 1600,
+      });
+    } catch (error: any) {
+      const apiErrors = error?.response?.data?.errors;
+      const firstErrorMessage =
+        (Array.isArray(apiErrors) && apiErrors[0]?.message) ||
+        (apiErrors && typeof apiErrors === 'object'
+          ? Object.values(apiErrors)?.[0]
+          : null);
+      const normalizedMessage = Array.isArray(firstErrorMessage)
+        ? firstErrorMessage[0]
+        : firstErrorMessage;
+
+      showToast({
+        description:
+          String(normalizedMessage || error?.response?.data?.message || t('GENERAL_ERROR')),
+        duration: 3500,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCreatingTag(false);
+    }
+  };
+
+  const saveCustomer = async () => {
+    const payloadName = newCustomerForm.name.trim();
+    if (!payloadName) {
+      showToast({
+        description: t('CUSTOMER_NAME'),
+        duration: 1800,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setIsCreatingCustomer(true);
+      const response = isEditCustomerMode && editingCustomerId
+        ? await axiosInstance.put(`/manage/customers/${editingCustomerId}`, {
+            name: payloadName,
+            phone: newCustomerForm.phone.trim(),
+            email: newCustomerForm.email.trim(),
+            notes: '-',
+            tax_registration_number: newCustomerForm.tax_registration_number.trim(),
+            vat_registration_number: newCustomerForm.vat_registration_number.trim(),
+          })
+        : await axiosInstance.post('/manage/customers', {
+        name: payloadName,
+        phone: newCustomerForm.phone.trim(),
+        email: newCustomerForm.email.trim(),
+        notes: '-',
+        tax_registration_number: newCustomerForm.tax_registration_number.trim(),
+        vat_registration_number: newCustomerForm.vat_registration_number.trim(),
+      });
+      const createdCustomer = response?.data?.data ?? response?.data ?? null;
+      const newCustomerId = createdCustomer?.id
+        ? String(createdCustomer.id)
+        : editingCustomerId;
+      if (!newCustomerId) throw new Error('Invalid customer response');
+
+      if (!isEditCustomerMode && newCustomerForm.address.trim()) {
+        await axiosInstance.post(`/manage/customers/addAddress/${newCustomerId}`, {
+          name: newCustomerForm.address.trim(),
+          description: '-',
+        });
+      }
+
+      setExtraCustomers((prev) =>
+        prev.some((customer) => customer.value === newCustomerId)
+          ? prev
+          : [...prev, { value: newCustomerId, label: payloadName }]
+      );
+      dispatch(updateField({ field: 'customer_id', value: newCustomerId }));
+      setNewCustomerForm({
+        name: '',
+        phone: '',
+        address: '',
+        email: '',
+        tax_registration_number: '',
+        vat_registration_number: '',
+      });
+      setIsCreateCustomerOpen(false);
+      setIsEditCustomerMode(false);
+      setEditingCustomerId('');
+      showToast({
+        description: t('ADDED_SUCCESSFULLY'),
+        duration: 1600,
+      });
+    } catch {
+      showToast({
+        description: t('GENERAL_ERROR'),
+        duration: 2500,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCreatingCustomer(false);
+    }
+  };
+
+  const openCreateCustomerDialog = () => {
+    (document.activeElement as HTMLElement | null)?.blur?.();
+    setIsEditCustomerMode(false);
+    setEditingCustomerId('');
+    setNewCustomerForm({
+      name: '',
+      phone: '',
+      address: '',
+      email: '',
+      tax_registration_number: '',
+      vat_registration_number: '',
+    });
+    setTimeout(() => setIsCreateCustomerOpen(true), 0);
+  };
+
+  const openEditCustomerDialog = () => {
+    const selectedId = selectedCustomerId ? String(selectedCustomerId) : '';
+    if (!selectedId) {
+      showToast({
+        description: t('NO_CUSTOMER_SELECTED_EDIT'),
+        duration: 2000,
+        variant: 'destructive',
+      });
+      return;
+    }
+    const selectedCustomer = Array.isArray(customersData?.data)
+      ? customersData.data.find((customer: any) => String(customer?.id) === selectedId)
+      : null;
+    (document.activeElement as HTMLElement | null)?.blur?.();
+    setIsEditCustomerMode(true);
+    setEditingCustomerId(selectedId);
+    setNewCustomerForm({
+      name: selectedCustomer?.name || selectedCustomerName || '',
+      phone: selectedCustomer?.phone || '',
+      address:
+        selectedCustomer?.address?.name ||
+        selectedCustomer?.addresses?.[0]?.name ||
+        '',
+      email: selectedCustomer?.email || '',
+      tax_registration_number: selectedCustomer?.tax_registration_number || '',
+      vat_registration_number: selectedCustomer?.vat_registration_number || '',
+    });
+    setTimeout(() => setIsCreateCustomerOpen(true), 0);
+  };
+
+  const clearCustomerSelection = () => {
+    dispatch(updateField({ field: 'customer_id', value: '' }));
+  };
+
+  const openCreateTagDialog = () => {
+    (document.activeElement as HTMLElement | null)?.blur?.();
+    setIsEditTagMode(false);
+    setEditingTagId('');
+    setNewTagName('');
+    setTimeout(() => setIsCreateTagOpen(true), 0);
+  };
+
+  const openEditTagDialog = () => {
+    const selectedId =
+      Array.isArray(orderSchema?.tags) && orderSchema.tags[0]
+        ? String(orderSchema.tags[0].id)
+        : '';
+    if (!selectedId) {
+      showToast({
+        description: t('NO_ORDER_TAG_SELECTED_EDIT'),
+        duration: 2000,
+        variant: 'destructive',
+      });
+      return;
+    }
+    const selectedLabel =
+      allTagOptions.find((tag) => tag.value === selectedId)?.label || '';
+    (document.activeElement as HTMLElement | null)?.blur?.();
+    setIsEditTagMode(true);
+    setEditingTagId(selectedId);
+    setNewTagName(selectedLabel);
+    setTimeout(() => setIsCreateTagOpen(true), 0);
+  };
+
+  const clearTagSelection = () => {
+    dispatch(updateField({ field: 'tags', value: [] }));
   };
 
   useEffect(() => {
@@ -572,8 +908,8 @@ export const IndividualInvoicesAdd: React.FC<
 
   return (
     <>
-      <div className="sticky top-2 z-20 mb-5 rounded-xl border border-mainBorder bg-background/95 p-4 shadow-sm backdrop-blur">
-        <div className="mb-3 grid grid-cols-1 gap-2 md:grid-cols-12">
+      <div className="sticky top-0 z-20 mb-0 rounded-xl border border-mainBorder bg-background/95 p-3 shadow-sm backdrop-blur">
+        <div className="mb-1 grid grid-cols-1 gap-2 md:grid-cols-12">
           <Button
             type="button"
             variant="outline"
@@ -613,27 +949,78 @@ export const IndividualInvoicesAdd: React.FC<
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         <div className="xl:col-span-4 xl:self-start">
           <div className="flex flex-col overflow-hidden rounded-xl border border-mainBorder bg-background p-3 xl:sticky xl:top-[150px] xl:h-[calc(100dvh-170px)]">
-            <div className="mb-3 flex h-10 items-center justify-between">
-              <div className="w-full max-w-[240px]">
+            <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-12">
+              <div className="sm:col-span-6">
                 <CustomSearchInbox
-                  options={customersData?.data?.map((customer: any) => ({
-                    value: customer.id,
-                    label: customer.name,
-                  }))}
+                  options={allCustomerOptions}
                   placeholder="CUSTOMER_NAME"
                   onValueChange={(value: string) =>
                     dispatch(updateField({ field: 'customer_id', value }))
                   }
                   className="h-full w-full"
-                  triggerClassName="h-full min-h-10 justify-start border-0 bg-transparent px-0 text-mainText shadow-none hover:bg-transparent"
-                  hideChevron
+                  triggerClassName="h-full min-h-10 justify-between rounded-md border border-mainBorder bg-mainBg px-3 text-mainText shadow-sm hover:bg-mainBg"
                   value={selectedCustomerId}
                   directValue={selectedCustomerName}
+                  footerActions={[
+                    {
+                      id: 'create-customer',
+                      label: t('ADD_CUSTOMER'),
+                      onClick: openCreateCustomerDialog,
+                    },
+                    {
+                      id: 'edit-customer',
+                      label: t('EDIT_CURRENT_CUSTOMER'),
+                      onClick: openEditCustomerDialog,
+                      disabled: !selectedCustomerId,
+                    },
+                    {
+                      id: 'clear-customer',
+                      label: t('CLEAR_CUSTOMER'),
+                      onClick: clearCustomerSelection,
+                    },
+                  ]}
                 />
               </div>
-              <span className="flex h-full items-center text-xs leading-none text-secText">
-                {cartItemsCount} {t('QUANTITY')}
-              </span>
+              <div className="sm:col-span-6">
+                <CustomSearchInbox
+                  options={allTagOptions}
+                  placeholder="ORDER_TAGS"
+                  onValueChange={(value: string) =>
+                    dispatch(
+                      updateField({
+                        field: 'tags',
+                        value: value ? [{ id: value }] : [],
+                      })
+                    )
+                  }
+                  className="h-full w-full"
+                  triggerClassName="h-full min-h-10 justify-between rounded-md border border-mainBorder bg-mainBg px-3 text-mainText shadow-sm hover:bg-mainBg"
+                  value={
+                    Array.isArray(orderSchema?.tags) && orderSchema.tags[0]
+                      ? orderSchema.tags[0].id
+                      : ''
+                  }
+                  footerActions={[
+                    {
+                      id: 'create-tag',
+                      label: t('CREATE_NEW_ORDER_TAG'),
+                      onClick: openCreateTagDialog,
+                    },
+                    {
+                      id: 'edit-tag',
+                      label: t('EDIT_CURRENT_ORDER_TAG'),
+                      onClick: openEditTagDialog,
+                      disabled:
+                        !Array.isArray(orderSchema?.tags) || !orderSchema.tags[0]?.id,
+                    },
+                    {
+                      id: 'clear-tag',
+                      label: t('CLEAR_ORDER_TAG'),
+                      onClick: clearTagSelection,
+                    },
+                  ]}
+                />
+              </div>
             </div>
             <div className="mb-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
               <Button
@@ -739,6 +1126,10 @@ export const IndividualInvoicesAdd: React.FC<
             </div>
             <div className="mt-3 rounded-md bg-[#F7F8FC] px-3 py-2 text-sm">
               <div className="flex items-center justify-between py-1">
+                <span className="text-secText">{t('QUANTITY')}</span>
+                <span className="font-medium">{cartItemsCount}</span>
+              </div>
+              <div className="flex items-center justify-between py-1">
                 <span className="text-secText">{t('SUBTOTAL')}</span>
                 <span className="font-medium">
                   SR {subtotalAmount.toFixed(2)}
@@ -787,22 +1178,38 @@ export const IndividualInvoicesAdd: React.FC<
           </div>
         </div>
         <div className="xl:col-span-8 xl:h-[calc(100dvh-170px)] xl:overflow-y-auto xl:pe-1">
-          <div className="sticky top-0 z-20 mb-3 grid grid-cols-1 gap-2 bg-mainBg pb-2 xl:h-10 xl:grid-cols-12 xl:items-stretch xl:gap-3">
+          <div className="sticky top-0 z-20 mb-0 grid grid-cols-1 gap-2 bg-mainBg pb-0 xl:h-10 xl:grid-cols-12 xl:items-stretch xl:gap-3">
             <div className="flex h-10 flex-nowrap items-center gap-2 overflow-x-auto xl:col-span-6 xl:h-full xl:whitespace-nowrap">
-              {categoryOptions.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  onClick={() => setActiveCategory(category)}
-                  className={`inline-flex h-10 shrink-0 items-center rounded-md px-3 text-sm xl:h-full ${
-                    activeCategory === category
-                      ? 'bg-main text-white'
-                      : 'border border-mainBorder bg-background text-mainText'
-                  }`}
-                >
-                  {category === 'all' ? t('ALL') : category}
-                </button>
-              ))}
+              {categoryOptions.map((category) => {
+                const isActive = activeCategory === category;
+                const categoryStyle = getCategoryStyle(category);
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setActiveCategory(category)}
+                    style={{
+                      backgroundColor: isActive
+                        ? categoryStyle.activeBg
+                        : categoryStyle.bg,
+                      borderColor: isActive
+                        ? categoryStyle.activeBorder
+                        : categoryStyle.border,
+                      color: CATEGORY_TEXT_COLOR,
+                    }}
+                    className={`inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md border px-3 text-sm transition-all duration-150 xl:h-full ${
+                      isActive
+                        ? 'border-2 font-semibold shadow-[inset_0_0_0_1px_rgba(255,255,255,0.45)]'
+                        : 'hover:brightness-95'
+                    }`}
+                  >
+                    {isActive && (
+                      <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-mainText" />
+                    )}
+                    {category === 'all' ? t('ALL') : category}
+                  </button>
+                );
+              })}
             </div>
             <div className="xl:col-span-6 xl:h-full">
               <Input
@@ -851,6 +1258,189 @@ export const IndividualInvoicesAdd: React.FC<
         closeDialog={() => setIsOpen(false)}
         getStatusMessage={undefined}
       />
+      <AlertDialogComp open={isCreateTagOpen} onOpenChange={setIsCreateTagOpen}>
+        <AlertDialogContentComp className="right-0 w-fit border-0 bg-transparent p-0 shadow-none">
+          <button
+            onClick={() => setIsCreateTagOpen(false)}
+            className="absolute -left-5 top-6 z-[100] flex h-10 w-10 items-center justify-center rounded-full border border-mainBorder bg-white text-mainText shadow-sm transition hover:scale-105"
+          >
+            <XIcons />
+          </button>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative h-[100dvh] w-[390px] max-w-[calc(100vw-48px)] overflow-y-auto bg-white"
+          >
+            <AlertDialogTitleComp className="sr-only">
+              {t('CREATE_NEW_ORDER_TAG')}
+            </AlertDialogTitleComp>
+            <AlertDialogDescriptionComp className="sr-only">
+              {t('ENTER_NEW_ORDER_TAG_NAME')}
+            </AlertDialogDescriptionComp>
+            <div className="border-b border-mainBorder px-7 py-6 text-center">
+              <div className="text-3xl font-semibold text-mainText">
+                {isEditTagMode ? t('EDIT') : t('CREATE_NEW_ORDER_TAG')}
+              </div>
+              <div className="mt-2 text-sm text-secText">
+                {t('ENTER_NEW_ORDER_TAG_NAME')}
+              </div>
+            </div>
+            <div className="px-7 py-6">
+              <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                {t('ORDER_TAGS')}
+              </label>
+              <Input
+                value={newTagName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setNewTagName(e.target.value)
+                }
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveTag();
+                  }
+                }}
+                placeholder={t('ENTER_NEW_ORDER_TAG_NAME')}
+                className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+              />
+            </div>
+            <div className="sticky bottom-0 border-t border-mainBorder bg-white px-7 py-4">
+              <Button
+                type="button"
+                loading={isCreatingTag}
+                disabled={isCreatingTag}
+                onClick={saveTag}
+                className="h-11 w-full rounded-md text-base font-semibold"
+              >
+                {isEditTagMode ? t('EDIT') : t('CREATE_NEW_ORDER_TAG')}
+              </Button>
+            </div>
+          </div>
+        </AlertDialogContentComp>
+      </AlertDialogComp>
+      <AlertDialogComp
+        open={isCreateCustomerOpen}
+        onOpenChange={(open) => {
+          setIsCreateCustomerOpen(open);
+          if (!open) {
+            setIsEditCustomerMode(false);
+            setEditingCustomerId('');
+          }
+        }}
+      >
+        <AlertDialogContentComp className="right-0 w-fit border-0 bg-transparent p-0 shadow-none">
+          <button
+            onClick={() => setIsCreateCustomerOpen(false)}
+            className="absolute -left-5 top-6 z-[100] flex h-10 w-10 items-center justify-center rounded-full border border-mainBorder bg-white text-mainText shadow-sm transition hover:scale-105"
+          >
+            <XIcons />
+          </button>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative h-[100dvh] w-[390px] max-w-[calc(100vw-48px)] overflow-y-auto bg-white"
+          >
+            <AlertDialogTitleComp className="sr-only">
+              {isEditCustomerMode ? t('UPDATE_CUSTOMER') : t('ADD_CUSTOMER')}
+            </AlertDialogTitleComp>
+            <AlertDialogDescriptionComp className="sr-only">
+              {t('CUSTOMER_NAME')}
+            </AlertDialogDescriptionComp>
+            <div className="border-b border-mainBorder px-7 py-6 text-center text-3xl font-semibold text-mainText">
+              {isEditCustomerMode ? t('UPDATE_CUSTOMER') : t('ADD_CUSTOMER')}
+            </div>
+            <div className="space-y-4 px-7 py-6">
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('CUSTOMER_NAME')}
+                </label>
+                <Input
+                  value={newCustomerForm.name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewCustomerForm((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('PHONE')}
+                </label>
+                <Input
+                  value={newCustomerForm.phone}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewCustomerForm((prev) => ({ ...prev, phone: e.target.value }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('ADDRESS')}
+                </label>
+                <Input
+                  value={newCustomerForm.address}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewCustomerForm((prev) => ({ ...prev, address: e.target.value }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('EMAIL')}
+                </label>
+                <Input
+                  value={newCustomerForm.email}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewCustomerForm((prev) => ({ ...prev, email: e.target.value }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('TAX_REGISTRATION_NUMBER')}
+                </label>
+                <Input
+                  value={newCustomerForm.tax_registration_number}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewCustomerForm((prev) => ({
+                      ...prev,
+                      tax_registration_number: e.target.value,
+                    }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
+                </label>
+                <Input
+                  value={newCustomerForm.vat_registration_number}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewCustomerForm((prev) => ({
+                      ...prev,
+                      vat_registration_number: e.target.value,
+                    }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+            </div>
+            <div className="sticky bottom-0 border-t border-mainBorder bg-white px-7 py-4">
+              <Button
+                type="button"
+                loading={isCreatingCustomer}
+                disabled={isCreatingCustomer}
+                onClick={saveCustomer}
+                className="h-11 w-full rounded-md text-base font-semibold"
+              >
+                {isEditCustomerMode ? t('UPDATE_CUSTOMER') : t('ADD_CUSTOMER')}
+              </Button>
+            </div>
+          </div>
+        </AlertDialogContentComp>
+      </AlertDialogComp>
     </>
   );
 };
