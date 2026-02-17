@@ -5,6 +5,34 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setCardItem } from '@/store/slices/cardItems';
 import imagePLaceHolder from '/icons/imagePLaceHolder.svg';
 
+const CATEGORY_COLOR_PALETTE = [
+  { bg: '#BDEAE8', border: '#A2D7D4', activeBg: '#A6D9D5', activeBorder: '#86C6C1' },
+  { bg: '#EBCBA3', border: '#DCB686', activeBg: '#E1BC8E', activeBorder: '#D3A96F' },
+  { bg: '#BFE3C1', border: '#A1CFA3', activeBg: '#A9D3AC', activeBorder: '#89BE8D' },
+  { bg: '#E9A7A7', border: '#D98F8F', activeBg: '#DE9595', activeBorder: '#CC7474' },
+  { bg: '#C7D7F0', border: '#ACBFDF', activeBg: '#B4C8E8', activeBorder: '#96ADD5' },
+  { bg: '#E4C8EB', border: '#D3ADDC', activeBg: '#D9B6E2', activeBorder: '#C595D2' },
+] as const;
+
+const getCategoryStyle = (category: string) => {
+  if (!category || category === 'all') {
+    return {
+      bg: '#EEF2F7',
+      border: '#D4DDE8',
+      activeBg: '#DDE7F4',
+      activeBorder: '#B8C8DE',
+    };
+  }
+
+  const normalized = category.trim().toLowerCase();
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i += 1) {
+    hash = (hash * 31 + normalized.charCodeAt(i)) >>> 0;
+  }
+
+  return CATEGORY_COLOR_PALETTE[hash % CATEGORY_COLOR_PALETTE.length];
+};
+
 export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
   const dispatch = useDispatch();
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
@@ -88,34 +116,50 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
     });
   }, [item, updateCardItem]);
 
+  const categoryStyle = useMemo(() => {
+    const categoryName =
+      item?.category?.name ||
+      item?.category_name ||
+      item?.category?.name_en ||
+      '';
+    return getCategoryStyle(categoryName);
+  }, [item]);
+
   return (
-    <div className="flex w-full flex-col rounded-none">
+    <div className="h-full w-full">
       <div
-        className="flex cursor-pointer flex-col rounded border border-gray-200 border-solid bg-white w-full"
+        className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-mainBorder bg-white transition-all duration-150 hover:border-main/50 hover:shadow-md active:scale-95 active:shadow-none"
+        style={{ borderBottomColor: categoryStyle.activeBorder, borderBottomWidth: '4px' }}
         onClick={incrementCount}
       >
-        <div className="relative flex w-full self-stretch justify-center rounded border border-gray-200 border-solid bg-white px-4 pt-1">
-          {qty > 0 && (
-            <div className="absolute right-2 top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-main px-1.5 text-xs font-bold text-white">
-              {qty}
-            </div>
-          )}
-          <div className="absolute bottom-2 left-2 right-2 rounded-md bg-white/90 px-2 py-1 text-center backdrop-blur-[1px]">
-            <div className="truncate text-xs font-semibold text-foreground">
-              {item?.name}
-            </div>
-            <div className="text-xs font-bold text-main">SR {item?.price}</div>
+        {qty > 0 && (
+          <div className="absolute right-2 top-2 z-10 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-main px-1.5 text-xs font-bold text-white shadow-sm ring-2 ring-white">
+            {qty}
           </div>
+        )}
+        
+        <div className="flex aspect-[4/3] w-full items-center justify-center bg-gray-100 p-4">
           <img
             loading="lazy"
             src={productImage}
-            className="object-contain aspect-[1.07] w-[165px]"
+            className="object-contain aspect-[1.07] w-[156px]"
             alt={item?.name}
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = imagePLaceHolder;
             }}
           />
+        </div>
+
+        <div className="flex flex-col border-t border-mainBorder bg-white px-2 py-2 text-center">
+          <div className="mb-1 flex h-8 w-full items-center justify-center">
+            <div className="line-clamp-2 text-xs font-medium leading-tight text-mainText" title={item?.name}>
+              {item?.name}
+            </div>
+          </div>
+          <div className="text-xs font-bold text-main">
+            SR {Number(item?.price || 0).toFixed(2)}
+          </div>
         </div>
       </div>
     </div>

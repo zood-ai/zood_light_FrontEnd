@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import createCrudService from '@/api/services/crudService';
 import { useDispatch, useSelector } from 'react-redux';
 import { addPayment, resetOrder, updateField } from '@/store/slices/orderSchema';
@@ -19,6 +19,8 @@ import {
 } from '@/components/ui/alert-dialog2';
 import XIcons from '@/components/Icons/XIcons';
 import { Input } from '@/components/ui/input';
+import { Plus, Pencil, X, HelpCircle, LogOut, Trash2 } from 'lucide-react';
+import SH_LOGO from '@/assets/SH_LOGO.svg';
 
 type PaymentRow = {
   payment_method_id: string;
@@ -34,6 +36,7 @@ export default function POSPaymentPanel() {
   const [activePaymentMethodId, setActivePaymentMethodId] = useState('');
   const [draftValue, setDraftValue] = useState('0');
   const [payments, setPayments] = useState<PaymentRow[]>([]);
+  const [lastSuccessItems, setLastSuccessItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [completedOrderData, setCompletedOrderData] = useState<any>(null);
   const [printQrDataUrl, setPrintQrDataUrl] = useState('');
@@ -183,9 +186,15 @@ export default function POSPaymentPanel() {
     if (activePaymentMethodId) return;
     const firstMethod = paymentMethodsData?.data?.[0];
     if (!firstMethod) return;
-    setActivePaymentMethodId(firstMethod.id);
-    setDraftValue('0');
-  }, [activePaymentMethodId, paymentMethodsData?.data]);
+
+    if (totals.total > 0 || cardItemValue.length === 0) {
+      setActivePaymentMethodId(firstMethod.id);
+      const initialAmount = totals.total;
+      setDraftValue(String(initialAmount));
+      // Removed auto-add to payments list to avoid confusion
+      setPayments([]);
+    }
+  }, [activePaymentMethodId, paymentMethodsData?.data, totals.total, cardItemValue.length]);
 
   useEffect(() => {
     let cancelled = false;
@@ -197,8 +206,16 @@ export default function POSPaymentPanel() {
         return;
       }
 
-      const businessDate =
-        completedOrderData?.business_date || new Date().toISOString();
+      let invoiceIsoDate = new Date().toISOString();
+      try {
+        const rawDate = completedOrderData?.business_date;
+        if (rawDate) {
+          invoiceIsoDate = new Date(rawDate).toISOString();
+        }
+      } catch (e) {
+        console.error('Invalid date format in completedOrderData', e);
+      }
+      
       const currentPaid = round2(
         payments.reduce((acc, item) => acc + Number(item.amount || 0), 0)
       );
@@ -218,7 +235,6 @@ export default function POSPaymentPanel() {
           allSettings?.WhoAmI?.business?.tax_registration_number ||
           ''
       );
-      const invoiceIsoDate = new Date(businessDate).toISOString();
       const zatcaTlvBase64 = encodeZatcaPhase1(
         sellerName,
         vatNumber,
@@ -336,8 +352,26 @@ export default function POSPaymentPanel() {
 
   const appendDigit = (digit: string) => {
     if (!activePaymentMethodId) return;
-    const base = draftValue === '0' ? '' : draftValue;
-    const next = digit === '.' ? (base.includes('.') ? base : `${base}.`) : `${base}${digit}`;
+
+    // Calculate total paid by OTHER methods to find what the "Auto/Default" amount would be
+    const totalPaidOthers = payments
+      .filter((p) => p.payment_method_id !== activePaymentMethodId)
+      .reduce((acc, p) => acc + Number(p.amount || 0), 0);
+      
+    const remainingExpected = Math.max(0, totals.total - totalPaidOthers);
+    
+    // If current value matches the expected remaining amount (auto-filled value), overwrite it.
+    // Use small epsilon for float comparison.
+    const isAutoFilledValue = Math.abs(Number(draftValue) - remainingExpected) < 0.01;
+
+    let next;
+    if (isAutoFilledValue && digit !== '.') {
+      next = digit;
+    } else {
+      const base = draftValue === '0' ? '' : draftValue;
+      next = digit === '.' ? (base.includes('.') ? base : `${base}.`) : `${base}${digit}`;
+    }
+
     const normalized = next || '0';
     setDraftValue(normalized);
     upsertActivePayment(Number(normalized));
@@ -360,7 +394,28 @@ export default function POSPaymentPanel() {
   };
 
   const submitOrder = async () => {
-    if (remaining > 0) {
+    // Check if we need to auto-apply the draft amount as a payment
+    let finalPayments = [...payments];
+    const draftAmount = Number(draftValue || 0);
+    const currentPaid = finalPayments.reduce((acc, p) => acc + Number(p.amount || 0), 0);
+    const currentRemaining = round2(totals.total - currentPaid);
+
+    // If there is a remaining amount and the draft input essentially covers it, auto-add it.
+    if (currentRemaining > 0 && Math.abs(currentRemaining - draftAmount) < 0.1 && activePaymentMethodId) {
+        const method = paymentMethodsData?.data?.find((m: any) => m.id === activePaymentMethodId);
+        if (method) {
+             finalPayments.push({
+                 payment_method_id: method.id,
+                 name: method.name,
+                 amount: draftAmount
+             });
+        }
+    }
+
+    const finalTotalPaid = finalPayments.reduce((acc, p) => acc + Number(p.amount || 0), 0);
+    const finalRemaining = round2(totals.total - finalTotalPaid);
+
+    if (finalRemaining > 0) {
       showToast({
         description: t('REMAINING_AMOUNT'),
         duration: 2500,
@@ -369,6 +424,24 @@ export default function POSPaymentPanel() {
       return;
     }
 
+    // Construct the payload with the updated payments
+    const paymentsPayload = finalPayments
+      .filter((item) => Number(item.amount || 0) > 0)
+      .map((item) => ({
+      payment_method_id: item.payment_method_id,
+      amount: Number(item.amount || 0),
+      tendered: 180,
+      tips: 0,
+      added_at: new Date().toISOString(),
+      business_date: new Date().toISOString(),
+      meta: { external_additional_payment_info: 'pos' },
+    }));
+
+    const finalOrderSchema = {
+        ...orderSchema,
+        payments: paymentsPayload
+    };
+
     try {
       setLoading(true);
       let createdOrderResponse: any = null;
@@ -376,7 +449,7 @@ export default function POSPaymentPanel() {
 
       for (let attempt = 0; attempt < 2; attempt += 1) {
         try {
-          createdOrderResponse = await axiosInstance.post('orders', orderSchema);
+          createdOrderResponse = await axiosInstance.post('orders', finalOrderSchema);
           lastError = null;
           break;
         } catch (error) {
@@ -407,12 +480,12 @@ export default function POSPaymentPanel() {
               createdOrderPayload?.total_price ?? totals.total ?? 0
             ),
             discount: Number(
-              createdOrderPayload?.discount_amount ?? orderSchema?.discount_amount ?? 0
+              createdOrderPayload?.discount_amount ?? finalOrderSchema?.discount_amount ?? 0
             ),
             tax: Number(
               createdOrderPayload?.total_taxes ?? totals.tax ?? 0
             ),
-            payments: payments.map((payment) => ({
+            payments: finalPayments.map((payment) => ({
               name: payment.name,
               amount: Number(payment.amount || 0),
             })),
@@ -428,8 +501,13 @@ export default function POSPaymentPanel() {
           description: t('ADDED_SUCCESSFULLY'),
           duration: 1600,
         });
+        // Save items locally for receipt display before clearing
+        setLastSuccessItems([...cardItemValue]);
+        
         // Show success/payment-complete screen immediately for better UX.
         setCompletedOrderData(createdOrderPayload);
+        // Sync local payments state just in case needed for UI before unmount
+        setPayments(finalPayments);
       }
 
       // Hydrate full order details in background without blocking UI.
@@ -471,8 +549,8 @@ export default function POSPaymentPanel() {
     return /^9665\d{8}$/.test(normalized);
   };
 
-  const escapeHtml = (value: string) =>
-    value
+  const escapeHtml = (value: any) =>
+    String(value || '')
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
@@ -510,7 +588,7 @@ export default function POSPaymentPanel() {
     const paidValue = Number(totalPaid || 0).toFixed(2);
     const changeValue = Number(change || 0).toFixed(2);
 
-    const fallbackItems = cardItemValue.map((item: any) => ({
+    const fallbackItems = (lastSuccessItems.length > 0 ? lastSuccessItems : cardItemValue).map((item: any) => ({
       name: item?.name || '-',
       quantity: Number(item?.qty || 0),
       unit_price: Number(item?.price || 0),
@@ -535,10 +613,10 @@ export default function POSPaymentPanel() {
               '-'
           )
         );
-        const qty = Number(item?.quantity ?? item?.qty ?? 0);
-        const unitPrice = Number(item?.unit_price ?? item?.price ?? 0);
+        const qty = Number(item?.quantity ?? item?.qty ?? item?.pivot?.quantity ?? 0);
+        const unitPrice = Number(item?.unit_price ?? item?.price ?? item?.pivot?.price ?? item?.pivot?.unit_price ?? 0);
         const lineTotal = Number(
-          item?.total_price ?? qty * unitPrice
+          item?.total_price ?? item?.pivot?.total_price ?? qty * unitPrice
         ).toFixed(2);
         return `
           <div class="item-row">
@@ -585,13 +663,35 @@ export default function POSPaymentPanel() {
         allSettings?.WhoAmI?.business?.tax_registration_number ||
         ''
     );
+    const invoiceHeader = String(
+      allSettings?.settings?.data?.receipt_header ||
+        settingsData?.data?.receipt_header ||
+        allSettings?.settings?.data?.invoice_header ||
+        settingsData?.data?.invoice_header ||
+        allSettings?.settings?.data?.header_text ||
+        settingsData?.data?.header_text ||
+        allSettings?.settings?.data?.description ||
+        settingsData?.data?.description ||
+        ''
+    );
+    const invoiceFooter = String(
+      allSettings?.settings?.data?.receipt_footer ||
+        settingsData?.data?.receipt_footer ||
+        allSettings?.settings?.data?.invoice_footer ||
+        settingsData?.data?.invoice_footer ||
+        allSettings?.settings?.data?.footer_text ||
+        settingsData?.data?.footer_text ||
+        allSettings?.settings?.data?.terms_and_conditions ||
+        settingsData?.data?.terms_and_conditions ||
+        ''
+    );
     const backendQr = String(completedOrderData?.qrcode || '').trim();
     const qrCodeDataUrl =
       printQrDataUrl ||
       (backendQr.startsWith('data:image/') ? backendQr : '');
 
     const labels = {
-      title: isArabic ? 'إيصال بيع' : 'SALE RECEIPT',
+      title: isArabic ? 'فاتورة ضريبية مبسطة' : 'Simplified Tax Invoice',
       subtitle: isArabic ? 'شكرا لشرائك' : 'Thank you for your purchase',
       invoice: isArabic ? 'رقم الفاتورة' : 'Invoice',
       date: isArabic ? 'التاريخ' : 'Date',
@@ -653,6 +753,7 @@ export default function POSPaymentPanel() {
               gap: 12px;
               font-size: 12px;
               margin: 6px 0;
+              padding: 2px 0;
             }
             .divider {
               margin: 10px 0;
@@ -741,6 +842,13 @@ export default function POSPaymentPanel() {
             <div class="line"><span>${labels.date}</span><span>${new Date(businessDate).toLocaleString()}</span></div>
             <div class="line"><span>${labels.customer}</span><span>${escapeHtml(String(customerName))}</span></div>
             <div class="line"><span>${labels.vatNumber}</span><span>${escapeHtml(String(vatNumber || '-'))}</span></div>
+            ${
+              invoiceHeader
+                ? `<div class="sub" style="margin: 8px 0; text-align: center; white-space: pre-wrap;">${escapeHtml(
+                    invoiceHeader
+                  )}</div>`
+                : ''
+            }
 
             <hr class="divider" />
             <div class="section-title">${labels.items}</div>
@@ -768,6 +876,13 @@ export default function POSPaymentPanel() {
             }
 
             <hr class="divider" />
+            ${
+              invoiceFooter
+                ? `<div class="sub" style="margin: 8px 0; text-align: center; white-space: pre-wrap;">${escapeHtml(
+                    invoiceFooter
+                  )}</div><hr class="divider" />`
+                : ''
+            }
             <div class="footer">${labels.footer}</div>
           </div>
         </body>
@@ -921,7 +1036,34 @@ export default function POSPaymentPanel() {
         allSettings?.settings?.data?.business_address ||
         ''
     );
-    const fallbackItems = cardItemValue.map((item: any) => ({
+    const vatNumber = String(
+      allSettings?.settings?.data?.business_tax_number ||
+        allSettings?.WhoAmI?.business?.tax_registration_number ||
+        ''
+    );
+    const invoiceHeader = String(
+      allSettings?.settings?.data?.receipt_header ||
+        settingsData?.data?.receipt_header ||
+        allSettings?.settings?.data?.invoice_header ||
+        settingsData?.data?.invoice_header ||
+        allSettings?.settings?.data?.header_text ||
+        settingsData?.data?.header_text ||
+        allSettings?.settings?.data?.description ||
+        settingsData?.data?.description ||
+        ''
+    );
+    const invoiceFooter = String(
+      allSettings?.settings?.data?.receipt_footer ||
+        settingsData?.data?.receipt_footer ||
+        allSettings?.settings?.data?.invoice_footer ||
+        settingsData?.data?.invoice_footer ||
+        allSettings?.settings?.data?.footer_text ||
+        settingsData?.data?.footer_text ||
+        allSettings?.settings?.data?.terms_and_conditions ||
+        settingsData?.data?.terms_and_conditions ||
+        ''
+    );
+    const fallbackItems = (lastSuccessItems.length > 0 ? lastSuccessItems : cardItemValue).map((item: any) => ({
       name: item?.name || '-',
       quantity: Number(item?.qty || 0),
       unit_price: Number(item?.price || 0),
@@ -944,10 +1086,10 @@ export default function POSPaymentPanel() {
               '-'
           )
         );
-        const qty = Number(item?.quantity ?? item?.qty ?? 0);
-        const unitPrice = Number(item?.unit_price ?? item?.price ?? 0);
+        const qty = Number(item?.quantity ?? item?.qty ?? item?.pivot?.quantity ?? 0);
+        const unitPrice = Number(item?.unit_price ?? item?.price ?? item?.pivot?.price ?? item?.pivot?.unit_price ?? 0);
         const lineTotal = Number(
-          item?.total_price ?? qty * unitPrice
+          item?.total_price ?? item?.pivot?.total_price ?? qty * unitPrice
         ).toFixed(2);
         return `<div class="line"><span>${name} (${qty} x ${unitPrice.toFixed(
           2
@@ -979,7 +1121,7 @@ export default function POSPaymentPanel() {
         <div class="card">
           <div class="center">
             ${logoUrl ? `<img class="logo" src="${escapeHtml(String(logoUrl))}" alt="logo" />` : ''}
-            <h3 style="margin:8px 0 2px">${isArabic ? 'إيصال بيع' : 'Sale Receipt'}</h3>
+            <h3 style="margin:8px 0 2px">${isArabic ? 'فاتورة ضريبية مبسطة' : 'Simplified Tax Invoice'}</h3>
             <div class="muted">${new Date(businessDate).toLocaleString()}</div>
           </div>
           <hr/>
@@ -995,6 +1137,16 @@ export default function POSPaymentPanel() {
           <div class="line"><span>${isArabic ? 'العنوان' : 'Address'}</span><span>${escapeHtml(
             String(companyAddress || '-')
           )}</span></div>
+          <div class="line"><span>${isArabic ? 'الرقم الضريبي' : 'VAT Number'}</span><span>${escapeHtml(
+            String(vatNumber || '-')
+          )}</span></div>
+          ${
+            invoiceHeader
+              ? `<div style="margin: 8px 0; text-align: center; font-size: 12px; color: #64748b; white-space: pre-wrap;">${escapeHtml(
+                  invoiceHeader
+                )}</div>`
+              : ''
+          }
           <div class="line"><span>${isArabic ? 'العميل' : 'Customer'}</span><span>${escapeHtml(
             String(customerName)
           )}</span></div>
@@ -1011,6 +1163,15 @@ export default function POSPaymentPanel() {
               ? `<div class="qr"><img class="qr" src="${printQrDataUrl}" alt="qr" /></div>`
               : ''
           }
+          <hr/>
+          ${
+            invoiceFooter
+              ? `<div style="margin: 8px 0; text-align: center; font-size: 12px; color: #64748b; white-space: pre-wrap;">${escapeHtml(
+                  invoiceFooter
+                )}</div><hr/>`
+              : ''
+          }
+          <div class="center muted">${isArabic ? 'مدعوم بواسطة Zood POS' : 'Powered by Zood POS'}</div>
         </div>
       </body>
       </html>
@@ -1154,6 +1315,85 @@ export default function POSPaymentPanel() {
     dispatch(updateField({ field: 'customer_id', value: '' }));
   };
 
+
+  const startPaymentTour = useCallback(async () => {
+    try {
+      const { driver } = await import('driver.js');
+      await import('driver.js/dist/driver.css');
+
+      const driverObj = driver({
+        showProgress: true,
+        animate: true,
+        nextBtnText: 'التالي',
+        prevBtnText: 'السابق',
+        doneBtnText: 'إنهاء',
+        steps: [
+          {
+            element: '#tour-payment-summary',
+            popover: {
+              title: t('PAYMENT_SUMMARY') || 'ملخص الدفع',
+              description: t('TOUR_PAYMENT_SUMMARY_DESC') || 'هنا يظهر إجمالي المبلغ والمتبقي.',
+              side: 'left',
+              align: 'start',
+            },
+          },
+          {
+            element: '#tour-payment-customer',
+            popover: {
+              title: t('CUSTOMER') || 'العميل',
+              description: t('TOUR_PAYMENT_CUSTOMER_DESC') || 'يمكنك تغيير العميل من هنا إذا لزم الأمر.',
+              side: 'bottom',
+              align: 'start',
+            },
+          },
+          {
+            element: '#tour-payment-methods',
+            popover: {
+              title: t('PAYMENT_METHODS') || 'طرق الدفع',
+              description: t('TOUR_PAYMENT_METHODS_DESC') || 'اختر طريقة الدفع المناسبة (نقد، شبكة، إلخ).',
+              side: 'top',
+              align: 'start',
+            },
+          },
+          {
+            element: '#tour-payment-numpad',
+            popover: {
+              title: t('NUMPAD') || 'لوحة الأرقام',
+              description: t('TOUR_PAYMENT_NUMPAD_DESC') || 'استخدم لوحة الأرقام لإدخال المبلغ المدفوع.',
+              side: 'top',
+              align: 'start',
+            },
+          },
+          {
+            element: '#tour-payment-confirm',
+            popover: {
+              title: t('CONFIRM_PAYMENT') || 'إتمام الدفع',
+              description: t('TOUR_PAYMENT_CONFIRM_DESC') || 'اضغط هنا لإتمام عملية الدفع وإصدار الفاتورة.',
+              side: 'top',
+              align: 'start',
+            },
+          },
+        ],
+        onDestroyed: () => {
+          localStorage.setItem('has_seen_pos_payment_tour_v2', 'true');
+        },
+      });
+      driverObj.drive();
+    } catch (error) {
+      console.error('Failed to load tour driver:', error);
+    }
+  }, [t]);
+
+  useEffect(() => {
+    const hasSeenTour = localStorage.getItem('has_seen_pos_payment_tour_v2');
+    if (!hasSeenTour) {
+      const timer = setTimeout(() => {
+        startPaymentTour();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [startPaymentTour]);
+
   if (completedOrderData) {
     return (
       <div
@@ -1182,7 +1422,18 @@ export default function POSPaymentPanel() {
               className="h-14 text-lg"
               onClick={handleSendWhatsapp}
             >
-              {t('SEND_RECEIPT')}
+              <div className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 32 32"
+                  className="h-6 w-6"
+                  aria-hidden="true"
+                >
+                  <path fill="#25D366" d="M19.11 17.57c-.3-.15-1.74-.86-2.01-.95-.27-.1-.47-.15-.67.15-.2.3-.77.95-.94 1.14-.17.2-.35.22-.65.07-.3-.15-1.24-.45-2.36-1.43-.87-.78-1.45-1.74-1.62-2.03-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.19-.24-.58-.48-.5-.67-.51h-.57c-.2 0-.52.08-.8.37-.27.3-1.04 1.02-1.04 2.49 0 1.46 1.06 2.88 1.21 3.08.15.2 2.07 3.15 5.02 4.42.7.3 1.25.48 1.67.62.7.22 1.34.2 1.84.12.56-.08 1.74-.71 1.99-1.4.25-.69.25-1.28.17-1.4-.08-.12-.27-.2-.57-.35z" />
+                  <path fill="#25D366" d="M16.02 3.2c-7 0-12.67 5.67-12.67 12.67 0 2.24.58 4.42 1.68 6.34L3.2 28.8l6.76-1.78a12.6 12.6 0 0 0 6.06 1.55h.01c6.99 0 12.66-5.67 12.66-12.67 0-3.39-1.32-6.58-3.72-8.98a12.6 12.6 0 0 0-8.95-3.72zm0 23.2h-.01a10.48 10.48 0 0 1-5.34-1.47l-.38-.23-4.02 1.06 1.08-3.92-.25-.4a10.45 10.45 0 0 1-1.6-5.55c0-5.8 4.72-10.51 10.52-10.51 2.81 0 5.45 1.09 7.43 3.08a10.45 10.45 0 0 1 3.08 7.43c0 5.8-4.72 10.51-10.51 10.51z" />
+                </svg>
+                <span>{t('SEND_WHATSAPP')}</span>
+              </div>
             </Button>
             <Button
               type="button"
@@ -1231,10 +1482,10 @@ export default function POSPaymentPanel() {
                   type="button"
                   onClick={submitWhatsappFromDialog}
                   disabled={!canSubmitWhatsapp}
-                  className={`flex h-[70px] w-[170px] items-center justify-center text-white ${
+                  className={`flex h-[70px] w-[170px] items-center justify-center transition-all ${
                     canSubmitWhatsapp
-                      ? 'bg-[#25D366] hover:bg-[#1fb95a]'
-                      : 'cursor-not-allowed bg-[#B9A8B7]'
+                      ? 'bg-[#25D366] text-white hover:bg-[#1fb95a]'
+                      : 'cursor-not-allowed bg-primary/50 text-white'
                   }`}
                 >
                   <svg
@@ -1255,130 +1506,325 @@ export default function POSPaymentPanel() {
     );
   }
 
+
   return (
-    <div dir={isRtl ? 'rtl' : 'ltr'} className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-      <div className="xl:col-span-5">
-        <div className="rounded-xl border border-mainBorder bg-background p-3">
-          <div className="mb-3">
-            <CustomSearchInbox
-              options={allCustomerOptions}
-              placeholder="CUSTOMER_NAME"
-              onValueChange={(value: string) =>
-                dispatch(updateField({ field: 'customer_id', value }))
-              }
-              className="h-[40px] w-full"
-              value={selectedCustomerId}
-              directValue={selectedCustomerName}
-              footerActions={[
-                {
-                  id: 'create-customer',
-                  label: t('ADD_CUSTOMER'),
-                  onClick: openCreateCustomerDialog,
-                },
-                {
-                  id: 'edit-customer',
-                  label: t('EDIT_CURRENT_CUSTOMER'),
-                  onClick: openEditCustomerDialog,
-                  disabled: !selectedCustomerId,
-                },
-                {
-                  id: 'clear-customer',
-                  label: t('CLEAR_CUSTOMER'),
-                  onClick: clearCustomerSelection,
-                },
-              ]}
-            />
+    <div dir={isRtl ? 'rtl' : 'ltr'} className="fixed inset-0 z-50 flex h-full w-full flex-col overflow-hidden bg-background md:flex-row md:flex-nowrap">
+      {/* Left Panel: Cart Summary (Consistent with POS Main) */}
+      <div className="flex w-full shrink-0 flex-col border-b border-mainBorder bg-background md:h-full md:w-[300px] md:border-b-0 md:border-e lg:w-[340px] xl:w-[380px]">
+        {/* Header */}
+        <div className="flex h-[60px] shrink-0 items-center justify-between border-b border-mainBorder bg-white px-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <img src={SH_LOGO} alt="Logo" className="h-8 w-auto object-contain" />
+            <span className="text-sm font-semibold text-mainText hidden sm:block">
+              {t('CART_ITEMS') || 'Sales Cart'}
+            </span>
+            <span className="rounded-full bg-main/10 px-2 py-0.5 text-xs font-bold text-main">
+              {cardItemValue.length}
+            </span>
           </div>
-          <div className="space-y-2">
-            {paymentMethodsData?.data?.map((method: any) => (
-              <button
-                key={method.id}
-                type="button"
-                onClick={() => selectPaymentMethod(method)}
-                className={`h-12 w-full rounded-md border px-3 text-start ${
-                  activePaymentMethodId === method.id
-                    ? 'border-main bg-main/10'
-                    : 'border-mainBorder bg-background'
-                }`}
-              >
-                {method.name}
-              </button>
-            ))}
-          </div>
-          <div className="mt-3 grid grid-cols-4 gap-2">
-            {['1', '2', '3', '+10', '4', '5', '6', '+20', '7', '8', '9', '+50', '+/-', '0', '.', '⌫'].map(
-              (key) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => {
-                    if (key === '⌫') return backspaceAmount();
-                    if (key === '+10') return addQuickAmount(10);
-                    if (key === '+20') return addQuickAmount(20);
-                    if (key === '+50') return addQuickAmount(50);
-                    if (key === '+/-') return;
-                    appendDigit(key);
-                  }}
-                  className="h-11 rounded-md border border-mainBorder bg-background text-sm"
+        </div>
+
+        <div className="flex flex-1 flex-col overflow-hidden p-2">
+          {/* Cart Items List */}
+          <div className="flex-1 space-y-2 overflow-y-auto">
+            {cardItemValue.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-secText/50">
+                {t('CART_EMPTY')}
+              </div>
+            ) : (
+              cardItemValue.map((item: any) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between rounded-lg border border-mainBorder bg-white p-3 shadow-sm"
                 >
-                  {key}
-                </button>
-              )
+                  <div className="flex-1">
+                    <div className="font-medium text-mainText">{item.name}</div>
+                    <div className="text-xs text-secText">
+                      {item.qty} x {Number(item.price || 0).toFixed(2)}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="font-bold text-mainText">
+                      SR {(Number(item.price || 0) * Number(item.qty || 0)).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              ))
             )}
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2">
+
+          {/* Footer Area: Totals & Back Button */}
+          <div className="mt-auto border-t border-mainBorder p-4 bg-white">
+            {/* Compact Totals */}
+            <div className="mb-4 space-y-1.5 px-1">
+              <div className="flex justify-between text-sm text-gray-500 font-medium">
+                <span>{t('SUBTOTAL')}</span>
+                <span>{totals.subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-gray-500 font-medium">
+                <span>{t('DISCOUNT')}</span>
+                <span>{Number(orderSchema?.discount_amount || 0).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-gray-500 font-medium">
+                <span>{t('TAX')}</span>
+                <span>{totals.tax.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-lg font-bold text-mainText pt-2 border-t border-dashed border-gray-200">
+                <span>{t('TOTAL')}</span>
+                <span>{totals.total.toFixed(2)}</span>
+              </div>
+            </div>
+
             <Button
               variant="outline"
-              className="h-11"
               onClick={() => navigate('/zood-dashboard/individual-invoices/add')}
+              className="w-full h-12 text-base font-semibold text-gray-500 border-gray-200 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300"
             >
+              <LogOut className={`h-5 w-5 me-2 ${isRtl ? '' : 'rotate-180'}`} />
               {t('RETURN')}
-            </Button>
-            <Button className="h-11" onClick={submitOrder} loading={loading}>
-              {t('CONFIRM')}
             </Button>
           </div>
         </div>
       </div>
-      <div className="xl:col-span-7">
-        <div className="rounded-xl border border-mainBorder bg-background p-4">
-          <div className="text-center text-[62px] font-bold leading-none">
-            {totals.total.toFixed(2)}
-          </div>
-          <div className="mt-5 space-y-2">
-            {payments.map((row, index) => (
-              <div
-                key={`${row.payment_method_id}-${index}`}
-                className="flex items-center justify-between rounded-md border border-mainBorder px-3 py-2"
+
+      {/* Right Panel: Payment Controls (Consistent with POS Main Right Area) */}
+      <div className="flex h-full flex-1 flex-col overflow-hidden bg-gray-50/50">
+        {/* Header */}
+        <div className="z-10 flex w-full flex-col border-b border-mainBorder bg-white shadow-sm h-[60px] justify-center">
+          <div className="flex items-center justify-between gap-3 px-4">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold text-mainText">
+                {t('PAYMENT')}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/zood-dashboard/individual-invoices/add')}
+                className="h-8 w-8 text-secText hover:bg-destructive/10 hover:text-destructive"
+                title={t('RETURN')}
               >
-                <span>{row.name}</span>
-                <div className="flex items-center gap-3">
-                  <span>SR {Number(row.amount || 0).toFixed(2)}</span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setPayments((prev) => {
-                        const next = prev.filter((_, i) => i !== index);
-                        return next;
-                      })
-                    }
-                    className="text-destructive"
-                  >
-                    x
-                  </button>
+                <LogOut className={`h-4 w-4 ${isRtl ? 'rotate-180' : ''}`} />
+              </Button>
+              <div className="hidden h-6 w-[1px] bg-gray-200 sm:block" />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={startPaymentTour}
+                className="h-8 w-8 text-secText hover:bg-main/10 hover:text-main"
+                title={t('HELP_TOUR')}
+              >
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Content Area */}
+        <div className="flex-1 overflow-hidden bg-[#F8F9FD] p-6">
+          <div className="mx-auto grid h-full max-w-5xl gap-6 md:grid-cols-12">
+            
+            {/* Right Column (Inputs) - Order 1 in source, Right in RTL */}
+            <div className="flex h-full flex-col gap-4 md:col-span-8">
+              {/* 1. Customer Selection */}
+              <div className="shrink-0 rounded-xl border border-gray-100 bg-white p-1 shadow-sm" id="tour-payment-customer">
+                <CustomSearchInbox
+                  options={allCustomerOptions}
+                  placeholder="CUSTOMER_NAME"
+                  onValueChange={(value: string) =>
+                    dispatch(updateField({ field: 'customer_id', value }))
+                  }
+                  className="h-[50px] w-full"
+                  triggerClassName="h-[50px] w-full border-0 bg-transparent text-lg font-medium px-4 focus:ring-0"
+                  value={selectedCustomerId}
+                  directValue={selectedCustomerName}
+                  footerActions={[
+                    {
+                      id: 'create-customer',
+                      label: (
+                        <div className="flex items-center justify-center gap-1">
+                          <Plus className="h-4 w-4" />
+                          <span>{t('ADD_CUSTOMER')}</span>
+                        </div>
+                      ),
+                      className:
+                        'bg-main/5 border-main/20 text-main hover:bg-main/10 font-medium py-3',
+                      onClick: openCreateCustomerDialog,
+                    },
+                    {
+                      id: 'edit-customer',
+                      label: (
+                        <div className="flex items-center justify-center gap-1">
+                          <Pencil className="h-4 w-4" />
+                          <span>{t('EDIT')}</span>
+                        </div>
+                      ),
+                      onClick: openEditCustomerDialog,
+                      disabled: !selectedCustomerId,
+                    },
+                    {
+                      id: 'clear-customer',
+                      label: (
+                        <div className="flex items-center justify-center gap-1">
+                          <X className="h-4 w-4" />
+                          <span>{t('CLEAR_CUSTOMER')}</span>
+                        </div>
+                      ),
+                      className:
+                        'hover:bg-red-50 hover:text-red-600 hover:border-red-200',
+                      onClick: clearCustomerSelection,
+                    },
+                  ]}
+                />
+              </div>
+
+              {/* 2. Payment Methods - Scrollable Area */}
+              <div className="flex-1 overflow-y-auto pr-1">
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4" id="tour-payment-methods">
+                  {paymentMethodsData?.data?.map((method: any, index: number) => {
+                    const isActive = activePaymentMethodId === method.id;
+                    const styleIndex = index % 6; // We have 6 color variants
+                    
+                    const colorStyles = [
+                      { active: 'bg-purple-600 text-white border-purple-600 ring-purple-200', inactive: 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100' },
+                      { active: 'bg-blue-600 text-white border-blue-600 ring-blue-200', inactive: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' },
+                      { active: 'bg-emerald-600 text-white border-emerald-600 ring-emerald-200', inactive: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' },
+                      { active: 'bg-amber-600 text-white border-amber-600 ring-amber-200', inactive: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' },
+                      { active: 'bg-rose-600 text-white border-rose-600 ring-rose-200', inactive: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100' },
+                      { active: 'bg-indigo-600 text-white border-indigo-600 ring-indigo-200', inactive: 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100' },
+                    ][styleIndex];
+
+                    return (
+                      <button
+                        key={method.id}
+                        type="button"
+                        onClick={() => selectPaymentMethod(method)}
+                        className={`flex h-[80px] items-center justify-center rounded-xl border text-base font-semibold transition-all shadow-sm active:scale-95 ${
+                          isActive
+                            ? `${colorStyles.active} ring-2 ring-offset-1`
+                            : `${colorStyles.inactive} hover:border-transparent`
+                        }`}
+                      >
+                        <span className="line-clamp-1 px-2">{method.name}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-            ))}
-          </div>
-          <div className="mt-8 border-t pt-4">
-            <div className="flex items-center justify-between text-emerald-700">
-              <span>{t('CHANGE')}</span>
-              <span>SR {change.toFixed(2)}</span>
+
+              {/* 3. Numpad */}
+              <div className="mt-auto grid shrink-0 grid-cols-4 gap-4" id="tour-payment-numpad">
+                {['1', '2', '3', '+10', '4', '5', '6', '+20', '7', '8', '9', '+50', '.', '0', 'C', '⌫'].map(
+                  (key) => {
+                    const isQuickAction = ['+10', '+20', '+50'].includes(key);
+                    const isAction = ['C', '⌫'].includes(key);
+                    const isDelete = key === '⌫';
+                    const isClear = key === 'C';
+                    
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => {
+                          if (key === '⌫') return backspaceAmount();
+                          if (key === 'C') {
+                            setDraftValue('0');
+                            upsertActivePayment(0);
+                            return;
+                          }
+                          if (key === '+10') return addQuickAmount(10);
+                          if (key === '+20') return addQuickAmount(20);
+                          if (key === '+50') return addQuickAmount(50);
+                          appendDigit(key);
+                        }}
+                        className={`flex h-[80px] items-center justify-center rounded-xl text-2xl font-bold shadow-sm transition-all active:scale-95 border ${
+                          isDelete
+                            ? 'bg-red-50 text-red-600 border-red-100 hover:bg-red-100'
+                            : isClear
+                            ? 'bg-orange-50 text-orange-600 border-orange-100 hover:bg-orange-100'
+                            : isQuickAction
+                            ? 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 text-xl'
+                            : 'bg-white border-gray-100 text-gray-800 hover:border-main/30'
+                        }`}
+                      >
+                        {isDelete ? <X className="h-8 w-8" /> : key}
+                      </button>
+                    );
+                  }
+                )}
+              </div>
             </div>
-            <div className="mt-2 flex items-center justify-between text-secText">
-              <span>{t('REMAINING_AMOUNT')}</span>
-              <span>SR {remaining.toFixed(2)}</span>
+
+            {/* Left Column (Amount & Confirm) - Order 2 in source, Left in RTL */}
+            <div className="flex h-full flex-col gap-4 md:col-span-4">
+              {/* Amount Box */}
+              <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                  {/* Main Amount */}
+                  <div className="flex shrink-0 flex-col items-center justify-center p-6 text-center">
+                    <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{t('TOTAL')}</div>
+                    <div className="text-[5rem] font-bold text-[#5D5FEF] leading-none tracking-tighter">
+                      {totals.total.toFixed(2)}
+                    </div>
+                  </div>
+
+                  {/* Stats Footer */}
+                  <div className="bg-gray-50 border-t border-gray-100">
+                    <div className="grid grid-cols-3 divide-x divide-gray-200 divide-x-reverse">
+                        {/* Paid */}
+                        <div className="flex flex-col items-center justify-center p-3">
+                          <span className="text-[10px] font-bold text-emerald-600 uppercase mb-1">{t('PAID')}</span>
+                          <span className="text-base font-bold text-emerald-600" dir="ltr">{totalPaid.toFixed(2)}</span>
+                        </div>
+                        {/* Remaining */}
+                        <div className="flex flex-col items-center justify-center p-3">
+                          <span className="text-[10px] font-bold text-red-500 uppercase mb-1">{t('REMAINING')}</span>
+                          <span className="text-base font-bold text-red-500" dir="ltr">{remaining.toFixed(2)}</span>
+                        </div>
+                        {/* Change */}
+                        <div className="flex flex-col items-center justify-center p-3">
+                          <span className="text-[10px] font-bold text-blue-600 uppercase mb-1">{t('CHANGE')}</span>
+                          <span className="text-base font-bold text-blue-600" dir="ltr">{change.toFixed(2)}</span>
+                        </div>
+                    </div>
+                  </div>
+                  
+                  {/* Partial Payments List */}
+                  {payments.length > 0 && (
+                    <div className="flex flex-col gap-2 border-t border-gray-100 bg-gray-50/50 p-4 overflow-y-auto max-h-[385px]">
+                        {payments.map((p, i) => (
+                          <div key={i} className="flex shrink-0 items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-3 shadow-sm">
+                              <span className="font-semibold text-gray-700">{p.name}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-gray-900" dir="ltr">{Number(p.amount).toFixed(2)}</span>
+                                <button 
+                                  onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPayments(prev => prev.filter((_, idx) => idx !== i));
+                                  }}
+                                  className="rounded-full p-1 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                  title={t('DELETE')}
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                              </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+              </div>
+              
+              {/* Confirm Button */}
+              <Button
+                id="tour-payment-confirm"
+                className="h-[80px] w-full rounded-2xl bg-[#5D5FEF] text-2xl font-bold text-white shadow-lg shadow-indigo-200 hover:bg-[#4B4DDB] active:scale-[0.98] transition-transform"
+                onClick={submitOrder}
+                loading={loading}
+              >
+                {t('CONFIRM_PAYMENT')}
+              </Button>
             </div>
+
           </div>
         </div>
       </div>
