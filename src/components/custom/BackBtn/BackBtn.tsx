@@ -8,8 +8,9 @@ import { useDispatch } from 'react-redux';
 import { resetOrder } from '@/store/slices/orderSchema';
 import { useTranslation } from 'react-i18next';
 import useDirection from '@/hooks/useDirection';
+import { cn } from '@/lib/utils';
 
-export const BackBtn: React.FC<BackBtnProps> = ({ bkAction }) => {
+export const BackBtn: React.FC<BackBtnProps> = ({ bkAction, className }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
@@ -21,20 +22,25 @@ export const BackBtn: React.FC<BackBtnProps> = ({ bkAction }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="mb-2 flex items-center justify-between space-y-2 cursor-pointer w-max">
+    <div
+      className={cn(
+        'mb-2 flex items-center justify-between space-y-2 cursor-pointer w-max',
+        className
+      )}
+    >
       <div>
-        <p className="text-muted-foreground">
+        <div className="text-muted-foreground">
           <div
             onClick={(e) => {
               e.stopPropagation();
               bkAction ? bkAction() : handleBack();
             }}
-            className="flex   gap-1.5 text-base text-right text-black whitespace-nowrap items-center cursor-pointer"
+            className="flex gap-1.5 text-base text-right text-black whitespace-nowrap items-center cursor-pointer"
           >
             <div
-            style={{
-              rotate: !isRtl ? '180deg' : '0deg',
-            }}
+              style={{
+                rotate: !isRtl ? '180deg' : '0deg',
+              }}
               // className="bg-black p-1.5 rounded-full"
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
@@ -51,23 +57,23 @@ export const BackBtn: React.FC<BackBtnProps> = ({ bkAction }) => {
                     <path
                       d="M14.0002 25.6666C20.4435 25.6666 25.6668 20.4432 25.6668 13.9999C25.6668 7.5566 20.4435 2.33325 14.0002 2.33325C7.55684 2.33325 2.3335 7.5566 2.3335 13.9999C2.3335 20.4432 7.55684 25.6666 14.0002 25.6666Z"
                       stroke="#363088"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                     <path
                       d="M14 18.6666L18.6667 13.9999L14 9.33325"
                       stroke="#363088"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                     <path
                       d="M9.3335 14H18.6668"
                       stroke="#363088"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                   </svg>
                 </>
@@ -84,23 +90,23 @@ export const BackBtn: React.FC<BackBtnProps> = ({ bkAction }) => {
                       d="M14.0002 25.6666C20.4435 25.6666 25.6668 20.4432 25.6668 13.9999C25.6668 7.5566 20.4435 2.33325 14.0002 2.33325C7.55684 2.33325 2.3335 7.5566 2.3335 13.9999C2.3335 20.4432 7.55684 25.6666 14.0002 25.6666Z"
                       fill="#363088"
                       stroke="#363088"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                     <path
                       d="M14 18.6666L18.6667 13.9999L14 9.33325"
                       stroke="white"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                     <path
                       d="M9.3335 14H18.6668"
                       stroke="white"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
                   </svg>
                 </>
@@ -109,7 +115,7 @@ export const BackBtn: React.FC<BackBtnProps> = ({ bkAction }) => {
 
             <div className="grow">{t('RETURN')}</div>
           </div>
-        </p>
+        </div>
       </div>
     </div>
   );

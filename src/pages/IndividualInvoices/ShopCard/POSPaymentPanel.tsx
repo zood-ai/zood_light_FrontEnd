@@ -19,7 +19,8 @@ import {
 } from '@/components/ui/alert-dialog2';
 import XIcons from '@/components/Icons/XIcons';
 import { Input } from '@/components/ui/input';
-import { Plus, Pencil, X, HelpCircle } from 'lucide-react';
+import { Plus, Pencil, X, HelpCircle, LogOut } from 'lucide-react';
+import SH_LOGO from '@/assets/SH_LOGO.svg';
 
 type PaymentRow = {
   payment_method_id: string;
@@ -1441,13 +1442,44 @@ export default function POSPaymentPanel() {
 
 
   return (
-    <div dir={isRtl ? 'rtl' : 'ltr'} className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+    <div dir={isRtl ? 'rtl' : 'ltr'} className="flex h-screen flex-col bg-background">
+      {/* Header Section */}
+      <div className="z-10 flex w-full flex-col border-b border-mainBorder bg-white shadow-sm">
+        <div className="flex items-center justify-between gap-3 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/zood-dashboard/individual-invoices/add')}
+              className="h-8 w-8 text-secText hover:bg-destructive/10 hover:text-destructive"
+              title={t('RETURN')}
+            >
+              <LogOut className={`h-4 w-4 ${isRtl ? 'rotate-180' : ''}`} />
+            </Button>
+            <div className="hidden h-6 w-[1px] bg-gray-200 sm:block" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={startPaymentTour}
+              className="h-8 w-8 text-secText hover:bg-main/10 hover:text-main"
+              title={t('HELP_TOUR')}
+            >
+              <HelpCircle className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid flex-1 overflow-y-auto grid-cols-1 gap-4 p-4 xl:grid-cols-12">
       <div className="xl:col-span-5">
         <div className="rounded-xl border border-mainBorder bg-background p-3">
-          <div className="mb-2 flex items-center justify-end">
-             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={startPaymentTour} title={t('HELP_TOUR')}>
-                <HelpCircle className="h-4 w-4 text-secText hover:text-main" />
-             </Button>
+          <div className="mb-2 flex items-center justify-between border-b border-mainBorder pb-2">
+            <div className="flex items-center gap-2">
+              <img src={SH_LOGO} alt="Logo" className="h-8 w-auto object-contain" />
+              <span className="hidden text-sm font-semibold text-mainText sm:block">
+                {t('POS')}
+              </span>
+            </div>
           </div>
           <div className="mb-3" id="tour-payment-customer">
             <CustomSearchInbox
@@ -1733,6 +1765,7 @@ export default function POSPaymentPanel() {
           </div>
         </AlertDialogContentComp>
       </AlertDialogComp>
+      </div>
     </div>
   );
 }

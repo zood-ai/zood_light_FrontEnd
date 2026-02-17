@@ -1008,6 +1008,14 @@ export const IndividualInvoicesAdd: React.FC<
       <div className="pos-container fixed inset-0 z-50 flex h-full w-full flex-col overflow-hidden bg-background md:flex-row md:flex-nowrap">
         {/* Left Side: Cart & Actions */}
         <div className="flex w-full shrink-0 flex-col border-b border-mainBorder bg-background p-2 md:h-full md:w-[300px] md:border-b-0 md:border-e lg:w-[340px] xl:w-[380px]">
+          <div className="mb-2 flex items-center justify-between border-b border-mainBorder pb-2">
+            <div className="flex items-center gap-2">
+              <img src={SH_LOGO} alt="Logo" className="h-8 w-auto object-contain" />
+              <span className="hidden text-sm font-semibold text-mainText sm:block">
+                {t('POS')}
+              </span>
+            </div>
+          </div>
           <div className="flex flex-1 flex-col overflow-hidden">
             {/* Cart Header Actions */}
             <div className="mb-2 space-y-2 border-b border-mainBorder/50 pb-2">
@@ -1360,13 +1368,6 @@ export const IndividualInvoicesAdd: React.FC<
                 >
                   <HelpCircle className="h-4 w-4" />
                 </Button>
-                <div className="hidden h-6 w-[1px] bg-gray-200 sm:block" />
-                <div className="flex items-center gap-2">
-                  <img src={SH_LOGO} alt="Logo" className="h-8 w-auto object-contain" />
-                  <span className="hidden text-sm font-semibold text-mainText sm:block">
-                    {t('POS')}
-                  </span>
-                </div>
               </div>
 
               <div className="flex flex-1 items-center justify-end gap-3 md:max-w-xl">

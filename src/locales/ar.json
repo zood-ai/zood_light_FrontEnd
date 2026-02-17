@@ -492,5 +492,8 @@
   "TOUR_PAYMENT_NUMPAD_DESC": "استخدم لوحة الأرقام لإدخال المبلغ المدفوع.",
   "CONFIRM_PAYMENT": "إتمام الدفع",
   "TOUR_PAYMENT_CONFIRM_DESC": "اضغط هنا لإتمام عملية الدفع وإصدار الفاتورة.",
-  "PAYMENT_DETAILS": "تفاصيل الدفع"
+    "PAYMENT_DETAILS": "تفاصيل الدفع",
+  "PRODUCT_IMAGE": "صورة المنتج",
+  "INVENTORY_AND_PRICING": "المخزون والتسعير",
+  "BASIC_INFO": "البيانات الأساسية"
 }

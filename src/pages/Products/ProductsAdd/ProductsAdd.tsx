@@ -27,6 +27,12 @@ import ConfirmBk from '@/components/custom/ConfimBk';
 import DelConfirm from '@/components/custom/DelConfim';
 import Cookies from 'js-cookie';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
@@ -37,6 +43,7 @@ const formSchema = z.object({
   quantity: z.string().optional(),
   category_id: z.string().nonempty('category is required'),
 });
+
 export const ProductsAdd: React.FC<ProductsAddProps> = () => {
   const { t } = useTranslation();
   const isRtl = useDirection();
@@ -265,164 +272,184 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
         closeDialog={() => setIsOpen(false)}
         getStatusMessage={undefined}
       />{' '}
-      <div className="flex flex-col items-start  mt-[19px]">
+      <div className="mt-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleFormSubmit)} className="">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 self-stretch  ">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[24px]  gap-y-[16px]   ">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1  ">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('PRODUCT_NAME')}
-                          inputClassName="w-[278px]"
-                          // placeholder="ادخل اسم المورد"
-                          // iconSrc={personIcon}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="name_localized"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1  ">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('PRODUCT_NAME_EN')}
-                          inputClassName="w-[278px]"
+          <form onSubmit={form.handleSubmit(handleFormSubmit)}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column: Form Fields */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Basic Info Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{t('BASIC_INFO')}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t('PRODUCT_NAME')}
+                                inputClassName="w-full"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="name_localized"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t('PRODUCT_NAME_EN')}
+                                inputClassName="w-full"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="category_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <SelectComp
+                              {...field}
+                              options={allData?.data?.map((item: any) => ({
+                                value: item.id,
+                                label: item.name,
+                              }))}
+                              onValueChange={field.onChange}
+                              label={t('CATEGORY_NAME')}
+                              className="w-full"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              placeholder={t('DESCRIPTION')}
+                              label={t('DESCRIPTION')}
+                              className="w-full"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
 
-                          // placeholder="ادخل اسم المورد"
-                          // iconSrc={personIcon}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="category_id"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1  ">
-                      <FormControl>
-                        <SelectComp
-                          {...field}
-                          options={allData?.data?.map((item: any) => ({
-                            value: item.id,
-                            label: item.name,
-                          }))}
-                          onValueChange={field.onChange}
-                          label={t('CATEGORY_NAME')}
-                          className="col-span-1 md:col-span-2 w-[278px]"
-                          // placeholder="ادخل اسم المورد"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1 md:col-span-2">
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder={t('DESCRIPTION')}
-                          label={t('DESCRIPTION')}
-                          className="w-full"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="sku"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1 md:col-span-2">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          inputClassName=" w-[253px]"
-                          label={t('BARCODE')}
-                          // disabled
-                          // placeholder="ادخل اسم المورد"
-                          // iconSrc={personIcon}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="quantity"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1 md:col-span-1">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          inputClassName=" w-[253px]"
-                          label={t('CURRENT_QUANTITY')}
-                          // placeholder="ادخل اسم المورد"
-                          // iconSrc={personIcon}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1 md:col-span-1">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          inputClassName=" w-[218px]"
-                          label={t('PRICE')}
-                          // placeholder="ادخل اسم المورد"
-                          iconSrcLeft={'SR'}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Inventory & Pricing Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{t('INVENTORY_AND_PRICING')}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="sku"
+                      render={({ field }) => (
+                        <FormItem className="md:col-span-2">
+                          <FormControl>
+                            <IconInput
+                              {...field}
+                              inputClassName="w-full"
+                              label={t('BARCODE')}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="quantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <IconInput
+                              {...field}
+                              inputClassName="w-full"
+                              label={t('CURRENT_QUANTITY')}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <IconInput
+                              {...field}
+                              inputClassName="w-full"
+                              label={t('PRICE')}
+                              iconSrcLeft={'SR'}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
               </div>
-              <div className="flex justify-center -translate-y-10">
-                <div className="w-[75%] h-[50%]  ">
-                  <Previews
-                    initialFile={file}
-                    onFileChange={(files) => {
-                      setfile(files);
-                    }}
-                  />
-                </div>
+
+              {/* Right Column: Image */}
+              <div className="lg:col-span-1">
+                <Card className="h-full">
+                  <CardHeader>
+                    <CardTitle>{t('PRODUCT_IMAGE')}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-64 lg:h-auto">
+                      <Previews
+                        initialFile={file}
+                        onFileChange={(files) => {
+                          setfile(files);
+                        }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
-            <Button
-              dir="ltr"
-              loading={loading}
-              disabled={loading}
-              className="mt-[32px] h-[39px] w-[163px]"
-              type="submit"
-            >
-              {isEditMode ? t('UPDATE_PRODUCT') : t('ADD_PRODUCT')}
-            </Button>
-            <DelConfirm route={'menu/products'} />
+
+            <div className="flex items-center gap-4 mt-8">
+              <Button
+                dir="ltr"
+                loading={loading}
+                disabled={loading}
+                className="h-[39px] w-[163px]"
+                type="submit"
+              >
+                {isEditMode ? t('UPDATE_PRODUCT') : t('ADD_PRODUCT')}
+              </Button>
+              {isEditMode && <DelConfirm route={'menu/products'} />}
+            </div>
           </form>
         </Form>
       </div>

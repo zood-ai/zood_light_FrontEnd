@@ -488,5 +488,8 @@
   "TOUR_PAYMENT_NUMPAD_DESC": "Use the numpad to enter the amount paid.",
   "CONFIRM_PAYMENT": "Complete Payment",
   "TOUR_PAYMENT_CONFIRM_DESC": "Click here to complete the payment and issue the invoice.",
-  "PAYMENT_DETAILS": "Payment Details"
+    "PAYMENT_DETAILS": "Payment Details",
+  "PRODUCT_IMAGE": "Product Image",
+  "INVENTORY_AND_PRICING": "Inventory & Pricing",
+  "BASIC_INFO": "Basic Information"
 }
