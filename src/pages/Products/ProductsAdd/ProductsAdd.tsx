@@ -30,11 +30,11 @@ import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 
 const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
-  name_localized: z.string().nonempty('Name is required'),
-  description: z.string().nonempty('description is required'),
+  name_localized: z.string().optional(),
+  description: z.string().optional(),
   price: z.string().nonempty('price is required'),
   sku: z.any(),
-  quantity: z.string().nonempty('quantity is required'),
+  quantity: z.string().optional(),
   category_id: z.string().nonempty('category is required'),
 });
 export const ProductsAdd: React.FC<ProductsAddProps> = () => {
@@ -356,7 +356,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                           {...field}
                           inputClassName=" w-[253px]"
                           label={t('BARCODE')}
-                          disabled
+                          // disabled
                           // placeholder="ادخل اسم المورد"
                           // iconSrc={personIcon}
                         />

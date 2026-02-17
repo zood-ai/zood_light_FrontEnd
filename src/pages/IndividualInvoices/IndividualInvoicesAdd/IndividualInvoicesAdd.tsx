@@ -25,6 +25,22 @@ import {
   AlertDialogTitleComp,
 } from '@/components/ui/alert-dialog2';
 import XIcons from '@/components/Icons/XIcons';
+import {
+  ShoppingBasket,
+  ScanBarcode,
+  Search,
+  LogOut,
+  PauseCircle,
+  PlayCircle,
+  Trash2,
+  Tag,
+  User,
+  Plus,
+  Pencil,
+  X,
+  HelpCircle,
+} from 'lucide-react';
+import SH_LOGO from '@/assets/SH_LOGO.svg';
 
 const CATEGORY_COLOR_PALETTE = [
   { bg: '#BDEAE8', border: '#A2D7D4', activeBg: '#A6D9D5', activeBorder: '#86C6C1' },
@@ -96,6 +112,7 @@ export const IndividualInvoicesAdd: React.FC<
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const selectedCustomerId = orderSchema?.customer_id;
+  const [selectedCartItemId, setSelectedCartItemId] = useState<string | null>(null);
   const { showToast } = useToast();
 
   const { data: tagsData } = createCrudService<any>(
@@ -232,6 +249,86 @@ export const IndividualInvoicesAdd: React.FC<
       return response.data;
     },
   });
+
+  const startTour = useCallback(async () => {
+    try {
+      // Dynamic import to prevent loading issues
+      const { driver } = await import('driver.js');
+      await import('driver.js/dist/driver.css');
+
+      const driverObj = driver({
+        showProgress: true,
+        animate: true,
+        nextBtnText: 'التالي',
+        prevBtnText: 'السابق',
+        doneBtnText: 'إنهاء',
+        steps: [
+          {
+            element: '#tour-categories',
+            popover: {
+              title: 'الفئات (Categories)',
+              description: 'أصبحت الفئات ملونة دائماً لسهولة التمييز والوصول السريع.',
+              side: 'bottom',
+              align: 'start',
+            },
+          },
+          {
+            element: '#tour-products',
+            popover: {
+              title: 'المنتجات (Products)',
+              description: 'اضغط على أي منتج لإضافته للسلة مباشرة.',
+              side: 'left',
+              align: 'start',
+            },
+          },
+          {
+            element: '#tour-customer',
+            popover: {
+              title: 'العميل (Customer)',
+              description: 'يمكنك اختيار العميل أو إضافته من هنا بسرعة.',
+              side: 'bottom',
+              align: 'start',
+            },
+          },
+          {
+            element: '#tour-cart-list',
+            popover: {
+              title: 'التحكم بالسلة (Cart Controls)',
+              description: 'مهم جداً: اضغط على أي منتج داخل السلة لتظهر لك خيارات تعديل الكمية والحذف.',
+              side: 'right',
+              align: 'start',
+            },
+          },
+          {
+            element: '#tour-payment',
+            popover: {
+              title: 'الدفع (Payment)',
+              description: 'اضغط هنا لإنهاء الطلب والانتقال للدفع.',
+              side: 'top',
+              align: 'start',
+            },
+          },
+        ],
+        onDestroyed: () => {
+          localStorage.setItem('has_seen_pos_tour_v2', 'true');
+        },
+      });
+      driverObj.drive();
+    } catch (error) {
+      console.error('Failed to load tour driver:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const hasSeenTour = localStorage.getItem('has_seen_pos_tour_v2');
+    if (!hasSeenTour) {
+      // Delay to ensure elements are rendered
+      const timer = setTimeout(() => {
+        startTour();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [startTour]);
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -908,223 +1005,281 @@ export const IndividualInvoicesAdd: React.FC<
 
   return (
     <>
-      <div className="sticky top-0 z-20 mb-0 rounded-xl border border-mainBorder bg-background/95 p-3 shadow-sm backdrop-blur">
-        <div className="mb-1 grid grid-cols-1 gap-2 md:grid-cols-12">
-          <Button
-            type="button"
-            variant="outline"
-            className="h-10 md:col-span-2"
-            onClick={() => setIsOpen(true)}
-          >
-            {t('POS_EXIT')}
-          </Button>
-          <div className="md:col-span-7">
-            <Input
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setSearchInput(e.target.value)
-              }
-              defaultValue=""
-              placeholder={t('SEARCH_TABLE_PLACEHOLDER')}
-              className="h-10 w-full"
-            />
-          </div>
-          <div className="md:col-span-3">
-            <div
-              className={`h-10 rounded-md border px-3 text-sm flex items-center ${
-                lastScanStatus === 'success'
-                  ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                  : lastScanStatus === 'error'
-                  ? 'border-red-300 bg-red-50 text-red-700'
-                  : 'border-mainBorder bg-background text-mainText'
-              }`}
-            >
-              <div className="truncate w-full">
-                <span className="text-xs opacity-80">{t('POS_LAST_SCAN')}:</span>{' '}
-                <span className="font-medium">{lastScanMessage}</span>
+      <div className="pos-container fixed inset-0 z-50 flex h-full w-full flex-col overflow-hidden bg-background md:flex-row md:flex-nowrap">
+        {/* Left Side: Cart & Actions */}
+        <div className="flex w-full shrink-0 flex-col border-b border-mainBorder bg-background p-2 md:h-full md:w-[300px] md:border-b-0 md:border-e lg:w-[340px] xl:w-[380px]">
+          <div className="flex flex-1 flex-col overflow-hidden">
+            {/* Cart Header Actions */}
+            <div className="mb-2 space-y-2 border-b border-mainBorder/50 pb-2">
+              <div className="grid grid-cols-2 gap-2">
+                {/* Customer Selector - Explicit */}
+                <div id="tour-customer" className="flex-1">
+                  <CustomSearchInbox
+                    options={allCustomerOptions}
+                    placeholder="CUSTOMER_NAME"
+                    onValueChange={(value: string) =>
+                      dispatch(updateField({ field: 'customer_id', value }))
+                    }
+                    className="h-full w-full"
+                    triggerClassName="h-9 w-full justify-between rounded border border-mainBorder bg-white px-2 text-xs text-mainText shadow-sm hover:bg-gray-50 focus:ring-1 focus:ring-main/20"
+                    value={selectedCustomerId}
+                    directValue={selectedCustomerName}
+                    footerActions={[
+                      {
+                        id: 'create-customer',
+                        label: (
+                          <div className="flex items-center justify-center gap-1">
+                            <Plus className="h-3.5 w-3.5" />
+                            <span>{t('ADD_CUSTOMER')}</span>
+                          </div>
+                        ),
+                        className:
+                          'bg-main/5 border-main/20 text-main hover:bg-main/10 font-medium',
+                        onClick: openCreateCustomerDialog,
+                      },
+                      {
+                        id: 'edit-customer',
+                        label: (
+                          <div className="flex items-center justify-center gap-1">
+                            <Pencil className="h-3.5 w-3.5" />
+                            <span>{t('EDIT')}</span>
+                          </div>
+                        ),
+                        onClick: openEditCustomerDialog,
+                        disabled: !selectedCustomerId,
+                      },
+                      {
+                        id: 'clear-customer',
+                        label: (
+                          <div className="flex items-center justify-center gap-1">
+                            <X className="h-3.5 w-3.5" />
+                            <span>{t('CLEAR_CUSTOMER')}</span>
+                          </div>
+                        ),
+                        className:
+                          'hover:bg-red-50 hover:text-red-600 hover:border-red-200',
+                        onClick: clearCustomerSelection,
+                      },
+                    ]}
+                  />
+                </div>
+                {/* Tag Selector - Explicit */}
+                <div className="flex-1">
+                  <CustomSearchInbox
+                    options={allTagOptions}
+                    placeholder="ORDER_TAGS"
+                    onValueChange={(value: string) =>
+                      dispatch(
+                        updateField({
+                          field: 'tags',
+                          value: value ? [{ id: value }] : [],
+                        })
+                      )
+                    }
+                    className="h-full w-full"
+                    triggerClassName="h-9 w-full justify-between rounded border border-mainBorder bg-white px-2 text-xs text-mainText shadow-sm hover:bg-gray-50 focus:ring-1 focus:ring-main/20"
+                    value={
+                      Array.isArray(orderSchema?.tags) && orderSchema.tags[0]
+                        ? orderSchema.tags[0].id
+                        : ''
+                    }
+                    footerActions={[
+                      {
+                        id: 'create-tag',
+                        label: (
+                          <div className="flex items-center justify-center gap-1">
+                            <Plus className="h-3.5 w-3.5" />
+                            <span>{t('CREATE_NEW_ORDER_TAG')}</span>
+                          </div>
+                        ),
+                        className:
+                          'bg-main/5 border-main/20 text-main hover:bg-main/10 font-medium',
+                        onClick: openCreateTagDialog,
+                      },
+                      {
+                        id: 'edit-tag',
+                        label: (
+                          <div className="flex items-center justify-center gap-1">
+                            <Pencil className="h-3.5 w-3.5" />
+                            <span>{t('EDIT')}</span>
+                          </div>
+                        ),
+                        onClick: openEditTagDialog,
+                        disabled:
+                          !Array.isArray(orderSchema?.tags) || !orderSchema.tags[0]?.id,
+                      },
+                      {
+                        id: 'clear-tag',
+                        label: (
+                          <div className="flex items-center justify-center gap-1">
+                            <X className="h-3.5 w-3.5" />
+                            <span>{t('CLEAR_ORDER_TAG')}</span>
+                          </div>
+                        ),
+                        className:
+                          'hover:bg-red-50 hover:text-red-600 hover:border-red-200',
+                        onClick: clearTagSelection,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+
+              {/* Park Order Action - Explicit Button */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 w-full justify-center text-xs font-medium hover:bg-orange-50 hover:text-orange-700 hover:border-orange-200"
+                  onClick={parkCurrentOrder}
+                  disabled={cardItemValue.length === 0}
+                >
+                  <PauseCircle className="mr-1.5 h-3.5 w-3.5" />
+                  {t('PARK_ORDER')}
+                </Button>
+                <div className="flex h-9 items-center justify-center rounded border border-mainBorder bg-gray-50 px-2 text-xs font-medium text-secText">
+                  {t('PARKED_ORDERS')}: <span className="mx-1 font-bold text-mainText">{parkedOrders.length}</span>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-        <div className="xl:col-span-4 xl:self-start">
-          <div className="flex flex-col overflow-hidden rounded-xl border border-mainBorder bg-background p-3 xl:sticky xl:top-[150px] xl:h-[calc(100dvh-170px)]">
-            <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-12">
-              <div className="sm:col-span-6">
-                <CustomSearchInbox
-                  options={allCustomerOptions}
-                  placeholder="CUSTOMER_NAME"
-                  onValueChange={(value: string) =>
-                    dispatch(updateField({ field: 'customer_id', value }))
-                  }
-                  className="h-full w-full"
-                  triggerClassName="h-full min-h-10 justify-between rounded-md border border-mainBorder bg-mainBg px-3 text-mainText shadow-sm hover:bg-mainBg"
-                  value={selectedCustomerId}
-                  directValue={selectedCustomerName}
-                  footerActions={[
-                    {
-                      id: 'create-customer',
-                      label: t('ADD_CUSTOMER'),
-                      onClick: openCreateCustomerDialog,
-                    },
-                    {
-                      id: 'edit-customer',
-                      label: t('EDIT_CURRENT_CUSTOMER'),
-                      onClick: openEditCustomerDialog,
-                      disabled: !selectedCustomerId,
-                    },
-                    {
-                      id: 'clear-customer',
-                      label: t('CLEAR_CUSTOMER'),
-                      onClick: clearCustomerSelection,
-                    },
-                  ]}
-                />
-              </div>
-              <div className="sm:col-span-6">
-                <CustomSearchInbox
-                  options={allTagOptions}
-                  placeholder="ORDER_TAGS"
-                  onValueChange={(value: string) =>
-                    dispatch(
-                      updateField({
-                        field: 'tags',
-                        value: value ? [{ id: value }] : [],
-                      })
-                    )
-                  }
-                  className="h-full w-full"
-                  triggerClassName="h-full min-h-10 justify-between rounded-md border border-mainBorder bg-mainBg px-3 text-mainText shadow-sm hover:bg-mainBg"
-                  value={
-                    Array.isArray(orderSchema?.tags) && orderSchema.tags[0]
-                      ? orderSchema.tags[0].id
-                      : ''
-                  }
-                  footerActions={[
-                    {
-                      id: 'create-tag',
-                      label: t('CREATE_NEW_ORDER_TAG'),
-                      onClick: openCreateTagDialog,
-                    },
-                    {
-                      id: 'edit-tag',
-                      label: t('EDIT_CURRENT_ORDER_TAG'),
-                      onClick: openEditTagDialog,
-                      disabled:
-                        !Array.isArray(orderSchema?.tags) || !orderSchema.tags[0]?.id,
-                    },
-                    {
-                      id: 'clear-tag',
-                      label: t('CLEAR_ORDER_TAG'),
-                      onClick: clearTagSelection,
-                    },
-                  ]}
-                />
-              </div>
-            </div>
-            <div className="mb-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-9 text-xs"
-                onClick={parkCurrentOrder}
-                disabled={cardItemValue.length === 0}
-              >
-                {t('PARK_ORDER')}
-              </Button>
-              <div className="flex h-9 items-center rounded border border-mainBorder px-2 text-xs text-secText">
-                {t('PARKED_ORDERS')}: {parkedOrders.length}
-              </div>
-            </div>
+
+            {/* Parked Orders List (Collapsible/Conditional) */}
             {parkedOrders.length > 0 && (
-              <div className="mb-2 max-h-[120px] space-y-1 overflow-y-auto rounded border border-mainBorder/70 p-2">
+              <div className="mb-2 max-h-[100px] space-y-1 overflow-y-auto rounded bg-orange-50/50 p-1">
                 {parkedOrders.map((order) => (
                   <div
                     key={order.id}
-                    className="flex items-center justify-between rounded bg-mainBg px-2 py-1 text-xs"
+                    className="flex items-center justify-between rounded bg-white px-2 py-1 text-[10px] shadow-sm"
                   >
-                    <div className="truncate">
-                      {order.customer_name || t('CUSTOMER_NAME')} - SR{' '}
-                      {Number(order.total || 0).toFixed(2)}
+                    <div className="truncate text-mainText">
+                      <span className="font-semibold">{order.customer_name || t('GUEST')}</span>
+                      <span className="mx-1 text-secText">-</span>
+                      <span>SR {Number(order.total || 0).toFixed(2)}</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <button
                         type="button"
-                        className="text-main"
+                        className="text-emerald-600 hover:text-emerald-700"
                         onClick={() => resumeParkedOrder(order.id)}
+                        title={t('RESUME_ORDER')}
                       >
-                        {t('RESUME_ORDER')}
+                        <PlayCircle className="h-3 w-3" />
                       </button>
                       <button
                         type="button"
-                        className="text-destructive"
+                        className="text-destructive hover:text-destructive/80"
                         onClick={() => deleteParkedOrder(order.id)}
+                        title={t('DELETE')}
                       >
-                        {t('DELETE')}
+                        <Trash2 className="h-3 w-3" />
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
+
             <div
+              id="tour-cart-list"
               ref={cartListRef}
-              className="mt-1 flex-1 space-y-2 overflow-y-auto pe-1"
+              className="mt-1 flex-1 space-y-1 overflow-y-auto pe-1"
             >
               {cardItemValue.length === 0 ? (
-                <div className="rounded-md border border-dashed border-mainBorder px-3 py-6 text-center text-sm text-secText">
-                  {t('POS_CART_EMPTY')}
+                <div className="flex h-full flex-col items-center justify-center space-y-3 text-secText/40">
+                  <ShoppingBasket className="h-16 w-16 opacity-20" strokeWidth={1} />
+                  <div className="text-sm font-medium">{t('POS_CART_EMPTY')}</div>
                 </div>
               ) : (
                 cardItemValue.map((item: any) => (
                   <div
                     key={item.id}
                     data-cart-item-id={item.id}
-                    className="flex items-center justify-between rounded-md border border-mainBorder px-3 py-2"
+                    onClick={() =>
+                      setSelectedCartItemId(
+                        selectedCartItemId === item.id ? null : item.id
+                      )
+                    }
+                    className={`group flex cursor-pointer items-center justify-between rounded border border-transparent px-2 py-2 transition-all hover:border-mainBorder hover:shadow-sm ${
+                      selectedCartItemId === item.id ? 'bg-blue-50/50' : 'bg-white'
+                    }`}
                   >
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-medium">{item.name}</div>
-                      <div className="text-xs text-secText">
-                        {item.qty} x SR {Number(item.price || 0).toFixed(2)}
+                    <div className="min-w-0 flex-1">
+                      <div
+                        className="truncate text-sm font-medium text-mainText"
+                        title={item.name}
+                      >
+                        {item.name}
+                      </div>
+                      <div className="mt-0.5 flex items-center gap-2 text-[11px]">
+                        <span className="flex items-center justify-center rounded bg-gray-100 px-1.5 py-0.5 font-bold text-mainText">
+                          {item.qty}
+                        </span>
+                        <span className="text-secText/60">x</span>
+                        <span className="font-semibold text-main">
+                          SR {Number(item.price || 0).toFixed(2)}
+                        </span>
+                        <span className="mx-1 h-3 w-[1px] bg-gray-200"></span>
+                        <span className="font-bold text-mainText">
+                          SR {(Number(item.price || 0) * Number(item.qty || 0)).toFixed(2)}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => adjustCartItemQty(item.id, -1)}
-                        className="h-7 w-7 rounded border border-mainBorder text-sm"
-                      >
-                        -
-                      </button>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={item.qty}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setCartItemQty(item.id, e.target.value)
-                        }
-                        className="!h-7 !w-[62px] !min-w-[62px] px-1 text-center text-sm font-semibold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => adjustCartItemQty(item.id, 1)}
-                        className="h-7 w-7 rounded border border-mainBorder text-sm"
-                      >
-                        +
-                      </button>
+
+                    <div
+                      className={`flex items-center gap-2 transition-opacity duration-200 ${
+                        selectedCartItemId === item.id
+                          ? 'opacity-100'
+                          : 'opacity-0 group-hover:opacity-100'
+                      }`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Compact Quantity Control */}
+                      <div className="flex h-7 items-center overflow-hidden rounded-md border border-mainBorder bg-gray-50">
+                        <button
+                          type="button"
+                          onClick={() => adjustCartItemQty(item.id, 1)}
+                          className="flex h-full w-7 items-center justify-center text-secText transition-colors hover:bg-white hover:text-mainText active:bg-gray-100"
+                        >
+                          +
+                        </button>
+                        <div className="h-full w-[1px] bg-mainBorder" />
+                        <Input
+                          type="number"
+                          min={0}
+                          value={item.qty}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setCartItemQty(item.id, e.target.value)
+                          }
+                          className="!h-full !w-[40px] !min-w-[40px] rounded-none border-0 bg-white px-0 text-center text-xs font-semibold focus-visible:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        />
+                        <div className="h-full w-[1px] bg-mainBorder" />
+                        <button
+                          type="button"
+                          onClick={() => adjustCartItemQty(item.id, -1)}
+                          className="flex h-full w-7 items-center justify-center text-secText transition-colors hover:bg-white hover:text-mainText active:bg-gray-100"
+                        >
+                          -
+                        </button>
+                      </div>
+
+                      {/* Delete Icon */}
                       <button
                         type="button"
                         onClick={() => removeCartItem(item.id)}
-                        className="ms-1 text-xs text-destructive"
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-secText opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
+                        title={t('DELETE')}
                       >
-                        {t('DELETE')}
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
                 ))
               )}
             </div>
-            <div className="mt-3 rounded-md bg-[#F7F8FC] px-3 py-2 text-sm">
+          </div>
+          {/* Fixed Bottom Section for Totals & Action */}
+          <div className="mt-auto pt-2">
+            <div className="rounded-md bg-[#F7F8FC] px-3 py-2 text-sm">
               <div className="flex items-center justify-between py-1">
                 <span className="text-secText">{t('QUANTITY')}</span>
                 <span className="font-medium">{cartItemsCount}</span>
@@ -1168,18 +1323,100 @@ export const IndividualInvoicesAdd: React.FC<
               </div>
             </div>
             <Button
+              id="tour-payment"
               type="button"
               onClick={() => navigate('shop-card')}
               disabled={cardItemValue.length === 0}
-              className="mt-3 h-10 w-full"
+              className="mt-2 h-12 w-full text-base font-semibold"
             >
               {t('POS_PROCEED_PAYMENT')}
             </Button>
           </div>
         </div>
-        <div className="xl:col-span-8 xl:h-[calc(100dvh-170px)] xl:overflow-y-auto xl:pe-1">
-          <div className="sticky top-0 z-20 mb-0 grid grid-cols-1 gap-2 bg-mainBg pb-0 xl:h-10 xl:grid-cols-12 xl:items-stretch xl:gap-3">
-            <div className="flex h-10 flex-nowrap items-center gap-2 overflow-x-auto xl:col-span-6 xl:h-full xl:whitespace-nowrap">
+
+        {/* Right Side: Products Grid */}
+        <div className="flex h-full flex-1 flex-col overflow-hidden bg-gray-50/50">
+          {/* Odoo-style Header: Compact & Clean */}
+          <div className="z-10 flex w-full flex-col border-b border-mainBorder bg-white shadow-sm">
+            {/* Top Row: Navigation & Search */}
+            <div className="flex items-center justify-between gap-3 px-3 py-2">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsOpen(true)}
+                  className="h-8 w-8 text-secText hover:bg-destructive/10 hover:text-destructive"
+                  title={t('POS_EXIT')}
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+                <div className="hidden h-6 w-[1px] bg-gray-200 sm:block" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={startTour}
+                  className="h-8 w-8 text-secText hover:bg-main/10 hover:text-main"
+                  title={t('HELP_TOUR')}
+                >
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+                <div className="hidden h-6 w-[1px] bg-gray-200 sm:block" />
+                <div className="flex items-center gap-2">
+                  <img src={SH_LOGO} alt="Logo" className="h-8 w-auto object-contain" />
+                  <span className="hidden text-sm font-semibold text-mainText sm:block">
+                    {t('POS')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-1 items-center justify-end gap-3 md:max-w-xl">
+                {/* Search Field */}
+                <div className="relative flex-1">
+                  <div className="pointer-events-none absolute left-2.5 top-2.5 flex items-center justify-center text-secText/50">
+                    <Search className="h-4 w-4" />
+                  </div>
+                  <Input
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setSearchInput(e.target.value)
+                    }
+                    defaultValue=""
+                    placeholder={t('POS_SEARCH_PLACEHOLDER')}
+                    className="h-9 w-full rounded-md border-mainBorder bg-gray-50/50 pl-9 text-sm focus:bg-white focus:ring-1 focus:ring-main/20"
+                  />
+                </div>
+
+                {/* Barcode Field */}
+                <div className="relative w-1/3 min-w-[140px]">
+                  <div className="pointer-events-none absolute left-2.5 top-2.5 flex items-center justify-center text-secText/50">
+                    <ScanBarcode className="h-4 w-4" />
+                  </div>
+                  <Input
+                    autoFocus
+                    value={barcodeInput}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setBarcodeInput(e.target.value)
+                    }
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        enqueueBarcode();
+                      }
+                    }}
+                    placeholder={lastScanMessage || t('SCAN')}
+                    className={`h-9 w-full rounded-md border-mainBorder pl-9 text-sm transition-all duration-300 focus:ring-1 focus:ring-main/20 ${
+                      lastScanStatus === 'success'
+                        ? 'border-emerald-500 bg-emerald-50/30 text-emerald-900 placeholder:text-emerald-700/50'
+                        : lastScanStatus === 'error'
+                        ? 'border-red-500 bg-red-50/30 text-red-900 placeholder:text-red-700/50'
+                        : 'bg-gray-50/50 focus:bg-white'
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Categories Row - Compact */}
+            <div id="tour-categories" className="flex w-full items-center gap-1.5 overflow-x-auto whitespace-nowrap border-t border-mainBorder/50 px-3 py-1.5">
               {categoryOptions.map((category) => {
                 const isActive = activeCategory === category;
                 const categoryStyle = getCategoryStyle(category);
@@ -1189,67 +1426,55 @@ export const IndividualInvoicesAdd: React.FC<
                     type="button"
                     onClick={() => setActiveCategory(category)}
                     style={{
-                      backgroundColor: isActive
-                        ? categoryStyle.activeBg
-                        : categoryStyle.bg,
-                      borderColor: isActive
-                        ? categoryStyle.activeBorder
-                        : categoryStyle.border,
+                      backgroundColor: isActive ? categoryStyle.activeBg : categoryStyle.bg,
+                      borderColor: isActive ? categoryStyle.activeBorder : categoryStyle.border,
                       color: CATEGORY_TEXT_COLOR,
                     }}
-                    className={`inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md border px-3 text-sm transition-all duration-150 xl:h-full ${
+                    className={`relative flex h-8 min-w-[80px] shrink-0 items-center justify-center rounded border px-3 text-xs font-medium transition-all duration-200 ${
                       isActive
-                        ? 'border-2 font-semibold shadow-[inset_0_0_0_1px_rgba(255,255,255,0.45)]'
-                        : 'hover:brightness-95'
+                        ? 'font-bold shadow-sm ring-1 ring-black/5'
+                        : 'opacity-90 hover:opacity-100 hover:shadow-sm'
                     }`}
                   >
+                    <span className="capitalize">
+                      {category === 'all' ? t('ALL') : category}
+                    </span>
                     {isActive && (
-                      <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-mainText" />
+                      <span
+                        className="absolute bottom-0 left-0 right-0 h-[3px] rounded-b"
+                        style={{ backgroundColor: categoryStyle.activeBorder }}
+                      />
                     )}
-                    {category === 'all' ? t('ALL') : category}
                   </button>
                 );
               })}
             </div>
-            <div className="xl:col-span-6 xl:h-full">
-              <Input
-                autoFocus
-                value={barcodeInput}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setBarcodeInput(e.target.value)
-                }
-                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    enqueueBarcode();
-                  }
-                }}
-                placeholder={t('SCAN_BARCODE_PLACEHOLDER')}
-                className="h-10 w-full xl:h-full"
-              />
-            </div>
           </div>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(185px,1fr))] gap-4">
-            {isLoading && products.length === 0 ? (
-              <CardGridSkeleton count={12} />
-            ) : (
-              visibleProducts?.map((item: any, index: any) => (
-                <CardItem key={item.id} index={index} item={item} />
-              ))
+
+          {/* Scrollable Products Area */}
+          <div className="flex-1 overflow-y-auto p-3">
+            <div id="tour-products" className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2 pb-20">
+              {isLoading && products.length === 0 ? (
+                <CardGridSkeleton count={12} />
+              ) : (
+                visibleProducts?.map((item: any, index: any) => (
+                  <CardItem key={item.id} index={index} item={item} />
+                ))
+              )}
+            </div>
+            {hasMore && (
+              <div className="mt-6 flex justify-center pb-8">
+                <button
+                  type="button"
+                  onClick={() => setPage((prev) => prev + 1)}
+                  disabled={isFetching}
+                  className="rounded-md border border-mainBorder bg-white px-4 py-2 text-sm shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isFetching ? t('LOADING') : t('LOAD_MORE')}
+                </button>
+              </div>
             )}
           </div>
-          {hasMore && (
-            <div className="mt-6 flex justify-center">
-              <button
-                type="button"
-                onClick={() => setPage((prev) => prev + 1)}
-                disabled={isFetching}
-                className="rounded-md border border-mainBorder bg-background px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isFetching ? t('LOADING') : t('LOAD_MORE')}
-              </button>
-            </div>
-          )}
         </div>
       </div>
       <ConfirmBk
