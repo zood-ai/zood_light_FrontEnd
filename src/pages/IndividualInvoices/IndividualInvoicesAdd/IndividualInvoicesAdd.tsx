@@ -148,7 +148,7 @@ export const IndividualInvoicesAdd: React.FC<
   const rawBarcodeByKeyRef = useRef<Map<string, string>>(new Map());
   const inFlightBarcodesRef = useRef<Set<string>>(new Set());
   const activeRequestsRef = useRef(0);
-  const PAGE_SIZE = 24;
+  const PAGE_SIZE = 50;
   const MAX_CONCURRENT_SCANS = 3;
   const SCAN_REQUEST_TIMEOUT_MS = 3000;
   const NOT_FOUND_CACHE_TTL_MS = 15000;
@@ -182,33 +182,50 @@ export const IndividualInvoicesAdd: React.FC<
   const grandTotal = subtotalAmount + vatAmount;
   const visibleProducts = useMemo(() => {
     if (activeCategory === 'all') return products;
-    return products.filter((product: any) => {
-      const categoryName =
-        product?.category?.name ||
-        product?.category_name ||
-        product?.category?.name_en ||
-        '';
-      return String(categoryName).toLowerCase() === activeCategory;
-    });
+    return products.filter(
+      (product: any) => String(product?.category?.id) === activeCategory
+    );
   }, [activeCategory, products]);
 
+  const { data: categoriesData } = createCrudService<any>(
+    'menu/categories?not_default=1&per_page=1000'
+  ).useGetAll();
+
   const categoryOptions = useMemo(() => {
-    const categories = new Set<string>();
+    // Priority: Use fetched categories
+    if (categoriesData?.data && Array.isArray(categoriesData.data)) {
+      return [
+        { id: 'all', name: 'all' },
+        ...categoriesData.data.map((cat: any) => ({
+          id: String(cat.id),
+          name: cat.name || cat.name_en || '',
+        })),
+      ];
+    }
+
+    // Fallback: Extract from loaded products (only useful if full list loaded)
+    const map = new Map<string, string>();
     products.forEach((product: any) => {
-      const categoryName =
+      const catId = String(product?.category?.id || '');
+      const catName =
         product?.category?.name ||
         product?.category_name ||
         product?.category?.name_en ||
         '';
-      if (categoryName) {
-        categories.add(String(categoryName).toLowerCase());
+      if (catId && catName) {
+        map.set(catId, catName);
       }
     });
-    return ['all', ...Array.from(categories)];
-  }, [products]);
+    return [
+      { id: 'all', name: 'all' },
+      ...Array.from(map.entries()).map(([id, name]) => ({ id, name })),
+    ];
+  }, [products, categoriesData]);
+
   const { data: customersData } = createCrudService<any>(
     'manage/customers?perPage=100000'
   ).useGetAll();
+
   const [extraCustomers, setExtraCustomers] = useState<
     { value: string; label: string }[]
   >([]);
@@ -235,20 +252,45 @@ export const IndividualInvoicesAdd: React.FC<
       ?.label || '';
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['individual-invoices-products', debouncedSearch, page],
+    queryKey: ['individual-invoices-products', debouncedSearch, page, activeCategory],
     queryFn: async () => {
-      const response = await axiosInstance.get('menu/products', {
-        params: {
-          not_default: 1,
-          per_page: PAGE_SIZE,
-          sort: '-created_at',
-          page,
-          ...(debouncedSearch ? { 'filter[name]': debouncedSearch } : {}),
-        },
-      });
+      // Smart Loading Strategy:
+      // 1. "All" view: Load small chunks (50) for fast initial render.
+      // 2. Specific Category: Load larger chunks (200) to show most items immediately without scrolling.
+      const dynamicPageSize = activeCategory === 'all' ? 50 : 200;
+
+      const params: any = {
+        not_default: 1,
+        per_page: dynamicPageSize,
+        sort: '-created_at',
+        page,
+        ...(debouncedSearch ? { 'filter[name]': debouncedSearch } : {}),
+        ...(activeCategory !== 'all' ? { 'filter[category_id]': activeCategory } : {}),
+      };
+      const response = await axiosInstance.get('menu/products', { params });
       return response.data;
     },
+    // Smart Caching:
+    // Keep data fresh for 5 minutes. Switching between categories will be instant (from memory).
+    staleTime: 1000 * 60 * 5, 
+    gcTime: 1000 * 60 * 10,
   });
+
+
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isFetching) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prev) => prev + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isFetching, hasMore]
+  );
 
   const startTour = useCallback(async () => {
     try {
@@ -986,11 +1028,27 @@ export const IndividualInvoicesAdd: React.FC<
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  // 1. Search Change: Clear everything (fresh search)
   useEffect(() => {
     setPage(1);
     setProducts([]);
     setHasMore(true);
   }, [debouncedSearch]);
+
+  // 2. Category Change: Optimistic update
+  useEffect(() => {
+    setPage(1);
+    
+    if (activeCategory === 'all') {
+      setProducts([]); 
+    } else {
+      // Optimistic UI: Filter current visible products to show relevant ones IMMEDIATELY
+      // while fetching the full list from server. This prevents empty screen flash.
+      setProducts((prev) => prev.filter((p: any) => String(p?.category?.id) === activeCategory));
+    }
+    
+    setHasMore(true);
+  }, [activeCategory]);
 
   useEffect(() => {
     if (!data) return;
@@ -1007,8 +1065,8 @@ export const IndividualInvoicesAdd: React.FC<
     <>
       <div className="pos-container fixed inset-0 z-50 flex h-full w-full flex-col overflow-hidden bg-background md:flex-row md:flex-nowrap">
         {/* Left Side: Cart & Actions */}
-        <div className="flex w-full shrink-0 flex-col border-b border-mainBorder bg-background p-2 md:h-full md:w-[300px] md:border-b-0 md:border-e lg:w-[340px] xl:w-[380px]">
-          <div className="mb-2 flex items-center justify-between border-b border-mainBorder pb-2">
+        <div className="flex w-full shrink-0 flex-col border-b border-mainBorder bg-background md:h-full md:w-[300px] md:border-b-0 md:border-e lg:w-[340px] xl:w-[380px]">
+          <div className="flex shrink-0 items-center justify-between border-b border-mainBorder bg-white px-3 py-2.5 shadow-sm">
             <div className="flex items-center gap-2">
               <img src={SH_LOGO} alt="Logo" className="h-8 w-auto object-contain" />
               <span className="hidden text-sm font-semibold text-mainText sm:block">
@@ -1016,7 +1074,7 @@ export const IndividualInvoicesAdd: React.FC<
               </span>
             </div>
           </div>
-          <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex flex-1 flex-col overflow-hidden p-2">
             {/* Cart Header Actions */}
             <div className="mb-2 space-y-2 border-b border-mainBorder/50 pb-2">
               <div className="grid grid-cols-2 gap-2">
@@ -1286,7 +1344,7 @@ export const IndividualInvoicesAdd: React.FC<
             </div>
           </div>
           {/* Fixed Bottom Section for Totals & Action */}
-          <div className="mt-auto pt-2">
+          <div className="mt-auto p-2">
             <div className="rounded-md bg-[#F7F8FC] px-3 py-2 text-sm">
               <div className="flex items-center justify-between py-1">
                 <span className="text-secText">{t('QUANTITY')}</span>
@@ -1418,14 +1476,14 @@ export const IndividualInvoicesAdd: React.FC<
 
             {/* Categories Row - Compact */}
             <div id="tour-categories" className="flex w-full items-center gap-1.5 overflow-x-auto whitespace-nowrap border-t border-mainBorder/50 px-3 py-1.5">
-              {categoryOptions.map((category) => {
-                const isActive = activeCategory === category;
-                const categoryStyle = getCategoryStyle(category);
+              {categoryOptions.map((category: any) => {
+                const isActive = activeCategory === category.id;
+                const categoryStyle = getCategoryStyle(category.name);
                 return (
                   <button
-                    key={category}
+                    key={category.id}
                     type="button"
-                    onClick={() => setActiveCategory(category)}
+                    onClick={() => setActiveCategory(category.id)}
                     style={{
                       backgroundColor: isActive ? categoryStyle.activeBg : categoryStyle.bg,
                       borderColor: isActive ? categoryStyle.activeBorder : categoryStyle.border,
@@ -1438,7 +1496,7 @@ export const IndividualInvoicesAdd: React.FC<
                     }`}
                   >
                     <span className="capitalize">
-                      {category === 'all' ? t('ALL') : category}
+                      {category.id === 'all' ? t('ALL') : category.name}
                     </span>
                     {isActive && (
                       <span
@@ -1463,16 +1521,12 @@ export const IndividualInvoicesAdd: React.FC<
                 ))
               )}
             </div>
-            {hasMore && (
-              <div className="mt-6 flex justify-center pb-8">
-                <button
-                  type="button"
-                  onClick={() => setPage((prev) => prev + 1)}
-                  disabled={isFetching}
-                  className="rounded-md border border-mainBorder bg-white px-4 py-2 text-sm shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isFetching ? t('LOADING') : t('LOAD_MORE')}
-                </button>
+            {hasMore && <div ref={lastElementRef} className="h-4 w-full opacity-0" />}
+            {isFetching && products.length > 0 && (
+              <div className="flex w-full justify-center pb-4 pt-2">
+                <span className="text-sm font-medium text-secText">
+                  {t('LOADING')}...
+                </span>
               </div>
             )}
           </div>

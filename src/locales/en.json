@@ -491,5 +491,8 @@
     "PAYMENT_DETAILS": "Payment Details",
   "PRODUCT_IMAGE": "Product Image",
   "INVENTORY_AND_PRICING": "Inventory & Pricing",
-  "BASIC_INFO": "Basic Information"
+  "BASIC_INFO": "Basic Information",
+  "PAYMENT_AMOUNT": "Total",
+  "REMAINING": "Remaining",
+  "CART_ITEMS": "Sales Cart"
 }

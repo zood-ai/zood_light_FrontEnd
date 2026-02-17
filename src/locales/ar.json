@@ -495,5 +495,8 @@
     "PAYMENT_DETAILS": "تفاصيل الدفع",
   "PRODUCT_IMAGE": "صورة المنتج",
   "INVENTORY_AND_PRICING": "المخزون والتسعير",
-  "BASIC_INFO": "البيانات الأساسية"
+  "BASIC_INFO": "البيانات الأساسية",
+  "PAYMENT_AMOUNT": "المجموع",
+  "REMAINING": "المتبقي",
+  "CART_ITEMS": "سلة المبيعات"
 }
