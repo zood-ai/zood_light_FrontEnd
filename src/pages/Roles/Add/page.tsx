@@ -24,6 +24,7 @@ import ConfirmBk from '@/components/custom/ConfimBk';
 import DelConfirm from '@/components/custom/DelConfim';
 import { ALL_PERMISSIONS, PERMISSION_GROUPS } from '../constants/Permissions';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useSelector } from 'react-redux';
 
 const formSchema = z.object({
   name: z.string().nonempty('Role name is required'),
@@ -39,6 +40,42 @@ const RolesAdd: React.FC = () => {
   const modalType = params.id;
   const isEditMode = modalType !== 'add';
   const navigate = useNavigate();
+
+  const allSettings = useSelector((state: any) => state.allSettings.value);
+
+  // ① جيب permissions بتاعت اليوزر الحالي
+  const myPermissions: string[] = useMemo(() => {
+    return (
+      allSettings?.WhoAmI?.user?.roles?.flatMap((el: any) =>
+        el?.permissions?.map((el2: any) => el2.name)
+      ) ?? []
+    );
+  }, [allSettings]);
+
+  // ② فلتر ALL_PERMISSIONS عشان تشيل اللي مش معاك
+  const allowedPermissions = useMemo(
+    () => ALL_PERMISSIONS.filter((perm) => myPermissions.includes(perm)),
+    [myPermissions]
+  );
+
+  // ③ فلتر PERMISSION_GROUPS عشان تشيل الجروبات اللي كل permissions فيها مش معاك
+  const allowedPermissionGroups = useMemo(() => {
+    return Object.entries(PERMISSION_GROUPS).reduce(
+      (acc, [groupKey, group]) => {
+        const filteredPermissions = group.permissions.filter((perm) =>
+          myPermissions.includes(perm)
+        );
+        if (filteredPermissions.length > 0) {
+          acc[groupKey] = {
+            ...group,
+            permissions: filteredPermissions,
+          };
+        }
+        return acc;
+      },
+      {} as typeof PERMISSION_GROUPS
+    );
+  }, [myPermissions]);
 
   // Fetch services and mutations
   const crudService = createCrudService<any>('hr/roles');
@@ -79,7 +116,10 @@ const RolesAdd: React.FC = () => {
           setcurrData(roleData);
           if (roleData) {
             form.setValue('name', roleData.name || '');
-            form.setValue('authorities', roleData?.permissions?.map(el=>el.name) || []);
+            form.setValue(
+              'authorities',
+              roleData?.permissions?.map((el: any) => el.name) || []
+            );
           }
         })
         .catch((err) => {
@@ -102,7 +142,6 @@ const RolesAdd: React.FC = () => {
     if (isEditMode) {
       try {
         await axiosInstance.put(`/roles/${params.objId}`, values);
-
         openDialog('updated');
         setLoading(false);
         navigate('/zood-dashboard/roles-and-permissions');
@@ -113,7 +152,6 @@ const RolesAdd: React.FC = () => {
     } else {
       try {
         await axiosInstance.post('/roles', values);
-
         openDialog('added');
         setLoading(false);
         form.reset({});
@@ -125,29 +163,28 @@ const RolesAdd: React.FC = () => {
     }
   };
 
-  // Toggle all permissions
+  // ④ Toggle all — بس اللي معاك إنت
   const handleToggleAll = (checked: boolean) => {
     if (checked) {
-      form.setValue('authorities', ALL_PERMISSIONS);
+      form.setValue('authorities', allowedPermissions);
     } else {
       form.setValue('authorities', []);
     }
   };
 
-  // Toggle all permissions in a group
+  // ⑤ Toggle group — بس اللي معاك في الجروب ده
   const handleToggleGroup = (groupKey: string, checked: boolean) => {
     const currentAuthorities = form.getValues('authorities') || [];
     const groupPermissions =
-      PERMISSION_GROUPS[groupKey as keyof typeof PERMISSION_GROUPS].permissions;
+      allowedPermissionGroups[groupKey as keyof typeof allowedPermissionGroups]
+        ?.permissions ?? [];
 
     if (checked) {
-      // Add all group permissions
       const newAuthorities = [
         ...new Set([...currentAuthorities, ...groupPermissions]),
       ];
       form.setValue('authorities', newAuthorities);
     } else {
-      // Remove all group permissions
       const newAuthorities = currentAuthorities.filter(
         (auth) => !groupPermissions.includes(auth)
       );
@@ -155,18 +192,25 @@ const RolesAdd: React.FC = () => {
     }
   };
 
-  // Check if all permissions are selected
+  // ⑥ Check if all allowed permissions are selected
   const isAllSelected = () => {
     const currentAuthorities = form.getValues('authorities') || [];
-    return ALL_PERMISSIONS.every((perm) => currentAuthorities.includes(perm));
+    return (
+      allowedPermissions.length > 0 &&
+      allowedPermissions.every((perm) => currentAuthorities.includes(perm))
+    );
   };
 
-  // Check if all permissions in a group are selected
+  // ⑦ Check if all allowed permissions in a group are selected
   const isGroupSelected = (groupKey: string) => {
     const currentAuthorities = form.getValues('authorities') || [];
     const groupPermissions =
-      PERMISSION_GROUPS[groupKey as keyof typeof PERMISSION_GROUPS].permissions;
-    return groupPermissions.every((perm) => currentAuthorities.includes(perm));
+      allowedPermissionGroups[groupKey as keyof typeof allowedPermissionGroups]
+        ?.permissions ?? [];
+    return (
+      groupPermissions.length > 0 &&
+      groupPermissions.every((perm) => currentAuthorities.includes(perm))
+    );
   };
 
   const [isOpen, setIsOpen] = useState(false);
@@ -240,9 +284,9 @@ const RolesAdd: React.FC = () => {
                         </label>
                       </div>
 
-                      {/* Permission Groups */}
+                      {/* Permission Groups — بس اللي معاك */}
                       <div className="space-y-3">
-                        {Object.entries(PERMISSION_GROUPS).map(
+                        {Object.entries(allowedPermissionGroups).map(
                           ([groupKey, group]) => (
                             <div
                               key={groupKey}
