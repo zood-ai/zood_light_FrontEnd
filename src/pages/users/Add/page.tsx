@@ -28,18 +28,34 @@ import { SelectComp } from '@/components/custom/SelectItem';
 import MultiSelect from '@/components/MultiSelect';
 import { Input } from '@/components/ui/input';
 
-const formSchema = z.object({
+const createFormSchema = z.object({
+  name: z.string().nonempty('Name is required'),
+  language: z.string().nonempty('Language is required'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  login_pin: z
+    .string()
+    .min(4, 'PIN must be at least 4 characters')
+    .max(6, 'PIN must be at most 6 characters'),
+  role: z.string().nonempty('Role is required'),
+  branches: z.array(z.string()).min(1, 'Please select at least one branch'),
+});
+
+const editFormSchema = z.object({
   name: z.string().nonempty('Name is required'),
   language: z.string().nonempty('Language is required'),
   email: z.string().email('Invalid email address'),
   password: z
     .string()
     .min(6, 'Password must be at least 6 characters')
-    .optional(),
+    .optional()
+    .or(z.literal('')),
   login_pin: z
     .string()
     .min(4, 'PIN must be at least 4 characters')
-    .max(6, 'PIN must be at most 6 characters'),
+    .max(6, 'PIN must be at most 6 characters')
+    .optional()
+    .or(z.literal('')),
   role: z.string().nonempty('Role is required'),
   branches: z.array(z.string()).min(1, 'Please select at least one branch'),
 });
@@ -51,6 +67,8 @@ const UsersAdd: React.FC = () => {
   const modalType = params.id;
   const isEditMode = modalType !== 'add';
   const navigate = useNavigate();
+
+  const formSchema = isEditMode ? editFormSchema : createFormSchema;
 
   // Fetch services and mutations
   const crudService = createCrudService<any>('auth/users');
@@ -94,10 +112,11 @@ const UsersAdd: React.FC = () => {
     })) ?? [];
 
   // Dummy branch options (replace with actual API call)
-  const branchOptions = Branches?.map((el) => ({
-    value: el?.id,
-    label: el?.name,
-  })) ?? [];
+  const branchOptions =
+    Branches?.map((el) => ({
+      value: el?.id,
+      label: el?.name,
+    })) ?? [];
 
   const defaultValues = useMemo(
     () =>
@@ -135,8 +154,8 @@ const UsersAdd: React.FC = () => {
             form.setValue('name', userData?.name || '');
             form.setValue('language', userData?.lang || '');
             form.setValue('email', userData?.email || '');
-            form.setValue('password', ''); // Don't pre-fill password in edit mode
-            form.setValue('login_pin', userData?.pin || '');
+            form.setValue('password', '');
+            form.setValue('login_pin', '');
             form.setValue('role', userData?.roles?.[0]?.id || '');
             form.setValue(
               'branches',
@@ -166,25 +185,20 @@ const UsersAdd: React.FC = () => {
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
 
-    // Remove password from update if it's empty
-    const submitData: any =
-      isEditMode && !values?.password
-        ? {
-            ...values,
-            roles: [{ id: values?.role }],
-            branches: values?.branches?.map((el) => ({ id: el })) ?? [],
-            password: undefined,
-          }
-        : {
-            ...values,
-            roles: [{ id: values?.role }],
-            branches: values?.branches?.map((el) => ({ id: el })) ?? [],
-          };
+    const submitData: any = {
+      ...values,
+      roles: [{ id: values?.role }],
+      branches: values?.branches?.map((el) => ({ id: el })) ?? [],
+      // لو edit والفيلد فاضي، ميتبعش للباك
+      ...(isEditMode && !values?.password && { password: undefined }),
+      ...(isEditMode && !values?.login_pin && { login_pin: undefined }),
+    };
+
     if (submitData?.role) delete submitData?.role;
+
     if (isEditMode) {
       try {
         await axiosInstance.put(`/auth/users/${params?.objId}`, submitData);
-
         openDialog('updated');
         setLoading(false);
         navigate('/zood-dashboard/users');
@@ -195,7 +209,6 @@ const UsersAdd: React.FC = () => {
     } else {
       try {
         await axiosInstance.post('/auth/users', submitData);
-
         openDialog('added');
         setLoading(false);
         form.reset({});
@@ -318,9 +331,7 @@ const UsersAdd: React.FC = () => {
                       <FormControl>
                         <IconInput
                           {...field}
-                          label={
-                            isEditMode ? `${t('PASSWORD')}` : t('PASSWORD')
-                          }
+                          label={t('PASSWORD')}
                           inputClassName="w-[278px]"
                           type="password"
                         />

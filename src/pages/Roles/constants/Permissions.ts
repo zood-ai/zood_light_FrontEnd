@@ -147,6 +147,11 @@ export const ALL_PERMISSIONS = [
 
 // Grouped permissions for better UX
 export const PERMISSION_GROUPS = {
+  dashboard: {
+    name: 'DASHBOARD_AUTHORITIES',
+    nameAr: 'لوحة التحكم',
+    permissions: rolePermissions[RolesEnum.DASHBOARD],
+  },
   invoices: {
     name: 'INVOICES_AND_PURCHASING_AUTHORITIES',
     nameAr: 'الفواتير',
@@ -189,7 +194,7 @@ export const PERMISSION_GROUPS = {
   },
   users: {
     name: 'USERS_AUTHORITIES',
-    nameAr: 'المستخدمين',
+    nameAr: 'المستخدمين و الصلاحيات',
     permissions: rolePermissions[RolesEnum.USERS],
   },
   branches: {

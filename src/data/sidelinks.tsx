@@ -64,7 +64,7 @@ export const sidelinks: SideLink[] = [
     label: '',
     href: '/zood-dashboard',
     icon: <IconLayoutDashboardFilled {...navIconProps} />,
-    authorities: [],
+    authorities: rolePermissions[Roles.DASHBOARD],
   },
   {
     title: 'نقطة البيع', // Individual Invoices
@@ -130,6 +130,7 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/zood-dashboard/products',
         icon: <IconBoxSeam {...navIconProps} />,
+        authorities: rolePermissions[Roles.INVENTORY],
       },
       {
         title: 'الفئات', // Categories
@@ -137,6 +138,7 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/zood-dashboard/categories',
         icon: <IconCategory {...navIconProps} />,
+        authorities: rolePermissions[Roles.INVENTORY],
       },
     ],
   },
@@ -162,6 +164,7 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/zood-dashboard/normal-report',
         icon: <IconReceipt {...navIconProps} />,
+        authorities: rolePermissions[Roles.REPORTS],
       },
       {
         title: 'فاتورة B2B', // B2B Report
@@ -169,6 +172,7 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/zood-dashboard/b2b-report',
         icon: <IconBuildingSkyscraper {...navIconProps} />,
+        authorities: rolePermissions[Roles.REPORTS],
       },
       {
         title: 'فاتورة الشراء', // Purchase Report
@@ -176,6 +180,7 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/zood-dashboard/purchase-report',
         icon: <IconTruck {...navIconProps} />,
+        authorities: rolePermissions[Roles.REPORTS],
       },
       {
         title: 'تقرير الأصناف', // Items Report
@@ -183,6 +188,7 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/zood-dashboard/items-report',
         icon: <IconBoxSeam {...navIconProps} />,
+        authorities: rolePermissions[Roles.REPORTS],
       },
       {
         title: 'تقرير المدفوعات', // Payments Report
@@ -190,6 +196,7 @@ export const sidelinks: SideLink[] = [
         label: '',
         href: '/zood-dashboard/payment-report',
         icon: <IconCreditCardFilled {...navIconProps} />,
+        authorities: rolePermissions[Roles.REPORTS],
       },
     ],
   },
@@ -239,7 +246,7 @@ export const sidelinks: SideLink[] = [
     icon: <IconLockCheck />,
     icon1: <IconLockCheck />,
     icon2: <IconLockCheck />,
-    authorities: rolePermissions[Roles.SETTINGS],
+    authorities: rolePermissions[Roles.USERS],
   },
   {
     title: 'الاعدادات', // Settings

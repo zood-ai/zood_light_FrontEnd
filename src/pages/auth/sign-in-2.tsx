@@ -23,6 +23,8 @@ import { useTranslation } from 'react-i18next';
 import { getToken } from '@/utils/auth';
 import PayDialog from '@/config/PayDialog';
 import Cookies from 'js-cookie';
+import { getFirstAccessibleLink } from '@/hooks/getFirstAccessibleLink';
+import axiosInstance from '@/api/interceptors';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -52,8 +54,21 @@ export default function SignIn2() {
   });
 
   useEffect(() => {
-    const token = getToken();
-    if (token) navigate('/zood-dashboard', { replace: true });
+    const fun = async () => {
+      const token = getToken();
+      if (token) {
+        const whomai = await axiosInstance.get('auth/whoami');
+        navigate(
+          getFirstAccessibleLink(
+            whomai?.data?.user?.roles?.flatMap((el) =>
+              el?.permissions?.map((el2) => el2.name)
+            )
+          ),
+          { replace: true }
+        );
+      }
+    };
+    fun();
   }, [navigate]);
 
   // Handle SignUp
@@ -71,8 +86,16 @@ export default function SignIn2() {
     };
     Cookies.set('business', JSON.stringify(business), { expires: 1 });
     const x = await login(data);
+    const whomai = await axiosInstance.get('auth/whoami');
     if (x.success === true) {
-      navigate('/zood-dashboard');
+      navigate(
+        getFirstAccessibleLink(
+          whomai?.data?.user?.roles?.flatMap((el) =>
+            el?.permissions?.map((el2) => el2.name)
+          )
+        ),
+        { replace: true }
+      );
     }
 
     if (x.errorCode === 401) {

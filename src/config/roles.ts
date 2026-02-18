@@ -1,4 +1,5 @@
 export enum Roles {
+  DASHBOARD = 'dashboard',
   ADMIN = 'admin',
   ORDERS = 'orders',
   PURCHASING = 'purchasing',
@@ -75,20 +76,19 @@ export enum Permissions {
 }
 
 export const rolePermissions: Record<Roles, string[]> = {
+  [Roles.DASHBOARD]: ['dashboard:inventory'],
+
   [Roles.ORDERS]: [
     'orders:read',
     'orders:manage',
     'orders:manage_tags',
-    'dashboard:inventory',
     'inventory_count:drafts:manage',
     'inventory_count:closed:manage',
     'inventory_items:read',
     'inventory_items:manage',
     'menu:read',
-    // 'menu:manage',
     'customers:read',
     'customers:read_insights',
-    // 'customers:manage',
     'customers:manage_house_account',
     'customers:manage_loyalty',
   ],
@@ -99,14 +99,11 @@ export const rolePermissions: Record<Roles, string[]> = {
     'purchasing_from_po:drafts:manage',
     'direct_purchasing:drafts:manage',
     'suppliers:read',
-    // 'suppliers:manage',
-    'dashboard:inventory',
     'inventory_count:drafts:manage',
     'inventory_count:closed:manage',
     'inventory_items:read',
     'inventory_items:manage',
     'menu:read',
-    // 'menu:manage',
   ],
 
   [Roles.PRICE_QUOTES]: [
@@ -114,22 +111,18 @@ export const rolePermissions: Record<Roles, string[]> = {
     'po:posted:manage',
     'po:approved:manage',
     'po:approved:receive',
-    'dashboard:inventory',
     'inventory_count:drafts:manage',
     'inventory_count:closed:manage',
     'inventory_items:read',
     'inventory_items:manage',
     'menu:read',
-    // 'menu:manage',
     'customers:read',
     'customers:read_insights',
-    // 'customers:manage',
     'customers:manage_house_account',
     'customers:manage_loyalty',
   ],
 
   [Roles.INVENTORY]: [
-    'dashboard:inventory',
     'inventory_count:drafts:manage',
     'inventory_count:closed:manage',
     'inventory_items:read',
@@ -168,8 +161,6 @@ export const rolePermissions: Record<Roles, string[]> = {
   [Roles.BRANCHES]: ['branches:manage'],
 
   [Roles.SETTINGS]: [
-    // 'users:manage',
-    // 'branches:manage',
     'settings:manage',
     'settings:manage_taxes_and_groups',
     'settings:manage_charges',
