@@ -87,8 +87,8 @@ export default function SignIn2() {
       };
       Cookies.set('business', JSON.stringify(business), { expires: 1 });
       const x = await login(data);
-      const whomai = await axiosInstance.get('auth/whoami');
       if (x.success === true) {
+        const whomai = await axiosInstance.get('auth/whoami');
         navigate(
           getFirstAccessibleLink(
             whomai?.data?.user?.roles?.flatMap((el) =>
@@ -104,6 +104,7 @@ export default function SignIn2() {
       }
       setIsLoading(false);
     } catch (err) {
+      console.log(err);
       setIsLoading(false);
     } finally {
       setIsLoading(false);
