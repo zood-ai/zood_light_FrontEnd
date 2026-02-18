@@ -62,14 +62,12 @@ const RolesAdd: React.FC = () => {
   const allowedPermissionGroups = useMemo(() => {
     return Object.entries(PERMISSION_GROUPS).reduce(
       (acc, [groupKey, group]) => {
-        const filteredPermissions = group.permissions.filter((perm) =>
-          myPermissions.includes(perm)
-        );
-        if (filteredPermissions.length > 0) {
-          acc[groupKey] = {
-            ...group,
-            permissions: filteredPermissions,
-          };
+        const allPermissionsAllowed =
+          group.permissions.length > 0 &&
+          group.permissions.every((perm) => myPermissions.includes(perm)); // every بدل filter + length
+
+        if (allPermissionsAllowed) {
+          acc[groupKey] = group; // الجروب كامل من غير تعديل
         }
         return acc;
       },
@@ -102,6 +100,12 @@ const RolesAdd: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues,
+  });
+  console.log({
+    selectedPr: form.watch('authorities'),
+    myPermissions,
+    allowedPermissions,
+    allowedPermissionGroups,
   });
 
   const [currData, setcurrData] = useState<any>({});
