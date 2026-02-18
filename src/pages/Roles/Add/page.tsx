@@ -64,10 +64,10 @@ const RolesAdd: React.FC = () => {
       (acc, [groupKey, group]) => {
         const allPermissionsAllowed =
           group.permissions.length > 0 &&
-          group.permissions.every((perm) => myPermissions.includes(perm)); // every بدل filter + length
+          group.permissions.every((perm) => myPermissions.includes(perm));
 
         if (allPermissionsAllowed) {
-          acc[groupKey] = group; // الجروب كامل من غير تعديل
+          acc[groupKey] = group;
         }
         return acc;
       },
