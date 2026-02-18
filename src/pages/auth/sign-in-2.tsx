@@ -80,28 +80,34 @@ export default function SignIn2() {
   const handleFormSubmit = async (data: AuthFormValues) => {
     setIsLoading(true);
     setExpired(false);
-    const business = {
-      businessName: '',
-      businessBusinessRef: data.business_reference,
-    };
-    Cookies.set('business', JSON.stringify(business), { expires: 1 });
-    const x = await login(data);
-    const whomai = await axiosInstance.get('auth/whoami');
-    if (x.success === true) {
-      navigate(
-        getFirstAccessibleLink(
-          whomai?.data?.user?.roles?.flatMap((el) =>
-            el?.permissions?.map((el2) => el2.name)
-          )
-        ),
-        { replace: true }
-      );
-    }
+    try {
+      const business = {
+        businessName: '',
+        businessBusinessRef: data.business_reference,
+      };
+      Cookies.set('business', JSON.stringify(business), { expires: 1 });
+      const x = await login(data);
+      const whomai = await axiosInstance.get('auth/whoami');
+      if (x.success === true) {
+        navigate(
+          getFirstAccessibleLink(
+            whomai?.data?.user?.roles?.flatMap((el) =>
+              el?.permissions?.map((el2) => el2.name)
+            )
+          ),
+          { replace: true }
+        );
+      }
 
-    if (x.errorCode === 401) {
-      setExpired(true);
+      if (x.errorCode === 401) {
+        setExpired(true);
+      }
+      setIsLoading(false);
+    } catch (err) {
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
   const [showPassword, setShowPassword] = React.useState(false);
 
