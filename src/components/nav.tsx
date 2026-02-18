@@ -40,7 +40,7 @@ export default function Nav({
   className,
   closeNav,
 }: NavProps) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const allSettings = useSelector((state: any) => state.allSettings.value);
   const isRtl = useDirection();
   if (!user) return;
@@ -108,11 +108,15 @@ export default function Nav({
           dir={isRtl ? 'rtl' : 'ltr'}
           className="grid gap-1 px-1 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2"
         >
-          {links.map((link) => (
-            <div key={`${link.i18n}-${link.href}`} className="py-0.5">
-              {renderLink(link)}
-            </div>
-          ))}
+          {links.map((link) => {
+            const content = renderLink(link);
+            if (!content) return null;
+            return (
+              <div key={`${link.i18n}-${link.href}`} className="py-0.5">
+                {content}
+              </div>
+            );
+          })}
         </nav>
       </TooltipProvider>
     </div>
@@ -149,14 +153,16 @@ function NavLink({
           variant: 'ghost',
           size: 'sm',
         }),
-        `mx-2 h-11 justify-start rounded-md px-3 text-wrap transition-colors focus-visible:ring-2 focus-visible:ring-main ${
+        `mx-2 w-[calc(100%-20px)] h-11 justify-start rounded-md px-3 text-wrap transition-colors focus-visible:ring-2 focus-visible:ring-main ${
           isActive
             ? 'bg-muted font-semibold text-main'
             : 'text-secText hover:bg-muted/50'
         }`,
         subLink &&
           `mx-0 h-10 w-full rounded-md px-2 ${
-            isRtl ? 'border-r border-r-slate-300' : 'border-l border-l-slate-300'
+            isRtl
+              ? 'border-r border-r-slate-300'
+              : 'border-l border-l-slate-300'
           }`
       )}
       aria-current={isActive ? 'page' : undefined}
@@ -211,7 +217,9 @@ function NavLinkDropdown({
   const isRtl = useDirection();
   const allSettings = useSelector((state: any) => state.allSettings.value);
 
-  const triggerIcon = isChildActive ? icon2 || icon1 || icon : icon1 || icon2 || icon;
+  const triggerIcon = isChildActive
+    ? icon2 || icon1 || icon
+    : icon1 || icon2 || icon;
   return (
     <Collapsible defaultOpen={isChildActive}>
       <CollapsibleTrigger
@@ -221,17 +229,11 @@ function NavLinkDropdown({
             isChildActive
               ? 'bg-muted font-semibold text-main'
               : 'text-secText hover:bg-muted/50'
-          }`
+          }  w-[calc(100%-20px)]`
         )}
       >
-        <div className={` ${isRtl ? 'ml-2' : 'mr-2'}`}>
-          {triggerIcon}
-        </div>
-        {
-          <p className="text-[15px] font-medium leading-5">
-            {t(i18n)}
-          </p>
-        }
+        <div className={` ${isRtl ? 'ml-2' : 'mr-2'}`}>{triggerIcon}</div>
+        {<p className="text-[15px] font-medium leading-5">{t(i18n)}</p>}
         {label && (
           <div
             className={cn(
@@ -244,7 +246,7 @@ function NavLinkDropdown({
         )}
         <span
           className={cn(
-            'ml-auto transition-all group-data-[state="open"]:-rotate-180'
+            'ms-auto  transition-all group-data-[state="open"]:-rotate-180'
           )}
         >
           <IconChevronDown stroke={1} />
@@ -289,7 +291,14 @@ function NavLinkDropdown({
   );
 }
 
-function NavLinkIcon({ title, i18n, icon, label, href, closeNav }: NavLinkProps) {
+function NavLinkIcon({
+  title,
+  i18n,
+  icon,
+  label,
+  href,
+  closeNav,
+}: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav();
   const { t } = useTranslation();
   const isActive = checkActiveNav(href);
@@ -306,22 +315,21 @@ function NavLinkIcon({ title, i18n, icon, label, href, closeNav }: NavLinkProps)
               size: 'icon',
             }),
             `h-10 w-10 rounded-md focus-visible:ring-2 focus-visible:ring-main ${
-              isActive
-                ? 'bg-muted text-main'
-                : 'text-secText hover:bg-muted/50'
+              isActive ? 'bg-muted text-main' : 'text-secText hover:bg-muted/50'
             }`
           )}
         >
-          <span
-            className={`${isActive ? 'text-main' : 'text-secText'}`}
-          >
+          <span className={`${isActive ? 'text-main' : 'text-secText'}`}>
             {icon}
           </span>{' '}
           {/* <span className="sr-only">{title}</span> */}
           <span className="sr-only">{t(i18n)}</span>
         </Link>
       </TooltipTrigger>
-      <TooltipContent side={isRtl ? 'left' : 'right'} className="flex items-center gap-4">
+      <TooltipContent
+        side={isRtl ? 'left' : 'right'}
+        className="flex items-center gap-4"
+      >
         {/* {title} */}
         {t(i18n)}
         {label && (
@@ -349,7 +357,9 @@ function NavLinkIconDropdown({
   /* Open collapsible by default
    * if one of child element is active */
   const isChildActive = !!sub?.find((s) => checkActiveNav(s.href));
-  const triggerIcon = isChildActive ? icon2 || icon1 || icon : icon1 || icon2 || icon;
+  const triggerIcon = isChildActive
+    ? icon2 || icon1 || icon
+    : icon1 || icon2 || icon;
 
   return (
     <DropdownMenu>
@@ -370,7 +380,10 @@ function NavLinkIconDropdown({
             </Button>
           </DropdownMenuTrigger>
         </TooltipTrigger>
-        <TooltipContent side={isRtl ? 'left' : 'right'} className="flex items-center gap-4">
+        <TooltipContent
+          side={isRtl ? 'left' : 'right'}
+          className="flex items-center gap-4"
+        >
           {t(i18n)}{' '}
           {label && (
             <span className="ml-auto text-muted-foreground">{label}</span>
@@ -405,7 +418,9 @@ function NavLinkIconDropdown({
               )}
             >
               {icon}
-              <span className={cn('max-w-52 text-wrap', isRtl ? 'mr-2' : 'ml-2')}>
+              <span
+                className={cn('max-w-52 text-wrap', isRtl ? 'mr-2' : 'ml-2')}
+              >
                 {t(i18n)}
               </span>
               {label && (

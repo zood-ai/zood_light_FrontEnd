@@ -1,12 +1,11 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import PayDialog from './PayDialog';
-import { Permissions } from './roles';
 import { useSelector } from 'react-redux';
 
 type ProtectedRouteProps = {
   children: JSX.Element;
-  requiredPermissions: Permissions[];
+  requiredPermissions: string[];
 };
 
 const ProtectedRoute = ({

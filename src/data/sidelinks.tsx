@@ -48,12 +48,12 @@ export interface NavLink {
   icon: JSX.Element;
   icon1?: JSX.Element;
   icon2?: JSX.Element;
-  authorities?: Permissions[];
+  authorities?: string[];
 }
 
 export interface SideLink extends NavLink {
   sub?: NavLink[];
-  authorities: Permissions[];
+  authorities: string[];
 }
 
 //  Add i18n keys without altering the title field
