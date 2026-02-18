@@ -69,6 +69,23 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const Another = !Corporate;
   const ShowCar =
     allSettings.WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
+  const showReturn = [
+    // Invoice
+    'orders:manage',
+    // Purchasing
+    'purchasing:drafts:manage',
+    'purchasing:closed:manage',
+    'purchasing_from_po:drafts:manage',
+    // Price quote
+    'po:drafts:manage',
+    'po:posted:manage',
+    'po:approved:manage',
+    'po:approved:receive',
+  ].some((permission) =>
+    allSettings?.WhoAmI?.user?.roles
+      ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
+      ?.includes(permission)
+  );
   const Data = { data };
   const [loading, setLoading] = useState(false);
   const [size, setSize] = useState('A4');
@@ -1023,14 +1040,15 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                               <span>{t('SEND_TO_ZATCA')}</span>
                             </Button>
                           )}
-
-                        <button
-                          disabled={loading}
-                          onClick={handleReturn}
-                          className="px-2.5 py-1 bg-white rounded-lg-lg border border-red-500 border-solid max-md:px-5 w-[100px]"
-                        >
-                          استرجاع
-                        </button>
+                        {showReturn && (
+                          <button
+                            disabled={loading}
+                            onClick={handleReturn}
+                            className="px-2.5 py-1 bg-white rounded-lg-lg border border-red-500 border-solid max-md:px-5 w-[100px]"
+                          >
+                            استرجاع
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
