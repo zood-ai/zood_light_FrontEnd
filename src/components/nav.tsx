@@ -73,7 +73,9 @@ export default function Nav({
 
     if (sub) {
       let hasSubPermission = false;
+      let hasSubPermissionDone = false;
       sub?.forEach((s: any) => {
+        if (hasSubPermissionDone) return;
         hasSubPermission =
           s.authorities?.length > 0
             ? s.authorities.every((permission) =>
@@ -82,7 +84,7 @@ export default function Nav({
                   ?.includes(permission)
               )
             : true;
-        if (hasSubPermission) return;
+        if (hasSubPermission) hasSubPermissionDone = true;
       });
       if (!hasSubPermission) {
         return;
