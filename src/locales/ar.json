@@ -479,6 +479,12 @@
   "NO_CUSTOMER_SELECTED_EDIT": "اختر عميلاً أولاً لتعديله",
   "CREATE_NEW_ORDER_TAG": "إنشاء تصنيف جديد",
   "ENTER_NEW_ORDER_TAG_NAME": "أدخل اسم تصنيف الطلب الجديد",
+  "EMPLOYEE_LOGIN": "دخول الموظف",
+  "EMPLOYEE_LOGIN_DESC": "أدخل الرقم السري للموظف",
+  "ENTER_PIN_TO_SWITCH": "أدخل الرقم السري للتبديل بين الموظفين",
+  "PIN_INVALID": "الرقم السري غير صحيح",
+  "PIN_INVALID_LENGTH": "أدخل 4 أرقام",
+  "PIN_LOGIN_SUCCESS": "تم تسجيل الدخول بنجاح",
   "HELP_TOUR": "جولة تعريفية",
   "POS_EXIT": "خروج من الكاشير",
   "POS_CART_EMPTY": "السلة فارغة",
@@ -498,5 +504,10 @@
   "BASIC_INFO": "البيانات الأساسية",
   "PAYMENT_AMOUNT": "المجموع",
   "REMAINING": "المتبقي",
-  "CART_ITEMS": "سلة المبيعات"
+  "CART_ITEMS": "سلة المبيعات",
+  "PAYMENT": "الدفع",
+  "UNIT_PRICE": "سعر الوحدة",
+  "SAVING": "توفير",
+  "ADD_NOTE_PLACEHOLDER": "أضف ملاحظة...",
+  "CUSTOMER": "العميل"
 }

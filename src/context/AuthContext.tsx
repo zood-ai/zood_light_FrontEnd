@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           Accept: 'application/json',
         },
       });
-      const token = responseData?.data?.token;
+      const token = (responseData?.data?.token || '').toString().trim();
       const authorities = responseData?.data?.authorities || [];
       const name = responseData?.data?.user?.name;
       const business = {

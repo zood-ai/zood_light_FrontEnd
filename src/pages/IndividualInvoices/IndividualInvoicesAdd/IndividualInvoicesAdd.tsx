@@ -39,8 +39,15 @@ import {
   Pencil,
   X,
   HelpCircle,
+  Lock,
+  Delete,
+  Image as ImageIcon,
+  Layers,
+  Percent,
 } from 'lucide-react';
+import PinLoginScreen from '../components/PinLoginScreen';
 import SH_LOGO from '@/assets/SH_LOGO.svg';
+import Cookies from 'js-cookie';
 
 const CATEGORY_COLOR_PALETTE = [
   { bg: '#BDEAE8', border: '#A2D7D4', activeBg: '#A6D9D5', activeBorder: '#86C6C1' },
@@ -75,13 +82,14 @@ const getCategoryStyle = (category: string) => {
 export const IndividualInvoicesAdd: React.FC<
   IndividualInvoicesAddProps
 > = () => {
-  const PARKED_ORDERS_KEY = 'pos_parked_orders_v1';
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [barcodeInput, setBarcodeInput] = useState('');
-  const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountType, setDiscountType] = useState<'fixed' | 'percent'>('fixed');
+  const [discountValue, setDiscountValue] = useState<string>('0');
+  // const [discountAmount, setDiscountAmount] = useState(0); // Deprecated in favor of calculated
   const [activeCategory, setActiveCategory] = useState('all');
   const [lastScanStatus, setLastScanStatus] = useState<
     'ready' | 'scanning' | 'success' | 'error'
@@ -97,6 +105,7 @@ export const IndividualInvoicesAdd: React.FC<
   const [isCreatingTag, setIsCreatingTag] = useState(false);
   const [isEditTagMode, setIsEditTagMode] = useState(false);
   const [editingTagId, setEditingTagId] = useState('');
+  const [showPinLogin, setShowPinLogin] = useState(false);
   const [isCreateCustomerOpen, setIsCreateCustomerOpen] = useState(false);
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
   const [isEditCustomerMode, setIsEditCustomerMode] = useState(false);
@@ -111,9 +120,21 @@ export const IndividualInvoicesAdd: React.FC<
   });
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const orderSchema = useSelector((state: any) => state.orderSchema);
+  const currentCashier = useSelector((state: any) => state.posCashier?.currentCashier);
+  const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
+  const parkedOrdersKey = `pos_parked_orders_v1_${branchId || 'default'}`;
   const selectedCustomerId = orderSchema?.customer_id;
   const [selectedCartItemId, setSelectedCartItemId] = useState<string | null>(null);
+  const [isEditItemOpen, setIsEditItemOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (orderSchema?.discount_amount) {
+      setDiscountValue(String(orderSchema.discount_amount));
+      setDiscountType('fixed');
+    }
+  }, []); // Run only on mount to restore from Redux if available
 
   const { data: tagsData } = createCrudService<any>(
     'manage/tags?perPage=100'
@@ -160,7 +181,7 @@ export const IndividualInvoicesAdd: React.FC<
   );
   const cartTotal = cardItemValue.reduce(
     (acc: number, item: any) =>
-      acc + Number(item?.price || 0) * Number(item?.qty || 0),
+      acc + (Number(item?.price || 0) * Number(item?.qty || 0) - (Number(item?.discount_amount || 0) * Number(item?.qty || 0))),
     0
   );
   const { data: settingsData } =
@@ -168,16 +189,51 @@ export const IndividualInvoicesAdd: React.FC<
   const { data: taxesData } = createCrudService<any>('manage/taxes').useGetAll();
   const vatRate = Number(taxesData?.data?.[0]?.rate || 15);
   const isTaxInclusive = Boolean(settingsData?.data?.tax_inclusive_pricing);
-  const subtotalAmountBeforeDiscount = isTaxInclusive
-    ? cartTotal / (1 + vatRate / 100)
-    : cartTotal;
-  const discountOnSubtotal = isTaxInclusive
-    ? discountAmount / (1 + vatRate / 100)
-    : discountAmount;
-  const subtotalAmount = Math.max(
-    0,
-    subtotalAmountBeforeDiscount - discountOnSubtotal
-  );
+  
+  const dispatch = useDispatch();
+
+  const subtotalAmountBeforeDiscount = useMemo(() => {
+    return cardItemValue.reduce((acc: number, item: any) => {
+        const itemTotal = (Number(item.price || 0) * Number(item.qty || 0)) - 
+                          (Number(item.discount_amount || 0) * Number(item.qty || 0));
+        return acc + itemTotal;
+    }, 0);
+  }, [cardItemValue]);
+
+  // Use discountAmount from the memoized calculation
+  // const [discountAmount, setDiscountAmount] = useState(0); // This was causing the conflict/error because it was commented out but referred to.
+  // Re-declared to satisfy linter if needed, but logic uses the memoized variable above.
+  
+  const discountAmount = useMemo(() => {
+      const base = isTaxInclusive
+        ? subtotalAmountBeforeDiscount
+        : subtotalAmountBeforeDiscount; // Logic depends on tax settings, simplifying for now
+      
+      const val = Number(discountValue || 0);
+      if (val <= 0) return 0;
+
+      let calculated = 0;
+      if (discountType === 'percent') {
+          calculated = (base * val) / 100;
+      } else {
+          calculated = val;
+      }
+      return Math.min(calculated, base);
+  }, [subtotalAmountBeforeDiscount, discountValue, discountType, isTaxInclusive]);
+
+  // Sync to Redux
+  useEffect(() => {
+      if(dispatch) {
+        dispatch(updateField({ field: 'discount_amount', value: discountAmount }));
+      }
+  }, [discountAmount, dispatch]);
+
+  const subtotalAmount = useMemo(() => {
+    const sub = isTaxInclusive
+      ? (subtotalAmountBeforeDiscount - discountAmount) / (1 + vatRate / 100)
+      : subtotalAmountBeforeDiscount - discountAmount;
+    return Math.max(0, sub);
+  }, [subtotalAmountBeforeDiscount, discountAmount, isTaxInclusive, vatRate]);
   const vatAmount = subtotalAmount * (vatRate / 100);
   const grandTotal = subtotalAmount + vatAmount;
   const visibleProducts = useMemo(() => {
@@ -372,26 +428,27 @@ export const IndividualInvoicesAdd: React.FC<
     }
   }, [startTour]);
 
-  const dispatch = useDispatch();
-  useEffect(() => {
-    // dispatch(resetCard());
-    dispatch(resetOrder());
-  }, [dispatch]);
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem(PARKED_ORDERS_KEY);
-      if (!saved) return;
+      const saved = window.localStorage.getItem(parkedOrdersKey);
+      if (!saved) {
+        setParkedOrders([]);
+        return;
+      }
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) {
         setParkedOrders(parsed);
+      } else {
+        setParkedOrders([]);
       }
     } catch {
       setParkedOrders([]);
     }
-  }, []);
+  }, [parkedOrdersKey]);
   useEffect(() => {
-    window.localStorage.setItem(PARKED_ORDERS_KEY, JSON.stringify(parkedOrders));
-  }, [parkedOrders]);
+    window.localStorage.setItem(parkedOrdersKey, JSON.stringify(parkedOrders));
+    // parkedOrdersKey intentionally omitted: when branch changes, load effect updates parkedOrders first; save runs on next render with correct key
+  }, [parkedOrders]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     dispatch(
       updateField({
@@ -427,12 +484,138 @@ export const IndividualInvoicesAdd: React.FC<
             image: product.image || product.images || '',
             price: Number(product.price || 0),
             qty: incrementBy,
+            discount_value: 0,
+            discount_type: 'fixed',
+            discount_amount: 0,
           },
         ])
       );
     },
     [dispatch, store]
   );
+
+  // Deprecated in favor of modal editing, keeping for compatibility if needed
+  const updateCartItemDiscount = (id: string, value: string, type: 'fixed' | 'percent') => {
+    // ... logic moved to modal
+  };
+
+  // Numpad Logic for Item Edit
+  const handleNumpadInput = (key: string) => {
+    if (!editingItem) return;
+
+    // Determine target field and current value
+    const targetField = editingItem._activeField || 'qty'; // Default to qty if not set
+    const isDiscountValue = targetField === 'discount_value';
+    const currentValue = String(editingItem[targetField] || (isDiscountValue ? '' : '0'));
+
+    let nextValue = currentValue;
+
+    if (key === 'backspace') {
+      nextValue = currentValue.length > 1 ? currentValue.slice(0, -1) : (isDiscountValue ? '' : '0');
+    } else if (key === 'clear') {
+      nextValue = isDiscountValue ? '' : '0';
+    } else if (key === '+10' || key === '+20' || key === '+50') {
+        const increment = Number(key.replace('+', ''));
+        const currentNum = Number(currentValue || 0);
+        // If discount type is percent, cap at 100? or let it be flexible
+        if (isDiscountValue && editingItem.discount_type === 'percent' && (currentNum + increment > 100)) {
+             nextValue = '100';
+        } else {
+             nextValue = String(currentNum + increment);
+        }
+    } else if (key === '.') {
+      if (!currentValue.includes('.')) {
+        nextValue = currentValue + '.';
+      }
+    } else {
+      // Append number
+      if (currentValue === '0' && key !== '.') {
+        nextValue = key;
+      } else {
+        nextValue = currentValue + key;
+      }
+    }
+
+    updateEditingItem(targetField, nextValue);
+  };
+
+  const setActiveField = (field: string) => {
+    setEditingItem((prev: any) => ({ ...prev, _activeField: field }));
+  };
+
+  const openEditItemModal = (item: any) => {
+    setEditingItem({
+        ...item,
+        discount_type: item.discount_type || 'fixed',
+        discount_value: item.discount_value || 0,
+        _activeField: 'qty' // Start editing quantity by default
+    });
+    setIsEditItemOpen(true);
+  };
+
+  const handleSaveEditItem = () => {
+    if (!editingItem) return;
+    
+    const latestCardItems = store.getState()?.cardItems?.value || [];
+    const updatedItems = latestCardItems.map((item: any) => {
+        if (item.id === editingItem.id) {
+             const price = Number(item.price || 0);
+             const qty = Number(editingItem.qty || 0);
+             const numericValue = Number(editingItem.discount_value || 0);
+             let calculatedPerUnit = 0;
+
+              if (editingItem.discount_type === 'percent') {
+                calculatedPerUnit = (price * numericValue) / 100;
+              } else {
+                if (qty > 0) {
+                    calculatedPerUnit = numericValue / qty;
+                }
+              }
+              calculatedPerUnit = Math.min(calculatedPerUnit, price);
+              
+            return {
+                ...item,
+                qty: qty,
+                discount_value: numericValue,
+                discount_type: editingItem.discount_type,
+                discount_amount: Number(calculatedPerUnit.toFixed(4)),
+                note: editingItem.note // Save note
+            };
+        }
+        return item;
+    });
+    
+    dispatch(setCardItem(updatedItems));
+    setIsEditItemOpen(false);
+    setEditingItem(null);
+  };
+
+  const updateEditingItem = (field: string, value: any) => {
+    setEditingItem((prev: any) => {
+        if (!prev) return null;
+        const next = { ...prev, [field]: value };
+        
+        // Auto-calculate discount amount for preview
+        if (field === 'discount_value' || field === 'discount_type' || field === 'qty') {
+             let calculatedPerUnit = 0;
+             const numericValue = Number(next.discount_value || 0);
+             const type = next.discount_type;
+             const price = Number(next.price || 0);
+             const qty = Number(next.qty || 0);
+
+              if (type === 'percent') {
+                calculatedPerUnit = (price * numericValue) / 100;
+              } else {
+                if (qty > 0) {
+                    calculatedPerUnit = numericValue / qty;
+                }
+              }
+              calculatedPerUnit = Math.min(calculatedPerUnit, price);
+              next.discount_amount = Number(calculatedPerUnit.toFixed(4));
+        }
+        return next;
+    });
+  };
 
   const normalizeBarcode = (value: string) => value.trim().toLowerCase();
 
@@ -661,7 +844,7 @@ export const IndividualInvoicesAdd: React.FC<
     setParkedOrders((prev) => [parkedOrder, ...prev]);
     dispatch(resetOrder());
     dispatch(setCardItem([]));
-    setDiscountAmount(0);
+    setDiscountValue('0');
     showToast({
       description: t('ORDER_PARKED'),
       duration: 1800,
@@ -697,7 +880,8 @@ export const IndividualInvoicesAdd: React.FC<
     if (Array.isArray(parkedOrder.tags) && parkedOrder.tags.length > 0) {
       dispatch(updateField({ field: 'tags', value: parkedOrder.tags }));
     }
-    setDiscountAmount(Number(parkedOrder.discount_amount || 0));
+    setDiscountType('fixed');
+    setDiscountValue(String(parkedOrder.discount_amount || 0));
   };
   const deleteParkedOrder = (parkedId: string) => {
     setParkedOrders((prev) => prev.filter((order) => order.id !== parkedId));
@@ -1073,6 +1257,17 @@ export const IndividualInvoicesAdd: React.FC<
                 {t('POS')}
               </span>
             </div>
+            <button
+              type="button"
+              onClick={() => setShowPinLogin(true)}
+              className="flex items-center gap-1.5 rounded-lg border border-mainBorder bg-white px-2.5 py-1.5 text-xs font-medium text-mainText shadow-sm hover:bg-gray-50 focus:ring-1 focus:ring-main/20"
+              title={t('EMPLOYEE_LOGIN')}
+            >
+              <Lock className="h-4 w-4" />
+              <span className="max-w-[80px] truncate">
+                {currentCashier?.name || t('EMPLOYEE_LOGIN')}
+              </span>
+            </button>
           </div>
           <div className="flex flex-1 flex-col overflow-hidden p-2">
             {/* Cart Header Actions */}
@@ -1212,13 +1407,22 @@ export const IndividualInvoicesAdd: React.FC<
             {/* Parked Orders List (Collapsible/Conditional) */}
             {parkedOrders.length > 0 && (
               <div className="mb-2 max-h-[100px] space-y-1 overflow-y-auto rounded bg-orange-50/50 p-1">
-                {parkedOrders.map((order) => (
+                {parkedOrders.map((order) => {
+                  const tagLabels = (order.tags || [])
+                    .map((tag: any) =>
+                      allTagOptions.find((opt) => opt.value === (tag?.id ?? tag))?.label
+                    )
+                    .filter(Boolean);
+                  const orderLabel =
+                    order.customer_name ||
+                    (tagLabels.length > 0 ? tagLabels.join(', ') : t('GUEST'));
+                  return (
                   <div
                     key={order.id}
                     className="flex items-center justify-between rounded bg-white px-2 py-1 text-[10px] shadow-sm"
                   >
                     <div className="truncate text-mainText">
-                      <span className="font-semibold">{order.customer_name || t('GUEST')}</span>
+                      <span className="font-semibold">{orderLabel}</span>
                       <span className="mx-1 text-secText">-</span>
                       <span>SR {Number(order.total || 0).toFixed(2)}</span>
                     </div>
@@ -1241,7 +1445,8 @@ export const IndividualInvoicesAdd: React.FC<
                       </button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
@@ -1260,11 +1465,7 @@ export const IndividualInvoicesAdd: React.FC<
                   <div
                     key={item.id}
                     data-cart-item-id={item.id}
-                    onClick={() =>
-                      setSelectedCartItemId(
-                        selectedCartItemId === item.id ? null : item.id
-                      )
-                    }
+                    onClick={() => openEditItemModal(item)}
                     className={`group flex cursor-pointer items-center justify-between rounded border border-transparent px-2 py-2 transition-all hover:border-mainBorder hover:shadow-sm ${
                       selectedCartItemId === item.id ? 'bg-blue-50/50' : 'bg-white'
                     }`}
@@ -1284,13 +1485,28 @@ export const IndividualInvoicesAdd: React.FC<
                         <span className="font-semibold text-main">
                           SR {Number(item.price || 0).toFixed(2)}
                         </span>
-                        <span className="mx-1 h-3 w-[1px] bg-gray-200"></span>
-                        <span className="font-bold text-mainText">
-                          SR {(Number(item.price || 0) * Number(item.qty || 0)).toFixed(2)}
-                        </span>
+                        {item.discount_amount > 0 && (
+                          <span className="rounded bg-emerald-50 px-1 font-semibold text-emerald-600">
+                             -{Number(item.discount_amount).toFixed(2)}
+                          </span>
+                        )}
                       </div>
                     </div>
 
+                    <div className="text-right flex flex-col items-end shrink-0 ms-2">
+                       <div className="text-sm font-bold text-mainText">
+                          SR {(
+                            (Number(item.price || 0) * Number(item.qty || 0)) - 
+                            (Number(item.discount_amount || 0) * Number(item.qty || 0))
+                          ).toFixed(2)}
+                       </div>
+                       {item.discount_amount > 0 && (
+                         <div className="text-[10px] text-secText line-through decoration-red-400 decoration-1">
+                           SR {(Number(item.price || 0) * Number(item.qty || 0)).toFixed(2)}
+                         </div>
+                       )}
+                    </div>
+                    
                     <div
                       className={`flex items-center gap-2 transition-opacity duration-200 ${
                         selectedCartItemId === item.id
@@ -1299,39 +1515,12 @@ export const IndividualInvoicesAdd: React.FC<
                       }`}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {/* Compact Quantity Control */}
-                      <div className="flex h-7 items-center overflow-hidden rounded-md border border-mainBorder bg-gray-50">
-                        <button
-                          type="button"
-                          onClick={() => adjustCartItemQty(item.id, 1)}
-                          className="flex h-full w-7 items-center justify-center text-secText transition-colors hover:bg-white hover:text-mainText active:bg-gray-100"
-                        >
-                          +
-                        </button>
-                        <div className="h-full w-[1px] bg-mainBorder" />
-                        <Input
-                          type="number"
-                          min={0}
-                          value={item.qty}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setCartItemQty(item.id, e.target.value)
-                          }
-                          className="!h-full !w-[40px] !min-w-[40px] rounded-none border-0 bg-white px-0 text-center text-xs font-semibold focus-visible:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                        />
-                        <div className="h-full w-[1px] bg-mainBorder" />
-                        <button
-                          type="button"
-                          onClick={() => adjustCartItemQty(item.id, -1)}
-                          className="flex h-full w-7 items-center justify-center text-secText transition-colors hover:bg-white hover:text-mainText active:bg-gray-100"
-                        >
-                          -
-                        </button>
-                      </div>
-
-                      {/* Delete Icon */}
                       <button
                         type="button"
-                        onClick={() => removeCartItem(item.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeCartItem(item.id);
+                        }}
                         className="flex h-7 w-7 items-center justify-center rounded-md text-secText opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
                         title={t('DELETE')}
                       >
@@ -1357,22 +1546,45 @@ export const IndividualInvoicesAdd: React.FC<
                 </span>
               </div>
               <div className="flex items-center justify-between py-1">
-                <span className="text-secText">{t('DISCOUNT')}</span>
-                <div className="w-[120px]">
+                <div className="flex items-center gap-2">
+                  <span className="text-secText">{t('DISCOUNT')}</span>
+                  <div className="flex h-6 w-fit items-center overflow-hidden rounded border border-mainBorder bg-white">
+                    <button
+                      type="button"
+                      onClick={() => setDiscountType('fixed')}
+                      className={`h-full px-2 text-[10px] font-bold transition-colors ${
+                        discountType === 'fixed'
+                          ? 'bg-blue-600 text-white'
+                          : 'text-gray-500 hover:bg-gray-50'
+                      }`}
+                    >
+                      SR
+                    </button>
+                    <div className="h-full w-[1px] bg-mainBorder" />
+                    <button
+                      type="button"
+                      onClick={() => setDiscountType('percent')}
+                      className={`h-full px-2 text-[10px] font-bold transition-colors ${
+                        discountType === 'percent'
+                          ? 'bg-emerald-600 text-white'
+                          : 'text-gray-500 hover:bg-gray-50'
+                      }`}
+                    >
+                      %
+                    </button>
+                  </div>
+                </div>
+                <div className="w-[100px]">
                   <Input
                     type="text"
                     inputMode="decimal"
-                    value={discountAmount}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const normalized = e.target.value.replace(',', '.');
-                      const requested = Math.max(0, Number(normalized || 0));
-                      const maxAllowed = isTaxInclusive
-                        ? cartTotal
-                        : subtotalAmountBeforeDiscount;
-                      const clamped = Math.min(requested, maxAllowed);
-                      setDiscountAmount(Number(clamped.toFixed(2)));
+                    value={discountValue}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9.]/g, '');
+                      setDiscountValue(val);
                     }}
-                    className="!h-8 !w-[88px] !min-w-[88px] px-2 text-right"
+                    className="!h-8 !w-full px-2 text-right"
+                    placeholder={discountType === 'percent' ? '%' : 'SR'}
                   />
                 </div>
               </div>
@@ -1391,7 +1603,12 @@ export const IndividualInvoicesAdd: React.FC<
             <Button
               id="tour-payment"
               type="button"
-              onClick={() => navigate('shop-card')}
+              onClick={() => {
+                if (isEditItemOpen && editingItem) {
+                  handleSaveEditItem();
+                }
+                navigate('shop-card');
+              }}
               disabled={cardItemValue.length === 0}
               className="mt-2 h-12 w-full text-base font-semibold"
             >
@@ -1401,7 +1618,217 @@ export const IndividualInvoicesAdd: React.FC<
         </div>
 
         {/* Right Side: Products Grid */}
-        <div className="flex h-full flex-1 flex-col overflow-hidden bg-gray-50/50">
+        <div className="flex h-full flex-1 flex-col overflow-hidden bg-gray-50/50 relative">
+          {isEditItemOpen && editingItem ? (
+            <div className="flex h-full w-full overflow-hidden bg-[#F8F9FD] p-6 relative">
+                <div className="mx-auto grid h-full w-full gap-6 md:grid-cols-12 max-w-7xl">
+            
+              {/* Right Column (Inputs) - Matches Payment Page Logic (Numpad + Selectors) */}
+              <div className="flex h-full flex-col gap-4 md:col-span-8">
+                 {/* Selectors - Replacing Payment Methods */}
+                 <div className="grid grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setActiveField('qty')}
+                      className={`relative flex h-[110px] flex-col items-center justify-center gap-1 rounded-2xl border transition-all shadow-sm active:scale-95 overflow-hidden group ${
+                        editingItem?._activeField === 'qty'
+                          ? 'bg-[#5D5FEF] text-white ring-2 ring-offset-1 ring-[#5D5FEF] border-transparent'
+                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-[#5D5FEF]/30'
+                      }`}
+                    >
+                      <span className={`text-sm font-bold uppercase tracking-wider ${editingItem?._activeField === 'qty' ? 'text-white/80' : 'text-gray-400'}`}>
+                        {t('QUANTITY')}
+                      </span>
+                      <span className="text-5xl font-black tracking-tight leading-none mt-1">
+                        {editingItem?.qty || 0}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveField('discount_value')}
+                      className={`relative flex h-[110px] flex-col items-center justify-center gap-1 rounded-2xl border transition-all shadow-sm active:scale-95 overflow-hidden group ${
+                        editingItem?._activeField === 'discount_value'
+                          ? 'bg-[#5D5FEF] text-white ring-2 ring-offset-1 ring-[#5D5FEF] border-transparent'
+                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-[#5D5FEF]/30'
+                      }`}
+                    >
+                      <span className={`text-sm font-bold uppercase tracking-wider ${editingItem?._activeField === 'discount_value' ? 'text-white/80' : 'text-gray-400'}`}>
+                        {t('DISCOUNT')}
+                      </span>
+                      <div className="flex items-baseline gap-1 mt-1">
+                        <span className="text-5xl font-black tracking-tight leading-none">
+                          {editingItem?.discount_value || 0}
+                        </span>
+                        <span className="text-lg font-bold opacity-60">
+                          {editingItem?.discount_type === 'percent' ? '%' : t('SAR', 'SR')}
+                        </span>
+                      </div>
+                    </button>
+                 </div>
+
+                 {/* Discount Type Toggles (Only visible when Discount is active) */}
+                 {editingItem?._activeField === 'discount_value' && (
+                    <div className="grid grid-cols-2 gap-4">
+                       <button
+                         type="button"
+                         onClick={(e) => { e.stopPropagation(); updateEditingItem('discount_type', 'fixed'); }}
+                         className={`flex h-[80px] items-center justify-center rounded-xl border text-xl font-bold transition-all shadow-sm active:scale-95 ${
+                           editingItem?.discount_type !== 'percent'
+                             ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-offset-1 ring-blue-200'
+                             : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
+                         }`}
+                       >
+                         {t('SAR', 'SR')}
+                       </button>
+                       <button
+                         type="button"
+                         onClick={(e) => { e.stopPropagation(); updateEditingItem('discount_type', 'percent'); }}
+                         className={`flex h-[80px] items-center justify-center rounded-xl border text-xl font-bold transition-all shadow-sm active:scale-95 ${
+                           editingItem?.discount_type === 'percent'
+                             ? 'bg-emerald-600 text-white border-emerald-600 ring-2 ring-offset-1 ring-emerald-200'
+                             : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                         }`}
+                       >
+                         %
+                       </button>
+                    </div>
+                 )}
+
+                 {/* Note Input */}
+                 <div className="mt-4">
+                    <label className="mb-2 block text-sm font-bold text-gray-700">{t('NOTES')}</label>
+                    <textarea
+                      rows={2}
+                      className="w-full rounded-xl border border-gray-200 p-3 text-sm focus:border-[#5D5FEF] focus:outline-none focus:ring-1 focus:ring-[#5D5FEF]"
+                      placeholder={t('ADD_NOTE_PLACEHOLDER')}
+                      value={editingItem?.note || ''}
+                      onChange={(e) => updateEditingItem('note', e.target.value)}
+                    />
+                 </div>
+
+                 {/* Numpad */}
+                 <div className="mt-auto grid shrink-0 grid-cols-4 gap-4 h-full max-h-[420px]" dir="ltr">
+                    {['1', '2', '3', '+10', '4', '5', '6', '+20', '7', '8', '9', '+50', '.', '0', 'C', 'backspace'].map((key) => {
+                      const isQuickAction = ['+10', '+20', '+50'].includes(key);
+                      const isDelete = key === 'backspace';
+                      const isClear = key === 'C';
+                      
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                             if (key === 'backspace') { handleNumpadInput('backspace'); return; }
+                             if (key === 'C') { handleNumpadInput('clear'); return; }
+                             if (key === '+10') { handleNumpadInput('+10'); return; }
+                             if (key === '+20') { handleNumpadInput('+20'); return; }
+                             if (key === '+50') { handleNumpadInput('+50'); return; }
+                             handleNumpadInput(key);
+                          }}
+                          className={`flex items-center justify-center rounded-xl text-2xl font-bold shadow-sm transition-all active:scale-95 border ${
+                             isDelete
+                               ? 'bg-red-50 text-red-600 border-red-100 hover:bg-red-100'
+                               : isClear
+                               ? 'bg-orange-50 text-orange-600 border-orange-100 hover:bg-orange-100'
+                               : isQuickAction
+                               ? 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 text-xl'
+                               : 'bg-white border-gray-100 text-gray-800 hover:border-main/30'
+                          }`}
+                        >
+                          {isDelete ? <X className="h-8 w-8" /> : key}
+                        </button>
+                      );
+                    })}
+                 </div>
+              </div>
+
+              {/* Left Column (Info & Actions) - Matches Payment Page Amount & Confirm */}
+              <div className="flex h-full flex-col gap-4 md:col-span-4">
+                {/* Product Info & Amount Box */}
+                <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                   <div className="border-b border-gray-100 p-6 bg-gray-50/10">
+                      <h3 className="text-xl font-bold text-mainText line-clamp-2 text-center mb-2" title={editingItem?.name}>{editingItem?.name}</h3>
+                      <div className="text-center text-sm font-medium text-secText">
+                        {t('UNIT_PRICE')}: <span className="font-bold text-main">SR {Number(editingItem?.price || 0).toFixed(2)}</span>
+                      </div>
+                   </div>
+
+                   <div className="flex shrink-0 flex-col items-center justify-center p-6 text-center flex-1 bg-white relative">
+                      {editingItem?.image ? (
+                        <div className="relative h-56 w-56 overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-white mb-6 transform transition-transform hover:scale-105 duration-300">
+                          <img 
+                            src={editingItem.image.startsWith('http') ? editingItem.image : `${settingsData?.data?.domain || ''}${editingItem.image}`} 
+                            alt={editingItem.name} 
+                            className="h-full w-full object-contain p-2"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                              (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                          <div className="hidden absolute inset-0 flex items-center justify-center bg-gray-50 text-gray-300">
+                             <ImageIcon className="h-20 w-20" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex h-56 w-56 items-center justify-center rounded-2xl bg-white border border-gray-100 shadow-sm text-gray-300 mb-6">
+                          <ImageIcon className="h-20 w-20" />
+                        </div>
+                      )}
+                      
+                      <div className="flex flex-col items-center w-full">
+                         <div className="text-4xl font-bold text-[#5D5FEF] tracking-tight">
+                           SR {(
+                             (Number(editingItem?.price || 0) * Number(editingItem?.qty || 0)) - 
+                             (Number(editingItem?.discount_amount || 0) * Number(editingItem?.qty || 0))
+                           ).toFixed(2)}
+                         </div>
+                         {Number(editingItem?.discount_amount) > 0 && (
+                            <div className="mt-2 rounded-lg bg-emerald-50 px-3 py-1 text-sm font-bold text-emerald-600 border border-emerald-100">
+                              {t('SAVING')} {Number(editingItem.discount_amount * editingItem.qty).toFixed(2)} SR
+                            </div>
+                         )}
+                      </div>
+                   </div>
+                </div>
+
+                {/* Actions */}
+                <div className="grid grid-cols-12 gap-3">
+                   <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        removeCartItem(editingItem?.id);
+                        setIsEditItemOpen(false);
+                      }}
+                      className="col-span-4 h-[70px] rounded-xl border-red-100 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-200 font-bold text-lg bg-white"
+                    >
+                      <Trash2 className="mr-2 h-6 w-6" />
+                      {t('DELETE')}
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleSaveEditItem}
+                      className="col-span-8 h-[70px] rounded-xl bg-[#5D5FEF] text-2xl font-bold text-white shadow-lg shadow-indigo-200 hover:bg-[#4B4DDB] active:scale-[0.98]"
+                    >
+                      {t('SAVE')}
+                    </Button>
+                </div>
+              </div>
+              
+            </div>
+            
+            {/* Close Button Absolute - Left Side */}
+             <button
+              type="button"
+              onClick={() => setIsEditItemOpen(false)}
+              className="absolute top-6 left-6 rounded-full bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors shadow-sm ring-1 ring-gray-100 z-10"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+          ) : (
+            <>
           {/* Odoo-style Header: Compact & Clean */}
           <div className="z-10 flex w-full flex-col border-b border-mainBorder bg-white shadow-sm">
             {/* Top Row: Navigation & Search */}
@@ -1530,6 +1957,8 @@ export const IndividualInvoicesAdd: React.FC<
               </div>
             )}
           </div>
+          </>
+          )}
         </div>
       </div>
       <ConfirmBk
@@ -1721,6 +2150,10 @@ export const IndividualInvoicesAdd: React.FC<
           </div>
         </AlertDialogContentComp>
       </AlertDialogComp>
+
+      {showPinLogin && (
+        <PinLoginScreen onClose={() => setShowPinLogin(false)} />
+      )}
     </>
   );
 };

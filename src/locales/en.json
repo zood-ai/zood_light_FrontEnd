@@ -475,6 +475,12 @@
   "NO_CUSTOMER_SELECTED_EDIT": "Select a customer first to edit",
   "CREATE_NEW_ORDER_TAG": "Create new classification",
   "ENTER_NEW_ORDER_TAG_NAME": "Enter new order classification name",
+  "EMPLOYEE_LOGIN": "Employee Login",
+  "EMPLOYEE_LOGIN_DESC": "Enter employee PIN",
+  "ENTER_PIN_TO_SWITCH": "Enter PIN to switch between employees",
+  "PIN_INVALID": "Invalid PIN",
+  "PIN_INVALID_LENGTH": "Enter 4 digits",
+  "PIN_LOGIN_SUCCESS": "Logged in successfully",
   "HELP_TOUR": "System Tour",
   "POS_EXIT": "Exit POS",
   "POS_CART_EMPTY": "Cart is empty",
@@ -494,5 +500,10 @@
   "BASIC_INFO": "Basic Information",
   "PAYMENT_AMOUNT": "Total",
   "REMAINING": "Remaining",
-  "CART_ITEMS": "Sales Cart"
+  "CART_ITEMS": "Sales Cart",
+  "PAYMENT": "Payment",
+  "UNIT_PRICE": "Unit Price",
+  "SAVING": "Saving",
+  "ADD_NOTE_PLACEHOLDER": "Add a note...",
+  "CUSTOMER": "Customer"
 }

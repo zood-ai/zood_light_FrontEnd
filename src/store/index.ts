@@ -6,6 +6,7 @@ import toggleAction from './slices/toggleAction';
 import cardItemsSlice from './slices/cardItems';
 import orderSchemaSlice from './slices/orderSchema';
 import allSettings from './slices/allSettings';
+import posCashierSlice from './slices/posCashierSlice';
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     cardItems: cardItemsSlice,
     orderSchema: orderSchemaSlice,
     allSettings: allSettings,
+    posCashier: posCashierSlice,
   },
 });
 

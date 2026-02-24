@@ -11,7 +11,7 @@ export default function SignUp() {
   const { showToast } = useToast();
   const [formState, setFormState] = useState({
     name: '',
-    package_id: '830f735a-eb95-4592-a61c-e78b2b2e8a4b',
+    package_id: '30027a7b-faa4-4fcc-9cae-53f1596b76a3',
     email: '',
     phone: '',
     password: '',
@@ -22,7 +22,7 @@ export default function SignUp() {
     streetName: '',
     postalCode: '',
     business_type_id: '',
-    business_location_id: '70c4bc20-1fe4-48b2-87c5-26407fe09cde',
+    business_location_id: '',
     tradeRegister: null,
     emailAlert: false,
   });
@@ -39,7 +39,22 @@ export default function SignUp() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ businessType: formState.business_location_id });
+    if (!formState.business_type_id) {
+      showToast({
+        description: 'يرجى اختيار نوع المتجر',
+        duration: 4000,
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (!formState.business_location_id) {
+      showToast({
+        description: 'يرجى اختيار الدولة',
+        duration: 4000,
+        variant: 'destructive',
+      });
+      return;
+    }
     const myFormData = new FormData();
     myFormData.append('name', formState.name);
     myFormData.append('email', formState.email);
@@ -48,11 +63,11 @@ export default function SignUp() {
     myFormData.append('business_type_id', formState.business_type_id);
     myFormData.append(
       'business_location_id',
-      formState.business_location_id ?? 'a2968fb8-28e8-4818-9bf6-33671265c09d'
+      formState.business_location_id
     );
     myFormData.append(
       'package_id',
-      formState.package_id ?? '830f735a-eb95-4592-a61c-e78b2b2e8a4b'
+      formState.package_id ?? '30027a7b-faa4-4fcc-9cae-53f1596b76a3'
     );
     myFormData.append('phone', formState.phone);
     setLoading(true);
@@ -61,8 +76,15 @@ export default function SignUp() {
       setResponseData(res.data);
       // changeStep();
     } catch (e: any) {
+      const data = e?.response?.data;
+      let description = data?.message || 'حدث خطأ ما';
+      if (data?.errors) {
+        const firstKey = Object.keys(data.errors)[0];
+        const firstError = data.errors[firstKey]?.[0];
+        if (firstError) description = firstError;
+      }
       showToast({
-        description: e?.response?.data?.message || 'حدث خطأ ما',
+        description,
         duration: 4000,
         variant: 'destructive',
       });

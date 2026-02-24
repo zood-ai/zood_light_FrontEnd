@@ -152,8 +152,10 @@ axiosInstance.interceptors.response.use(
     setGlobalLoading(false);
 
     if (error.response?.status === 401) {
+      const backendMessage = error.response?.data?.message || '';
+      const message = backendMessage || 'Unauthorized access - token expired.';
       if (!window.location.pathname.includes('/zood-login')) {
-        showToast('Error', 'Unauthorized access - token expired.');
+        showToast('خطأ في المصادقة', message);
       }
       removeToken();
       if (!window.location.pathname.includes('/zood-login')) {
