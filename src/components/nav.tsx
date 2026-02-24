@@ -44,16 +44,19 @@ export default function Nav({
   const allSettings = useSelector((state: any) => state.allSettings.value);
   const isRtl = useDirection();
   if (!user) return;
+  const isOwner = allSettings?.WhoAmI?.user?.is_owner ?? allSettings?.WhoAmI?.is_owner;
+  const userPermissions = allSettings?.WhoAmI?.user?.roles
+    ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
+    ?? [];
+
   const renderLink = ({ sub, ...rest }: SideLink) => {
     const key = `${rest.i18n}-${rest.href}`;
     const hasPermission =
-      rest.authorities?.length > 0
-        ? rest.authorities.every((permission) =>
-            allSettings?.WhoAmI?.user?.roles
-              ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
-              ?.includes(permission)
-          )
-        : true;
+      isOwner || rest.authorities?.length === 0
+        ? true
+        : rest.authorities!.every((permission) =>
+            userPermissions.includes(permission)
+          );
 
     if (!hasPermission) {
       return;
@@ -75,13 +78,11 @@ export default function Nav({
       let hasSubPermission = false;
       sub?.forEach((s: any) => {
         hasSubPermission =
-          s.authorities?.length > 0
-            ? s.authorities.every((permission) =>
-                allSettings?.WhoAmI?.user?.roles
-                  ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
-                  ?.includes(permission)
-              )
-            : true;
+          isOwner || !(s.authorities?.length > 0)
+            ? true
+            : s.authorities.every((permission: string) =>
+                userPermissions.includes(permission)
+              );
         if (hasSubPermission) return;
       });
       if (!hasSubPermission) {
@@ -210,6 +211,10 @@ function NavLinkDropdown({
   const isChildActive = !!sub?.find((s) => checkActiveNav(s.href));
   const isRtl = useDirection();
   const allSettings = useSelector((state: any) => state.allSettings.value);
+  const isOwner = allSettings?.WhoAmI?.user?.is_owner ?? allSettings?.WhoAmI?.is_owner;
+  const userPermissions = allSettings?.WhoAmI?.user?.roles
+    ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
+    ?? [];
 
   const triggerIcon = isChildActive ? icon2 || icon1 || icon : icon1 || icon2 || icon;
   return (
@@ -261,13 +266,11 @@ function NavLinkDropdown({
         >
           {sub!.map((sublink: any) => {
             const hasPermission =
-              sublink?.authorities?.length > 0
-                ? sublink?.authorities.every((permission) =>
-                    allSettings?.WhoAmI?.user?.roles
-                      ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
-                      ?.includes(permission)
-                  )
-                : true;
+              isOwner || !(sublink?.authorities?.length > 0)
+                ? true
+                : sublink.authorities.every((permission: string) =>
+                    userPermissions.includes(permission)
+                  );
 
             if (!hasPermission) {
               return;
