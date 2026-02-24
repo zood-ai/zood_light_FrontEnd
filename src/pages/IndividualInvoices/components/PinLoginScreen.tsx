@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import useDirection from '@/hooks/useDirection';
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,9 +17,13 @@ const PIN_LENGTH = 4;
 
 interface PinLoginScreenProps {
   onClose: () => void;
+  /** When true, cancel is hidden - user must enter PIN to unlock */
+  isLockScreen?: boolean;
+  /** When true, show "Employee Login" messaging; when false, show "Screen Locked" */
+  isInitialLogin?: boolean;
 }
 
-export default function PinLoginScreen({ onClose }: PinLoginScreenProps) {
+export default function PinLoginScreen({ onClose, isLockScreen = false, isInitialLogin = false }: PinLoginScreenProps) {
   const { t } = useTranslation();
   const isRtl = useDirection();
   const dispatch = useDispatch();
@@ -27,10 +31,29 @@ export default function PinLoginScreen({ onClose }: PinLoginScreenProps) {
   const [pinValue, setPinValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const isSubmittingRef = useRef(false);
 
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const branchId =
     orderSchema?.branch_id || Cookies.get('branch_id') || '';
+  const [prefetchedBranchId, setPrefetchedBranchId] = useState<string>('');
+
+  // Pre-fetch branches when modal opens if branch_id is missing (avoids delay on submit)
+  useEffect(() => {
+    if (branchId) return;
+    let cancelled = false;
+    axiosInstance.get('manage/branches').then(({ data }) => {
+      if (!cancelled) {
+        const firstId = data?.data?.[0]?.id;
+        if (firstId) {
+          setPrefetchedBranchId(firstId);
+          dispatch(updateField({ field: 'branch_id', value: firstId }));
+          Cookies.set('branch_id', firstId);
+        }
+      }
+    });
+    return () => { cancelled = true; };
+  }, [branchId, dispatch]);
 
   const appendDigit = useCallback(
     (digit: string) => {
@@ -53,18 +76,35 @@ export default function PinLoginScreen({ onClose }: PinLoginScreenProps) {
 
   const handleVerifyPin = useCallback(
     async (pin?: string) => {
+      if (isSubmittingRef.current) return;
       const pinToVerify = pin ?? pinValue;
       if (pinToVerify.length < PIN_LENGTH) {
         setError(t('PIN_INVALID_LENGTH') || 'Enter 4 digits');
         return;
       }
 
+      isSubmittingRef.current = true;
       setLoading(true);
       setError('');
       try {
+        let effectiveBranchId = branchId || prefetchedBranchId;
+        if (!effectiveBranchId) {
+          const { data: branchesRes } = await axiosInstance.get('manage/branches');
+          effectiveBranchId = branchesRes?.data?.[0]?.id;
+          if (effectiveBranchId) {
+            dispatch(updateField({ field: 'branch_id', value: effectiveBranchId }));
+            Cookies.set('branch_id', effectiveBranchId);
+          } else {
+            setError(t('BRANCH_REQUIRED') || 'Please select a branch first');
+            setLoading(false);
+            isSubmittingRef.current = false;
+            return;
+          }
+        }
+
         const { data } = await axiosInstance.post('auth/pos/verify-pin', {
           pin: pinToVerify,
-          branch_id: branchId,
+          branch_id: effectiveBranchId,
         });
 
         const user = data?.data?.user ?? data?.user;
@@ -88,16 +128,12 @@ export default function PinLoginScreen({ onClose }: PinLoginScreenProps) {
         const msg =
           err?.response?.data?.message || t('PIN_INVALID') || 'Invalid PIN';
         setError(msg);
-        showToast({
-          description: msg,
-          duration: 3000,
-          variant: 'destructive',
-        });
       } finally {
         setLoading(false);
+        isSubmittingRef.current = false;
       }
     },
-    [pinValue, branchId, dispatch, onClose, showToast, t]
+    [pinValue, branchId, prefetchedBranchId, dispatch, onClose, showToast, t]
   );
 
   // LTR: 1 on left, 0 centered. RTL: reverse rows so 1 stays on left (شمال), 0 centered.
@@ -116,7 +152,7 @@ export default function PinLoginScreen({ onClose }: PinLoginScreenProps) {
           <div className="flex items-center gap-3">
             <img src={SH_LOGO} alt="Logo" className="h-8 w-auto object-contain" />
             <span className="hidden text-sm font-semibold text-mainText sm:block">
-              {t('EMPLOYEE_LOGIN')}
+              {isLockScreen && !isInitialLogin ? t('SCREEN_LOCKED') : t('EMPLOYEE_LOGIN')}
             </span>
           </div>
         </div>
@@ -128,27 +164,29 @@ export default function PinLoginScreen({ onClose }: PinLoginScreenProps) {
             </div>
             <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm text-center">
               <div className="text-base font-semibold text-mainText mb-1">
-                {t('EMPLOYEE_LOGIN')}
+                {isLockScreen && !isInitialLogin ? t('SCREEN_LOCKED') : t('EMPLOYEE_LOGIN')}
               </div>
               <div className="text-sm text-secText">
-                {t('EMPLOYEE_LOGIN_DESC')}
+                {isLockScreen && !isInitialLogin ? t('SCREEN_LOCKED_DESC') : t('EMPLOYEE_LOGIN_DESC')}
               </div>
               <div className="mt-2 text-xs text-gray-400">
-                {t('ENTER_PIN_TO_SWITCH')}
+                {isLockScreen && !isInitialLogin ? t('ENTER_PIN_TO_UNLOCK') : (isInitialLogin ? t('ENTER_PIN_TO_START') : t('ENTER_PIN_TO_SWITCH'))}
               </div>
             </div>
           </div>
 
-          <div className="mt-auto border-t border-mainBorder p-4 bg-white">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="w-full h-12 text-base font-semibold text-gray-500 border-gray-200 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300"
-            >
-              <X className={`h-5 w-5 me-2 ${isRtl ? '' : 'rotate-180'}`} />
-              {t('CANCEL')}
-            </Button>
-          </div>
+          {!isLockScreen && (
+            <div className="mt-auto border-t border-mainBorder p-4 bg-white">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="w-full h-12 text-base font-semibold text-gray-500 border-gray-200 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300"
+              >
+                <X className={`h-5 w-5 me-2 ${isRtl ? '' : 'rotate-180'}`} />
+                {t('CANCEL')}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -161,18 +199,20 @@ export default function PinLoginScreen({ onClose }: PinLoginScreenProps) {
                 {t('ENTER_PIN')}
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="h-8 w-8 text-secText hover:bg-destructive/10 hover:text-destructive"
-                title={t('CANCEL')}
-              >
-                <X className={`h-4 w-4 ${isRtl ? 'rotate-180' : ''}`} />
-              </Button>
-              <div className="hidden h-6 w-[1px] bg-gray-200 sm:block" />
-            </div>
+            {!isLockScreen && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  className="h-8 w-8 text-secText hover:bg-destructive/10 hover:text-destructive"
+                  title={t('CANCEL')}
+                >
+                  <X className={`h-4 w-4 ${isRtl ? 'rotate-180' : ''}`} />
+                </Button>
+                <div className="hidden h-6 w-[1px] bg-gray-200 sm:block" />
+              </div>
+            )}
           </div>
         </div>
 
@@ -190,6 +230,7 @@ export default function PinLoginScreen({ onClose }: PinLoginScreenProps) {
                   type="numeric"
                   length={PIN_LENGTH}
                   onComplete={(pin) => handleVerifyPin(pin)}
+                  disabled={loading}
                   className="flex justify-center gap-4"
                 >
                   {Array.from({ length: PIN_LENGTH }, (_, i) => (
@@ -261,7 +302,7 @@ export default function PinLoginScreen({ onClose }: PinLoginScreenProps) {
                 className="h-[80px] w-full rounded-2xl bg-[#5D5FEF] text-2xl font-bold text-white shadow-lg shadow-indigo-200 hover:bg-[#4B4DDB] active:scale-[0.98] transition-transform"
                 onClick={() => handleVerifyPin()}
                 loading={loading}
-                disabled={pinValue.length < PIN_LENGTH}
+                disabled={loading || pinValue.length < PIN_LENGTH}
               >
                 {t('CONFIRM')}
               </Button>

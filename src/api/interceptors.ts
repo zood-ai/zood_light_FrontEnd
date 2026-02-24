@@ -105,9 +105,11 @@ const getReadableError = (error: any) => {
 
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // if (config.method === 'get') {
-    setGlobalLoading(true);
-    // }
+    const isVerifyPin = config.url?.includes('verify-pin');
+    if (!isVerifyPin) {
+      setGlobalLoading(true);
+    }
+    (config as InternalAxiosRequestConfig & { skipGlobalLoading?: boolean }).skipGlobalLoading = isVerifyPin;
 
     config.headers['Content-Type'] = 'application/json';
     config.headers['Accept'] = 'application/json';
@@ -145,11 +147,13 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
-    setGlobalLoading(false);
+    const skipLoading = (response.config as { skipGlobalLoading?: boolean }).skipGlobalLoading;
+    if (!skipLoading) setGlobalLoading(false);
     return response;
   },
   (error) => {
-    setGlobalLoading(false);
+    const skipLoading = (error.config as { skipGlobalLoading?: boolean })?.skipGlobalLoading;
+    if (!skipLoading) setGlobalLoading(false);
 
     if (error.response?.status === 401) {
       const backendMessage = error.response?.data?.message || '';
@@ -163,7 +167,9 @@ axiosInstance.interceptors.response.use(
       }
     } else {
       // remove all 404 errors like (customer not found - rout not found - etc)
-      if (error.response?.status !== 404) {
+      // skip toast for verify-pin - handled by PinLoginScreen
+      const isVerifyPin = (error.config?.url as string)?.includes('verify-pin');
+      if (error.response?.status !== 404 && !isVerifyPin) {
         const { title, description } = getReadableError(error);
         showToast(title, description);
       }

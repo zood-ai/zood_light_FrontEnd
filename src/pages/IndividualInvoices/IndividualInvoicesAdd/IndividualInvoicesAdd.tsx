@@ -34,7 +34,6 @@ import {
   PlayCircle,
   Trash2,
   Tag,
-  User,
   Plus,
   Pencil,
   X,
@@ -105,7 +104,7 @@ export const IndividualInvoicesAdd: React.FC<
   const [isCreatingTag, setIsCreatingTag] = useState(false);
   const [isEditTagMode, setIsEditTagMode] = useState(false);
   const [editingTagId, setEditingTagId] = useState('');
-  const [showPinLogin, setShowPinLogin] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const [isCreateCustomerOpen, setIsCreateCustomerOpen] = useState(false);
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
   const [isEditCustomerMode, setIsEditCustomerMode] = useState(false);
@@ -1259,12 +1258,12 @@ export const IndividualInvoicesAdd: React.FC<
             </div>
             <button
               type="button"
-              onClick={() => setShowPinLogin(true)}
+              onClick={() => setIsLocked(true)}
               className="flex items-center gap-1.5 rounded-lg border border-mainBorder bg-white px-2.5 py-1.5 text-xs font-medium text-mainText shadow-sm hover:bg-gray-50 focus:ring-1 focus:ring-main/20"
-              title={t('EMPLOYEE_LOGIN')}
+              title={currentCashier ? t('LOCK_SCREEN') : t('EMPLOYEE_LOGIN')}
             >
-              <Lock className="h-4 w-4" />
-              <span className="max-w-[80px] truncate">
+              <Lock className="h-4 w-4 shrink-0" />
+              <span className="max-w-[100px] truncate">
                 {currentCashier?.name || t('EMPLOYEE_LOGIN')}
               </span>
             </button>
@@ -2151,8 +2150,12 @@ export const IndividualInvoicesAdd: React.FC<
         </AlertDialogContentComp>
       </AlertDialogComp>
 
-      {showPinLogin && (
-        <PinLoginScreen onClose={() => setShowPinLogin(false)} />
+      {(isLocked || !currentCashier) && (
+        <PinLoginScreen
+          onClose={() => setIsLocked(false)}
+          isLockScreen={true}
+          isInitialLogin={!currentCashier}
+        />
       )}
     </>
   );
