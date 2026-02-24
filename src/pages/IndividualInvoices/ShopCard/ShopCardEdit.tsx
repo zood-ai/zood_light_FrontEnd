@@ -56,7 +56,7 @@ export const ShopCardEdit: React.FC<ShopCardProps> = () => {
         total_price: item.pivot?.total_price || 0,
         name: item.name || '',
         discount_amount: item.pivot?.discount_amount,
-        discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
+        discount_id: item.pivot?.discount_id || '',
         discount_type: item.pivot?.discount_type || 2,
       }));
 
@@ -69,7 +69,7 @@ export const ShopCardEdit: React.FC<ShopCardProps> = () => {
       quantity: item.qty || 0,
       unit_price: item.price || 0,
       discount_amount: 0,
-      discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
+      discount_id: '',
       discount_type: 2,
       total_price: item.price * item.qty || 0,
       is_tax_included: settings?.data?.tax_inclusive_pricing,

@@ -28,14 +28,15 @@ const ProtectedRoute = ({
     return <Loader className="min-h-[50vh]" />; // انتظار تحديث حالة المستخدم
   }
 
+  const isOwner = allSettings?.WhoAmI?.user?.is_owner ?? allSettings?.WhoAmI?.is_owner;
   const hasPermission =
-    requiredPermissions?.length > 0
-      ? requiredPermissions.every((permission) =>
-          allSettings?.WhoAmI?.user?.roles
-            ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
-            ?.includes(permission)
-        )
-      : true;
+    isOwner ||
+    requiredPermissions?.length === 0 ||
+    requiredPermissions.every((permission) =>
+      allSettings?.WhoAmI?.user?.roles
+        ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
+        ?.includes(permission)
+    );
 
   if (!hasPermission) {
     logout();

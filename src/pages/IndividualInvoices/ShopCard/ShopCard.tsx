@@ -58,7 +58,7 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
           quantity: item.qty || 0,
           unit_price: item.price || 0,
           discount_amount: item.discount_amount || 0,
-          discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
+          discount_id: '',
           discount_type: 2, // Always send as fixed amount to ensure currency value matches
           note: item.note || '', // Pass note if available
           total_price: itemTotal,

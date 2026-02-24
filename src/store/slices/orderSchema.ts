@@ -62,7 +62,7 @@ const initialState: OrderSchemaState = {
   discount_amount: 0,
   customer_id: '',
   discount_type: 2,
-  discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
+  discount_id: '',
 
   taxes: [
     {
