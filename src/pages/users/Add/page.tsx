@@ -181,6 +181,11 @@ const UsersAdd: React.FC = () => {
             branches: values?.branches?.map((el) => ({ id: el })) ?? [],
           };
     if (submitData?.role) delete submitData?.role;
+    // Map login_pin to pin (backend expects 'pin')
+    if (values?.login_pin) {
+      submitData.pin = values.login_pin;
+    }
+    delete submitData.login_pin;
     if (isEditMode) {
       try {
         await axiosInstance.put(`/auth/users/${params?.objId}`, submitData);

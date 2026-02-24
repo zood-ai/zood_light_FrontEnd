@@ -9,7 +9,7 @@ import { useDispatch, useSelector, useStore } from 'react-redux';
 import ConfirmBk from '@/components/custom/ConfimBk';
 import { resetOrder, updateField } from '@/store/slices/orderSchema';
 import { CardGridSkeleton } from '@/components/CardItem/components/CardGridSkeleton';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/api/interceptors';
 import { Input } from '@/components/ui/input';
 import { setCardItem } from '@/store/slices/cardItems';
@@ -122,11 +122,24 @@ export const IndividualInvoicesAdd: React.FC<
   const currentCashier = useSelector((state: any) => state.posCashier?.currentCashier);
   const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
   const parkedOrdersKey = `pos_parked_orders_v1_${branchId || 'default'}`;
+  const currentCartKey = `pos_current_cart_v1_${branchId || 'default'}`;
   const selectedCustomerId = orderSchema?.customer_id;
   const [selectedCartItemId, setSelectedCartItemId] = useState<string | null>(null);
   const [isEditItemOpen, setIsEditItemOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Prefetch payment methods so they appear instantly on the payment page
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: ['manage/payment_methods?filter[is_active]=1', {}],
+      queryFn: async () => {
+        const res = await axiosInstance.get('manage/payment_methods?filter[is_active]=1');
+        return res.data;
+      },
+    });
+  }, [queryClient]);
 
   useEffect(() => {
     if (orderSchema?.discount_amount) {
@@ -276,6 +289,36 @@ export const IndividualInvoicesAdd: React.FC<
       ...Array.from(map.entries()).map(([id, name]) => ({ id, name })),
     ];
   }, [products, categoriesData]);
+
+  // Prefetch 50 products from each category in background for instant category switching
+  const MAX_CATEGORIES_TO_PREFETCH = 15;
+  const PRODUCTS_PER_CATEGORY = 50;
+  useEffect(() => {
+    const categories = categoriesData?.data;
+    if (!Array.isArray(categories) || categories.length === 0) return;
+    const categoryIds = categories
+      .slice(0, MAX_CATEGORIES_TO_PREFETCH)
+      .map((cat: any) => String(cat.id))
+      .filter(Boolean);
+    categoryIds.forEach((catId: string) => {
+      queryClient.prefetchQuery({
+        queryKey: ['individual-invoices-products', '', 1, catId],
+        queryFn: async () => {
+          const res = await axiosInstance.get('menu/products', {
+            params: {
+              not_default: 1,
+              per_page: PRODUCTS_PER_CATEGORY,
+              page: 1,
+              sort: '-created_at',
+              'filter[category_id]': catId,
+            },
+          });
+          return res.data;
+        },
+        staleTime: 1000 * 60 * 5,
+      });
+    });
+  }, [categoriesData?.data, queryClient]);
 
   const { data: customersData } = createCrudService<any>(
     'manage/customers?perPage=100000'
@@ -448,6 +491,39 @@ export const IndividualInvoicesAdd: React.FC<
     window.localStorage.setItem(parkedOrdersKey, JSON.stringify(parkedOrders));
     // parkedOrdersKey intentionally omitted: when branch changes, load effect updates parkedOrders first; save runs on next render with correct key
   }, [parkedOrders]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Restore cart from localStorage FIRST on mount (before save overwrites it)
+  const hasRestoredCartRef = useRef(false);
+  useEffect(() => {
+    if (hasRestoredCartRef.current || cardItemValue.length > 0) return;
+    hasRestoredCartRef.current = true;
+    try {
+      const saved = window.localStorage.getItem(currentCartKey);
+      if (!saved) return;
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        dispatch(setCardItem(parsed));
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }, [currentCartKey, cardItemValue.length, dispatch]);
+
+  // Persist current cart to localStorage - skip first run to avoid overwriting before restore
+  const isFirstSaveRef = useRef(true);
+  useEffect(() => {
+    if (isFirstSaveRef.current) {
+      isFirstSaveRef.current = false;
+      return;
+    }
+    if (Array.isArray(cardItemValue)) {
+      try {
+        window.localStorage.setItem(currentCartKey, JSON.stringify(cardItemValue));
+      } catch {
+        // ignore quota or parse errors
+      }
+    }
+  }, [cardItemValue, currentCartKey]);
   useEffect(() => {
     dispatch(
       updateField({
@@ -906,9 +982,10 @@ export const IndividualInvoicesAdd: React.FC<
       } else {
         payload.name = trimmed;
       }
-      if (sampleTag && 'type' in sampleTag && sampleTag?.type) {
-        payload.type = sampleTag.type;
-      }
+      // type is required by backend - use sampleTag.type if available, else ORDER (4) for POS order tags
+      payload.type = sampleTag && 'type' in sampleTag && sampleTag?.type
+        ? sampleTag.type
+        : 4;
       if (sampleTag && 'name_ar' in sampleTag) payload.name_ar = trimmed;
       if (sampleTag && 'name_en' in sampleTag) payload.name_en = trimmed;
 
@@ -2150,11 +2227,10 @@ export const IndividualInvoicesAdd: React.FC<
         </AlertDialogContentComp>
       </AlertDialogComp>
 
-      {(isLocked || !currentCashier) && (
+      {isLocked && (
         <PinLoginScreen
           onClose={() => setIsLocked(false)}
           isLockScreen={true}
-          isInitialLogin={!currentCashier}
         />
       )}
     </>

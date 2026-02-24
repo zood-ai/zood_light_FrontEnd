@@ -106,10 +106,12 @@ const getReadableError = (error: any) => {
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const isVerifyPin = config.url?.includes('verify-pin');
-    if (!isVerifyPin) {
+    const isPosOrderCreate = config.method === 'post' && config.url?.includes('orders');
+    const skipGlobalLoading = isVerifyPin || isPosOrderCreate;
+    if (!skipGlobalLoading) {
       setGlobalLoading(true);
     }
-    (config as InternalAxiosRequestConfig & { skipGlobalLoading?: boolean }).skipGlobalLoading = isVerifyPin;
+    (config as InternalAxiosRequestConfig & { skipGlobalLoading?: boolean }).skipGlobalLoading = skipGlobalLoading;
 
     config.headers['Content-Type'] = 'application/json';
     config.headers['Accept'] = 'application/json';

@@ -21,6 +21,7 @@ import XIcons from '@/components/Icons/XIcons';
 import { Input } from '@/components/ui/input';
 import { Plus, Pencil, X, HelpCircle, LogOut, Trash2 } from 'lucide-react';
 import SH_LOGO from '@/assets/SH_LOGO.svg';
+import Cookies from 'js-cookie';
 
 type PaymentRow = {
   payment_method_id: string;
@@ -63,7 +64,7 @@ export default function POSPaymentPanel() {
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const allSettings = useSelector((state: any) => state.allSettings?.value);
 
-  const { data: paymentMethodsData } = createCrudService<any>(
+  const { data: paymentMethodsData, isLoading: paymentMethodsLoading } = createCrudService<any>(
     'manage/payment_methods?filter[is_active]=1'
   ).useGetAll();
   const { data: branchesData } =
@@ -444,25 +445,7 @@ export default function POSPaymentPanel() {
 
     try {
       setLoading(true);
-      let createdOrderResponse: any = null;
-      let lastError: unknown = null;
-
-      for (let attempt = 0; attempt < 2; attempt += 1) {
-        try {
-          createdOrderResponse = await axiosInstance.post('orders', finalOrderSchema);
-          lastError = null;
-          break;
-        } catch (error) {
-          lastError = error;
-          if (attempt === 0) {
-            await new Promise((resolve) => setTimeout(resolve, 350));
-          }
-        }
-      }
-
-      if (!createdOrderResponse) {
-        throw lastError || new Error('Order create failed');
-      }
+      const createdOrderResponse = await axiosInstance.post('orders', finalOrderSchema);
 
       const createdOrderPayload =
         createdOrderResponse?.data?.data ?? createdOrderResponse?.data ?? null;
@@ -560,6 +543,12 @@ export default function POSPaymentPanel() {
   const handlePrintReceipt = () => {
     if (!completedOrderData) return;
     const finishAndGoToPos = () => {
+      const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
+      try {
+        window.localStorage.removeItem(`pos_current_cart_v1_${branchId || 'default'}`);
+      } catch {
+        // ignore
+      }
       dispatch(setCardItem([]));
       dispatch(resetOrder());
       navigate('/zood-dashboard/individual-invoices/add');
@@ -1480,6 +1469,12 @@ export default function POSPaymentPanel() {
               type="button"
               className="h-14 text-lg"
               onClick={() => {
+                const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
+                try {
+                  window.localStorage.removeItem(`pos_current_cart_v1_${branchId || 'default'}`);
+                } catch {
+                  // ignore
+                }
                 dispatch(setCardItem([]));
                 dispatch(resetOrder());
                 navigate('/zood-dashboard/individual-invoices/add');
@@ -1726,9 +1721,17 @@ export default function POSPaymentPanel() {
               </div>
 
               {/* 2. Payment Methods - Scrollable Area */}
-              <div className="flex-1 overflow-y-auto pr-1">
+                <div className="flex-1 overflow-y-auto pr-1">
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4" id="tour-payment-methods">
-                  {paymentMethodsData?.data?.map((method: any, index: number) => {
+                  {paymentMethodsLoading ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-[80px] animate-pulse rounded-xl border border-gray-100 bg-gray-100"
+                      />
+                    ))
+                  ) : (
+                  paymentMethodsData?.data?.map((method: any, index: number) => {
                     const isActive = activePaymentMethodId === method.id;
                     const styleIndex = index % 6; // We have 6 color variants
                     
@@ -1755,7 +1758,8 @@ export default function POSPaymentPanel() {
                         <span className="line-clamp-1 px-2">{method.name}</span>
                       </button>
                     );
-                  })}
+                  })
+                  )}
                 </div>
               </div>
 
@@ -1867,7 +1871,7 @@ export default function POSPaymentPanel() {
                 onClick={submitOrder}
                 loading={loading}
               >
-                {t('CONFIRM_PAYMENT')}
+                {loading ? t('POS_FINALIZING_INVOICE') : t('CONFIRM_PAYMENT')}
               </Button>
             </div>
 
