@@ -22,7 +22,7 @@ export default function SignUp() {
     streetName: '',
     postalCode: '',
     business_type_id: '',
-    business_location_id: '70c4bc20-1fe4-48b2-87c5-26407fe09cde',
+    business_location_id: '',
     tradeRegister: null,
     emailAlert: false,
   });
@@ -39,17 +39,174 @@ export default function SignUp() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ businessType: formState.business_location_id });
+    if (!formState.business_type_id) {
+      showToast({
+        description: 'يرجى اختيار نوع المتجر',
+        duration: 4000,
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (!formState.business_location_id) {
+      showToast({
+        description: 'يرجى اختيار الدولة',
+        duration: 4000,
+        variant: 'destructive',
+      });
+      return;
+    }
     const myFormData = new FormData();
+    const ZOOD_LIGHT_PERMISSIONS_GROUPS = {
+      dashboard: {
+        name: 'Dashboard',
+        permissions: ['dashboard:inventory'],
+      },
+
+      invoices: {
+        name: 'Invoices',
+        permissions: [
+          'orders:read',
+          'orders:manage',
+          'orders:manage_tags',
+          'inventory_count:drafts:manage',
+          'inventory_count:closed:manage',
+          'inventory_items:read',
+          'inventory_items:manage',
+          'menu:read',
+          'customers:read',
+          'customers:read_insights',
+          'customers:manage_house_account',
+          'customers:manage_loyalty',
+        ],
+      },
+
+      priceQuotes: {
+        name: 'Price Quotes',
+        permissions: [
+          'po:drafts:manage',
+          'po:posted:manage',
+          'po:approved:manage',
+          'po:approved:receive',
+          'inventory_count:drafts:manage',
+          'inventory_count:closed:manage',
+          'inventory_items:read',
+          'inventory_items:manage',
+          'menu:read',
+          'customers:read',
+          'customers:read_insights',
+          'customers:manage_house_account',
+          'customers:manage_loyalty',
+        ],
+      },
+
+      purchasing: {
+        name: 'Purchasing',
+        permissions: [
+          'purchasing:drafts:manage',
+          'purchasing:closed:manage',
+          'purchasing_from_po:drafts:manage',
+          'direct_purchasing:drafts:manage',
+          'suppliers:read',
+          'inventory_count:drafts:manage',
+          'inventory_count:closed:manage',
+          'inventory_items:read',
+          'inventory_items:manage',
+          'menu:read',
+        ],
+      },
+
+      inventory: {
+        name: 'Inventory',
+        permissions: [
+          'inventory_count:drafts:manage',
+          'inventory_count:closed:manage',
+          'inventory_items:read',
+          'inventory_items:manage',
+          'menu:read',
+          'menu:manage',
+        ],
+      },
+
+      customers: {
+        name: 'Customers',
+        permissions: [
+          'customers:read',
+          'customers:read_insights',
+          'customers:manage',
+          'customers:manage_house_account',
+          'customers:manage_loyalty',
+        ],
+      },
+
+      suppliers: {
+        name: 'Suppliers',
+        permissions: ['suppliers:read', 'suppliers:manage'],
+      },
+
+      reports: {
+        name: 'Reports',
+        permissions: [
+          'reports:other',
+          'reports:inventory_control',
+          'reports:inventory_levels',
+          'reports:inventory_transactions',
+          'reports:sales',
+          'reports:cost_adjustment_history',
+          'purchasing:drafts:manage',
+          'purchasing:closed:manage',
+          'purchasing_from_po:drafts:manage',
+          'direct_purchasing:drafts:manage',
+        ],
+      },
+
+      paymentMethods: {
+        name: 'Payment Methods',
+        permissions: ['settings:manage_payment_methods'],
+      },
+
+      users: {
+        name: 'Users & Permissions',
+        permissions: ['users:manage'],
+      },
+
+      branches: {
+        name: 'Branches',
+        permissions: ['branches:manage'],
+      },
+
+      settings: {
+        name: 'Settings',
+        permissions: [
+          'settings:manage',
+          'settings:manage_taxes_and_groups',
+          'settings:manage_charges',
+          'settings:manage_tags',
+          'settings:manage_reasons',
+          'settings:manage_kitchen_flows',
+          'settings:manage_reservations',
+          'settings:manage_online_ordering',
+          'settings:manage_price_tags',
+          'settings:manage_notifications',
+        ],
+      },
+    };
     myFormData.append('name', formState.name);
     myFormData.append('email', formState.email);
     myFormData.append('password', formState.password);
     myFormData.append('business_name', formState.business_name);
     myFormData.append('business_type_id', formState.business_type_id);
-    myFormData.append(
-      'business_location_id',
-      formState.business_location_id ?? 'a2968fb8-28e8-4818-9bf6-33671265c09d'
-    );
+    myFormData.append('project', 'zood-light');
+    const permissions = [
+      ...new Set(
+        Object.values(ZOOD_LIGHT_PERMISSIONS_GROUPS).flatMap(
+          (group) => group.permissions
+        )
+      ),
+    ];
+    permissions.forEach((permission) => {
+      myFormData.append('permissions[]', permission);
+    });
+    myFormData.append('business_location_id', formState.business_location_id);
     myFormData.append(
       'package_id',
       formState.package_id ?? '830f735a-eb95-4592-a61c-e78b2b2e8a4b'
@@ -61,8 +218,15 @@ export default function SignUp() {
       setResponseData(res.data);
       // changeStep();
     } catch (e: any) {
+      const data = e?.response?.data;
+      let description = data?.message || 'حدث خطأ ما';
+      if (data?.errors) {
+        const firstKey = Object.keys(data.errors)[0];
+        const firstError = data.errors[firstKey]?.[0];
+        if (firstError) description = firstError;
+      }
       showToast({
-        description: e?.response?.data?.message || 'حدث خطأ ما',
+        description,
         duration: 4000,
         variant: 'destructive',
       });
