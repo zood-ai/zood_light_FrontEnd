@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,6 +33,18 @@ export default function SignUpForm({
   ).useGetAll();
   const { data: countries } =
     createCrudService<any>('manage/countries').useGetAll();
+  // const { data: packages } = createCrudService<any>(
+  //   'super-admin/packages?page=1&sort=asc'
+  // ).useGetAll();
+
+  // useEffect(() => {
+  //   if (packages) {
+  //     const packageData = packages.data[0];
+  //     if (packageData) {
+  //       handleChange('package_id', packageData.id);
+  //     }
+  //   }
+  // }, [packages]);
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-4xl">
       <div className="mx-auto my-8 px-4">
@@ -154,7 +166,10 @@ export default function SignUpForm({
                 options={
                   businessTypes?.data.map((e) => ({
                     value: e.id,
-                    label: e.name.length > 1 ? t(e.name?.split(' ').join('_').toUpperCase()) : t(e.name?.toUpperCase()),
+                    label:
+                      e.name.length > 1
+                        ? t(e.name?.split(' ').join('_').toUpperCase())
+                        : t(e.name?.toUpperCase()),
                   })) || []
                 }
                 placeholder="اختر نوع المتجر"
@@ -174,9 +189,7 @@ export default function SignUpForm({
             </Label>
             <Combobox
               dir="rtl"
-              value={
-                formState.business_location_id
-              }
+              value={formState.business_location_id}
               onValueChange={(value) =>
                 handleChange('business_location_id', value)
               }
