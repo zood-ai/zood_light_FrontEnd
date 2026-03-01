@@ -1,14 +1,13 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import PayDialog from './PayDialog';
-import { Permissions } from './roles';
 import { useSelector } from 'react-redux';
 import Cookies from 'js-cookie';
 import Loader from '@/components/loader';
 
 type ProtectedRouteProps = {
   children: JSX.Element;
-  requiredPermissions: Permissions[];
+  requiredPermissions: string[];
 };
 
 const ProtectedRoute = ({
@@ -28,9 +27,7 @@ const ProtectedRoute = ({
     return <Loader className="min-h-[50vh]" />; // انتظار تحديث حالة المستخدم
   }
 
-  const isOwner = allSettings?.WhoAmI?.user?.is_owner ?? allSettings?.WhoAmI?.is_owner;
   const hasPermission =
-    isOwner ||
     requiredPermissions?.length === 0 ||
     requiredPermissions.every((permission) =>
       allSettings?.WhoAmI?.user?.roles

@@ -52,95 +52,102 @@ export default function Sidebar({
         )}
         style={{ direction }}
       >
-
-      <Layout
-        fixed
-        className={
-          navOpened
+        <Layout
+          fixed
+          className={
+            navOpened
               ? 'h-svh w-[100vw] transition-all duration-300 ease-out md:w-full'
               : 'h-svh w-[100vw] transition-all duration-300 ease-out md:w-full'
-        }
-      >
-        {/* Header */}
-        <Layout.Header
-          sticky
-          style={{ direction }}
-          className="z-50 flex h-16 items-center justify-between border-b bg-background px-3 transition-all duration-300 ease-out md:px-3"
+          }
         >
-          <div
-            className={`flex items-center transition-all duration-300 ease-out ${
-              !isCollapsed ? 'gap-2' : ''
-            }`}
+          {/* Header */}
+          <Layout.Header
+            sticky
+            style={{ direction }}
+            className="z-50 flex h-16 items-center justify-between border-b bg-background px-3 transition-all duration-300 ease-out md:px-3"
           >
-            <Link to="/zood-dashboard">
-              <img
-                src={logo || ''}
-                alt="Zood Logo"
-                className={cn(
-                  'cursor-pointer object-contain transition-transform hover:scale-105',
-                  isCollapsed ? 'h-8 w-8' : 'h-10 w-auto'
-                )}
-              />
-            </Link>
             <div
-              className={`flex flex-col justify-end truncate ${
-                isCollapsed ? 'invisible w-0' : 'visible w-auto'
+              className={`flex items-center transition-all duration-300 ease-out ${
+                !isCollapsed ? 'gap-2' : ''
               }`}
             >
-              <span className="text-sm font-semibold leading-none text-main">
-                Zood Lite
-              </span>
-              <span className="text-xs text-muted-foreground">E-invoice</span>
+              <div>
+                <img
+                  src={logo || ''}
+                  alt="Zood Logo"
+                  className={cn(
+                    'cursor-pointer object-contain transition-transform hover:scale-105',
+                    isCollapsed ? 'h-8 w-8' : 'h-10 w-auto'
+                  )}
+                />
+              </div>
+              <div
+                className={`flex flex-col justify-end truncate ${
+                  isCollapsed ? 'invisible w-0' : 'visible w-auto'
+                }`}
+              >
+                <span className="text-sm font-semibold leading-none text-main">
+                  Zood Lite
+                </span>
+                <span className="text-xs text-muted-foreground">E-invoice</span>
+              </div>
             </div>
-          </div>
 
-          {/* Toggle Button in mobile */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden "
-            aria-label="Toggle Navigation"
-            aria-controls="sidebar-menu"
-            aria-expanded={navOpened}
-            onClick={() => {
-              setNavOpened((prev) => !prev);
-            }}
-          >
-            {navOpened ? <IconX /> : <IconMenu2 />}
-          </Button>
-        </Layout.Header>
+            {/* Toggle Button in mobile */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden "
+              aria-label="Toggle Navigation"
+              aria-controls="sidebar-menu"
+              aria-expanded={navOpened}
+              onClick={() => {
+                setNavOpened((prev) => !prev);
+              }}
+            >
+              {navOpened ? <IconX /> : <IconMenu2 />}
+            </Button>
+          </Layout.Header>
 
-        {/* Navigation links */}
-        <Nav
-          id="sidebar-menu"
-          className={`z-40 h-full flex-1 overflow-x-hidden transition-all duration-300 ease-out md:mt-2 ${
-            navOpened ? 'max-h-screen' : 'max-h-0 py-0 md:max-h-screen md:py-2'
-          }`}
-          closeNav={() => setNavOpened(false)}
-          isCollapsed={isCollapsed}
-          links={sidelinks}
-        />
-
-        {/* Scrollbar width toggle button */}
-        <Button
-          onClick={() => setIsCollapsed((prev) => !prev)}
-          variant="outline"
-          size="icon"
-          className={cn(
-            'absolute top-20 hidden h-8 w-8 rounded-full border bg-background shadow-sm transition-transform hover:scale-105 md:inline-flex',
-            isRtl ? '-left-4' : '-right-4'
-          )}
-          aria-label="Toggle sidebar width"
-        >
-          <IconChevronsLeft
-            size={16}
-            className={cn(
-              'transition-transform duration-300',
-              isCollapsed ? (isRtl ? 'rotate-0' : 'rotate-180') : isRtl ? 'rotate-180' : 'rotate-0'
-            )}
+          {/* Navigation links */}
+          <Nav
+            id="sidebar-menu"
+            className={`z-40 h-full flex-1 overflow-x-hidden transition-all duration-300 ease-out md:mt-2 ${
+              navOpened
+                ? 'max-h-screen'
+                : 'max-h-0 py-0 md:max-h-screen md:py-2'
+            }`}
+            closeNav={() => setNavOpened(false)}
+            isCollapsed={isCollapsed}
+            links={sidelinks}
           />
-        </Button>
-      </Layout>
+
+          {/* Scrollbar width toggle button */}
+          <Button
+            onClick={() => setIsCollapsed((prev) => !prev)}
+            variant="outline"
+            size="icon"
+            className={cn(
+              'absolute top-20 hidden h-8 w-8 rounded-full border bg-background shadow-sm transition-transform hover:scale-105 md:inline-flex',
+              isRtl ? '-left-4' : '-right-4'
+            )}
+            aria-label="Toggle sidebar width"
+          >
+            <IconChevronsLeft
+              size={16}
+              className={cn(
+                'transition-transform duration-300',
+                isCollapsed
+                  ? isRtl
+                    ? 'rotate-0'
+                    : 'rotate-180'
+                  : isRtl
+                    ? 'rotate-180'
+                    : 'rotate-0'
+              )}
+            />
+          </Button>
+        </Layout>
       </aside>
     </>
   );

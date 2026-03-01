@@ -25,6 +25,7 @@ import DelConfirm from '@/components/custom/DelConfim';
 import { ALL_PERMISSIONS, PERMISSION_GROUPS } from '../constants/Permissions';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useSelector } from 'react-redux';
+import { useAuth } from '@/context/AuthContext';
 
 const formSchema = z.object({
   name: z.string().nonempty('Role name is required'),
@@ -62,14 +63,12 @@ const RolesAdd: React.FC = () => {
   const allowedPermissionGroups = useMemo(() => {
     return Object.entries(PERMISSION_GROUPS).reduce(
       (acc, [groupKey, group]) => {
-        const filteredPermissions = group.permissions.filter((perm) =>
-          myPermissions.includes(perm)
-        );
-        if (filteredPermissions.length > 0) {
-          acc[groupKey] = {
-            ...group,
-            permissions: filteredPermissions,
-          };
+        const allPermissionsAllowed =
+          group.permissions.length > 0 &&
+          group.permissions.every((perm) => myPermissions.includes(perm));
+
+        if (allPermissionsAllowed) {
+          acc[groupKey] = group;
         }
         return acc;
       },
@@ -103,6 +102,12 @@ const RolesAdd: React.FC = () => {
     resolver: zodResolver(formSchema),
     defaultValues,
   });
+  console.log({
+    selectedPr: form.watch('authorities'),
+    myPermissions,
+    allowedPermissions,
+    allowedPermissionGroups,
+  });
 
   const [currData, setcurrData] = useState<any>({});
 
@@ -133,6 +138,7 @@ const RolesAdd: React.FC = () => {
     }
   }, [getDataById, form, isEditMode, params.objId]);
 
+  const { logout } = useAuth();
   const { openDialog } = useGlobalDialog();
 
   // Handle form submission for both add and edit scenarios
@@ -142,6 +148,12 @@ const RolesAdd: React.FC = () => {
     if (isEditMode) {
       try {
         await axiosInstance.put(`/roles/${params.objId}`, values);
+        if (
+          allSettings?.WhoAmI?.user?.roles.some((el) => el.id === params.objId)
+        ) {
+          logout();
+          return;
+        }
         openDialog('updated');
         setLoading(false);
         navigate('/zood-dashboard/roles-and-permissions');

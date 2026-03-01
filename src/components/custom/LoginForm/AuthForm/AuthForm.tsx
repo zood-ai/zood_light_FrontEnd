@@ -20,6 +20,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { getFirstAccessibleLink } from '@/hooks/getFirstAccessibleLink';
+import { useSelector } from 'react-redux';
 
 // Define the zod schema for form validation
 const formSchema = z.object({
@@ -50,13 +52,20 @@ export const AuthForm: React.FC<AuthFormProps> = () => {
     },
   });
 
+  const allSettings = useSelector((state: any) => state.allSettings.value);
   // Handle form submission
   const handleFormSubmit = async (data: AuthFormValues) => {
     setIsLoading(true);
     try {
       const x = await login(data);
       if (x.success === true) {
-        navigate('/zood-dashboard');
+        navigate(
+          getFirstAccessibleLink(
+            allSettings?.WhoAmI?.user?.roles?.flatMap((el) =>
+              el?.permissions?.map((el2) => el2.name)
+            )
+          )
+        );
       }
     } finally {
       setIsLoading(false);

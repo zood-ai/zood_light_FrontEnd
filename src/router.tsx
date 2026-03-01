@@ -308,7 +308,9 @@ const router = createBrowserRouter(
           index: true,
           element: (
             <React.Suspense fallback={<div>Loading Dashboard...</div>}>
-              <ProtectedRoute requiredPermissions={[]}>
+              <ProtectedRoute
+                requiredPermissions={rolePermissions[Roles.DASHBOARD]}
+              >
                 <DashBoard />
               </ProtectedRoute>
             </React.Suspense>
@@ -385,7 +387,7 @@ const router = createBrowserRouter(
               }
             >
               <ProtectedRoute
-                requiredPermissions={rolePermissions[Roles.SETTINGS]}
+                requiredPermissions={rolePermissions[Roles.USERS]}
               >
                 <RolesAndPermissions />
               </ProtectedRoute>
@@ -397,7 +399,7 @@ const router = createBrowserRouter(
           element: (
             <React.Suspense fallback={<div>Loading...</div>}>
               <ProtectedRoute
-                requiredPermissions={rolePermissions[Roles.SETTINGS]}
+                requiredPermissions={rolePermissions[Roles.USERS]}
               >
                 <RolesAndPermissionsAdd />
               </ProtectedRoute>
@@ -881,7 +883,7 @@ const router = createBrowserRouter(
 
     // Fallback 404 route
     { path: '*', Component: NotFoundError },
-  ],
+  ]
   // {
   //   future: {
   //     v7_startTransition: true,
