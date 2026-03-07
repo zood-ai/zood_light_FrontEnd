@@ -195,7 +195,6 @@ const UsersAdd: React.FC = () => {
     };
 
     if (submitData?.role) delete submitData?.role;
-
     if (isEditMode) {
       try {
         await axiosInstance.put(`/auth/users/${params?.objId}`, submitData);

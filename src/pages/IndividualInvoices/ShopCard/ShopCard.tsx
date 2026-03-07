@@ -51,28 +51,29 @@ export const ShopCard: React.FC<ShopCardProps> = () => {
   const taxAmount = useMemo(() => (totalCost * 15) / 100, [totalCost]);
   useEffect(() => {
     if (cardItemValue && cardItemValue.length > 0) {
-      const products = cardItemValue.map((item: any) => ({
-        product_id: item.id || '',
-        quantity: item.qty || 0,
-        unit_price: item.price || 0,
-        discount_amount: 0,
-        discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
-        discount_type: 2,
-        total_price: item.price * item.qty || 0,
-        is_tax_included: settings?.data?.tax_inclusive_pricing,
-        taxes: [
-          {
-            id: taxes?.data[0]?.id,
-            rate: taxes?.data[0]?.rate,
-            amount: !settings?.data?.tax_inclusive_pricing
-              ? (item.price * item.qty || 0) *
-                ((taxes?.data[0]?.rate || 0) / 100)
-              : (item.price * item.qty || 0) *
-                ((taxes?.data[0]?.rate || 0) /
-                  (100 + taxes?.data[0]?.rate || 0)),
-          },
-        ],
-      }));
+      const products = cardItemValue.map((item: any) => {
+        const itemTotal = (Number(item.price || 0) - Number(item.discount_amount || 0)) * Number(item.qty || 0);
+        return {
+          product_id: item.id || '',
+          quantity: item.qty || 0,
+          unit_price: item.price || 0,
+          discount_amount: item.discount_amount || 0,
+          discount_id: '',
+          discount_type: 2, // Always send as fixed amount to ensure currency value matches
+          note: item.note || '', // Pass note if available
+          total_price: itemTotal,
+          is_tax_included: settings?.data?.tax_inclusive_pricing,
+          taxes: [
+            {
+              id: taxes?.data[0]?.id,
+              rate: taxes?.data[0]?.rate,
+              amount: !settings?.data?.tax_inclusive_pricing
+                ? itemTotal * ((taxes?.data[0]?.rate || 0) / 100)
+                : itemTotal * ((taxes?.data[0]?.rate || 0) / (100 + taxes?.data[0]?.rate || 0)),
+            },
+          ],
+        };
+      });
 
       dispatch(addProduct(products));
     }

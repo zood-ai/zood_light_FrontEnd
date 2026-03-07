@@ -34,6 +34,7 @@ export interface OrderTag {
 interface OrderSchemaState {
   type: number;
   branch_id: string;
+  cashier_id?: string;
   tags: OrderTag[];
   discount_amount: number;
   taxes: Tax[];
@@ -56,11 +57,12 @@ interface OrderSchemaState {
 const initialState: OrderSchemaState = {
   type: 0,
   branch_id: '',
+  cashier_id: undefined,
   tags: [],
   discount_amount: 0,
   customer_id: '',
   discount_type: 2,
-  discount_id: '0aaa23cb-2156-4778-b6dd-a69ba6642552',
+  discount_id: '',
 
   taxes: [
     {

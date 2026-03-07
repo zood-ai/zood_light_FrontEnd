@@ -36,7 +36,9 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!window.location.pathname.includes('/zood-dashboard')) return;
-    if (!user && window.location.pathname.includes('/zood-dashboard')) {
+    // لا تسجيل خروج إذا كان التوكن موجوداً (حالة سباق بعد تسجيل الدخول)
+    const hasToken = Cookies.get('accessToken');
+    if (!user && !hasToken) {
       logout();
       window.location.replace('/');
     }

@@ -1,11 +1,14 @@
 import Cookies from 'js-cookie';
 
-export const getToken = (): string | any => {
-    return Cookies.get('accessToken');
+export const getToken = (): string | undefined => {
+    const token = Cookies.get('accessToken');
+    return token ? String(token).trim() : undefined;
   };
-  
 
   export const removeToken = () => {
-    return Cookies.remove('accessToken');
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
+    Cookies.remove('authorities');
+    Cookies.remove('branch_id');
   };
   

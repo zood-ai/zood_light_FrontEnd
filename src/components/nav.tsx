@@ -44,16 +44,19 @@ export default function Nav({
   const allSettings = useSelector((state: any) => state.allSettings.value);
   const isRtl = useDirection();
   if (!user) return;
+  const userPermissions =
+    allSettings?.WhoAmI?.user?.roles?.flatMap((el) =>
+      el?.permissions?.map((el2) => el2.name)
+    ) ?? [];
+
   const renderLink = ({ sub, ...rest }: SideLink) => {
     const key = `${rest.i18n}-${rest.href}`;
     const hasPermission =
-      rest.authorities?.length > 0
-        ? rest.authorities.every((permission) =>
-            allSettings?.WhoAmI?.user?.roles
-              ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
-              ?.includes(permission)
-          )
-        : true;
+      rest.authorities?.length === 0
+        ? true
+        : rest.authorities!.every((permission) =>
+            userPermissions.includes(permission)
+          );
 
     if (!hasPermission) {
       return;
@@ -79,9 +82,7 @@ export default function Nav({
         hasSubPermission =
           s.authorities?.length > 0
             ? s.authorities.every((permission) =>
-                allSettings?.WhoAmI?.user?.roles
-                  ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
-                  ?.includes(permission)
+                userPermissions.includes(permission)
               )
             : true;
         if (hasSubPermission) hasSubPermissionDone = true;
@@ -171,7 +172,9 @@ function NavLink({
     >
       <div className={`${isRtl ? 'ml-2.5' : 'mr-2.5'}`}>
         <span
-          className={`${isActive ? 'text-main' : 'text-secText'} inline-flex items-center`}
+          className={`${
+            isActive ? 'text-main' : 'text-secText'
+          } inline-flex items-center`}
         >
           <i>
             {/* {false?icon1:icon2} */}
@@ -182,7 +185,9 @@ function NavLink({
         </span>
       </div>
       <span
-        className={`text-[15px] leading-5 ${isActive ? 'font-semibold text-main' : 'font-medium text-secText'}`}
+        className={`text-[15px] leading-5 ${
+          isActive ? 'font-semibold text-main' : 'font-medium text-secText'
+        }`}
       >
         {/* {title} */}
         {t(i18n)}
@@ -218,6 +223,10 @@ function NavLinkDropdown({
   const isChildActive = !!sub?.find((s) => checkActiveNav(s.href));
   const isRtl = useDirection();
   const allSettings = useSelector((state: any) => state.allSettings.value);
+  const userPermissions =
+    allSettings?.WhoAmI?.user?.roles?.flatMap((el) =>
+      el?.permissions?.map((el2) => el2.name)
+    ) ?? [];
 
   const triggerIcon = isChildActive
     ? icon2 || icon1 || icon
@@ -264,14 +273,11 @@ function NavLinkDropdown({
           )}
         >
           {sub!.map((sublink: any) => {
-            const hasPermission =
-              sublink?.authorities?.length > 0
-                ? sublink?.authorities.every((permission) =>
-                    allSettings?.WhoAmI?.user?.roles
-                      ?.flatMap((el) => el?.permissions?.map((el2) => el2.name))
-                      ?.includes(permission)
-                  )
-                : true;
+            const hasPermission = !(sublink?.authorities?.length > 0)
+              ? true
+              : sublink.authorities.every((permission: string) =>
+                  userPermissions.includes(permission)
+                );
 
             if (!hasPermission) {
               return;

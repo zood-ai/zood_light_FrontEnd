@@ -135,10 +135,16 @@ const AddEditModal: React.FC<AddEditModalProps> = ({
     setLoading(true);
 
     // Remove password from update if it's empty
-    const submitData =
+    const submitData: Record<string, unknown> =
       modalType === 'Edit' && !values.password
         ? { ...values, password: undefined }
-        : values;
+        : { ...values };
+
+    // Map login_pin to pin (backend expects 'pin')
+    if (values.login_pin) {
+      submitData.pin = values.login_pin;
+    }
+    delete submitData.login_pin;
 
     if (modalType === 'Add') {
       await createNewUser(submitData, {

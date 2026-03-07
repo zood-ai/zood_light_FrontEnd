@@ -21,6 +21,7 @@ import XIcons from '@/components/Icons/XIcons';
 import { Input } from '@/components/ui/input';
 import { Plus, Pencil, X, HelpCircle, LogOut, Trash2 } from 'lucide-react';
 import SH_LOGO from '@/assets/SH_LOGO.svg';
+import Cookies from 'js-cookie';
 
 type PaymentRow = {
   payment_method_id: string;
@@ -63,7 +64,7 @@ export default function POSPaymentPanel() {
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const allSettings = useSelector((state: any) => state.allSettings?.value);
 
-  const { data: paymentMethodsData } = createCrudService<any>(
+  const { data: paymentMethodsData, isLoading: paymentMethodsLoading } = createCrudService<any>(
     'manage/payment_methods?filter[is_active]=1'
   ).useGetAll();
   const { data: branchesData } =
@@ -99,7 +100,7 @@ export default function POSPaymentPanel() {
     () =>
       cardItemValue.reduce(
         (acc: number, item: any) =>
-          acc + Number(item?.price || 0) * Number(item?.qty || 0),
+          acc + (Number(item?.price || 0) * Number(item?.qty || 0) - (Number(item?.discount_amount || 0) * Number(item?.qty || 0))),
         0
       ),
     [cardItemValue]
@@ -444,25 +445,7 @@ export default function POSPaymentPanel() {
 
     try {
       setLoading(true);
-      let createdOrderResponse: any = null;
-      let lastError: unknown = null;
-
-      for (let attempt = 0; attempt < 2; attempt += 1) {
-        try {
-          createdOrderResponse = await axiosInstance.post('orders', finalOrderSchema);
-          lastError = null;
-          break;
-        } catch (error) {
-          lastError = error;
-          if (attempt === 0) {
-            await new Promise((resolve) => setTimeout(resolve, 350));
-          }
-        }
-      }
-
-      if (!createdOrderResponse) {
-        throw lastError || new Error('Order create failed');
-      }
+      const createdOrderResponse = await axiosInstance.post('orders', finalOrderSchema);
 
       const createdOrderPayload =
         createdOrderResponse?.data?.data ?? createdOrderResponse?.data ?? null;
@@ -560,6 +543,12 @@ export default function POSPaymentPanel() {
   const handlePrintReceipt = () => {
     if (!completedOrderData) return;
     const finishAndGoToPos = () => {
+      const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
+      try {
+        window.localStorage.removeItem(`pos_current_cart_v1_${branchId || 'default'}`);
+      } catch {
+        // ignore
+      }
       dispatch(setCardItem([]));
       dispatch(resetOrder());
       navigate('/zood-dashboard/individual-invoices/add');
@@ -615,14 +604,29 @@ export default function POSPaymentPanel() {
         );
         const qty = Number(item?.quantity ?? item?.qty ?? item?.pivot?.quantity ?? 0);
         const unitPrice = Number(item?.unit_price ?? item?.price ?? item?.pivot?.price ?? item?.pivot?.unit_price ?? 0);
-        const lineTotal = Number(
-          item?.total_price ?? item?.pivot?.total_price ?? qty * unitPrice
-        ).toFixed(2);
+        const discountAmt = Number(item?.discount_amount ?? item?.pivot?.discount_amount ?? 0);
+        
+        let lineTotal = 0;
+        // If we have total_price from backend, use it. Otherwise calculate.
+        if (item?.total_price || item?.pivot?.total_price) {
+           lineTotal = Number(item?.total_price ?? item?.pivot?.total_price);
+        } else {
+           lineTotal = (unitPrice * qty) - (discountAmt * qty);
+        }
+
+        const hasDiscount = discountAmt > 0;
+
         return `
           <div class="item-row">
             <div class="item-name">${name}</div>
-            <div class="item-meta">${qty} x ${unitPrice.toFixed(2)}</div>
-            <div class="item-total">SR ${lineTotal}</div>
+            <div class="item-meta">
+               ${qty} x ${unitPrice.toFixed(2)}
+               ${hasDiscount ? `<br/><span style="font-size:10px; color:black;">(Discount: -${(discountAmt * qty).toFixed(2)})</span>` : ''}
+            </div>
+            <div class="item-total">
+               ${hasDiscount ? `<span style="text-decoration:line-through; font-size:10px; color:#999; margin-right:4px; display:block;">${(unitPrice * qty).toFixed(2)}</span>` : ''}
+               SR ${lineTotal.toFixed(2)}
+            </div>
           </div>
         `;
       })
@@ -1088,12 +1092,30 @@ export default function POSPaymentPanel() {
         );
         const qty = Number(item?.quantity ?? item?.qty ?? item?.pivot?.quantity ?? 0);
         const unitPrice = Number(item?.unit_price ?? item?.price ?? item?.pivot?.price ?? item?.pivot?.unit_price ?? 0);
-        const lineTotal = Number(
-          item?.total_price ?? item?.pivot?.total_price ?? qty * unitPrice
-        ).toFixed(2);
-        return `<div class="line"><span>${name} (${qty} x ${unitPrice.toFixed(
-          2
-        )})</span><span>SR ${lineTotal}</span></div>`;
+        const discountAmt = Number(item?.discount_amount ?? item?.pivot?.discount_amount ?? 0);
+        
+        let lineTotal = 0;
+        if (item?.total_price || item?.pivot?.total_price) {
+           lineTotal = Number(item?.total_price ?? item?.pivot?.total_price);
+        } else {
+           lineTotal = (unitPrice * qty) - (discountAmt * qty);
+        }
+
+        const hasDiscount = discountAmt > 0;
+
+        return `<div class="line">
+          <div>
+            <div style="font-weight:600">${name}</div>
+            <div style="font-size:11px;color:#64748b">
+              ${qty} x ${unitPrice.toFixed(2)}
+              ${hasDiscount ? `<br/><span style="color:#0f172a">(Discount: -${(discountAmt * qty).toFixed(2)})</span>` : ''}
+            </div>
+          </div>
+          <div style="text-align:right">
+            ${hasDiscount ? `<div style="text-decoration:line-through;font-size:10px;color:#94a3b8">${(unitPrice * qty).toFixed(2)}</div>` : ''}
+            <span>SR ${lineTotal.toFixed(2)}</span>
+          </div>
+        </div>`;
       })
       .join('');
 
@@ -1331,8 +1353,8 @@ export default function POSPaymentPanel() {
           {
             element: '#tour-payment-summary',
             popover: {
-              title: t('PAYMENT_SUMMARY') || 'ملخص الدفع',
-              description: t('TOUR_PAYMENT_SUMMARY_DESC') || 'هنا يظهر إجمالي المبلغ والمتبقي.',
+              title: t('PAYMENT_SUMMARY'),
+              description: t('TOUR_PAYMENT_SUMMARY_DESC'),
               side: 'left',
               align: 'start',
             },
@@ -1340,8 +1362,8 @@ export default function POSPaymentPanel() {
           {
             element: '#tour-payment-customer',
             popover: {
-              title: t('CUSTOMER') || 'العميل',
-              description: t('TOUR_PAYMENT_CUSTOMER_DESC') || 'يمكنك تغيير العميل من هنا إذا لزم الأمر.',
+              title: t('CUSTOMER'),
+              description: t('TOUR_PAYMENT_CUSTOMER_DESC'),
               side: 'bottom',
               align: 'start',
             },
@@ -1349,8 +1371,8 @@ export default function POSPaymentPanel() {
           {
             element: '#tour-payment-methods',
             popover: {
-              title: t('PAYMENT_METHODS') || 'طرق الدفع',
-              description: t('TOUR_PAYMENT_METHODS_DESC') || 'اختر طريقة الدفع المناسبة (نقد، شبكة، إلخ).',
+              title: t('PAYMENT_METHODS'),
+              description: t('TOUR_PAYMENT_METHODS_DESC'),
               side: 'top',
               align: 'start',
             },
@@ -1358,8 +1380,8 @@ export default function POSPaymentPanel() {
           {
             element: '#tour-payment-numpad',
             popover: {
-              title: t('NUMPAD') || 'لوحة الأرقام',
-              description: t('TOUR_PAYMENT_NUMPAD_DESC') || 'استخدم لوحة الأرقام لإدخال المبلغ المدفوع.',
+              title: t('NUMPAD'),
+              description: t('TOUR_PAYMENT_NUMPAD_DESC'),
               side: 'top',
               align: 'start',
             },
@@ -1367,8 +1389,8 @@ export default function POSPaymentPanel() {
           {
             element: '#tour-payment-confirm',
             popover: {
-              title: t('CONFIRM_PAYMENT') || 'إتمام الدفع',
-              description: t('TOUR_PAYMENT_CONFIRM_DESC') || 'اضغط هنا لإتمام عملية الدفع وإصدار الفاتورة.',
+              title: t('CONFIRM_PAYMENT'),
+              description: t('TOUR_PAYMENT_CONFIRM_DESC'),
               side: 'top',
               align: 'start',
             },
@@ -1447,6 +1469,12 @@ export default function POSPaymentPanel() {
               type="button"
               className="h-14 text-lg"
               onClick={() => {
+                const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
+                try {
+                  window.localStorage.removeItem(`pos_current_cart_v1_${branchId || 'default'}`);
+                } catch {
+                  // ignore
+                }
                 dispatch(setCardItem([]));
                 dispatch(resetOrder());
                 navigate('/zood-dashboard/individual-invoices/add');
@@ -1516,7 +1544,7 @@ export default function POSPaymentPanel() {
           <div className="flex items-center gap-3">
             <img src={SH_LOGO} alt="Logo" className="h-8 w-auto object-contain" />
             <span className="text-sm font-semibold text-mainText hidden sm:block">
-              {t('CART_ITEMS') || 'Sales Cart'}
+              {t('CART_ITEMS')}
             </span>
             <span className="rounded-full bg-main/10 px-2 py-0.5 text-xs font-bold text-main">
               {cardItemValue.length}
@@ -1541,12 +1569,25 @@ export default function POSPaymentPanel() {
                     <div className="font-medium text-mainText">{item.name}</div>
                     <div className="text-xs text-secText">
                       {item.qty} x {Number(item.price || 0).toFixed(2)}
+                      {Number(item.discount_amount) > 0 && (
+                        <span className="mx-1 rounded bg-emerald-50 px-1 text-[10px] font-bold text-emerald-600">
+                          -{Number(item.discount_amount).toFixed(2)}
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-end gap-0.5">
                     <div className="font-bold text-mainText">
-                      SR {(Number(item.price || 0) * Number(item.qty || 0)).toFixed(2)}
+                      SR {(
+                        (Number(item.price || 0) * Number(item.qty || 0)) - 
+                        (Number(item.discount_amount || 0) * Number(item.qty || 0))
+                      ).toFixed(2)}
                     </div>
+                    {Number(item.discount_amount) > 0 && (
+                      <div className="text-[10px] text-secText line-through decoration-red-400">
+                        SR {(Number(item.price || 0) * Number(item.qty || 0)).toFixed(2)}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))
@@ -1680,9 +1721,17 @@ export default function POSPaymentPanel() {
               </div>
 
               {/* 2. Payment Methods - Scrollable Area */}
-              <div className="flex-1 overflow-y-auto pr-1">
+                <div className="flex-1 overflow-y-auto pr-1">
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4" id="tour-payment-methods">
-                  {paymentMethodsData?.data?.map((method: any, index: number) => {
+                  {paymentMethodsLoading ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-[80px] animate-pulse rounded-xl border border-gray-100 bg-gray-100"
+                      />
+                    ))
+                  ) : (
+                  paymentMethodsData?.data?.map((method: any, index: number) => {
                     const isActive = activePaymentMethodId === method.id;
                     const styleIndex = index % 6; // We have 6 color variants
                     
@@ -1709,12 +1758,13 @@ export default function POSPaymentPanel() {
                         <span className="line-clamp-1 px-2">{method.name}</span>
                       </button>
                     );
-                  })}
+                  })
+                  )}
                 </div>
               </div>
 
               {/* 3. Numpad */}
-              <div className="mt-auto grid shrink-0 grid-cols-4 gap-4" id="tour-payment-numpad">
+              <div className="mt-auto grid shrink-0 grid-cols-4 gap-4" id="tour-payment-numpad" dir="ltr">
                 {['1', '2', '3', '+10', '4', '5', '6', '+20', '7', '8', '9', '+50', '.', '0', 'C', '⌫'].map(
                   (key) => {
                     const isQuickAction = ['+10', '+20', '+50'].includes(key);
@@ -1821,7 +1871,7 @@ export default function POSPaymentPanel() {
                 onClick={submitOrder}
                 loading={loading}
               >
-                {t('CONFIRM_PAYMENT')}
+                {loading ? t('POS_FINALIZING_INVOICE') : t('CONFIRM_PAYMENT')}
               </Button>
             </div>
 
