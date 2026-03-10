@@ -1335,12 +1335,12 @@ export const IndividualInvoicesAdd: React.FC<
             </div>
             <button
               type="button"
-              disabled
-              className="flex items-center gap-1.5 rounded-lg border border-mainBorder bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-gray-400 shadow-sm cursor-not-allowed opacity-60"
+              onClick={() => setIsLocked(true)}
+              className="flex items-center gap-1.5 rounded-lg border border-mainBorder bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-mainText shadow-sm hover:bg-gray-50"
               title={t('EMPLOYEE_LOGIN')}
             >
               <Lock className="h-4 w-4 shrink-0" />
-              <span className="max-w-[100px] truncate">
+              <span className="max-w-[120px] truncate">
                 {t('EMPLOYEE_LOGIN')}
               </span>
             </button>

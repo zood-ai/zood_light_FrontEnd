@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import useDirection from '@/hooks/useDirection';
 import { useDispatch, useSelector } from 'react-redux';
 import Cookies from 'js-cookie';
@@ -12,6 +13,7 @@ import { updateField } from '@/store/slices/orderSchema';
 import { useToast } from '@/components/custom/useToastComp';
 import { X, User } from 'lucide-react';
 import SH_LOGO from '@/assets/SH_LOGO.svg';
+import { reFetchSettings } from '@/store/slices/allSettings';
 
 const PIN_LENGTH = 4;
 
@@ -25,6 +27,7 @@ interface PinLoginScreenProps {
 
 export default function PinLoginScreen({ onClose, isLockScreen = false, isInitialLogin = false }: PinLoginScreenProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const isRtl = useDirection();
   const dispatch = useDispatch();
   const { showToast } = useToast();
@@ -37,6 +40,9 @@ export default function PinLoginScreen({ onClose, isLockScreen = false, isInitia
   const branchId =
     orderSchema?.branch_id || Cookies.get('branch_id') || '';
   const [prefetchedBranchId, setPrefetchedBranchId] = useState<string>('');
+  const business = JSON.parse(Cookies.get('business') || '{}');
+  const businessReference: string =
+    business?.businessBusinessRef || business?.business_reference || '';
 
   // Pre-fetch branches when modal opens if branch_id is missing (avoids delay on submit)
   useEffect(() => {
@@ -105,7 +111,20 @@ export default function PinLoginScreen({ onClose, isLockScreen = false, isInitia
         const { data } = await axiosInstance.post('auth/pos/verify-pin', {
           pin: pinToVerify,
           branch_id: effectiveBranchId,
+          ...(businessReference
+            ? {
+                business_reference: businessReference,
+              }
+            : {}),
         });
+
+        const rawToken =
+          data?.data?.token !== undefined ? data?.data?.token : data?.token;
+        const token = rawToken ? String(rawToken).trim() : '';
+        if (token) {
+          Cookies.set('accessToken', token, { expires: 1, path: '/' });
+          Cookies.set('refreshToken', token, { expires: 1, path: '/' });
+        }
 
         const user = data?.data?.user ?? data?.user;
         if (user?.id) {
@@ -120,6 +139,10 @@ export default function PinLoginScreen({ onClose, isLockScreen = false, isInitia
             description: t('PIN_LOGIN_SUCCESS') || 'Logged in successfully',
             duration: 1500,
           });
+          // Force refresh of global settings/whoami slice
+          dispatch(reFetchSettings());
+          // And refetch any React Query hooks that use auth/whoami endpoint
+          queryClient.invalidateQueries({ queryKey: ['auth/whoami'] });
           onClose();
         } else {
           setError(t('PIN_INVALID') || 'Invalid PIN');
@@ -133,7 +156,7 @@ export default function PinLoginScreen({ onClose, isLockScreen = false, isInitia
         isSubmittingRef.current = false;
       }
     },
-    [pinValue, branchId, prefetchedBranchId, dispatch, onClose, showToast, t]
+    [pinValue, branchId, prefetchedBranchId, businessReference, dispatch, onClose, showToast, t, queryClient]
   );
 
   // LTR: 1 on left, 0 centered. RTL: reverse rows so 1 stays on left (شمال), 0 centered.
@@ -224,23 +247,23 @@ export default function PinLoginScreen({ onClose, isLockScreen = false, isInitia
                 <label className="block text-sm font-semibold text-mainText mb-4">
                   {t('ENTER_PIN')}
                 </label>
-                <PinInput
-                  value={pinValue}
-                  onChange={setPinValue}
-                  type="numeric"
-                  length={PIN_LENGTH}
-                  onComplete={(pin) => handleVerifyPin(pin)}
-                  disabled={loading}
-                  className="flex justify-center gap-4"
-                >
-                  {Array.from({ length: PIN_LENGTH }, (_, i) => (
-                    <PinInputField
-                      key={i}
-                      component={Input}
-                      className="h-16 w-16 text-center text-3xl font-bold border-2 border-gray-200 rounded-xl focus:border-[#5D5FEF] focus:ring-2 focus:ring-[#5D5FEF]/20 transition-colors"
-                    />
-                  ))}
-                </PinInput>
+                <div dir="ltr" className="flex justify-center">
+                  <PinInput
+                    value={pinValue}
+                    onChange={setPinValue}
+                    type="numeric"
+                    disabled={loading}
+                    className="flex justify-center gap-4"
+                  >
+                    {Array.from({ length: PIN_LENGTH }, (_, i) => (
+                      <PinInputField
+                        key={i}
+                        component={Input}
+                        className="h-16 w-16 text-center text-3xl font-bold border-2 border-gray-200 rounded-xl focus:border-[#5D5FEF] focus:ring-2 focus:ring-[#5D5FEF]/20 transition-colors"
+                      />
+                    ))}
+                  </PinInput>
+                </div>
                 {error && (
                   <p className="mt-3 text-sm text-red-600 font-medium text-center">{error}</p>
                 )}
