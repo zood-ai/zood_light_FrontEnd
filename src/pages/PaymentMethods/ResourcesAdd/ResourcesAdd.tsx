@@ -35,6 +35,7 @@ const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
   type: z.string().nonempty('type is required'),
   is_active: z.union([z.boolean(), z.number()]).optional().default(true),
+  is_has_nfc: z.union([z.boolean(), z.number()]).optional().default(false),
 });
 
 export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
@@ -64,7 +65,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
   // Initialize form with validation schema and default values
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { is_active: true, ...defaultValues },
+    defaultValues: { is_active: true, is_has_nfc: false, ...defaultValues },
   });
 
   // Reset form when data changes
@@ -88,6 +89,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
           data: {
             ...values,
             is_active: values.is_active ? 1 : 0,
+            is_has_nfc: values.is_has_nfc ? 1 : 0,
           },
         },
         {
@@ -103,6 +105,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
         {
           ...values,
           is_active: values.is_active ? 1 : 0,
+          is_has_nfc: values.is_has_nfc ? 1 : 0,
         },
         {
           onSuccess: (data) => {
@@ -175,6 +178,23 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
                         <CheckboxWithText
                           {...field}
                           label={t("ACTIVE")}
+                          checked={field.value ? true : false}
+                          onChange={(value) => field.onChange(value)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="is_has_nfc"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <CheckboxWithText
+                          {...field}
+                          label="تفعيل الدفع عبر NFC"
                           checked={field.value ? true : false}
                           onChange={(value) => field.onChange(value)}
                         />
