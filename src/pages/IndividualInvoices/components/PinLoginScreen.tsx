@@ -325,7 +325,7 @@ export default function PinLoginScreen({ onClose, isLockScreen = false, isInitia
                 className="h-[80px] w-full rounded-2xl bg-[#5D5FEF] text-2xl font-bold text-white shadow-lg shadow-indigo-200 hover:bg-[#4B4DDB] active:scale-[0.98] transition-transform"
                 onClick={() => handleVerifyPin()}
                 loading={loading}
-                disabled={loading || pinValue.length < PIN_LENGTH}
+                disabled
               >
                 {t('CONFIRM')}
               </Button>
