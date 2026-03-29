@@ -19,6 +19,14 @@ import {
   toggleActionViewData,
 } from '@/store/slices/toggleAction';
 import { useDispatch } from 'react-redux';
+import { currencyFormated } from '@/utils/currencyFormated';
+
+function formatBalanceCell(value: unknown): string {
+  if (value === undefined || value === null || value === '') return '—';
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '—';
+  return currencyFormated(n);
+}
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
@@ -81,6 +89,35 @@ export const useDataTableColumns = () => {
               className="max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]"
             >
               {row.getValue('phone') || '-'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'account_balance',
+      accessorFn: (row: any) =>
+        row?.account_balance ??
+        row?.insights?.account_balance ??
+        row?.customer_insights?.account_balance,
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title={t('ACCOUNT_BALANCE_LABEL')}
+        />
+      ),
+      cell: ({ row }) => {
+        const raw =
+          row.original?.account_balance ??
+          row.original?.insights?.account_balance ??
+          row.original?.customer_insights?.account_balance;
+        return (
+          <div className="flex space-x-2">
+            <span
+              dir="ltr"
+              className="min-w-[5.5rem] font-semibold tabular-nums text-main sm:min-w-[6rem]"
+            >
+              {formatBalanceCell(raw)}
             </span>
           </div>
         );

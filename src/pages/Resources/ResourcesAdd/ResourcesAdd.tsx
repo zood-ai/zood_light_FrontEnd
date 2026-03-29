@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -10,7 +10,7 @@ import IconInput from '@/components/custom/InputWithIcon';
 import { DetailsHeadWithOutFilter } from '@/components/custom/DetailsHeadWithOutFilter';
 import { Button } from '@/components/custom/button';
 import createCrudService from '@/api/services/crudService';
-import useDirection from '@/hooks/useDirection';
+import axiosInstance from '@/api/interceptors';
 
 import personIcon from '/icons/name person.svg';
 import callIcon from '/icons/call.svg';
@@ -22,67 +22,126 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { ResourcesAddProps } from './ResourcesAdd.types';
 import ConfirmBk from '@/components/custom/ConfimBk';
 import DelConfirm from '@/components/custom/DelConfim';
 
-// Validation schema using Zod
+const inputFullWidth = 'w-full min-w-0';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  phone: z.string().min(1, 'Phone is required').optional(),
-  email: z.string().email('Invalid email address').optional(),
-  tax_registration_number: z
-    .string()
-    .length(15, 'Tax registration number must be exactly 15 digits')
-    .regex(/^\d{15}$/, 'Tax registration number must only contain 15 digits')
-    .optional(),
-  vat_registration_number: z
-    .string()
-    .length(15, 'Vat registration number must be exactly 15 digits')
-    .regex(/^\d{15}$/, 'Tax registration number must only contain 15 digits')
-    .optional(),
+  contact_name: z.string().optional().nullable(),
+  code: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  primary_email: z.string().optional().nullable(),
+  tax_registration_number: z.string().optional().nullable(),
+  vat_registration_number: z.string().optional().nullable(),
 });
+
+function SupplierFormSkeleton() {
+  return (
+    <div className="space-y-6" aria-busy="true" aria-label="Loading">
+      {[1, 2, 3].map((section) => (
+        <Card key={section} className="border-mainBorder/80">
+          <CardHeader className="pb-2">
+            <Skeleton className="h-5 w-40" />
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Skeleton className="h-[72px] w-full rounded-lg" />
+            <Skeleton className="h-[72px] w-full rounded-lg" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
 
 export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
   const { t } = useTranslation();
-  const isRtl = useDirection();
   const params = useParams();
   const modalType = params.id;
   const isEditMode = modalType !== 'add';
   const navigate = useNavigate();
-  // Fetch services and mutations
+
   const crudService = createCrudService<any>('inventory/suppliers');
-  const { useGetById, useUpdate, useCreate } = crudService;
+  const { useUpdate, useCreate } = crudService;
   const { mutate: createNewUser } = useCreate();
   const { mutate: updateDataUserById } = useUpdate();
-  const { data: getDataById } = useGetById(`${params.objId ?? ''}`);
 
-  const [loading, setLoading] = useState(false);
-
-  // Set default form values based on add/edit mode
-  const defaultValues = useMemo(
-    () => (isEditMode ? getDataById?.data : {}),
-    [getDataById, isEditMode]
-  );
-
-  // Initialize form with validation schema and default values
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: {
+      name: '',
+      contact_name: '',
+      code: '',
+      phone: '',
+      primary_email: '',
+      tax_registration_number: '',
+      vat_registration_number: '',
+    },
   });
 
-  // Reset form when data changes
-  useEffect(() => {
-    if (isEditMode) {
-      form.reset(getDataById?.data);
-    } else {
-      form.reset({});
-    }
-  }, [getDataById, form, isEditMode]);
+  const [currData, setcurrData] = useState<any>({});
+  const [loading, setLoading] = useState(false);
+  const [supplierLoading, setSupplierLoading] = useState(
+    () => isEditMode && Boolean(params.objId)
+  );
 
-  // Handle form submission for both add and edit scenarios
+  useEffect(() => {
+    if (!isEditMode) {
+      form.reset({
+        name: '',
+        contact_name: '',
+        code: '',
+        phone: '',
+        primary_email: '',
+        tax_registration_number: '',
+        vat_registration_number: '',
+      });
+      setcurrData({});
+      setSupplierLoading(false);
+      return;
+    }
+
+    if (!params.objId) {
+      setSupplierLoading(false);
+      return;
+    }
+
+    setSupplierLoading(true);
+    axiosInstance
+      .get(`/inventory/suppliers/${params.objId}`)
+      .then((res) => {
+        const d = res?.data?.data ?? res?.data;
+        setcurrData(d);
+        if (d) {
+          form.reset({
+            name: d.name ?? '',
+            contact_name: d.contact_name ?? '',
+            code: d.code ?? '',
+            phone: d.phone ?? '',
+            primary_email: d.primary_email ?? d.email ?? '',
+            tax_registration_number: d.tax_registration_number ?? '',
+            vat_registration_number: d.vat_registration_number ?? '',
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to fetch supplier', err);
+      })
+      .finally(() => {
+        setSupplierLoading(false);
+      });
+  }, [isEditMode, params.objId, form]);
+
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
 
@@ -92,7 +151,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
       await updateDataUserById(
         { id: params.objId, data: values },
         {
-          onSuccess: (data) => {
+          onSuccess: () => {
             setLoading(false);
             form.reset({});
             navigate('/zood-dashboard/resources');
@@ -104,7 +163,7 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
       await createNewUser(
         { ...values },
         {
-          onSuccess: (data) => {
+          onSuccess: () => {
             setLoading(false);
             form.reset({});
             navigate('/zood-dashboard/resources');
@@ -119,158 +178,207 @@ export const ResourcesAdd: React.FC<ResourcesAddProps> = () => {
   return (
     <>
       <DetailsHeadWithOutFilter
-        mainTittle={isEditMode ? form.getValues('name') : t('ADD_SUPPLIER')}
+        mainTittle={isEditMode ? t('UPDATE_SUPPLIER') : t('ADD_SUPPLIER')}
+        subTitle={
+          isEditMode && currData?.name ? String(currData.name) : undefined
+        }
         bkAction={() => {
           setIsOpen(true);
         }}
       />
-      <div className="min-h-[70vh]">
-        <div className="flex flex-col items-start max-w-[580px]">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleFormSubmit)}
-              className="px-s4 my-5"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-md">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('SUPPLIER_NAME')}
-                          iconSrc={personIcon}
-                          inputClassName="w-[100%] md:col-span-2"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="contact_name"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('communication_name')}
-                          iconSrc={personIcon}
-                          inputClassName="w-[100%] md:col-span-2"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="code"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('BARCODE')}
-                          // iconSrc={callIcon}
-                          inputClassName="w-[100%]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('PHONE')}
-                          iconSrc={callIcon}
-                          inputClassName="w-[100%]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="primary_email"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-4 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('EMAIL_ADDRESS')}
-                          inputClassName="w-[278px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="vat_registration_number"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
-                          inputClassName="w-[278px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="tax_registration_number"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('TAX_REGISTRATION_NUMBER')}
-                          inputClassName="w-[278px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="  ">
-                <Button
-                  dir="ltr"
-                  type="submit"
-                  loading={loading}
-                  disabled={loading}
-                  className="mt-4 h-[39px] w-[163px]"
-                >
-                  {isEditMode ? t('UPDATE_SUPPLIER') : t('ADD_SUPPLIER')}
-                </Button>
-                <DelConfirm route={'inventory/suppliers'} />
-              </div>
-            </form>
-          </Form>
-        </div>
-      </div>
       <ConfirmBk
         isOpen={isOpen}
         setIsOpen={undefined}
         closeDialog={() => setIsOpen(false)}
         getStatusMessage={undefined}
       />
+      <div className="min-h-[70vh]">
+        <div className="mx-auto max-w-3xl px-s4 pb-10 pt-1">
+          {supplierLoading ? (
+            <SupplierFormSkeleton />
+          ) : (
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(handleFormSubmit)}
+                className="space-y-6"
+              >
+                <Card className="border-mainBorder shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-semibold text-mainText">
+                      {t('SUPPLIER_SECTION_BASIC')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                value={field.value ?? ''}
+                                label={t('SUPPLIER_NAME')}
+                                iconSrc={personIcon}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="contact_name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                value={field.value ?? ''}
+                                label={t('communication_name')}
+                                iconSrc={personIcon}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="code"
+                        render={({ field }) => (
+                          <FormItem className="sm:col-span-2">
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                value={field.value ?? ''}
+                                label={t('BARCODE')}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-mainBorder shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-semibold text-mainText">
+                      {t('SUPPLIER_SECTION_CONTACT')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                value={field.value ?? ''}
+                                label={t('PHONE')}
+                                iconSrc={callIcon}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="primary_email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                value={field.value ?? ''}
+                                label={t('EMAIL_ADDRESS')}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-mainBorder shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-semibold text-mainText">
+                      {t('SUPPLIER_SECTION_TAX')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="vat_registration_number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                value={field.value ?? ''}
+                                label={t(
+                                  'SETTINGS_COMMERCIAL_REGISTRATION_NUMBER'
+                                )}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="tax_registration_number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                value={field.value ?? ''}
+                                label={t('TAX_REGISTRATION_NUMBER')}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <Button
+                    dir="ltr"
+                    type="submit"
+                    loading={loading}
+                    disabled={loading}
+                    className="h-[39px] min-w-[163px]"
+                  >
+                    {isEditMode ? t('UPDATE_SUPPLIER') : t('ADD_SUPPLIER')}
+                  </Button>
+                  <DelConfirm route={'inventory/suppliers'} />
+                </div>
+              </form>
+            </Form>
+          )}
+        </div>
+      </div>
     </>
   );
 };
