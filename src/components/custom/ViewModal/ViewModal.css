@@ -1,0 +1,135 @@
+/* A4 invoice document — screen + print (logical layout: seller / document meta follow reading order) */
+.invoice-a4-document {
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  display: flex;
+  flex-direction: column;
+  /* Fill at least one A4 page height so the footer sits at the bottom when content is short */
+  min-height: min(297mm, calc(100dvh - 10rem));
+}
+
+.invoice-a4-main {
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.invoice-a4-header__grid {
+  break-inside: avoid;
+}
+
+.invoice-a4-doc-header,
+.invoice-a4-doc-footer {
+  break-inside: avoid;
+}
+
+.invoice-a4-seller,
+.invoice-a4-document-stack {
+  break-inside: avoid;
+}
+
+.invoice-a4-party {
+  break-inside: avoid;
+}
+
+.invoice-a4-preamble {
+  break-inside: avoid;
+}
+
+.invoice-line-table {
+  border-spacing: 0;
+}
+
+/* Invoice preview: theme-aligned striping inside print area (overrides global .makeEvenOddBg in index.css) */
+.print-content .makeEvenOddBg > div:nth-child(odd) {
+  background-color: hsl(var(--muted) / 0.35);
+}
+
+@media print {
+  /*
+   * index.css sets `.myDiv * { page-break-inside: avoid }` on every descendant.
+   * That breaks multi-page invoices: whole blocks (including the footer) jump to
+   * the next page and the footer can sit alone at the top of page 2.
+   * Restore normal breaking inside the A4 invoice only.
+   */
+  .myDiv .invoice-a4-document,
+  .myDiv .invoice-a4-document * {
+    page-break-inside: auto !important;
+  }
+
+  /*
+   * Screen flex + min-height pushes the footer to the visual bottom; in print that
+   * maps badly to pagination and can place the footer at the top of page 2.
+   * Use normal block flow when printing so the footer always follows the body.
+   */
+  .invoice-a4-document {
+    display: block;
+    min-height: 0 !important;
+    height: auto !important;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    max-width: none;
+  }
+
+  .invoice-a4-main {
+    display: block;
+    flex: none !important;
+    min-height: 0 !important;
+  }
+
+  .myDiv .invoice-a4-document .invoice-a4-header__grid {
+    break-inside: avoid;
+    page-break-inside: avoid !important;
+  }
+
+  .myDiv .invoice-a4-document .invoice-a4-doc-header {
+    break-inside: avoid;
+    page-break-inside: avoid !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Must beat `.myDiv .invoice-a4-document *` so the footer is not split across pages */
+  .myDiv .invoice-a4-document .invoice-a4-doc-footer {
+    break-inside: avoid;
+    page-break-inside: avoid !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .myDiv .invoice-a4-document .invoice-a4-seller,
+  .myDiv .invoice-a4-document .invoice-a4-document-stack {
+    break-inside: avoid;
+    page-break-inside: avoid !important;
+  }
+
+  .myDiv .invoice-a4-document .invoice-a4-party {
+    break-inside: avoid;
+    page-break-inside: avoid !important;
+    box-shadow: none;
+  }
+
+  .myDiv .invoice-a4-document .invoice-a4-preamble {
+    break-inside: avoid;
+    page-break-inside: avoid !important;
+  }
+
+  .invoice-preview-table-header {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
+  }
+
+  .myDiv .invoice-a4-document .invoice-line-table tbody tr {
+    break-inside: avoid;
+    page-break-inside: avoid !important;
+  }
+
+  .print-content .makeEvenOddBg > div:nth-child(odd) {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-color: hsl(var(--muted) / 0.55);
+  }
+}

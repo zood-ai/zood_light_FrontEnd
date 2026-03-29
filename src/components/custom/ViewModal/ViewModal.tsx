@@ -13,8 +13,67 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Button } from 'antd';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 import { useTranslation } from 'react-i18next';
-import { Pointer } from 'lucide-react';
+import {
+  buildReceiptCompanyContext,
+  buildSimplifiedTaxInvoiceHtml,
+  mapApiOrderToReceiptInput,
+  openAndPrintSimplifiedTaxInvoice,
+  resolveReceiptQrDataUrl,
+} from '@/utils/simplifiedTaxInvoiceReceipt';
+import { Pointer, Printer, Receipt, RotateCcw } from 'lucide-react';
 import dayjs from 'dayjs';
+
+/** Must match `title` prop from DetailsModal routes (used for layout + i18n). */
+export const INVOICE_VIEW_TITLE = {
+  SIMPLIFIED: 'فاتورة ضريبية مبسطة',
+  PURCHASE: 'فاتورة  شراء',
+  QUOTE: 'عرض سعر',
+  TAX: 'فاتورة ضريبية',
+} as const;
+
+function resolveInvoiceViewTitle(
+  rawTitle: string,
+  translate: (key: string) => string
+): string {
+  const map: Record<string, string> = {
+    [INVOICE_VIEW_TITLE.SIMPLIFIED]: 'VIEW_MODAL_TITLE_SIMPLIFIED',
+    [INVOICE_VIEW_TITLE.PURCHASE]: 'VIEW_MODAL_TITLE_PURCHASE',
+    [INVOICE_VIEW_TITLE.QUOTE]: 'VIEW_MODAL_TITLE_QUOTE',
+    [INVOICE_VIEW_TITLE.TAX]: 'VIEW_MODAL_TITLE_TAX',
+  };
+  const key = map[rawTitle];
+  return key ? translate(key) : rawTitle || translate('INVOICE');
+}
+
+/** Fixes doubled settings text e.g. "WelcomeWelcome" from saved receipt_header. */
+function normalizeReceiptBannerHeader(raw: string | undefined): string {
+  const s = String(raw ?? '').trim();
+  if (!s) return '';
+  if (s.length % 2 === 0) {
+    const half = s.slice(0, s.length / 2);
+    if (half === s.slice(s.length / 2)) return half;
+  }
+  return s;
+}
+
+function safeParseBranchStreetName(registeredAddress: string | undefined): string {
+  if (!registeredAddress?.trim()) return '';
+  try {
+    const o = JSON.parse(registeredAddress) as { streetName?: string };
+    return typeof o?.streetName === 'string' ? o.streetName.trim() : '';
+  } catch {
+    return '';
+  }
+}
+
+/** Hides test/junk values often left in branch streetName. */
+function isLikelyPlaceholderAddress(s: string): boolean {
+  const t = s.trim();
+  if (t.length < 2) return true;
+  if (/^(.)\1{5,}$/.test(t)) return true;
+  if (/^([a-zA-Z])\1{4,}\d*$/i.test(t)) return true;
+  return false;
+}
 
 const animationStyles = `
     @keyframes buttonPulse {
@@ -50,7 +109,7 @@ const animationStyles = `
 
 export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const dispatch = useDispatch();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const data = useSelector((state: any) => state.toggleAction.data);
   const allSettings = useSelector((state: any) => state.allSettings.value);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -67,6 +126,27 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
     data?.zatca_report_status
   );
   const Another = !Corporate;
+  const customerRaw = data?.customer as
+    | {
+        phone?: string;
+        mobile?: string;
+        tax_registration_number?: string;
+        vat_registration_number?: string;
+      }
+    | undefined;
+  const supplierRaw = data?.get_supplier as
+    | { phone?: string; tax_registration_number?: string }
+    | undefined;
+  const partyPhone = Corporate
+    ? String(supplierRaw?.phone ?? '').trim()
+    : String(customerRaw?.phone ?? customerRaw?.mobile ?? '').trim();
+  const partyTax = Corporate
+    ? String(supplierRaw?.tax_registration_number ?? '').trim()
+    : String(
+        customerRaw?.tax_registration_number ??
+          customerRaw?.vat_registration_number ??
+          ''
+      ).trim();
   const ShowCar =
     allSettings.WhoAmI?.business?.business_type?.toLowerCase() === 'workshop';
   const showReturn = [
@@ -87,14 +167,92 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
       ?.includes(permission)
   );
   const Data = { data };
+  const receiptHeaderRaw = allSettings.settings?.data?.receipt_header;
+  const receiptHeaderNormalized =
+    normalizeReceiptBannerHeader(receiptHeaderRaw);
+  const receiptHeaderHasDot = String(receiptHeaderRaw ?? '').includes('Dot');
+  const branchStreetName = safeParseBranchStreetName(
+    allSettings.WhoAmI?.user?.branches[0]?.registered_address
+  );
+  const showBranchAddressLine =
+    branchStreetName.length > 0 &&
+    !isLikelyPlaceholderAddress(branchStreetName);
+  const isArabic = Boolean(i18n.language?.startsWith('ar'));
+  const showPartyBlock = Corporate || Another;
+
+  const invoiceMetaBox = (
+    <div className="rounded-lg border border-border bg-muted/30 p-3 text-start">
+      <p className="text-xs font-medium text-muted-foreground">
+        {resolveInvoiceViewTitle(title, t)}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {title === INVOICE_VIEW_TITLE.QUOTE
+          ? t('VIEW_MODAL_QUOTE_NUMBER')
+          : t('INVOICE_NUMBER')}
+      </p>
+      <p
+        className="mt-1 text-lg font-bold tabular-nums text-foreground"
+        dir="ltr"
+      >
+        {data?.reference || '—'}
+      </p>
+      {data?.business_date?.split(' ')[0] && (
+        <p className="mt-2 border-t border-border pt-2 text-xs text-muted-foreground">
+          {t('VIEW_MODAL_INVOICE_DATE')}:{' '}
+          <span className="font-medium text-foreground tabular-nums" dir="ltr">
+            {dayjs(
+              `${dayjs(data?.business_date).format('YYYY-MM-DD')} ${dayjs(
+                data?.created_at
+              ).format('HH:mm:ss')}`
+            ).format('D/M/YYYY h:mm A')}
+          </span>
+        </p>
+      )}
+    </div>
+  );
+
   const [loading, setLoading] = useState(false);
-  const [size, setSize] = useState('A4');
   const queryClient = useQueryClient();
-  const handleSizeChange = (newSize: string) => {
-    setSize(newSize);
-  };
   const handlePrint = () => {
     reactToPrintFn();
+  };
+
+  /** Same thermal receipt HTML as POS (shared template). */
+  const handlePrintPosReceipt = async () => {
+    if (!data) return;
+    const ctx = buildReceiptCompanyContext(allSettings, undefined);
+    const isArabic = Boolean(i18n.language?.startsWith('ar'));
+    let invoiceIsoDate = new Date().toISOString();
+    try {
+      if (data?.business_date) {
+        invoiceIsoDate = new Date(data.business_date).toISOString();
+      }
+    } catch {
+      // keep default
+    }
+    const sellerName = String(
+      allSettings?.settings?.data?.business_name ||
+        allSettings?.WhoAmI?.business?.name ||
+        'Store'
+    );
+    const vatNumber = String(
+      allSettings?.settings?.data?.business_tax_number ||
+        allSettings?.WhoAmI?.business?.tax_registration_number ||
+        ''
+    );
+    const totalStr = Number(data?.total_price ?? 0).toFixed(2);
+    const taxStr = Number(data?.total_taxes ?? 0).toFixed(2);
+    const qrDataUrl = await resolveReceiptQrDataUrl({
+      qrcodeRaw: String(data?.qrcode || ''),
+      sellerName,
+      vatNumber,
+      invoiceIsoDate,
+      totalAmount: totalStr,
+      taxAmount: taxStr,
+    });
+    const input = mapApiOrderToReceiptInput(data, ctx, isArabic, qrDataUrl);
+    const html = buildSimplifiedTaxInvoiceHtml(input);
+    openAndPrintSimplifiedTaxInvoice(html);
   };
   const handleReturn = async () => {
     if (!data) return;
@@ -102,17 +260,17 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
     try {
       await axiosInstance.put(`/orders/${data?.id}/refund`);
       toast({
-        title: 'Returned',
-        description: 'Item returned successfully',
+        title: t('VIEW_MODAL_RETURN_SUCCESS'),
+        description: t('VIEW_MODAL_RETURN_SUCCESS_DESC'),
         duration: 3000,
         variant: 'default',
       });
-      queryClient.invalidateQueries(['/orders']);
+      queryClient.invalidateQueries({ queryKey: ['/orders'] });
       dispatch(toggleActionView(false));
     } catch (error) {
       toast({
-        title: 'somthing went wrong',
-        description: 'somthing went wrong',
+        title: t('VIEW_MODAL_ERROR'),
+        description: t('VIEW_MODAL_ERROR'),
         duration: 3000,
         variant: 'destructive',
       });
@@ -126,7 +284,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
       const res = await axiosInstance.post(`zatca/orders/${data?.id}/report`);
       toast({
         title: t('REPORT'),
-        description: res.data.message || 'Sent to Zatca successfully',
+        description: res.data.message || t('VIEW_MODAL_ZATCA_SENT'),
         duration: 3000,
         variant: 'default',
       });
@@ -134,318 +292,382 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
       console.error('Zatca Error: ', err);
     } finally {
       setIsConnectedLoading(false);
-      queryClient.invalidateQueries(['/orders']);
+      queryClient.invalidateQueries({ queryKey: ['/orders'] });
       dispatch(toggleActionView(false));
     }
   };
 
-  const customerAddressLength = data?.customer?.addresses[0]?.name?.length > 35;
-  console.log('faf: ', { aaaa: data?.business_date, bbbb: data?.created_at });
   return (
     <>
-      <div className="flex flex-wrap gap-4 rounded-lg-none h-[90vh] max-w-[80vw] overflow-y-auto relative bg-white">
-        <div className="flex flex-col rounded-lg-none ">
-          <div className="px-11 py-a12 w-full bg-white rounded-lg-lg  border-solid   max-md:max-w-full">
-            <div className="flex gap-5 max-md:flex-col myDiv">
+      <div className="relative w-full min-w-0 max-w-full rounded-lg bg-background">
+        <div className="flex min-w-0 flex-col rounded-lg">
+          <div className="w-full min-w-0 max-md:max-w-full rounded-lg bg-card px-3 py-4 sm:px-6 md:px-8 md:py-6">
+            <div className="myDiv flex min-w-0 gap-4 max-md:flex-col md:flex-row md:items-start md:gap-5">
               <div
                 ref={contentRef}
                 style={{
                   width: '100%',
-                  maxWidth: '800px',
+                  maxWidth: 'min(100%, 860px)',
                   margin: 'auto',
-                  padding: '20px',
+                  padding: 'clamp(8px, 2vw, 20px)',
                 }}
-                className={`${
-                  size === 'A4' ? 'a4-size' : 'small-receipt'
-                } flex flex-col w-[74%] max-md:ml-0 max-md:w-full`}
+                className="a4-size flex w-full min-w-0 flex-1 flex-col md:max-w-[min(100%,860px)]"
               >
-                {size === 'A4' ? (
-                  <div className="flex print-content flex-col   pt-4 pb-2 mx-auto w-full text-sm bg-white rounded-lg-lg  text-zinc-800 max-md:mt-10 max-md:max-w-full">
-                    <p className="text-center mb-2">
-                      {allSettings.settings?.data?.receipt_header?.includes(
-                        'Dot'
-                      )
-                        ? 'Welcome'
-                        : allSettings.settings?.data?.receipt_header}
-                    </p>
-                    <div className="w-full flex justify-between items-center mb-4">
-                      <div>
-                        <div className="flex items-center gap-5">
-                          <img
-                            className="size-[80px]"
-                            src={`${allSettings.settings?.data?.business_logo}`}
-                            alt="Logo"
-                          />
-                          <p className="font-semibold text-2xl">
-                            {allSettings.WhoAmI?.business?.name}
+                  <div className="print-content invoice-a4-document mx-auto w-full max-w-[210mm] rounded-lg border border-border bg-card p-4 text-sm leading-relaxed text-foreground max-md:mt-2 md:p-6">
+                    <header
+                      className="invoice-a4-doc-header shrink-0 -mx-4 -mt-4 mb-4 border-b border-border bg-muted/30 px-4 py-3 text-center text-xs text-muted-foreground sm:-mx-5 sm:px-5 md:-mx-6 md:-mt-6 md:px-8"
+                      dir={isArabic ? 'rtl' : 'ltr'}
+                    >
+                      <p className="font-medium text-foreground">
+                        {resolveInvoiceViewTitle(title, t)}
+                      </p>
+                    </header>
+                    <div className="invoice-a4-main min-h-0">
+                    <section className="invoice-a4-meta border-b border-border pb-4">
+                      <div
+                        className="invoice-a4-header__grid grid grid-cols-2 gap-3 md:items-start md:gap-4"
+                        dir="ltr"
+                      >
+                        <section
+                          className={`invoice-a4-document-stack flex min-w-0 flex-col ${
+                            isArabic ? 'order-1' : 'order-2'
+                          }`}
+                          aria-label={t('INVOICE')}
+                          dir={isArabic ? 'rtl' : 'ltr'}
+                        >
+                          {invoiceMetaBox}
+                        </section>
+
+                        <section
+                          className={`invoice-a4-seller min-w-0 rounded-lg border border-border bg-muted/30 p-3 ${
+                            isArabic ? 'order-2' : 'order-1'
+                          }`}
+                          aria-labelledby="invoice-a4-seller-title"
+                          dir={isArabic ? 'rtl' : 'ltr'}
+                        >
+                          <p className="text-xs font-medium text-muted-foreground">
+                            {t('VIEW_MODAL_SELLER')}
                           </p>
-                        </div>
-                        <p className="mt-4 leading-[30.18px]">
-                          {allSettings.WhoAmI?.user?.branches[0]
-                            ?.registered_address &&
-                            JSON.parse(
-                              allSettings.WhoAmI?.user?.branches[0]
-                                ?.registered_address
-                            )?.streetName}
-                        </p>
-                        <p className="w-[277px]">
-                          {allSettings.settings?.data?.business_tax_number}
-                        </p>
-                        <p className="w-[277px]">
-                          {allSettings.WhoAmI?.user?.branches[0]?.phone}
-                        </p>
-                      </div>
-                      <QRCodeComp settings={allSettings.settings} Data={Data} />
-                    </div>
-                    <div className="self-center ml-4 font-semibold text-right">
-                      {title}
-                    </div>
-                    <div className="flex flex-wrap mt-4 text-right bg-white rounded-lg border border-[#ECECEC] border-solid max-md:mr-1 max-md:max-w-full">
-                      <div className="flex flex-col flex-1 items-center   min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid   justify-between">
-                        {Corporate && 'اسم المورد'}
-                        {Another && 'اسم العميل'}
-                        <div className="mt-4 font-semibold w-full text-center">
-                          {Corporate ? data?.get_supplier?.name : ''}
-                          {Another ? data?.customer?.name : ''}
-                        </div>
-                      </div>
-                      <div className="flex z-10 flex-col flex-1   min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-[#ECECEC] border-solid   justify-between">
-                        <div className="self-center">الجوال</div>
-                        <div className="self-start mt-4 w-full text-center font-semibold">
-                          {Corporate ? supplierInfo?.data?.phone : ''}
-                          {Another ? customerInfo?.data?.phone : ''}
-                        </div>
+                          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
+                            <img
+                              className="h-12 w-12 shrink-0 rounded border border-border bg-background object-contain p-1 sm:h-14 sm:w-14"
+                              src={`${allSettings.settings?.data?.business_logo}`}
+                              alt=""
+                            />
+                            <div className="min-w-0 flex-1 space-y-1.5">
+                              <h2
+                                id="invoice-a4-seller-title"
+                                className="text-base font-semibold leading-snug text-foreground"
+                              >
+                                {allSettings.WhoAmI?.business?.name}
+                              </h2>
+                              {showBranchAddressLine ? (
+                                <p className="max-w-prose text-xs text-muted-foreground">
+                                  {branchStreetName}
+                                </p>
+                              ) : null}
+                              <dl className="flex flex-col gap-1 border-t border-border pt-2 text-xs">
+                                <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                                  <dt className="text-muted-foreground">
+                                    {t('SETTINGS_TAX_NUMBER')}
+                                  </dt>
+                                  <dd
+                                    className="font-medium text-foreground tabular-nums"
+                                    dir="ltr"
+                                  >
+                                    {allSettings.settings?.data?.business_tax_number}
+                                  </dd>
+                                </div>
+                                <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                                  <dt className="text-muted-foreground">
+                                    {t('phone')}
+                                  </dt>
+                                  <dd
+                                    className="font-medium text-foreground tabular-nums"
+                                    dir="ltr"
+                                  >
+                                    {allSettings.WhoAmI?.user?.branches[0]?.phone}
+                                  </dd>
+                                </div>
+                              </dl>
+                            </div>
+                          </div>
+                        </section>
                       </div>
 
-                      <div className="flex flex-col flex-1  min-w-fit pt-4 pb-2 bg-white rounded-lg border border-[#ECECEC] border-solid max-md:pl-5 justify-between">
-                        <div className="self-center">الرقم الضريبي</div>
-                        <div className="mt-4 text-center font-semibold">
-                          {Corporate
-                            ? supplierInfo?.data?.tax_registration_number
-                            : ''}
-                          {Another
-                            ? customerInfo?.data?.tax_registration_number
-                            : ''}
-                        </div>
-                      </div>
-                      <div className="flex z-10 flex-col flex-1  min-w-fit pt-4 pb-2 bg-white border border-[#ECECEC] border-solid   justify-between">
-                        <div className="self-center">تاريخ الفاتورة</div>
-                        <div className="flex gap-2 mt-4 font-semibold whitespace-nowrap justify-between">
-                          {data?.business_date?.split(' ')[0] && (
-                            <div className="grow text-center">
-                              {/* {moment(
-                                data?.business_date?.split(' ')[0]
-                              ).format('D/M/YYYY h:mm A')} */}
-                              {dayjs(
-                                `${dayjs(data?.business_date).format(
-                                  'YYYY-MM-DD'
-                                )} ${dayjs(data?.created_at).format('HH:mm:ss')}`
-                              ).format('D/M/YYYY h:mm A')}
-                            </div>
-                          )}
-                          {data?.business_date?.split(' ')[1]?.slice(0, 5) && (
-                            <div className="grow text-center">
-                              {/* {data?.business_date?.split(' ')[1]?.slice(0, 5)} */}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {title === 'فاتورة  شراء' && (
-                        <div className="flex flex-col flex-1 items-center   min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid   justify-between">
-                          <div>الرقم المرجعي</div>
-                          <div className="mt-4 font-semibold w-full text-center">
-                            {data?.invoice_number || ''}
-                          </div>
-                        </div>
-                      )}
-                      <div className="flex flex-col flex-1 items-center   min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid  justify-between">
-                        <div>
-                          {title === 'عرض سعر'
-                            ? 'رقم عرض السعر'
-                            : 'رقم الفاتورة'}
-                        </div>
-                        <div className="mt-4 font-semibold w-full text-center">
-                          {data?.reference || ''}
-                        </div>
-                      </div>
-                    </div>
-                    {Another &&
-                      customerAddressLength &&
-                      data?.customer?.addresses[0]?.name && (
-                        <div className="flex flex-wrap mt-4 text-right bg-white rounded-lg border border-[#ECECEC] border-solid max-md:mr-1 max-md:max-w-full">
-                          <div className="flex z-10 flex-col flex-1   min-w-fit pt-4 pb-2 whitespace-nowrap bg-white border border-[#ECECEC] border-solid   justify-between">
-                            <div className="self-center">عنوان العميل</div>
-                            <div className="self-start mt-4 w-full text-center font-semibold">
-                              {Another
-                                ? data?.customer?.addresses[0]?.name
-                                : ''}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    <div className="flex">
-                      {!customerAddressLength &&
-                        Another &&
-                        data?.customer?.addresses[0]?.name && (
-                          <div className="flex flex-col flex-1 items-center   min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid   justify-between">
-                            <div>عنوان العميل</div>
-                            <div className="mt-4 font-semibold w-full text-center">
-                              {Another
-                                ? data?.customer?.addresses[0]?.name
-                                : '---'}
-                            </div>
-                          </div>
-                        )}
-                      {ShowCar && data?.kitchen_received_at && (
-                        <div className="flex flex-col flex-1 items-center   min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid   justify-between">
-                          <div>نوع السيارة</div>
-                          <div className="mt-4 font-semibold w-full text-center">
-                            {data?.kitchen_received_at || ''}
-                          </div>
-                        </div>
-                      )}
+                      {showPartyBlock && (
+                        <div
+                          className="mt-4 w-full min-w-0"
+                          dir={isArabic ? 'rtl' : 'ltr'}
+                        >
+                          <div className="invoice-a4-party w-full rounded-lg border border-border bg-muted/30">
+                            <div className="flex w-full flex-col gap-3 p-3 min-[480px]:flex-row min-[480px]:items-start min-[480px]:justify-between min-[480px]:gap-4">
+                                <div className="min-w-0 flex-1 space-y-3 text-start">
+                                <div className="space-y-1.5">
+                                  <p className="text-xs font-medium text-muted-foreground">
+                                    {Corporate
+                                      ? t('VIEW_MODAL_SUPPLIER_SECTION')
+                                      : t('VIEW_MODAL_CUSTOMER_SECTION')}
+                                  </p>
+                                  <p className="text-base font-semibold leading-snug text-foreground">
+                                    {Corporate ? data?.get_supplier?.name : ''}
+                                    {Another ? data?.customer?.name : ''}
+                                  </p>
+                                  {(partyPhone || partyTax) && (
+                                    <dl className="grid gap-1 text-xs">
+                                      {partyPhone ? (
+                                        <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                                          <dt className="text-muted-foreground">
+                                            {t('phone')}
+                                          </dt>
+                                          <dd
+                                            className="font-medium tabular-nums text-foreground"
+                                            dir="ltr"
+                                          >
+                                            {partyPhone}
+                                          </dd>
+                                        </div>
+                                      ) : null}
+                                      {partyTax ? (
+                                        <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                                          <dt className="text-muted-foreground">
+                                            {t('SETTINGS_TAX_NUMBER')}
+                                          </dt>
+                                          <dd
+                                            className="font-medium tabular-nums text-foreground"
+                                            dir="ltr"
+                                          >
+                                            {partyTax}
+                                          </dd>
+                                        </div>
+                                      ) : null}
+                                    </dl>
+                                  )}
+                                  {title === INVOICE_VIEW_TITLE.PURCHASE &&
+                                    Corporate && (
+                                      <p className="text-xs leading-snug">
+                                        <span className="text-muted-foreground">
+                                          {t('VIEW_MODAL_REFERENCE_NUMBER')}{' '}
+                                        </span>
+                                        <span
+                                          className="font-medium tabular-nums text-foreground"
+                                          dir="ltr"
+                                        >
+                                          {data?.invoice_number || '—'}
+                                        </span>
+                                      </p>
+                                    )}
+                                  {Another &&
+                                    data?.customer?.addresses[0]?.name && (
+                                      <p className="text-xs leading-relaxed text-foreground">
+                                        <span className="text-muted-foreground">
+                                          {t('VIEW_MODAL_CUSTOMER_ADDRESS')}{' '}
+                                        </span>
+                                        <span className="font-medium">
+                                          {data?.customer?.addresses[0]?.name}
+                                        </span>
+                                      </p>
+                                    )}
+                                </div>
 
-                      {ShowCar && data?.kitchen_done_at && (
-                        <div className="flex flex-col flex-1 items-center  min-w-fit pt-4 pb-2 bg-white rounded-lg-none border border-[#ECECEC] border-solid   justify-between">
-                          <div>رقم اللوحة</div>
-                          <div className="mt-4 font-semibold w-full text-center">
-                            {data?.kitchen_done_at || ''}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                                {ShowCar &&
+                                  (data?.kitchen_received_at ||
+                                    data?.kitchen_done_at) && (
+                                    <div className="space-y-1.5 border-t border-border pt-3">
+                                      <p className="text-xs font-medium text-muted-foreground">
+                                        {t('VIEW_MODAL_VEHICLE_SECTION')}
+                                      </p>
+                                      <dl className="space-y-1.5 text-xs leading-snug">
+                                        {data?.kitchen_received_at ? (
+                                          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                                            <dt className="shrink-0 text-muted-foreground">
+                                              {t('CAR_TYPE')}
+                                            </dt>
+                                            <dd className="min-w-0 font-medium text-foreground">
+                                              {data.kitchen_received_at}
+                                            </dd>
+                                          </div>
+                                        ) : null}
+                                        {data?.kitchen_done_at ? (
+                                          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                                            <dt className="shrink-0 text-muted-foreground">
+                                              {t('CAR_PLATE')}
+                                            </dt>
+                                            <dd
+                                              className="min-w-0 font-medium tabular-nums text-foreground"
+                                              dir="ltr"
+                                            >
+                                              {data.kitchen_done_at}
+                                            </dd>
+                                          </div>
+                                        ) : null}
+                                      </dl>
+                                    </div>
+                                  )}
+                                </div>
 
-                    {!Corporate && data?.kitchen_notes && (
-                      <div className="mt-6 flex flex-1 items-center min-w-fit bg-white rounded-lg-none border border-[#ECECEC] border-solid  justify-between">
-                        <div className="flex-grow p-4 font-semibold text-base w-[100px] flex items-center justify-center">
-                          ملاحظات
-                        </div>
-                        <div className="p-4 border-r-2 border-r-[#ECECEC] font-normal text-base w-full">
-                          {data?.kitchen_notes || ''}
-                          {/* الابواب الخشبية وتصليح الاقفال وعمل ديكور السقف فك
-                          القديم وتركيب جديد 60+60 ابيض عمل نظافة داخل البيت
-                          كاملوالحمامات والمطبخ تركيبسيراميكالجدران والارضية مع
-                          المواد السباك ومواد النجار */}
-                        </div>
-                      </div>
-                    )}
-                    {Corporate && data?.notes && (
-                      <div className="mt-6 flex flex-1 items-center min-w-fit bg-white rounded-lg-none border border-[#ECECEC] border-solid   justify-between">
-                        <div className="flex-grow py-4   font-semibold text-base min-w-[100px] flex items-center justify-center text-nowrap">
-                          وصف المشتريات
-                        </div>
-                        <div className="p-4 border-r-2 border-r-[#ECECEC] font-normal text-base w-full">
-                          {data?.notes || ''}
-                          {/* الابواب الخشبية وتصليح الاقفال وعمل ديكور السقف فك
-                          القديم وتركيب جديد 60+60 ابيض عمل نظافة داخل البيت
-                          كاملوالحمامات والمطبخ تركيبسيراميكالجدران والارضية مع
-                          المواد السباك ومواد النجار */}
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex z-10 flex-wrap gap-5 justify-between   py-1.5 mt-4 w-full font-semibold text-right text-white rounded-lg border border-[#ECECEC] border-solid bg-[#868686] max-md:mr-1 max-md:max-w-full">
-                      <div className="flex w-full items-center text-center">
-                        <div className={`${Corporate ? 'w-1/2' : 'w-1/3'}`}>
-                          اسم المنتج
-                        </div>
-                        <div className="w-[110px]">كمية</div>
-                        <div className="w-[110px]">سعر الوحدة</div>
-                        {!Corporate && (
-                          <div className="w-[200px]">المجموع الكلي</div>
-                        )}
-                        {!Corporate && (
-                          <div className="w-[150px]">قيمة الضريبة</div>
-                        )}
-                        <div className="w-[140px]   py-4">
-                          المجموع <br />
-                          <span className="text-[10px] font-bold">
-                            (غير شامل الضريبة)
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-5 justify-between py-5 mt-0  bg-white rounded-lg border border-[#ECECEC] border-solid w-[802px] max-w-full max-md:mr-1   text-right">
-                      {Data?.data?.order_product?.map((e) => {
-                        return (
-                          <div className="flex font-semibold w-full">
-                            <div className="w-1/3 flex justify-center items-center">
-                              {e?.kitchen_notes
-                                ? e?.kitchen_notes
-                                : Data?.data?.products?.find(
-                                    (test) => test.id === e.product_id
-                                  )?.name}
-                            </div>
-                            <div className="w-[120px] flex justify-center items-center">
-                              {currencyFormated(e?.quantity)}
-                            </div>
-                            <div className="w-[120px] flex justify-center items-center">
-                              {currencyFormated(e?.unit_price)}
-                            </div>
-                            <div className="w-[230px] flex justify-center items-center">
-                              {currencyFormated(
-                                parseFloat(e?.unit_price) *
-                                  parseFloat(e?.quantity)
-                              )}
-                            </div>
-
-                            {!Corporate && (
-                              <div className="w-[120px] flex justify-center items-center">
-                                {currencyFormated(e?.taxes?.[0]?.pivot?.amount)}
+                                <div className="flex shrink-0 justify-center min-[480px]:self-start">
+                                  <div className="rounded border border-border bg-background p-1">
+                                    <QRCodeComp
+                                      settings={allSettings.settings}
+                                      Data={Data}
+                                    />
+                                  </div>
+                                </div>
                               </div>
-                            )}
-                            <div className="w-[140px] flex justify-center items-center">
-                              {currencyFormated(
-                                parseFloat(e?.unit_price) *
-                                  parseFloat(e?.quantity) +
-                                  e?.taxes?.[0]?.pivot?.amount *
-                                    (e?.is_tax_included ? -1 : 0)
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {Data?.data?.items?.map((e) => (
-                        <div className="flex font-semibold w-full">
-                          <div className="w-1/2 flex justify-center items-center">
-                            {e?.name === 'sku-zood-20001'
-                              ? e?.pivot?.kitchen_notes
-                              : e?.name}
-                          </div>
-                          <div className="max-w-[120px] flex-grow flex justify-center items-center">
-                            {currencyFormated(e?.pivot?.quantity)}
-                          </div>
-                          <div className="max-w-[120px] flex-grow flex justify-center items-center">
-                            {currencyFormated(e?.pivot?.cost)}
-                          </div>
-                          <div className="max-w-[120px] flex-grow flex justify-center items-center">
-                            {currencyFormated(
-                              e?.pivot?.quantity * e?.pivot?.cost
-                            )}
                           </div>
                         </div>
-                      ))}
-                    </div>
-                    <div className="flex flex-col gap-3 mt-10 makeEvenOddBg">
+                      )}
+                    </section>
+
+                    {(receiptHeaderHasDot || receiptHeaderNormalized) && (
+                      <div
+                        className="invoice-a4-preamble mt-4 rounded-lg border border-dashed border-border bg-muted/10 px-3 py-2"
+                        dir={isArabic ? 'rtl' : 'ltr'}
+                      >
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          {t('receipt_header')}
+                        </p>
+                        <p className="mt-2 text-sm leading-relaxed text-foreground">
+                          {receiptHeaderHasDot
+                            ? t('VIEW_MODAL_RECEIPT_WELCOME')
+                            : receiptHeaderNormalized}
+                        </p>
+                      </div>
+                    )}
+
+                    {Data?.data?.order_product && Data.data.order_product.length > 0 ? (
+                      <div className="mt-5 overflow-x-auto rounded-xl border border-border">
+                        <table className="invoice-line-table w-full min-w-[520px] border-collapse text-sm">
+                          <thead>
+                            <tr className="invoice-preview-table-header border-b border-border bg-muted/90 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              <th className="px-3 py-3 text-start">
+                                {t('VIEW_MODAL_PRODUCT_NAME')}
+                              </th>
+                              <th className="w-20 px-2 py-3 text-end tabular-nums">
+                                {t('VIEW_MODAL_QTY')}
+                              </th>
+                              <th className="w-24 px-2 py-3 text-end tabular-nums">
+                                {t('VIEW_MODAL_UNIT_PRICE')}
+                              </th>
+                              {!Corporate && (
+                                <th className="w-24 px-2 py-3 text-end tabular-nums">
+                                  {t('VIEW_MODAL_TAX_VALUE')}
+                                </th>
+                              )}
+                              <th className="w-28 px-2 py-3 text-end tabular-nums">
+                                {t('TOTAL')}
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border bg-card">
+                            {Data.data.order_product.map((e, idx) => (
+                              <tr
+                                key={`op-${e?.product_id ?? idx}`}
+                                className="hover:bg-muted/20"
+                              >
+                                <td className="max-w-[220px] px-3 py-2.5 text-start align-top text-sm font-medium">
+                                  {e?.kitchen_notes
+                                    ? e?.kitchen_notes
+                                    : Data?.data?.products?.find(
+                                        (test) => test.id === e.product_id
+                                      )?.name}
+                                </td>
+                                <td className="px-2 py-2.5 text-end tabular-nums text-muted-foreground">
+                                  {currencyFormated(e?.quantity)}
+                                </td>
+                                <td className="px-2 py-2.5 text-end tabular-nums text-muted-foreground">
+                                  {currencyFormated(e?.unit_price)}
+                                </td>
+                                {!Corporate && (
+                                  <td className="px-2 py-2.5 text-end tabular-nums">
+                                    {currencyFormated(
+                                      e?.taxes?.[0]?.pivot?.amount
+                                    )}
+                                  </td>
+                                )}
+                                <td className="px-2 py-2.5 text-end text-sm font-semibold tabular-nums">
+                                  {currencyFormated(
+                                    parseFloat(e?.unit_price) *
+                                      parseFloat(e?.quantity) +
+                                      e?.taxes?.[0]?.pivot?.amount *
+                                        (e?.is_tax_included ? -1 : 0)
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : null}
+
+                    {Data?.data?.items && Data.data.items.length > 0 ? (
+                      <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+                        <table className="invoice-line-table w-full min-w-[480px] border-collapse text-sm">
+                          <thead>
+                            <tr className="invoice-preview-table-header border-b border-border bg-muted/90 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              <th className="px-3 py-3 text-start">
+                                {t('VIEW_MODAL_PRODUCT_NAME')}
+                              </th>
+                              <th className="w-20 px-2 py-3 text-end tabular-nums">
+                                {t('VIEW_MODAL_QTY')}
+                              </th>
+                              <th className="w-24 px-2 py-3 text-end tabular-nums">
+                                {t('VIEW_MODAL_UNIT_PRICE')}
+                              </th>
+                              <th className="w-28 px-2 py-3 text-end tabular-nums">
+                                {t('VIEW_MODAL_LINE_TOTAL')}
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border bg-card">
+                            {Data.data.items.map((e, idx) => (
+                              <tr key={`it-${e?.name ?? idx}-${idx}`} className="hover:bg-muted/20">
+                                <td className="max-w-[240px] px-3 py-2.5 text-start align-top text-sm font-medium">
+                                  {e?.name === 'sku-zood-20001'
+                                    ? e?.pivot?.kitchen_notes
+                                    : e?.name}
+                                </td>
+                                <td className="px-2 py-2.5 text-end tabular-nums text-muted-foreground">
+                                  {currencyFormated(e?.pivot?.quantity)}
+                                </td>
+                                <td className="px-2 py-2.5 text-end tabular-nums text-muted-foreground">
+                                  {currencyFormated(e?.pivot?.cost)}
+                                </td>
+                                <td className="px-2 py-2.5 text-end text-sm font-semibold tabular-nums">
+                                  {currencyFormated(
+                                    e?.pivot?.quantity * e?.pivot?.cost
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : null}
+
+                    <div className="mt-5 flex justify-end">
+                      <div className="makeEvenOddBg w-full max-w-md space-y-0 overflow-hidden rounded-xl border border-border bg-muted/10 p-0 text-sm">
                       {Data?.data?.subtotal_price ? (
-                        <div className="flex justify-between p-2 rounded-lg items-center">
-                          <div>الإجمالي الفرعي</div>
-                          <div>
+                        <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
+                          <span>{t('SUBTOTAL')}</span>
+                          <span className="tabular-nums text-foreground">
                             SR {currencyFormated(Data?.data?.subtotal_price)}
-                          </div>
+                          </span>
                         </div>
                       ) : null}
                       {Data?.data?.discount_amount ? (
-                        <div className="flex justify-between p-2 rounded-lg items-center">
-                          <div>خصم</div>
-                          <div>
+                        <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
+                          <span>{t('DISCOUNT')}</span>
+                          <span className="tabular-nums text-foreground">
                             SR {currencyFormated(Data?.data?.discount_amount)}
-                          </div>
+                          </span>
                         </div>
                       ) : null}
                       {Data?.data?.items ? (
-                        <div className="flex justify-between p-2 rounded-lg items-center">
-                          <div>المبلغ الإجمالي غير شامل الضريبة</div>
-                          <div>
+                        <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
+                          <span>{t('VIEW_MODAL_TOTAL_EXCL_VAT_AMOUNT')}</span>
+                          <span className="tabular-nums text-foreground">
                             SR{' '}
                             {currencyFormated(
                               Data?.data?.items?.reduce(
@@ -453,44 +675,44 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                                 0
                               )
                             )}
-                          </div>
+                          </span>
                         </div>
                       ) : null}
                       {Data?.data?.tax_exclusive_discount_amount ? (
-                        <div className="flex justify-between p-2 rounded-lg items-center">
-                          <div>مجموع ضريبة القيمة المضافة 15%</div>
-                          <div>
+                        <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
+                          <span>{t('VIEW_MODAL_VAT_15_TOTAL')}</span>
+                          <span className="tabular-nums text-foreground">
                             SR{' '}
                             {currencyFormated(
                               Data.data.tax_exclusive_discount_amount
                             )}
-                          </div>
+                          </span>
                         </div>
                       ) : null}
                       {Corporate ? (
-                        <div className="flex justify-between p-2 rounded-lg items-center">
-                          <div>مجموع ضريبة القيمة المضافة 15%</div>
-                          <div>
+                        <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
+                          <span>{t('VIEW_MODAL_VAT_15_TOTAL')}</span>
+                          <span className="tabular-nums text-foreground">
                             SR{' '}
                             {currencyFormated(
                               parseFloat(Data.data.paid_tax || 0)
                             )}
-                          </div>
+                          </span>
                         </div>
                       ) : null}
 
                       {Data?.data?.total_price ? (
-                        <div className="flex justify-between p-2 rounded-lg items-center">
-                          <div>المبلغ الإجمالي</div>
-                          <div>
+                        <div className="flex justify-between gap-4 border-b-2 border-border bg-muted/25 px-4 py-3 text-base font-semibold text-foreground">
+                          <span>{t('TOTAL_AMOUNT')}</span>
+                          <span className="tabular-nums">
                             SR {currencyFormated(Data?.data?.total_price)}
-                          </div>
+                          </span>
                         </div>
                       ) : null}
                       {Data?.data?.items ? (
-                        <div className="flex justify-between p-2 rounded-lg items-center">
-                          <div>المبلغ الإجمالي شامل الضريبة</div>
-                          <div>
+                        <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
+                          <span>{t('VIEW_MODAL_TOTAL_INCL_VAT')}</span>
+                          <span className="tabular-nums text-foreground">
                             SR{' '}
                             {currencyFormated(
                               parseFloat(Data.data.paid_tax || 0) +
@@ -499,23 +721,27 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                                   0
                                 )
                             )}
-                          </div>
+                          </span>
                         </div>
                       ) : null}
-                      {Data?.data?.payments?.map((e) => {
-                        if (e?.payment_method_id) {
-                          return (
-                            <div className="flex justify-between p-2 rounded-lg items-center">
-                              <div>{e?.payment_method?.name}</div>
-                              <div>SR {currencyFormated(e?.amount)}</div>
-                            </div>
-                          );
-                        }
+                      {Data?.data?.payments?.map((e, payIdx) => {
+                        if (!e?.payment_method_id) return null;
+                        return (
+                          <div
+                            key={e?.payment_method_id ?? payIdx}
+                            className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground"
+                          >
+                            <span>{e?.payment_method?.name}</span>
+                            <span className="tabular-nums text-foreground">
+                              SR {currencyFormated(e?.amount)}
+                            </span>
+                          </div>
+                        );
                       })}
                       {Data?.data?.payments?.length > 0 ? (
-                        <div className="flex justify-between p-2 rounded-lg items-center">
-                          <div>المبلغ الإجمالي المدفوع</div>
-                          <div>
+                        <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
+                          <span>{t('AMOUNT_PAID')}</span>
+                          <span className="tabular-nums text-foreground">
                             SR{' '}
                             {currencyFormated(
                               Data?.data?.payments.reduce(
@@ -523,7 +749,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                                 0
                               )
                             )}
-                          </div>
+                          </span>
                         </div>
                       ) : null}
                       {Data?.data?.payments?.length > 0 &&
@@ -534,9 +760,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       ) -
                         Data?.data?.total_price >
                         0 ? (
-                        <div className="flex justify-between p-2 rounded-lg items-center">
-                          <div>إجمالي المبلغ المتبقي</div>
-                          <div>
+                        <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
+                          <span>{t('VIEW_MODAL_TOTAL_REMAINING')}</span>
+                          <span className="tabular-nums text-foreground">
                             SR{' '}
                             {(Data?.data?.payments?.reduce(
                               (sum, item) => sum + item?.amount,
@@ -549,7 +775,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                                   ) - Data?.data?.total_price
                                 )
                               : Number(0).toFixed(2)) || 0}
-                          </div>
+                          </span>
                         </div>
                       ) : null}
                       {Data?.data?.total_price &&
@@ -559,9 +785,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           0
                         ) >
                         0 ? (
-                        <div className="flex justify-between p-2 rounded-lg items-center">
-                          <div>إجمالي المبلغ المستحق</div>
-                          <div>
+                        <div className="flex justify-between gap-4 px-4 py-2.5 text-muted-foreground">
+                          <span>{t('VIEW_MODAL_TOTAL_DUE')}</span>
+                          <span className="tabular-nums text-foreground">
                             SR{' '}
                             {((Data?.data?.payments?.reduce(
                               (sum, item) => sum + item.amount,
@@ -575,13 +801,42 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                                     )
                                 )
                               : 0) || 0}
-                          </div>
+                          </span>
                         </div>
                       ) : null}
                     </div>
+                    </div>
+
+                    {!Corporate && data?.kitchen_notes && (
+                      <div
+                        className="mt-4 rounded-lg border border-dashed border-border bg-muted/10 px-3 py-2"
+                        dir={isArabic ? 'rtl' : 'ltr'}
+                      >
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          {t('NOTES')}
+                        </p>
+                        <p className="mt-2 text-sm leading-relaxed">
+                          {data?.kitchen_notes}
+                        </p>
+                      </div>
+                    )}
+                    {Corporate && data?.notes && (
+                      <div
+                        className="mt-4 rounded-lg border border-dashed border-border bg-muted/10 px-3 py-2"
+                        dir={isArabic ? 'rtl' : 'ltr'}
+                      >
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          {t('VIEW_MODAL_PURCHASE_DESCRIPTION')}
+                        </p>
+                        <p className="mt-2 text-sm leading-relaxed">
+                          {data?.notes}
+                        </p>
+                      </div>
+                    )}
+
                     <div className="flex justify-between items-center">
                       {/* <p className="text-sm w-[50%] mt-[30px] text-[#26262F]">
-                        الشروط والاحكام
+                        Terms and conditions
                       </p> */}
                       {/* <div className="justify-items-end">
                         <img
@@ -598,458 +853,83 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                     </div>
                     {/* {data?.kitchen_notes ? (
                       <div className="flex flex-col pt-4 pb-2 bg-white rounded-lg-none  max-md:px-5 justify-between">
-                        <div>ملاحظات : {data?.kitchen_notes || ''}</div>
+                        <div>
+                          {t('NOTES')}: {data?.kitchen_notes || ''}
+                        </div>
                       </div>
                     ) : null} */}
-                    <p className="text-center">
-                      {allSettings.settings?.data?.receipt_footer}
-                    </p>
+                    </div>
+                    <footer
+                      className="invoice-a4-doc-footer shrink-0 -mx-4 border-t border-border bg-muted/30 px-4 py-4 text-center text-xs leading-relaxed text-muted-foreground sm:-mx-5 sm:px-5 md:-mx-6 md:px-8"
+                      dir={isArabic ? 'rtl' : 'ltr'}
+                    >
+                      {String(
+                        allSettings.settings?.data?.receipt_footer ?? ''
+                      ).trim() ? (
+                        <p>{allSettings.settings?.data?.receipt_footer}</p>
+                      ) : (
+                        <p className="text-muted-foreground">
+                          {allSettings.WhoAmI?.business?.name}
+                        </p>
+                      )}
+                    </footer>
                   </div>
-                ) : (
-                  <div className="flex print-content2 flex-col w-[80mm]  mx-auto text-righ text-sm p-1  ">
-                    <p className="text-center mb-2">
-                      {allSettings.settings?.data?.receipt_header?.includes(
-                        'Dot'
-                      )
-                        ? 'Welcome'
-                        : allSettings.settings?.data?.receipt_header}
-                    </p>
-                    <img
-                      className="mx-auto size-[80px]"
-                      src={`${allSettings.settings?.data?.business_logo}`}
-                      alt="Logo"
-                    />
-                    <p className="font-semibold text-sm text-center pt-2 pb-5">
-                      {allSettings.WhoAmI?.business?.name}
-                    </p>
-                    <div className="text-center text-sm leading-6 mb-4">
-                      {allSettings.WhoAmI?.user?.branches[0]
-                        ?.registered_address &&
-                        JSON.parse(
-                          allSettings.WhoAmI?.user?.branches[0]
-                            ?.registered_address
-                        )?.streetName}
-                    </div>
-                    <div className="text-center font-semibold text-lg my-6">
-                      {title}
-                    </div>
-                    <div className="flex flex-col gap-3 mb-2">
-                      <div className="flex justify-between">
-                        <p>
-                          {Another && 'اسم العميل'}
-                          {Corporate && 'اسم المورد'}
-                        </p>
-                        <p>
-                          {Corporate ? data?.get_supplier?.name : ''}
-                          {Another ? data?.customer?.name : ''}
-                        </p>
-                      </div>
-                      {/* <div className="flex justify-between">
-                        <p>
-                          {Another && 'عنوان العميل'}
-                          {Corporate && 'عنوان المورد'}
-                        </p>
-                        <p>
-                          {Corporate
-                            ? data?.get_supplier?.addresses[0]?.name
-                            : ''}
-                          {Another ? data?.customer?.addresses[0]?.name : ''}
-                        </p>
-                      </div> */}
-                      <div className="flex justify-between">
-                        <p>الجوال </p>
-                        <p>
-                          {Corporate ? supplierInfo?.data?.phone : ''}
-                          {Another ? customerInfo?.data?.phone : ''}
-                        </p>
-                      </div>
-                      <div className="flex justify-between">
-                        <p>الرقم الضريبي </p>
-                        <p>
-                          {Corporate
-                            ? supplierInfo?.data?.tax_registration_number
-                            : ''}
-                          {Another
-                            ? customerInfo?.data?.tax_registration_number
-                            : ''}
-                        </p>
-                      </div>
-                      <div className="flex justify-between">
-                        <p>تاريخ الفاتورة </p>
-                        <p>
-                          {' '}
-                          {/* {moment(data?.business_date?.split(' ')[0]).format(
-                            'D/M/YYYY h:mm A'
-                          )} */}
-                          {dayjs(
-                            `${dayjs(data?.business_date).format(
-                              'YYYY-MM-DD'
-                            )} ${dayjs(data?.created_at).format('HH:mm:ss')}`
-                          ).format('D/M/YYYY h:mm A')}
-                        </p>
-                      </div>
-                      <div className="flex justify-between">
-                        <p>
-                          {' '}
-                          {title === 'عرض سعر'
-                            ? 'رقم عرض السعر'
-                            : 'رقم الفاتورة'}{' '}
-                        </p>
-                        <p>{data?.reference}</p>
-                      </div>
-                      {title === 'فاتورة  شراء' && (
-                        <div className="flex justify-between">
-                          <p>الرقم المرجعي</p>
-                          <p>{data?.invoice_number || ''}</p>
-                        </div>
-                      )}
-                      {ShowCar && data?.kitchen_received_at && (
-                        <div className="flex justify-between">
-                          <p>نوع السيارة</p>
-                          <p>{data?.kitchen_received_at || ''}</p>
-                        </div>
-                      )}
-                      {ShowCar && data?.kitchen_done_at && (
-                        <div className="flex justify-between">
-                          <p>رقم اللوحة</p>
-                          <p>{data?.kitchen_done_at || ''}</p>
-                        </div>
-                      )}
-                    </div>
-                    <div className=" py-5">
-                      <div className="flex font-semibold justify-between text-black text-xs  mb-2">
-                        <div className="!w-[80px] self-end text-center">
-                          اسم المنتج
-                        </div>
-                        <div className="!w-[70px]  self-end text-center">
-                          كمية
-                        </div>
-                        <div className="!w-[70px]  self-end text-center">
-                          سعر الوحدة
-                        </div>
-                        {!Corporate && (
-                          <div className="!w-[70px]  self-end text-center">
-                            قيمة الضريبة
-                          </div>
-                        )}
-                        <div className="!w-[70px] text-center">
-                          المجموع (غير شامل الضريبة)
-                          {/* المجموع (شامل الضريبة) */}
-                        </div>
-                      </div>
-                      <div className="flex border-t-2 border-b-black/20 flex-col bg-white rounded-lg py-2   text-sm">
-                        {Data?.data?.order_product?.map(
-                          (orderProduct, index) => {
-                            return (
-                              <div
-                                key={index}
-                                className="flex justify-between border-b-2 border-b-black/20"
-                              >
-                                <div className="!w-[80px] flex-grow items-center text-[12px]">
-                                  {orderProduct?.kitchen_notes
-                                    ? orderProduct?.kitchen_notes
-                                    : Data?.data?.products?.find(
-                                        (test) =>
-                                          test.id === orderProduct.product_id
-                                      )?.name}
-                                </div>
-                                <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
-                                  <p>
-                                    {currencyFormated(orderProduct?.quantity)}
-                                  </p>
-                                </div>
-                                <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
-                                  <p>
-                                    {currencyFormated(orderProduct?.unit_price)}
-                                  </p>
-                                </div>
-                                {!Corporate && (
-                                  <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
-                                    <p>
-                                      {currencyFormated(
-                                        orderProduct?.taxes?.[0]?.pivot
-                                          ?.amount || 0
-                                      )}
-                                    </p>
-                                  </div>
-                                )}
-                                <div className="!w-[70px] flex-grow items-center flex justify-center text-[12px]">
-                                  <p>
-                                    {currencyFormated(
-                                      parseFloat(orderProduct?.unit_price) *
-                                        parseFloat(orderProduct?.quantity) +
-                                        orderProduct?.taxes?.[0]?.pivot
-                                          ?.amount *
-                                          (orderProduct?.is_tax_included
-                                            ? -1
-                                            : 0)
-                                    )}
-                                  </p>
-                                </div>
-                              </div>
-                            );
-                          }
-                        )}
-                        {Data?.data?.items?.map((product, index) => (
-                          <div
-                            key={index}
-                            className="flex justify-between border-b-2 border-b-black/20"
-                          >
-                            <div
-                              style={{ width: `calc(100%/3)` }}
-                              className="!w-[70px] items-center text-[12px]"
-                            >
-                              {product?.name === 'sku-zood-20001'
-                                ? product?.pivot?.kitchen_notes
-                                : product?.name}
-                            </div>
-                            <div className="!w-[70px] items-center flex justify-center text-[12px]">
-                              <p>
-                                {currencyFormated(product?.pivot?.quantity)}
-                              </p>
-                            </div>
-                            <div className="!w-[70px] items-center flex justify-center text-[12px]">
-                              <p>{currencyFormated(product?.pivot?.cost)}</p>
-                            </div>
-                            <div className="!w-[70px] items-center flex justify-center text-[12px]">
-                              <p>
-                                {currencyFormated(
-                                  product?.pivot?.quantity *
-                                    product?.pivot?.cost
-                                )}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex flex-col mt-4 gap-4">
-                      <div className="flex flex-col gap-2">
-                        {Data?.data?.subtotal_price ? (
-                          <div className="flex justify-between items-center">
-                            <p className="w-[50%]">الإجمالي الفرعي</p>
-                            <p>
-                              SR {currencyFormated(Data?.data?.subtotal_price)}
-                            </p>
-                          </div>
-                        ) : null}
-                        {Data?.data?.items ? (
-                          <div className="flex justify-between items-center">
-                            <p className="w-[50%]">الاجمالي</p>
-                            <p>
-                              SR{' '}
-                              {currencyFormated(
-                                Data?.data?.items?.reduce(
-                                  (sum, item) => sum + item?.pivot?.total_cost,
-                                  0
-                                )
-                              )}
-                            </p>
-                          </div>
-                        ) : null}
-                        {Data?.data?.discount_amount ? (
-                          <div className="flex justify-between items-center">
-                            <div>خصم</div>
-                            <p>
-                              SR {currencyFormated(Data?.data?.discount_amount)}
-                            </p>
-                          </div>
-                        ) : null}
-                        {Data?.data?.tax_exclusive_discount_amount ? (
-                          <div className="flex justify-between items-center">
-                            <p>مجموع ضريبة القيمة المضافة 15%</p>
-                            <p>
-                              SR{' '}
-                              {currencyFormated(
-                                Data?.data?.tax_exclusive_discount_amount
-                              )}
-                            </p>
-                          </div>
-                        ) : null}
-                      </div>
-                      <div className="flex flex-col gap-4">
-                        {Data?.data?.total_price ? (
-                          <div className="flex justify-between items-center">
-                            <p>المبلغ الإجمالي</p>
-                            <p>
-                              SR {currencyFormated(Data?.data?.total_price)}
-                            </p>
-                          </div>
-                        ) : null}
-                        {Data?.data?.payments?.length > 0 ? (
-                          <div className="flex justify-between items-center">
-                            <p>المبلغ الإجمالي المدفوع</p>
-                            <p>
-                              SR{' '}
-                              {currencyFormated(
-                                Data?.data?.payments.reduce(
-                                  (sum, item) => sum + item?.amount,
-                                  0
-                                )
-                              )}
-                            </p>
-                          </div>
-                        ) : null}
-                      </div>
-                      {Data?.data?.payments?.length > 0 &&
-                      Data?.data?.total_price &&
-                      Data?.data?.payments?.reduce(
-                        (sum, item) => sum + item?.amount,
-                        0
-                      ) -
-                        Data?.data?.total_price >
-                        0 ? (
-                        <div className="flex justify-between items-center">
-                          <div>إجمالي المبلغ المتبقي</div>
-                          <p>
-                            SR{' '}
-                            {Data?.data?.payments?.reduce(
-                              (sum, item) => sum + item?.amount,
-                              0
-                            ) > Data?.data?.total_price
-                              ? currencyFormated(
-                                  Data?.data?.payments?.reduce(
-                                    (sum, item) => sum + item?.amount,
-                                    0
-                                  ) - Data?.data?.total_price
-                                )
-                              : Number(0).toFixed(2)}
-                          </p>
-                        </div>
-                      ) : null}
-                      {Data?.data?.payments?.length > 0 &&
-                      Data?.data?.total_price &&
-                      Data?.data?.total_price -
-                        Data?.data?.payments?.reduce(
-                          (sum, item) => sum + item?.amount,
-                          0
-                        ) >
-                        0 ? (
-                        <div className="flex justify-between rounded-lg items-center">
-                          <p>إجمالي المبلغ المستحق</p>
-                          <div>
-                            SR{' '}
-                            {(Data?.data?.payments?.reduce(
-                              (sum, item) => sum + item?.amount,
-                              0
-                            ) <= Data?.data?.total_price
-                              ? currencyFormated(
-                                  Data?.data?.total_price -
-                                    Data?.data?.payments?.reduce(
-                                      (sum, item) => sum + item?.amount,
-                                      0
-                                    )
-                                )
-                              : 0) || 0}
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                    {data?.kitchen_notes ? (
-                      <div className="flex flex-col pt-8 pb-2 bg-white rounded-lg-none   justify-between">
-                        <div>ملاحظات : {data?.kitchen_notes || ''}</div>
-                      </div>
-                    ) : null}
-                    <div className="  my-6">
-                      {/* <img
-                        src="/icons/parCodeIn80.webp"
-                        alt="Barcode"
-                        className="w-[381px] h-[57px]"
-                      /> */}
-                      <div className="  my-4 flex justify-center">
-                        <QRCodeComp
-                          settings={allSettings.settings}
-                          Data={Data}
-                        />
-                      </div>
-                      <p className="text-center mt-2">
-                        {allSettings.settings?.data?.receipt_footer}
-                      </p>
-                      <div className="w-1 h-1"></div>
-                    </div>
-                  </div>
-                )}
               </div>
-              <div className="no-print flex flex-col ml-5 w-[26%] max-md:ml-0 max-md:w-full">
-                <div className="flex flex-col max-md:mt-10">
-                  <div className="flex flex-col w-full font-semibold text-right">
-                    <div className="flex flex-col w-full">
-                      <div className="flex flex-col w-full text-zinc-800">
-                        <div className="flex flex-col w-full text-sm">
-                          <div className="flex self-end max-w-full min-h-[64px] w-[130px]" />
-                        </div>
-                        <div className="mt-8 text-base">طباعة الفاتورة</div>
-                      </div>
-                      <div className="flex flex-col justify-center self-end mt-3 max-w-full text-sm whitespace-nowrap w-full">
-                        <div className="flex gap-4 items-center w-full flex-grow text-zinc-800">
-                          <div className="flex gap-2 items-center self-stretch my-auto">
-                            <button
-                              disabled={loading}
-                              onClick={() => handleSizeChange('80mm')}
-                              className={`self-stretch my-auto`}
-                            >
-                              80mm
-                            </button>
-                            <div
-                              onClick={() => handleSizeChange('80mm')}
-                              className={`flex shrink-0 self-stretch my-auto w-3 h-3 ${
-                                size == '80mm' ? 'bg-indigo-900' : 'bg-white'
-                              } rounded-lg-full border-4 border-gray-200 border-solid`}
-                            />
-                          </div>
-                          <div className="flex gap-2 items-center self-stretch my-auto">
-                            <button
-                              disabled={loading}
-                              onClick={() => handleSizeChange('A4')}
-                              className={`self-stretch my-auto `}
-                            >
-                              A4
-                            </button>
-                            <div
-                              onClick={() => handleSizeChange('A4')}
-                              className={`flex shrink-0 self-stretch my-auto w-3 h-3 ${
-                                size == 'A4' && 'bg-indigo-900'
-                              } rounded-lg-full border-4 border-gray-200 border-solid`}
-                            />
-                          </div>
-                        </div>
-                        <button
-                          disabled={loading}
-                          onClick={handlePrint}
-                          className="gap-2.5 self-end  py-1 mt-4 max-w-full text-white bg-indigo-900 rounded-lg-lg min-h-[32px] mx-auto w-[100px]  "
+              <div className="no-print flex w-full shrink-0 flex-col rounded-xl border border-border bg-muted/40 p-4 md:ml-5 md:w-[26%] md:rounded-none md:border-0 md:bg-transparent md:p-0">
+                <div className="flex w-full max-w-full flex-col">
+                  <h3 className="text-base font-semibold text-foreground">
+                    {t('VIEW_INVOICE_PRINT_SECTION')}
+                  </h3>
+                  <div className="mt-4 flex w-full max-w-[240px] flex-col gap-2.5 self-end">
+                    <button
+                      disabled={loading}
+                      type="button"
+                      onClick={handlePrint}
+                      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      <Printer className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                      {t('PRINT')}
+                    </button>
+                    {Another && !Corporate && (
+                      <button
+                        type="button"
+                        disabled={loading}
+                        onClick={() => void handlePrintPosReceipt()}
+                        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                      >
+                        <Receipt className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                        {t('RECEIPT_POS_STYLE')}
+                      </button>
+                    )}
+                    {Another &&
+                      zatcaStatus !== 'PASS' &&
+                      Boolean(isConnectedToZatca) && (
+                        <Button
+                          block
+                          type="primary"
+                          disabled={isConnectedLoading}
+                          className="button-send-zatca flex h-11 items-center justify-center gap-2 rounded-lg border-0 px-4 text-sm font-semibold shadow-sm transition-all duration-200 ease-out hover:scale-[1.01] hover:shadow-md active:scale-[0.99]"
+                          onClick={() => {
+                            handleSendToZatca();
+                          }}
                         >
-                          طباعة
-                        </button>
-                      </div>
-                    </div>
-                    {Another && (
-                      <div className="flex flex-grow gap-4 flex-col self-end mt-28 mx-auto text-sm text-red-500 whitespace-nowrap rounded-lg-lg  max-md:mt-10">
-                        {zatcaStatus !== 'PASS' &&
-                          Boolean(isConnectedToZatca) && (
-                            <Button
-                              disabled={isConnectedLoading}
-                              className="px-2.5 py-1 gap-2 text-white bg-[#5951C8] rounded-lg border border-[#5951C8] border-solid max-md:px-5 hover:text-white transition-all duration-200 ease-out hover:scale-105 active:scale-95 cursor-pointer hover:shadow-md hover:shadow-[#5951C8]/30 button-send-zatca"
-                              onClick={() => {
-                                handleSendToZatca();
-                              }}
-                            >
-                              <Pointer
-                                size={15}
-                                className="pointer-icon-animation"
-                              />
-                              <span>{t('SEND_TO_ZATCA')}</span>
-                            </Button>
-                          )}
-                        {showReturn && (
-                          <button
-                            disabled={loading}
-                            onClick={handleReturn}
-                            className="px-2.5 py-1 bg-white rounded-lg-lg border border-red-500 border-solid max-md:px-5 w-[100px]"
-                          >
-                            استرجاع
-                          </button>
-                        )}
-                      </div>
+                          <Pointer
+                            size={16}
+                            className="pointer-icon-animation shrink-0"
+                          />
+                          <span>{t('SEND_TO_ZATCA')}</span>
+                        </Button>
+                      )}
+                    {Another && showReturn && (
+                      <button
+                        disabled={loading}
+                        type="button"
+                        onClick={handleReturn}
+                        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-destructive/50 bg-destructive/5 px-4 text-sm font-semibold text-destructive transition-colors hover:border-destructive/70 hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                      >
+                        <RotateCcw className="h-4 w-4 shrink-0" aria-hidden />
+                        {t('VIEW_INVOICE_REFUND')}
+                      </button>
                     )}
                   </div>
                 </div>
