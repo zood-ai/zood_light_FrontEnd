@@ -885,9 +885,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       disabled={loading}
                       type="button"
                       onClick={handlePrint}
-                      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-neutral-950 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-neutral-800 active:bg-neutral-950 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200 dark:active:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950/40 focus-visible:ring-offset-2 dark:focus-visible:ring-zinc-300/60 disabled:pointer-events-none disabled:opacity-50"
                     >
-                      <Printer className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                      <Printer className="h-4 w-4 shrink-0 opacity-95" aria-hidden />
                       {t('PRINT')}
                     </button>
                     {Another && !Corporate && (
