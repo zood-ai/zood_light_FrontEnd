@@ -509,6 +509,7 @@
   "CART_ITEMS": "Sales Cart",
   "PAYMENT": "Payment",
   "UNIT_PRICE": "Unit Price",
+  "AVAILABLE_QUANTITY": "Available quantity",
   "SAVING": "Saving",
   "ADD_NOTE_PLACEHOLDER": "Add a note...",
   "CUSTOMER": "Customer"

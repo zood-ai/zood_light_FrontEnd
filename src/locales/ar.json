@@ -513,6 +513,7 @@
   "CART_ITEMS": "سلة المبيعات",
   "PAYMENT": "الدفع",
   "UNIT_PRICE": "سعر الوحدة",
+  "AVAILABLE_QUANTITY": "الكمية المتوفرة",
   "SAVING": "توفير",
   "ADD_NOTE_PLACEHOLDER": "أضف ملاحظة...",
   "CUSTOMER": "العميل"

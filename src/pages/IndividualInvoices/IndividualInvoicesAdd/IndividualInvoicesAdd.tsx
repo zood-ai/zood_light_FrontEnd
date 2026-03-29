@@ -540,10 +540,20 @@ export const IndividualInvoicesAdd: React.FC<
         (cartItem: { id: string }) => cartItem.id === product.id
       );
 
+      const resolvedStock =
+        product.quantity ?? product.stock_quantity ?? product.available_quantity;
+
       if (existingItem) {
         const updatedItems = latestCardItems.map((cartItem: any) =>
           cartItem.id === product.id
-            ? { ...cartItem, qty: Number(cartItem.qty || 0) + incrementBy }
+            ? {
+                ...cartItem,
+                qty: Number(cartItem.qty || 0) + incrementBy,
+                stock_quantity:
+                  resolvedStock !== undefined && resolvedStock !== null
+                    ? resolvedStock
+                    : cartItem.stock_quantity,
+              }
             : cartItem
         );
         dispatch(setCardItem(updatedItems));
@@ -562,6 +572,9 @@ export const IndividualInvoicesAdd: React.FC<
             discount_value: 0,
             discount_type: 'fixed',
             discount_amount: 0,
+            ...(resolvedStock !== undefined && resolvedStock !== null
+              ? { stock_quantity: resolvedStock }
+              : {}),
           },
         ])
       );
@@ -677,7 +690,8 @@ export const IndividualInvoicesAdd: React.FC<
                 discount_value: numericValue,
                 discount_type: editingItem.discount_type,
                 discount_amount: Number(calculatedPerUnit.toFixed(4)),
-                note: editingItem.note // Save note
+                note: editingItem.note,
+                stock_quantity: editingItem.stock_quantity ?? item.stock_quantity,
             };
         }
         return item;
@@ -1909,6 +1923,32 @@ export const IndividualInvoicesAdd: React.FC<
                             : Number(editingItem?.price ?? 0).toFixed(2)}
                         </span>
                       </div>
+                      {(() => {
+                        const raw = editingItem?.stock_quantity;
+                        if (
+                          raw === undefined ||
+                          raw === null ||
+                          raw === ''
+                        ) {
+                          return null;
+                        }
+                        const stockNum = Number(raw);
+                        if (!Number.isFinite(stockNum)) return null;
+                        const qtyNum = Number(editingItem?.qty || 0);
+                        const exceeds = qtyNum > stockNum;
+                        return (
+                          <div className="mt-2 text-center text-sm font-medium text-secText">
+                            {t('AVAILABLE_QUANTITY')}:{' '}
+                            <span
+                              className={`font-bold ${
+                                exceeds ? 'text-red-600' : 'text-main'
+                              }`}
+                            >
+                              {stockNum.toLocaleString()}
+                            </span>
+                          </div>
+                        );
+                      })()}
                    </div>
 
                    <div className="flex shrink-0 flex-col items-center justify-center p-6 text-center flex-1 bg-white relative">
