@@ -22,6 +22,13 @@ import { Input } from '@/components/ui/input';
 import { Plus, Pencil, X, HelpCircle, LogOut, Trash2 } from 'lucide-react';
 import SH_LOGO from '@/assets/SH_LOGO.svg';
 import Cookies from 'js-cookie';
+import {
+  buildReceiptCompanyContext,
+  buildSimplifiedTaxInvoiceHtml,
+  openAndPrintSimplifiedTaxInvoice,
+  resolveReceiptQrDataUrl,
+  type ReceiptLineItem,
+} from '@/utils/simplifiedTaxInvoiceReceipt';
 
 type PaymentRow = {
   payment_method_id: string;
@@ -532,27 +539,10 @@ export default function POSPaymentPanel() {
     return /^9665\d{8}$/.test(normalized);
   };
 
-  const escapeHtml = (value: any) =>
-    String(value || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+  /** Same HTML as thermal print (`buildSimplifiedTaxInvoiceHtml`) for print + download. */
+  const buildCompletedPosReceiptHtml = async (): Promise<string | null> => {
+    if (!completedOrderData) return null;
 
-  const handlePrintReceipt = () => {
-    if (!completedOrderData) return;
-    const finishAndGoToPos = () => {
-      const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
-      try {
-        window.localStorage.removeItem(`pos_current_cart_v1_${branchId || 'default'}`);
-      } catch {
-        // ignore
-      }
-      dispatch(setCardItem([]));
-      dispatch(resetOrder());
-      navigate('/zood-dashboard/individual-invoices/add');
-    };
     const customerName =
       completedOrderData?.customer?.name || selectedCustomerName || '-';
     const businessDate =
@@ -564,18 +554,16 @@ export default function POSPaymentPanel() {
       '-';
     const totalValue = Number(
       completedOrderData?.total_price ?? totalPaid ?? 0
-    ).toFixed(2);
+    );
     const subtotalValue = Number(
       completedOrderData?.subtotal_price ?? totals.subtotal ?? 0
-    ).toFixed(2);
+    );
     const taxValue = Number(
       completedOrderData?.total_taxes ?? totals.tax ?? 0
-    ).toFixed(2);
+    );
     const discountValue = Number(
       completedOrderData?.discount_amount ?? orderSchema?.discount_amount ?? 0
-    ).toFixed(2);
-    const paidValue = Number(totalPaid || 0).toFixed(2);
-    const changeValue = Number(change || 0).toFixed(2);
+    );
 
     const fallbackItems = (lastSuccessItems.length > 0 ? lastSuccessItems : cardItemValue).map((item: any) => ({
       name: item?.name || '-',
@@ -590,350 +578,112 @@ export default function POSPaymentPanel() {
         ? completedOrderData.products
         : fallbackItems;
 
-    const itemsHtml = sourceItems
-      .map((item: any) => {
-        const name = escapeHtml(
-          String(
-            item?.name ||
-              item?.product?.name ||
-              item?.product_name ||
-              item?.title ||
-              item?.product_id ||
-              '-'
-          )
-        );
-        const qty = Number(item?.quantity ?? item?.qty ?? item?.pivot?.quantity ?? 0);
-        const unitPrice = Number(item?.unit_price ?? item?.price ?? item?.pivot?.price ?? item?.pivot?.unit_price ?? 0);
-        const discountAmt = Number(item?.discount_amount ?? item?.pivot?.discount_amount ?? 0);
-        
-        let lineTotal = 0;
-        // If we have total_price from backend, use it. Otherwise calculate.
-        if (item?.total_price || item?.pivot?.total_price) {
-           lineTotal = Number(item?.total_price ?? item?.pivot?.total_price);
-        } else {
-           lineTotal = (unitPrice * qty) - (discountAmt * qty);
-        }
+    const receiptLines: ReceiptLineItem[] = sourceItems.map((item: any) => {
+      const qty = Number(item?.quantity ?? item?.qty ?? item?.pivot?.quantity ?? 0);
+      const unitPrice = Number(item?.unit_price ?? item?.price ?? item?.pivot?.price ?? item?.pivot?.unit_price ?? 0);
+      const discountAmt = Number(item?.discount_amount ?? item?.pivot?.discount_amount ?? 0);
+      return {
+        name: String(
+          item?.name ||
+            item?.product?.name ||
+            item?.product_name ||
+            item?.title ||
+            item?.product_id ||
+            '-'
+        ),
+        quantity: qty,
+        unitPrice,
+        discountPerUnit: discountAmt,
+      };
+    });
 
-        const hasDiscount = discountAmt > 0;
-
-        return `
-          <div class="item-row">
-            <div class="item-name">${name}</div>
-            <div class="item-meta">
-               ${qty} x ${unitPrice.toFixed(2)}
-               ${hasDiscount ? `<br/><span style="font-size:10px; color:black;">(Discount: -${(discountAmt * qty).toFixed(2)})</span>` : ''}
-            </div>
-            <div class="item-total">
-               ${hasDiscount ? `<span style="text-decoration:line-through; font-size:10px; color:#999; margin-right:4px; display:block;">${(unitPrice * qty).toFixed(2)}</span>` : ''}
-               SR ${lineTotal.toFixed(2)}
-            </div>
-          </div>
-        `;
-      })
-      .join('');
-
-    const paymentsHtml = payments
-      .filter((payment) => Number(payment.amount || 0) > 0)
-      .map(
-        (payment) => `
-          <div class="line">
-            <span>${escapeHtml(payment.name || (isArabic ? 'دفعة' : 'Payment'))}</span>
-            <span>SR ${Number(payment.amount || 0).toFixed(2)}</span>
-          </div>
-        `
-      )
-      .join('');
-    const logoUrl =
-      allSettings?.settings?.data?.business_logo ||
-      settingsData?.data?.business_logo ||
-      '';
-    const companyName = String(
-      allSettings?.WhoAmI?.business?.name ||
-        allSettings?.settings?.data?.business_name ||
-        'Zood'
-    );
-    const companyPhone = String(
-      allSettings?.WhoAmI?.user?.branches?.[0]?.phone ||
-        allSettings?.settings?.data?.phone_number ||
-        ''
-    );
-    const companyAddress = String(
-      allSettings?.WhoAmI?.user?.branches?.[0]?.registered_address ||
-        allSettings?.settings?.data?.business_address ||
-        ''
-    );
-    const vatNumber = String(
-      allSettings?.settings?.data?.business_tax_number ||
-        allSettings?.WhoAmI?.business?.tax_registration_number ||
-        ''
-    );
-    const invoiceHeader = String(
-      allSettings?.settings?.data?.receipt_header ||
-        settingsData?.data?.receipt_header ||
-        allSettings?.settings?.data?.invoice_header ||
-        settingsData?.data?.invoice_header ||
-        allSettings?.settings?.data?.header_text ||
-        settingsData?.data?.header_text ||
-        allSettings?.settings?.data?.description ||
-        settingsData?.data?.description ||
-        ''
-    );
-    const invoiceFooter = String(
-      allSettings?.settings?.data?.receipt_footer ||
-        settingsData?.data?.receipt_footer ||
-        allSettings?.settings?.data?.invoice_footer ||
-        settingsData?.data?.invoice_footer ||
-        allSettings?.settings?.data?.footer_text ||
-        settingsData?.data?.footer_text ||
-        allSettings?.settings?.data?.terms_and_conditions ||
-        settingsData?.data?.terms_and_conditions ||
-        ''
-    );
+    const ctx = buildReceiptCompanyContext(allSettings, settingsData);
     const backendQr = String(completedOrderData?.qrcode || '').trim();
-    const qrCodeDataUrl =
+    let qrCodeDataUrl =
       printQrDataUrl ||
       (backendQr.startsWith('data:image/') ? backendQr : '');
-
-    const labels = {
-      title: isArabic ? 'فاتورة ضريبية مبسطة' : 'Simplified Tax Invoice',
-      subtitle: isArabic ? 'شكرا لشرائك' : 'Thank you for your purchase',
-      invoice: isArabic ? 'رقم الفاتورة' : 'Invoice',
-      date: isArabic ? 'التاريخ' : 'Date',
-      customer: isArabic ? 'العميل' : 'Customer',
-      companyName: isArabic ? 'اسم المنشأة' : 'Company',
-      companyPhone: isArabic ? 'الجوال' : 'Phone',
-      companyAddress: isArabic ? 'العنوان' : 'Address',
-      items: isArabic ? 'الأصناف' : 'ITEMS',
-      noItems: isArabic ? 'لا توجد أصناف' : 'No items',
-      subtotal: isArabic ? 'المجموع الفرعي' : 'Subtotal',
-      discount: isArabic ? 'الخصم' : 'Discount',
-      tax: isArabic ? 'الضريبة' : 'Tax',
-      total: isArabic ? 'الإجمالي' : 'Total',
-      payments: isArabic ? 'المدفوعات' : 'PAYMENTS',
-      paid: isArabic ? 'المدفوع' : 'Paid',
-      amountPaid: isArabic ? 'المبلغ المدفوع' : 'Amount Paid',
-      change: isArabic ? 'الباقي' : 'Change',
-      vatNumber: isArabic ? 'الرقم الضريبي' : 'VAT Number',
-      footer: isArabic ? 'مدعوم بواسطة Zood POS' : 'Powered by Zood POS',
-    };
-
-    const printWindow = window.open('', '_blank', 'width=420,height=720');
-    if (!printWindow) return;
-
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>${labels.title}</title>
-          <style>
-            * { box-sizing: border-box; }
-            body {
-              font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-              margin: 0;
-              padding: 14px;
-              color: #111827;
-              background: #fff;
-              direction: ${isArabic ? 'rtl' : 'ltr'};
-            }
-            .receipt {
-              width: 78mm;
-              margin: 0 auto;
-              border: 1px dashed #d1d5db;
-              border-radius: 8px;
-              padding: 12px;
-            }
-            .center { text-align: center; }
-            .logo-wrap { margin-bottom: 6px; }
-            .logo {
-              width: 56px;
-              height: 56px;
-              object-fit: contain;
-              border-radius: 8px;
-            }
-            .brand { font-size: 18px; font-weight: 800; letter-spacing: 0.4px; }
-            .sub { color: #6b7280; font-size: 12px; margin-top: 2px; }
-            .line {
-              display: flex;
-              justify-content: space-between;
-              gap: 12px;
-              font-size: 12px;
-              margin: 6px 0;
-              padding: 2px 0;
-            }
-            .divider {
-              margin: 10px 0;
-              border: 0;
-              border-top: 1px dashed #d1d5db;
-            }
-            .section-title {
-              font-size: 11px;
-              letter-spacing: 0.6px;
-              color: #6b7280;
-              font-weight: 700;
-              margin-bottom: 4px;
-            }
-            .item-row {
-              border-bottom: 1px dotted #e5e7eb;
-              padding: 6px 0;
-            }
-            .item-name {
-              font-size: 12px;
-              font-weight: 600;
-              margin-bottom: 2px;
-              word-break: break-word;
-            }
-            .item-meta {
-              font-size: 11px;
-              color: #6b7280;
-            }
-            .item-total {
-              margin-top: 2px;
-              text-align: right;
-              font-size: 12px;
-              font-weight: 700;
-            }
-            .totals .line { font-size: 13px; }
-            .grand {
-              display: flex;
-              justify-content: space-between;
-              font-size: 16px;
-              font-weight: 800;
-              margin-top: 8px;
-            }
-            .footer {
-              margin-top: 12px;
-              text-align: center;
-              font-size: 11px;
-              color: #6b7280;
-            }
-            .qr-wrap {
-              margin-top: 10px;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              gap: 6px;
-            }
-            .qr-image {
-              width: 120px;
-              height: 120px;
-              object-fit: contain;
-            }
-            @media print {
-              body { padding: 0; }
-              .receipt { border: 0; border-radius: 0; width: 100%; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="receipt">
-            <div class="center">
-              ${
-                logoUrl
-                  ? `<div class="logo-wrap"><img class="logo" src="${escapeHtml(
-                      String(logoUrl)
-                    )}" alt="logo" /></div>`
-                  : ''
-              }
-              <div class="brand">${labels.title}</div>
-              <div class="sub">${labels.subtitle}</div>
-            </div>
-            <hr class="divider" />
-            <div class="line"><span>${labels.companyName}</span><span>${escapeHtml(String(companyName || '-'))}</span></div>
-            <div class="line"><span>${labels.companyPhone}</span><span>${escapeHtml(String(companyPhone || '-'))}</span></div>
-            <div class="line"><span>${labels.companyAddress}</span><span>${escapeHtml(String(companyAddress || '-'))}</span></div>
-            <hr class="divider" />
-
-            <div class="line"><span>${labels.invoice}</span><span>${escapeHtml(String(invoiceNumber))}</span></div>
-            <div class="line"><span>${labels.date}</span><span>${new Date(businessDate).toLocaleString()}</span></div>
-            <div class="line"><span>${labels.customer}</span><span>${escapeHtml(String(customerName))}</span></div>
-            <div class="line"><span>${labels.vatNumber}</span><span>${escapeHtml(String(vatNumber || '-'))}</span></div>
-            ${
-              invoiceHeader
-                ? `<div class="sub" style="margin: 8px 0; text-align: center; white-space: pre-wrap;">${escapeHtml(
-                    invoiceHeader
-                  )}</div>`
-                : ''
-            }
-
-            <hr class="divider" />
-            <div class="section-title">${labels.items}</div>
-            ${itemsHtml || `<div class="sub">${labels.noItems}</div>`}
-
-            <hr class="divider" />
-            <div class="totals">
-              <div class="line"><span>${labels.subtotal}</span><span>SR ${subtotalValue}</span></div>
-              <div class="line"><span>${labels.discount}</span><span>SR ${discountValue}</span></div>
-              <div class="line"><span>${labels.tax}</span><span>SR ${taxValue}</span></div>
-              <div class="grand"><span>${labels.total}</span><span>SR ${totalValue}</span></div>
-            </div>
-
-            <hr class="divider" />
-            <div class="section-title">${labels.payments}</div>
-            ${paymentsHtml || `<div class="line"><span>${labels.paid}</span><span>SR ${paidValue}</span></div>`}
-            <div class="line"><span>${labels.amountPaid}</span><span>SR ${paidValue}</span></div>
-            <div class="line"><span>${labels.change}</span><span>SR ${changeValue}</span></div>
-            ${
-              qrCodeDataUrl
-                ? `<div class="qr-wrap">
-              <img class="qr-image" src="${qrCodeDataUrl}" alt="ZATCA QR" />
-            </div>`
-                : ''
-            }
-
-            <hr class="divider" />
-            ${
-              invoiceFooter
-                ? `<div class="sub" style="margin: 8px 0; text-align: center; white-space: pre-wrap;">${escapeHtml(
-                    invoiceFooter
-                  )}</div><hr class="divider" />`
-                : ''
-            }
-            <div class="footer">${labels.footer}</div>
-          </div>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-
-    const runPrint = () => {
-      printWindow.focus();
-      printWindow.print();
-    };
-
-    const images = Array.from(printWindow.document.images || []);
-    if (images.length === 0) {
-      runPrint();
-    } else {
-      const waitForImages = Promise.all(
-        images.map(
-          (img) =>
-            new Promise<void>((resolve) => {
-              if (img.complete) {
-                resolve();
-                return;
-              }
-              img.onload = () => resolve();
-              img.onerror = () => resolve();
-            })
-        )
+    if (!qrCodeDataUrl) {
+      let invoiceIsoDate = new Date().toISOString();
+      try {
+        const rawDate = completedOrderData?.business_date;
+        if (rawDate) invoiceIsoDate = new Date(rawDate).toISOString();
+      } catch {
+        // keep default
+      }
+      const sellerName = String(
+        allSettings?.settings?.data?.business_name ||
+          allSettings?.WhoAmI?.business?.name ||
+          'Store'
       );
-
-      Promise.race([
-        waitForImages,
-        new Promise((resolve) => setTimeout(resolve, 1500)),
-      ]).then(() => runPrint());
+      const vatNumber = String(
+        allSettings?.settings?.data?.business_tax_number ||
+          allSettings?.WhoAmI?.business?.tax_registration_number ||
+          ''
+      );
+      const totalStr = Number(
+        completedOrderData?.total_price ?? totalPaid ?? 0
+      ).toFixed(2);
+      const taxStr = Number(
+        completedOrderData?.total_taxes ?? totals.tax ?? 0
+      ).toFixed(2);
+      qrCodeDataUrl = await resolveReceiptQrDataUrl({
+        qrcodeRaw: backendQr,
+        sellerName,
+        vatNumber,
+        invoiceIsoDate,
+        totalAmount: totalStr,
+        taxAmount: taxStr,
+      });
     }
 
-    printWindow.onafterprint = () => {
-      printWindow.close();
-      finishAndGoToPos();
+    return buildSimplifiedTaxInvoiceHtml({
+      isArabic,
+      ...ctx,
+      customerName,
+      invoiceNumber: String(invoiceNumber),
+      businessDate,
+      items: receiptLines,
+      subtotal: subtotalValue,
+      tax: taxValue,
+      discount: discountValue,
+      total: totalValue,
+      payments: payments
+        .filter((payment) => Number(payment.amount || 0) > 0)
+        .map((p) => ({
+          name: p.name || (isArabic ? 'دفعة' : 'Payment'),
+          amount: Number(p.amount || 0),
+        })),
+      paidAmount: Number(totalPaid || 0),
+      changeAmount: Number(change || 0),
+      qrCodeDataUrl,
+    });
+  };
+
+  const handlePrintReceipt = async () => {
+    if (!completedOrderData) return;
+    const finishAndGoToPos = () => {
+      const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
+      try {
+        window.localStorage.removeItem(`pos_current_cart_v1_${branchId || 'default'}`);
+      } catch {
+        // ignore
+      }
+      dispatch(setCardItem([]));
+      dispatch(resetOrder());
+      navigate('/zood-dashboard/individual-invoices/add');
     };
+    const html = await buildCompletedPosReceiptHtml();
+    if (!html) return;
+    openAndPrintSimplifiedTaxInvoice(html, {
+      onAfterPrint: finishAndGoToPos,
+    });
   };
 
   useEffect(() => {
     if (!completedOrderData || autoPrintTriggered || isPreparingPrintQr) return;
     setAutoPrintTriggered(true);
     const timer = setTimeout(() => {
-      handlePrintReceipt();
+      void handlePrintReceipt();
     }, 120);
 
     return () => clearTimeout(timer);
@@ -997,208 +747,14 @@ export default function POSPaymentPanel() {
     setShowWhatsappDialog(false);
   };
 
-  const handleDownloadReceipt = () => {
-    if (!completedOrderData) return;
-
-    const customerName =
-      completedOrderData?.customer?.name || selectedCustomerName || '-';
-    const businessDate =
-      completedOrderData?.business_date || new Date().toISOString();
+  const handleDownloadReceipt = async () => {
+    const html = await buildCompletedPosReceiptHtml();
+    if (!html || !completedOrderData) return;
     const invoiceNumber =
       completedOrderData?.reference ||
       completedOrderData?.invoice_number ||
       completedOrderData?.id ||
       '-';
-    const totalValue = Number(
-      completedOrderData?.total_price ?? totalPaid ?? 0
-    ).toFixed(2);
-    const subtotalValue = Number(
-      completedOrderData?.subtotal_price ?? totals.subtotal ?? 0
-    ).toFixed(2);
-    const taxValue = Number(
-      completedOrderData?.total_taxes ?? totals.tax ?? 0
-    ).toFixed(2);
-    const discountValue = Number(
-      completedOrderData?.discount_amount ?? orderSchema?.discount_amount ?? 0
-    ).toFixed(2);
-    const logoUrl =
-      allSettings?.settings?.data?.business_logo ||
-      settingsData?.data?.business_logo ||
-      '';
-    const companyName = String(
-      allSettings?.WhoAmI?.business?.name ||
-        allSettings?.settings?.data?.business_name ||
-        'Zood'
-    );
-    const companyPhone = String(
-      allSettings?.WhoAmI?.user?.branches?.[0]?.phone ||
-        allSettings?.settings?.data?.phone_number ||
-        ''
-    );
-    const companyAddress = String(
-      allSettings?.WhoAmI?.user?.branches?.[0]?.registered_address ||
-        allSettings?.settings?.data?.business_address ||
-        ''
-    );
-    const vatNumber = String(
-      allSettings?.settings?.data?.business_tax_number ||
-        allSettings?.WhoAmI?.business?.tax_registration_number ||
-        ''
-    );
-    const invoiceHeader = String(
-      allSettings?.settings?.data?.receipt_header ||
-        settingsData?.data?.receipt_header ||
-        allSettings?.settings?.data?.invoice_header ||
-        settingsData?.data?.invoice_header ||
-        allSettings?.settings?.data?.header_text ||
-        settingsData?.data?.header_text ||
-        allSettings?.settings?.data?.description ||
-        settingsData?.data?.description ||
-        ''
-    );
-    const invoiceFooter = String(
-      allSettings?.settings?.data?.receipt_footer ||
-        settingsData?.data?.receipt_footer ||
-        allSettings?.settings?.data?.invoice_footer ||
-        settingsData?.data?.invoice_footer ||
-        allSettings?.settings?.data?.footer_text ||
-        settingsData?.data?.footer_text ||
-        allSettings?.settings?.data?.terms_and_conditions ||
-        settingsData?.data?.terms_and_conditions ||
-        ''
-    );
-    const fallbackItems = (lastSuccessItems.length > 0 ? lastSuccessItems : cardItemValue).map((item: any) => ({
-      name: item?.name || '-',
-      quantity: Number(item?.qty || 0),
-      unit_price: Number(item?.price || 0),
-      total_price: Number(item?.price || 0) * Number(item?.qty || 0),
-    }));
-    const sourceItems =
-      Array.isArray(completedOrderData?.products) &&
-      completedOrderData.products.length > 0
-        ? completedOrderData.products
-        : fallbackItems;
-    const receiptItemsHtml = sourceItems
-      .map((item: any) => {
-        const name = escapeHtml(
-          String(
-            item?.name ||
-              item?.product?.name ||
-              item?.product_name ||
-              item?.title ||
-              item?.product_id ||
-              '-'
-          )
-        );
-        const qty = Number(item?.quantity ?? item?.qty ?? item?.pivot?.quantity ?? 0);
-        const unitPrice = Number(item?.unit_price ?? item?.price ?? item?.pivot?.price ?? item?.pivot?.unit_price ?? 0);
-        const discountAmt = Number(item?.discount_amount ?? item?.pivot?.discount_amount ?? 0);
-        
-        let lineTotal = 0;
-        if (item?.total_price || item?.pivot?.total_price) {
-           lineTotal = Number(item?.total_price ?? item?.pivot?.total_price);
-        } else {
-           lineTotal = (unitPrice * qty) - (discountAmt * qty);
-        }
-
-        const hasDiscount = discountAmt > 0;
-
-        return `<div class="line">
-          <div>
-            <div style="font-weight:600">${name}</div>
-            <div style="font-size:11px;color:#64748b">
-              ${qty} x ${unitPrice.toFixed(2)}
-              ${hasDiscount ? `<br/><span style="color:#0f172a">(Discount: -${(discountAmt * qty).toFixed(2)})</span>` : ''}
-            </div>
-          </div>
-          <div style="text-align:right">
-            ${hasDiscount ? `<div style="text-decoration:line-through;font-size:10px;color:#94a3b8">${(unitPrice * qty).toFixed(2)}</div>` : ''}
-            <span>SR ${lineTotal.toFixed(2)}</span>
-          </div>
-        </div>`;
-      })
-      .join('');
-
-    const html = `
-      <!doctype html>
-      <html lang="${isArabic ? 'ar' : 'en'}" dir="${isArabic ? 'rtl' : 'ltr'}">
-      <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>${isArabic ? 'إيصال' : 'Receipt'} ${escapeHtml(
-      String(invoiceNumber)
-    )}</title>
-        <style>
-          body{font-family:Segoe UI,Tahoma,Arial,sans-serif;background:#f8fafc;color:#0f172a;padding:16px}
-          .card{max-width:420px;margin:auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px}
-          .center{text-align:center}.line{display:flex;justify-content:space-between;margin:6px 0;font-size:14px}
-          .muted{color:#64748b;font-size:12px}.strong{font-weight:700}
-          .qr{display:flex;justify-content:center;margin-top:12px}
-          hr{border:0;border-top:1px dashed #e2e8f0;margin:10px 0}
-          img.logo{width:56px;height:56px;object-fit:contain;border-radius:8px}
-          img.qr{width:130px;height:130px}
-        </style>
-      </head>
-      <body>
-        <div class="card">
-          <div class="center">
-            ${logoUrl ? `<img class="logo" src="${escapeHtml(String(logoUrl))}" alt="logo" />` : ''}
-            <h3 style="margin:8px 0 2px">${isArabic ? 'فاتورة ضريبية مبسطة' : 'Simplified Tax Invoice'}</h3>
-            <div class="muted">${new Date(businessDate).toLocaleString()}</div>
-          </div>
-          <hr/>
-          <div class="line"><span>${isArabic ? 'رقم الفاتورة' : 'Invoice'}</span><span class="strong">${escapeHtml(
-            String(invoiceNumber)
-          )}</span></div>
-          <div class="line"><span>${isArabic ? 'اسم المنشأة' : 'Company'}</span><span>${escapeHtml(
-            String(companyName || '-')
-          )}</span></div>
-          <div class="line"><span>${isArabic ? 'الجوال' : 'Phone'}</span><span>${escapeHtml(
-            String(companyPhone || '-')
-          )}</span></div>
-          <div class="line"><span>${isArabic ? 'العنوان' : 'Address'}</span><span>${escapeHtml(
-            String(companyAddress || '-')
-          )}</span></div>
-          <div class="line"><span>${isArabic ? 'الرقم الضريبي' : 'VAT Number'}</span><span>${escapeHtml(
-            String(vatNumber || '-')
-          )}</span></div>
-          ${
-            invoiceHeader
-              ? `<div style="margin: 8px 0; text-align: center; font-size: 12px; color: #64748b; white-space: pre-wrap;">${escapeHtml(
-                  invoiceHeader
-                )}</div>`
-              : ''
-          }
-          <div class="line"><span>${isArabic ? 'العميل' : 'Customer'}</span><span>${escapeHtml(
-            String(customerName)
-          )}</span></div>
-          <hr/>
-          <div class="muted strong">${isArabic ? 'الأصناف' : 'Items'}</div>
-          ${receiptItemsHtml || `<div class="muted">${isArabic ? 'لا توجد أصناف' : 'No items'}</div>`}
-          <hr/>
-          <div class="line"><span>${isArabic ? 'المجموع الفرعي' : 'Subtotal'}</span><span>SR ${subtotalValue}</span></div>
-          <div class="line"><span>${isArabic ? 'الخصم' : 'Discount'}</span><span>SR ${discountValue}</span></div>
-          <div class="line"><span>${isArabic ? 'الضريبة' : 'Tax'}</span><span>SR ${taxValue}</span></div>
-          <div class="line strong"><span>${isArabic ? 'الإجمالي' : 'Total'}</span><span>SR ${totalValue}</span></div>
-          ${
-            printQrDataUrl
-              ? `<div class="qr"><img class="qr" src="${printQrDataUrl}" alt="qr" /></div>`
-              : ''
-          }
-          <hr/>
-          ${
-            invoiceFooter
-              ? `<div style="margin: 8px 0; text-align: center; font-size: 12px; color: #64748b; white-space: pre-wrap;">${escapeHtml(
-                  invoiceFooter
-                )}</div><hr/>`
-              : ''
-          }
-          <div class="center muted">${isArabic ? 'مدعوم بواسطة Zood POS' : 'Powered by Zood POS'}</div>
-        </div>
-      </body>
-      </html>
-    `;
-
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1434,7 +990,7 @@ export default function POSPaymentPanel() {
               variant="outline"
               className="h-14 text-lg"
               disabled={isPreparingPrintQr}
-              onClick={handlePrintReceipt}
+              onClick={() => void handlePrintReceipt()}
             >
               {isPreparingPrintQr ? t('LOADING') : t('PRINT')}
             </Button>
@@ -1461,7 +1017,7 @@ export default function POSPaymentPanel() {
               type="button"
               variant="outline"
               className="h-14 text-lg"
-              onClick={handleDownloadReceipt}
+              onClick={() => void handleDownloadReceipt()}
             >
               {t('DOWNLOAD_RECEIPT')}
             </Button>

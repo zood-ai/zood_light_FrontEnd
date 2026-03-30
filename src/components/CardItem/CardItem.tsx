@@ -73,6 +73,7 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
       name: string;
       image: any;
       price: number;
+      stock_quantity?: number | string | null;
     }) => {
       const existingItemIndex = cardItemValue.findIndex(
         (i: { id: string }) => i.id === newItem.id
@@ -85,6 +86,11 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
               return {
                 ...item,
                 qty: item.qty + newItem.qty,
+                stock_quantity:
+                  newItem.stock_quantity !== undefined &&
+                  newItem.stock_quantity !== null
+                    ? newItem.stock_quantity
+                    : (item as { stock_quantity?: unknown }).stock_quantity,
               };
             }
             return item;
@@ -107,12 +113,15 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
   );
 
   const incrementCount = useCallback(() => {
+    const stock =
+      item.quantity ?? item.stock_quantity ?? item.available_quantity;
     updateCardItem({
       id: item.id,
       qty: 1,
       name: item.name,
       image: item.image,
       price: item.price,
+      ...(stock !== undefined && stock !== null ? { stock_quantity: stock } : {}),
     });
   }, [item, updateCardItem]);
 

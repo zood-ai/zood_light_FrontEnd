@@ -540,10 +540,20 @@ export const IndividualInvoicesAdd: React.FC<
         (cartItem: { id: string }) => cartItem.id === product.id
       );
 
+      const resolvedStock =
+        product.quantity ?? product.stock_quantity ?? product.available_quantity;
+
       if (existingItem) {
         const updatedItems = latestCardItems.map((cartItem: any) =>
           cartItem.id === product.id
-            ? { ...cartItem, qty: Number(cartItem.qty || 0) + incrementBy }
+            ? {
+                ...cartItem,
+                qty: Number(cartItem.qty || 0) + incrementBy,
+                stock_quantity:
+                  resolvedStock !== undefined && resolvedStock !== null
+                    ? resolvedStock
+                    : cartItem.stock_quantity,
+              }
             : cartItem
         );
         dispatch(setCardItem(updatedItems));
@@ -562,6 +572,9 @@ export const IndividualInvoicesAdd: React.FC<
             discount_value: 0,
             discount_type: 'fixed',
             discount_amount: 0,
+            ...(resolvedStock !== undefined && resolvedStock !== null
+              ? { stock_quantity: resolvedStock }
+              : {}),
           },
         ])
       );
@@ -578,32 +591,45 @@ export const IndividualInvoicesAdd: React.FC<
   const handleNumpadInput = (key: string) => {
     if (!editingItem) return;
 
-    // Determine target field and current value
-    const targetField = editingItem._activeField || 'qty'; // Default to qty if not set
+    const targetField = editingItem._activeField || 'qty';
     const isDiscountValue = targetField === 'discount_value';
-    const currentValue = String(editingItem[targetField] || (isDiscountValue ? '' : '0'));
+    const isPriceValue = targetField === 'price';
+    const rawField = editingItem[targetField];
+    const currentValue =
+      isDiscountValue || isPriceValue
+        ? rawField === undefined || rawField === null || rawField === ''
+          ? ''
+          : String(rawField)
+        : String(rawField ?? '0');
 
     let nextValue = currentValue;
 
     if (key === 'backspace') {
-      nextValue = currentValue.length > 1 ? currentValue.slice(0, -1) : (isDiscountValue ? '' : '0');
+      nextValue =
+        currentValue.length > 1
+          ? currentValue.slice(0, -1)
+          : isDiscountValue || isPriceValue
+            ? ''
+            : '0';
     } else if (key === 'clear') {
-      nextValue = isDiscountValue ? '' : '0';
+      nextValue = isDiscountValue || isPriceValue ? '' : '0';
     } else if (key === '+10' || key === '+20' || key === '+50') {
-        const increment = Number(key.replace('+', ''));
-        const currentNum = Number(currentValue || 0);
-        // If discount type is percent, cap at 100? or let it be flexible
-        if (isDiscountValue && editingItem.discount_type === 'percent' && (currentNum + increment > 100)) {
-             nextValue = '100';
-        } else {
-             nextValue = String(currentNum + increment);
-        }
+      const increment = Number(key.replace('+', ''));
+      const currentNum = Number(currentValue || 0);
+      if (
+        isDiscountValue &&
+        editingItem.discount_type === 'percent' &&
+        currentNum + increment > 100
+      ) {
+        nextValue = '100';
+      } else {
+        nextValue = String(currentNum + increment);
+      }
     } else if (key === '.') {
       if (!currentValue.includes('.')) {
-        nextValue = currentValue + '.';
+        nextValue = currentValue === '' ? '0.' : currentValue + '.';
       }
     } else {
-      // Append number
       if (currentValue === '0' && key !== '.') {
         nextValue = key;
       } else {
@@ -621,6 +647,7 @@ export const IndividualInvoicesAdd: React.FC<
   const openEditItemModal = (item: any) => {
     setEditingItem({
         ...item,
+        price: item.price ?? 0,
         discount_type: item.discount_type || 'fixed',
         discount_value: item.discount_value || 0,
         _activeField: 'qty' // Start editing quantity by default
@@ -634,7 +661,15 @@ export const IndividualInvoicesAdd: React.FC<
     const latestCardItems = store.getState()?.cardItems?.value || [];
     const updatedItems = latestCardItems.map((item: any) => {
         if (item.id === editingItem.id) {
-             const price = Number(item.price || 0);
+             const rawPrice = editingItem.price;
+             const price = Math.max(
+               0,
+               Number(
+                 rawPrice === '' || rawPrice === undefined || rawPrice === null
+                   ? item.price
+                   : rawPrice
+               )
+             );
              const qty = Number(editingItem.qty || 0);
              const numericValue = Number(editingItem.discount_value || 0);
              let calculatedPerUnit = 0;
@@ -650,11 +685,13 @@ export const IndividualInvoicesAdd: React.FC<
               
             return {
                 ...item,
+                price,
                 qty: qty,
                 discount_value: numericValue,
                 discount_type: editingItem.discount_type,
                 discount_amount: Number(calculatedPerUnit.toFixed(4)),
-                note: editingItem.note // Save note
+                note: editingItem.note,
+                stock_quantity: editingItem.stock_quantity ?? item.stock_quantity,
             };
         }
         return item;
@@ -671,11 +708,21 @@ export const IndividualInvoicesAdd: React.FC<
         const next = { ...prev, [field]: value };
         
         // Auto-calculate discount amount for preview
-        if (field === 'discount_value' || field === 'discount_type' || field === 'qty') {
+        if (
+          field === 'discount_value' ||
+          field === 'discount_type' ||
+          field === 'qty' ||
+          field === 'price'
+        ) {
              let calculatedPerUnit = 0;
              const numericValue = Number(next.discount_value || 0);
              const type = next.discount_type;
-             const price = Number(next.price || 0);
+             const rawP = next.price;
+             const priceNum =
+               rawP === '' || rawP === undefined || rawP === null
+                 ? 0
+                 : Number(rawP);
+             const price = Number.isFinite(priceNum) ? Math.max(0, priceNum) : 0;
              const qty = Number(next.qty || 0);
 
               if (type === 'percent') {
@@ -1702,7 +1749,7 @@ export const IndividualInvoicesAdd: React.FC<
               {/* Right Column (Inputs) - Matches Payment Page Logic (Numpad + Selectors) */}
               <div className="flex h-full flex-col gap-4 md:col-span-8">
                  {/* Selectors - Replacing Payment Methods */}
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="grid grid-cols-3 gap-3">
                     <button
                       type="button"
                       onClick={() => setActiveField('qty')}
@@ -1712,12 +1759,42 @@ export const IndividualInvoicesAdd: React.FC<
                           : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-[#5D5FEF]/30'
                       }`}
                     >
-                      <span className={`text-sm font-bold uppercase tracking-wider ${editingItem?._activeField === 'qty' ? 'text-white/80' : 'text-gray-400'}`}>
+                      <span className={`text-xs font-bold uppercase tracking-wider ${editingItem?._activeField === 'qty' ? 'text-white/80' : 'text-gray-400'}`}>
                         {t('QUANTITY')}
                       </span>
-                      <span className="text-5xl font-black tracking-tight leading-none mt-1">
+                      <span className="text-4xl font-black tracking-tight leading-none mt-1">
                         {editingItem?.qty || 0}
                       </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveField('price')}
+                      className={`relative flex h-[110px] flex-col items-center justify-center gap-1 rounded-2xl border transition-all shadow-sm active:scale-95 overflow-hidden group px-1 ${
+                        editingItem?._activeField === 'price'
+                          ? 'bg-[#5D5FEF] text-white ring-2 ring-offset-1 ring-[#5D5FEF] border-transparent'
+                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-[#5D5FEF]/30'
+                      }`}
+                    >
+                      <span className={`text-xs font-bold uppercase tracking-wider ${editingItem?._activeField === 'price' ? 'text-white/80' : 'text-gray-400'}`}>
+                        {t('UNIT_PRICE')}
+                      </span>
+                      <div className="flex items-baseline gap-0.5 mt-1 max-w-full">
+                        <span className="text-2xl sm:text-3xl font-black tracking-tight leading-none truncate max-w-full">
+                          {editingItem?._activeField === 'price'
+                            ? String(
+                                editingItem?.price === '' ||
+                                  editingItem?.price === null ||
+                                  editingItem?.price === undefined
+                                  ? '0'
+                                  : editingItem.price
+                              )
+                            : Number(editingItem?.price ?? 0).toFixed(2)}
+                        </span>
+                        <span className="text-sm font-bold opacity-60 shrink-0">
+                          {t('SAR', 'SR')}
+                        </span>
+                      </div>
                     </button>
 
                     <button
@@ -1729,14 +1806,14 @@ export const IndividualInvoicesAdd: React.FC<
                           : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-[#5D5FEF]/30'
                       }`}
                     >
-                      <span className={`text-sm font-bold uppercase tracking-wider ${editingItem?._activeField === 'discount_value' ? 'text-white/80' : 'text-gray-400'}`}>
+                      <span className={`text-xs font-bold uppercase tracking-wider ${editingItem?._activeField === 'discount_value' ? 'text-white/80' : 'text-gray-400'}`}>
                         {t('DISCOUNT')}
                       </span>
                       <div className="flex items-baseline gap-1 mt-1">
-                        <span className="text-5xl font-black tracking-tight leading-none">
+                        <span className="text-4xl font-black tracking-tight leading-none">
                           {editingItem?.discount_value || 0}
                         </span>
-                        <span className="text-lg font-bold opacity-60">
+                        <span className="text-sm font-bold opacity-60">
                           {editingItem?.discount_type === 'percent' ? '%' : t('SAR', 'SR')}
                         </span>
                       </div>
@@ -1825,9 +1902,53 @@ export const IndividualInvoicesAdd: React.FC<
                 <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
                    <div className="border-b border-gray-100 p-6 bg-gray-50/10">
                       <h3 className="text-xl font-bold text-mainText line-clamp-2 text-center mb-2" title={editingItem?.name}>{editingItem?.name}</h3>
-                      <div className="text-center text-sm font-medium text-secText">
-                        {t('UNIT_PRICE')}: <span className="font-bold text-main">SR {Number(editingItem?.price || 0).toFixed(2)}</span>
+                      <div
+                        className={`text-center text-sm font-medium text-secText ${
+                          editingItem?._activeField === 'price'
+                            ? 'rounded-lg px-2 py-1 ring-2 ring-[#5D5FEF]/80 ring-offset-1'
+                            : ''
+                        }`}
+                      >
+                        {t('UNIT_PRICE')}:{' '}
+                        <span className="font-bold text-main">
+                          SR{' '}
+                          {editingItem?._activeField === 'price'
+                            ? String(
+                                editingItem?.price === '' ||
+                                  editingItem?.price === null ||
+                                  editingItem?.price === undefined
+                                  ? '0'
+                                  : editingItem.price
+                              )
+                            : Number(editingItem?.price ?? 0).toFixed(2)}
+                        </span>
                       </div>
+                      {(() => {
+                        const raw = editingItem?.stock_quantity;
+                        if (
+                          raw === undefined ||
+                          raw === null ||
+                          raw === ''
+                        ) {
+                          return null;
+                        }
+                        const stockNum = Number(raw);
+                        if (!Number.isFinite(stockNum)) return null;
+                        const qtyNum = Number(editingItem?.qty || 0);
+                        const exceeds = qtyNum > stockNum;
+                        return (
+                          <div className="mt-2 text-center text-sm font-medium text-secText">
+                            {t('AVAILABLE_QUANTITY')}:{' '}
+                            <span
+                              className={`font-bold ${
+                                exceeds ? 'text-red-600' : 'text-main'
+                              }`}
+                            >
+                              {stockNum.toLocaleString()}
+                            </span>
+                          </div>
+                        );
+                      })()}
                    </div>
 
                    <div className="flex shrink-0 flex-col items-center justify-center p-6 text-center flex-1 bg-white relative">

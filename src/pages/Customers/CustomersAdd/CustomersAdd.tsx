@@ -1,12 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import IconInput from '@/components/custom/InputWithIcon';
-import useDirection from '@/hooks/useDirection';
 import personIcon from '/icons/name person.svg';
 import callIcon from '/icons/call.svg';
 import { Button } from '@/components/custom/button';
 import { DetailsHeadWithOutFilter } from '@/components/custom/DetailsHeadWithOutFilter';
-import createCrudService from '@/api/services/crudService';
 import {
   Form,
   FormControl,
@@ -22,6 +20,14 @@ import axiosInstance from '@/api/interceptors';
 import { useGlobalDialog } from '@/context/GlobalDialogProvider';
 import ConfirmBk from '@/components/custom/ConfimBk';
 import DelConfirm from '@/components/custom/DelConfim';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { currencyFormated } from '@/utils/currencyFormated';
 
 const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
@@ -32,83 +38,145 @@ const formSchema = z.object({
   coTax: z.string().optional().nullable(),
 });
 
+const inputFullWidth = 'w-full min-w-0';
+
+type CustomerInsights = {
+  total_credit?: number;
+  total_debit?: number;
+  account_balance?: number;
+};
+
+function formatInsightAmount(value: unknown): string {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '—';
+  return currencyFormated(n);
+}
+
+function CustomerFormSkeleton() {
+  return (
+    <div className="space-y-6" aria-busy="true" aria-label="Loading">
+      {[1, 2, 3].map((section) => (
+        <Card key={section} className="border-mainBorder/80">
+          <CardHeader className="pb-2">
+            <Skeleton className="h-5 w-40" />
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Skeleton className="h-[72px] w-full rounded-lg" />
+            <Skeleton className="h-[72px] w-full rounded-lg" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 export const CustomersAdd: React.FC = () => {
   const { t } = useTranslation();
-  const isRtl = useDirection();
   const params = useParams();
   const modalType = params.id;
   const isEditMode = modalType !== 'add';
   const navigate = useNavigate();
 
-  // Fetch services and mutations
-  const crudService = createCrudService<any>(
-    'manage/customers?perPage=100000&includes=address'
-  );
-  const { useGetById, useUpdate, useCreate } = crudService;
-  const crudServiceAddress = createCrudService<any>(
-    'manage/customers/addAddress'
-  );
-
-  const { useCreateById: useCreateAddress, useUpdate: useUpdateAddress } =
-    crudServiceAddress;
-
-  const { mutate: createNewUser } = useCreate();
-  const { mutate: updateDataUserById } = useUpdate();
-  const { mutate: createNewAddress } = useCreateAddress();
-  const { mutate: updateAddress } = useUpdateAddress();
-  const { data: getDataById } = useGetById(`${params.objId ?? ''}`);
-
-  const [loading, setLoading] = useState(false);
-
-  const defaultValues = useMemo(
-    () => (isEditMode ? getDataById?.data : {}),
-    [getDataById, isEditMode]
-  );
-
-  // Initialize form with validation schema and default values
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: {
+      name: '',
+      phone: '',
+      address: '',
+      email: '',
+      taxNum: '',
+      coTax: '',
+    },
   });
+
   const [currData, setcurrData] = useState<any>({});
-  // Reset form when data changes
+  const [loading, setLoading] = useState(false);
+  const [customerLoading, setCustomerLoading] = useState(
+    () => isEditMode && Boolean(params.objId)
+  );
+  const [insights, setInsights] = useState<CustomerInsights | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [insightsError, setInsightsError] = useState(false);
+
   useEffect(() => {
-    if (isEditMode && getDataById?.data) {
-      axiosInstance
-        .get(`/manage/customers/${params.objId}`)
-        .then((res) => {
-          const customerData = res?.data?.data;
-          setcurrData(customerData);
-          if (customerData) {
-            form.setValue('name', customerData.name || '');
-            form.setValue('phone', customerData.phone || '');
-            form.setValue('taxNum', customerData.tax_registration_number || '');
-            form.setValue('coTax', customerData.vat_registration_number || '');
-            form.setValue('email', customerData.email || '');
-            // Check if the addresses array exists and has at least one entry
-            const address = customerData.addresses?.[0]?.name || '';
-            form.setValue('address', address);
-          }
-        })
-        .catch((err) => {
-          console.error('Failed to fetch customer data', err);
-        });
-    } else {
-      form.reset({});
+    if (!isEditMode) {
+      form.reset({
+        name: '',
+        phone: '',
+        address: '',
+        email: '',
+        taxNum: '',
+        coTax: '',
+      });
+      setcurrData({});
+      setCustomerLoading(false);
+      setInsights(null);
+      setInsightsError(false);
+      return;
     }
-  }, [getDataById, form, isEditMode, params.objId]);
+
+    if (!params.objId) {
+      setCustomerLoading(false);
+      return;
+    }
+
+    setCustomerLoading(true);
+    axiosInstance
+      .get(`/manage/customers/${params.objId}`)
+      .then((res) => {
+        const customerData = res?.data?.data;
+        setcurrData(customerData);
+        if (customerData) {
+          form.reset({
+            name: customerData.name || '',
+            phone: customerData.phone || '',
+            taxNum: customerData.tax_registration_number || '',
+            coTax: customerData.vat_registration_number || '',
+            email: customerData.email || '',
+            address: customerData.addresses?.[0]?.name || '',
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to fetch customer data', err);
+      })
+      .finally(() => {
+        setCustomerLoading(false);
+      });
+  }, [isEditMode, params.objId, form]);
+
+  useEffect(() => {
+    if (!isEditMode || !params.objId) {
+      setInsights(null);
+      setInsightsError(false);
+      setInsightsLoading(false);
+      return;
+    }
+
+    setInsightsLoading(true);
+    setInsightsError(false);
+    axiosInstance
+      .get(`/manage/customer_insights/${params.objId}`)
+      .then((res) => {
+        const payload = res?.data?.data as CustomerInsights | undefined;
+        setInsights(payload ?? null);
+      })
+      .catch(() => {
+        setInsights(null);
+        setInsightsError(true);
+      })
+      .finally(() => {
+        setInsightsLoading(false);
+      });
+  }, [isEditMode, params.objId]);
 
   const { openDialog } = useGlobalDialog();
 
-  // Handle form submission for both add and edit scenarios
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
 
-    const onError = () => setLoading(false);
-
     if (isEditMode) {
       try {
-        // First API call to update the customer
         const res = await axiosInstance.put(
           `/manage/customers/${params.objId}`,
           {
@@ -119,7 +187,6 @@ export const CustomersAdd: React.FC = () => {
           }
         );
 
-        // Second API call to update the address
         if (values.address)
           await axiosInstance.post(
             `/manage/customers/addAddress/${res?.data?.data.id}`,
@@ -147,7 +214,6 @@ export const CustomersAdd: React.FC = () => {
       }
     } else {
       try {
-        // First API call to create a customer
         const res = await axiosInstance.post('/manage/customers', {
           ...values,
           notes: '-',
@@ -155,7 +221,6 @@ export const CustomersAdd: React.FC = () => {
           vat_registration_number: values.coTax,
         });
 
-        // Second API call to add an address for the created customer
         if (values.address)
           await axiosInstance.post(
             `/manage/customers/addAddress/${res?.data?.data.id}`,
@@ -165,13 +230,11 @@ export const CustomersAdd: React.FC = () => {
             }
           );
 
-        // Success actions
         openDialog('added');
         setLoading(false);
         form.reset({});
         navigate('/zood-dashboard/customers');
       } catch (err) {
-        // Error handling
         form.reset({});
         setLoading(false);
       }
@@ -182,7 +245,10 @@ export const CustomersAdd: React.FC = () => {
   return (
     <>
       <DetailsHeadWithOutFilter
-        mainTittle={isEditMode ? form.getValues('name') : t('ADD_CUSTOMER')}
+        mainTittle={isEditMode ? t('UPDATE_CUSTOMER') : t('ADD_CUSTOMER')}
+        subTitle={
+          isEditMode && currData?.name ? String(currData.name) : undefined
+        }
         bkAction={() => {
           setIsOpen(true);
         }}
@@ -194,125 +260,223 @@ export const CustomersAdd: React.FC = () => {
         getStatusMessage={undefined}
       />
       <div className="min-h-[70vh]">
-        <div className="grid grid-cols-1  items-start">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleFormSubmit)}
-              className="px-s4 my-5"
-            >
-              <div className=" grid grid-cols-1 md:grid-cols-2 gap-x-4 max-w-[580px] ">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('CUSTOMER_NAME')}
-                          iconSrc={personIcon}
-                          inputClassName="w-[278px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem className="col-span-1 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('PHONE')}
-                          iconSrc={callIcon}
-                          inputClassName="w-[278px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-1 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('ADDRESS')}
-                          inputClassName="w-[278px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-1 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('EMAIL')}
-                          inputClassName="w-[278px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="coTax"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-1 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
-                          inputClassName="w-[278px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="taxNum"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-1 mt-md">
-                      <FormControl>
-                        <IconInput
-                          {...field}
-                          label={t('TAX_REGISTRATION_NUMBER')}
-                          inputClassName="w-[278px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <Button
-                dir="ltr"
-                type="submit"
-                loading={loading}
-                disabled={loading}
-                className="mt-4 h-[39px] w-[163px]"
+        <div className="mx-auto max-w-3xl px-s4 pb-10 pt-1">
+          {customerLoading ? (
+            <CustomerFormSkeleton />
+          ) : (
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(handleFormSubmit)}
+                className="space-y-6"
               >
-                {isEditMode ? t('UPDATE_CUSTOMER') : t('ADD_CUSTOMER')}
-              </Button>
-              <DelConfirm route={'manage/customers'} />
-            </form>
-          </Form>
+                <Card className="border-mainBorder shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-semibold text-mainText">
+                      {t('CUSTOMER_SECTION_BASIC')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t('CUSTOMER_NAME')}
+                                iconSrc={personIcon}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t('PHONE')}
+                                iconSrc={callIcon}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-mainBorder shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-semibold text-mainText">
+                      {t('CUSTOMER_SECTION_CONTACT')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t('ADDRESS')}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t('EMAIL')}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-mainBorder shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-semibold text-mainText">
+                      {t('CUSTOMER_SECTION_TAX')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="coTax"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t('SETTINGS_COMMERCIAL_REGISTRATION_NUMBER')}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="taxNum"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <IconInput
+                                {...field}
+                                label={t('TAX_REGISTRATION_NUMBER')}
+                                inputClassName={inputFullWidth}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {isEditMode && (
+                  <Card className="border-mainBorder shadow-sm">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base font-semibold text-mainText">
+                        {t('CUSTOMER_ACCOUNT_SUMMARY')}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {insightsLoading ? (
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                          <Skeleton className="h-14 w-full rounded-lg" />
+                          <Skeleton className="h-14 w-full rounded-lg" />
+                          <Skeleton className="h-14 w-full rounded-lg" />
+                        </div>
+                      ) : insightsError ? (
+                        <p className="text-sm text-muted-foreground">
+                          {t('CUSTOMER_INSIGHTS_ERROR')}
+                        </p>
+                      ) : (
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                          <div className="rounded-xl border border-mainBorder bg-mainBg/50 px-4 py-3">
+                            <div className="text-xs font-medium text-secText">
+                              {t('TOTAL_CREDIT')}
+                            </div>
+                            <div
+                              className="mt-1 text-lg font-bold tabular-nums text-mainText"
+                              dir="ltr"
+                            >
+                              {formatInsightAmount(insights?.total_credit)}
+                            </div>
+                          </div>
+                          <div className="rounded-xl border border-mainBorder bg-mainBg/50 px-4 py-3">
+                            <div className="text-xs font-medium text-secText">
+                              {t('TOTAL_DEBIT')}
+                            </div>
+                            <div
+                              className="mt-1 text-lg font-bold tabular-nums text-mainText"
+                              dir="ltr"
+                            >
+                              {formatInsightAmount(insights?.total_debit)}
+                            </div>
+                          </div>
+                          <div className="rounded-xl border border-mainBorder bg-mainBg/50 px-4 py-3">
+                            <div className="text-xs font-medium text-secText">
+                              {t('ACCOUNT_BALANCE_LABEL')}
+                            </div>
+                            <div
+                              className="mt-1 text-lg font-bold tabular-nums text-main"
+                              dir="ltr"
+                            >
+                              {formatInsightAmount(insights?.account_balance)}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <Button
+                    dir="ltr"
+                    type="submit"
+                    loading={loading}
+                    disabled={loading}
+                    className="h-[39px] min-w-[163px]"
+                  >
+                    {isEditMode ? t('UPDATE_CUSTOMER') : t('ADD_CUSTOMER')}
+                  </Button>
+                  <DelConfirm route={'manage/customers'} />
+                </div>
+              </form>
+            </Form>
+          )}
         </div>
       </div>
     </>

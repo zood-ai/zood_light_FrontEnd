@@ -22,6 +22,7 @@ import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { getToken } from '@/utils/auth';
 import PayDialog from '@/config/PayDialog';
+import BlockedBusinessDialog from '@/config/BlockedBusinessDialog';
 import Cookies from 'js-cookie';
 import { getFirstAccessibleLink } from '@/hooks/getFirstAccessibleLink';
 import axiosInstance from '@/api/interceptors';
@@ -43,6 +44,7 @@ export default function SignIn2() {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const [expired, setExpired] = useState(false);
+  const [showBlockedDialog, setShowBlockedDialog] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -80,6 +82,7 @@ export default function SignIn2() {
   const handleFormSubmit = async (data: AuthFormValues) => {
     setIsLoading(true);
     setExpired(false);
+      setShowBlockedDialog(false);
     try {
       const business = {
         businessName: '',
@@ -98,7 +101,9 @@ export default function SignIn2() {
           { replace: true }
         );
       }
-
+      if (x.errorCode === 403) {
+        setShowBlockedDialog(true);
+      }
       if (x.errorCode === 401) {
         setExpired(true);
       }
@@ -115,6 +120,10 @@ export default function SignIn2() {
   return (
     <div className="min-h-[100vh] overflow-hidden px-4 flex flex-col items-center sm:px-[52px]">
       {expired && <PayDialog showAllTime={true} />}
+      <BlockedBusinessDialog
+        open={showBlockedDialog}
+        onClose={() => setShowBlockedDialog(false)}
+      />
       <div className="w-full flex flex-row gap-5 justify-between mt-[46px]  items-center ">
         <div className="w-[213px]">
           <Link to="/">
