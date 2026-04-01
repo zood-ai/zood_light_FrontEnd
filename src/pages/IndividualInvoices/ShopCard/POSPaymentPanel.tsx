@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import createCrudService from '@/api/services/crudService';
 import { useDispatch, useSelector } from 'react-redux';
 import { addPayment, resetOrder, updateField } from '@/store/slices/orderSchema';
@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/alert-dialog2';
 import XIcons from '@/components/Icons/XIcons';
 import { Input } from '@/components/ui/input';
-import { Plus, Pencil, X, HelpCircle, LogOut, Trash2 } from 'lucide-react';
+import { Plus, Pencil, X, HelpCircle, LogOut, Trash2, RotateCcw } from 'lucide-react';
 import SH_LOGO from '@/assets/SH_LOGO.svg';
 import Cookies from 'js-cookie';
 import {
@@ -29,12 +29,35 @@ import {
   resolveReceiptQrDataUrl,
   type ReceiptLineItem,
 } from '@/utils/simplifiedTaxInvoiceReceipt';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { useOfflineOrdersSummary } from '@/hooks/useOfflineOrdersSummary';
+import { enqueueOfflineOrder, syncPendingOrders } from '@/lib/offline/outbox';
+import OfflineSyncStatusPill from '@/components/custom/OfflineSyncStatusPill';
 
 type PaymentRow = {
   payment_method_id: string;
   name: string;
   amount: number;
 };
+
+type RefundOrder = {
+  id: string;
+  reference?: string;
+  invoice_number?: string;
+  total_price?: number;
+  business_date?: string;
+  created_at?: string;
+  return_reason?: string | null;
+  customer?: {
+    name?: string;
+  };
+  branch_id?: string;
+  branch?: {
+    id?: string;
+  };
+};
+
+const ONLINE_ORDER_SUBMIT_TIMEOUT_MS = 9000;
 
 export default function POSPaymentPanel() {
   const { t, i18n } = useTranslation();
@@ -44,6 +67,7 @@ export default function POSPaymentPanel() {
   const [activePaymentMethodId, setActivePaymentMethodId] = useState('');
   const [draftValue, setDraftValue] = useState('0');
   const [payments, setPayments] = useState<PaymentRow[]>([]);
+  const submitOrderInFlightRef = useRef(false);
   const [lastSuccessItems, setLastSuccessItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [completedOrderData, setCompletedOrderData] = useState<any>(null);
@@ -56,6 +80,12 @@ export default function POSPaymentPanel() {
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
   const [isEditCustomerMode, setIsEditCustomerMode] = useState(false);
   const [editingCustomerId, setEditingCustomerId] = useState('');
+  const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false);
+  const [isLoadingRefundOrders, setIsLoadingRefundOrders] = useState(false);
+  const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
+  const [refundOrders, setRefundOrders] = useState<RefundOrder[]>([]);
+  const [refundSearch, setRefundSearch] = useState('');
+  const [selectedRefundOrderId, setSelectedRefundOrderId] = useState('');
   const [extraCustomers, setExtraCustomers] = useState<
     { value: string; label: string }[]
   >([]);
@@ -70,6 +100,8 @@ export default function POSPaymentPanel() {
   const orderSchema = useSelector((state: any) => state.orderSchema);
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const allSettings = useSelector((state: any) => state.allSettings?.value);
+  const { isOnline } = useNetworkStatus();
+  const { pendingCount, failedCount } = useOfflineOrdersSummary();
 
   const { data: paymentMethodsData, isLoading: paymentMethodsLoading } = createCrudService<any>(
     'manage/payment_methods?filter[is_active]=1'
@@ -102,6 +134,28 @@ export default function POSPaymentPanel() {
   const selectedCustomerName =
     allCustomerOptions.find((customer: any) => customer.value === selectedCustomerId)
       ?.label || '';
+  const canRefund = useMemo(
+    () =>
+      [
+        'orders:manage',
+        'purchasing:drafts:manage',
+        'purchasing:closed:manage',
+        'purchasing_from_po:drafts:manage',
+        'po:drafts:manage',
+        'po:posted:manage',
+        'po:approved:manage',
+        'po:approved:receive',
+      ].some((permission) =>
+        allSettings?.WhoAmI?.user?.roles
+          ?.flatMap((role: any) =>
+            Array.isArray(role?.permissions)
+              ? role.permissions.map((perm: any) => perm?.name)
+              : []
+          )
+          ?.includes(permission)
+      ),
+    [allSettings?.WhoAmI?.user?.roles]
+  );
 
   const baseAmount = useMemo(
     () =>
@@ -402,6 +456,9 @@ export default function POSPaymentPanel() {
   };
 
   const submitOrder = async () => {
+    if (loading || submitOrderInFlightRef.current) return;
+    submitOrderInFlightRef.current = true;
+
     // Check if we need to auto-apply the draft amount as a payment
     let finalPayments = [...payments];
     const draftAmount = Number(draftValue || 0);
@@ -429,6 +486,7 @@ export default function POSPaymentPanel() {
         duration: 2500,
         variant: 'destructive',
       });
+      submitOrderInFlightRef.current = false;
       return;
     }
 
@@ -445,14 +503,114 @@ export default function POSPaymentPanel() {
       meta: { external_additional_payment_info: 'pos' },
     }));
 
+    const clientOrderId =
+      String(orderSchema?.client_order_id || '').trim() ||
+      (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `client-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);
+
     const finalOrderSchema = {
-        ...orderSchema,
-        payments: paymentsPayload
+      ...orderSchema,
+      payments: paymentsPayload,
+      client_order_id: clientOrderId,
     };
+
+    const buildPendingCompletedOrder = (
+      localId: string,
+      mode: 'offline' | 'online' = 'offline'
+    ) => ({
+      id: localId,
+      reference: localId,
+      business_date: new Date().toISOString(),
+      total_price: totals.total,
+      subtotal_price: totals.subtotal,
+      total_taxes: totals.tax,
+      discount_amount: Number(finalOrderSchema?.discount_amount || 0),
+      qrcode: '',
+      products: cardItemValue.map((item: any) => ({
+        name: item?.name || '-',
+        quantity: Number(item?.qty || 0),
+        unit_price: Number(item?.price || 0),
+        discount_amount: Number(item?.discount_amount || 0),
+      })),
+      sync_status: mode === 'offline' ? 'pending' : 'syncing',
+      is_offline_order: mode === 'offline',
+    });
+
+    if (!isOnline) {
+      try {
+        setLoading(true);
+        const queuedOrder = await enqueueOfflineOrder(finalOrderSchema);
+        setLastSuccessItems([...cardItemValue]);
+        setCompletedOrderData(buildPendingCompletedOrder(queuedOrder.local_id, 'offline'));
+        setPayments(finalPayments);
+        showToast({
+          description:
+            'Order saved offline. It will sync automatically when internet is back.',
+          duration: 2800,
+        });
+      } catch {
+        showToast({
+          description: t('GENERAL_ERROR'),
+          duration: 3000,
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+        submitOrderInFlightRef.current = false;
+      }
+      return;
+    }
 
     try {
       setLoading(true);
-      const createdOrderResponse = await axiosInstance.post('orders', finalOrderSchema);
+      const optimisticLocalId = `pending-online-${Date.now()}`;
+      setLastSuccessItems([...cardItemValue]);
+      setCompletedOrderData(buildPendingCompletedOrder(optimisticLocalId, 'online'));
+      setPayments(finalPayments);
+
+      const submitController = new AbortController();
+      const submitTimeout = setTimeout(() => {
+        submitController.abort();
+      }, ONLINE_ORDER_SUBMIT_TIMEOUT_MS);
+      let createdOrderResponse: any;
+      try {
+        createdOrderResponse = await axiosInstance.post('orders', finalOrderSchema, {
+          headers: {
+            'X-Idempotency-Key': clientOrderId,
+          },
+          signal: submitController.signal,
+        });
+      } catch (error: any) {
+        const isTimeoutAbort =
+          error?.code === 'ERR_CANCELED' ||
+          error?.name === 'CanceledError' ||
+          error?.message === 'canceled';
+        if (!isTimeoutAbort) {
+          const queuedOrder = await enqueueOfflineOrder(finalOrderSchema);
+          setCompletedOrderData(buildPendingCompletedOrder(queuedOrder.local_id, 'offline'));
+          showToast({
+            description: isArabic
+              ? 'تعذر إتمام الطلب أونلاين، تم حفظه أوفلاين وسيتم مزامنته تلقائياً.'
+              : 'Could not complete online. Order was saved offline and will sync automatically.',
+            duration: 3200,
+          });
+          void syncPendingOrders();
+          return;
+        }
+        const queuedOrder = await enqueueOfflineOrder(finalOrderSchema);
+        setCompletedOrderData(buildPendingCompletedOrder(queuedOrder.local_id, 'offline'));
+        showToast({
+          description: isArabic
+            ? 'الشبكة بطيئة، تم حفظ الطلب أوفلاين وسيتم مزامنته تلقائياً.'
+            : 'Network is slow. Order was saved offline and will sync automatically.',
+          duration: 3200,
+        });
+        void syncPendingOrders();
+        return;
+      } finally {
+        clearTimeout(submitTimeout);
+      }
 
       const createdOrderPayload =
         createdOrderResponse?.data?.data ?? createdOrderResponse?.data ?? null;
@@ -489,15 +647,11 @@ export default function POSPaymentPanel() {
         }
         showToast({
           description: t('ADDED_SUCCESSFULLY'),
-          duration: 1600,
+          duration: 1200,
         });
-        // Save items locally for receipt display before clearing
-        setLastSuccessItems([...cardItemValue]);
-        
-        // Show success/payment-complete screen immediately for better UX.
+
+        // Replace optimistic completion payload with real server payload.
         setCompletedOrderData(createdOrderPayload);
-        // Sync local payments state just in case needed for UI before unmount
-        setPayments(finalPayments);
       }
 
       // Hydrate full order details in background without blocking UI.
@@ -510,6 +664,7 @@ export default function POSPaymentPanel() {
           })
           .catch(() => {});
       }
+      void syncPendingOrders();
     } catch {
       showToast({
         description: t('GENERAL_ERROR'),
@@ -518,6 +673,7 @@ export default function POSPaymentPanel() {
       });
     } finally {
       setLoading(false);
+      submitOrderInFlightRef.current = false;
     }
   };
 
@@ -893,6 +1049,99 @@ export default function POSPaymentPanel() {
     dispatch(updateField({ field: 'customer_id', value: '' }));
   };
 
+  const fetchRefundableOrders = useCallback(async () => {
+    try {
+      setIsLoadingRefundOrders(true);
+      const response = await axiosInstance.get(
+        '/orders?filter[type]=1&filter[status]=4&sort=-created_at&perPage=100',
+        { timeout: 10000 }
+      );
+      const list = Array.isArray(response?.data?.data)
+        ? (response.data.data as RefundOrder[])
+        : [];
+      const currentBranchId = String(
+        orderSchema?.branch_id || Cookies.get('branch_id') || ''
+      ).trim();
+      const filtered = list
+        .filter((order) => {
+          const orderBranchId = String(
+            order?.branch_id ?? order?.branch?.id ?? ''
+          ).trim();
+          if (currentBranchId && orderBranchId && orderBranchId !== currentBranchId) {
+            return false;
+          }
+          return true;
+        })
+        .slice(0, 40);
+      setRefundOrders(filtered);
+      setSelectedRefundOrderId((prev) => {
+        if (prev && filtered.some((order) => String(order.id) === prev)) return prev;
+        return filtered[0]?.id ? String(filtered[0].id) : '';
+      });
+    } catch {
+      showToast({
+        description: t('GENERAL_ERROR'),
+        duration: 2500,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingRefundOrders(false);
+    }
+  }, [orderSchema?.branch_id, showToast, t]);
+
+  useEffect(() => {
+    if (!isRefundDialogOpen) return;
+    void fetchRefundableOrders();
+  }, [isRefundDialogOpen]);
+
+  const filteredRefundOrders = useMemo(() => {
+    const needle = refundSearch.trim().toLowerCase();
+    if (!needle) return refundOrders;
+    return refundOrders.filter((order) => {
+      const ref = String(order?.reference ?? order?.invoice_number ?? '').toLowerCase();
+      const customerName = String(order?.customer?.name ?? '').toLowerCase();
+      return ref.includes(needle) || customerName.includes(needle);
+    });
+  }, [refundOrders, refundSearch]);
+
+  const handleRefundOrder = async () => {
+    if (!selectedRefundOrderId || isSubmittingRefund) return;
+    try {
+      setIsSubmittingRefund(true);
+      await axiosInstance.put(`/orders/${selectedRefundOrderId}/refund`);
+      showToast({
+        description: t('VIEW_MODAL_RETURN_SUCCESS_DESC'),
+        duration: 2200,
+      });
+      setIsRefundDialogOpen(false);
+      setRefundSearch('');
+      setSelectedRefundOrderId('');
+      await fetchRefundableOrders();
+    } catch {
+      showToast({
+        description: t('GENERAL_ERROR'),
+        duration: 2500,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmittingRefund(false);
+    }
+  };
+
+  const formatRefundOrderDate = (order: RefundOrder) => {
+    const raw = order?.business_date || order?.created_at;
+    if (!raw) return '-';
+    const d = new Date(raw);
+    if (Number.isNaN(d.getTime())) return '-';
+    return d.toLocaleString(i18n.language?.startsWith('ar') ? 'ar-SA' : 'en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
 
   const startPaymentTour = useCallback(async () => {
     try {
@@ -984,11 +1233,11 @@ export default function POSPaymentPanel() {
             {paidInteger}
             <span className="text-[#7E8393]">.{paidDecimal}</span>
           </div>
-          <div className="mx-auto mt-10 grid max-w-[980px] grid-cols-1 gap-4 md:grid-cols-4">
+          <div className="mx-auto mt-10 grid w-full max-w-[980px] grid-cols-2 gap-4 md:grid-cols-4">
             <Button
               type="button"
               variant="outline"
-              className="h-14 text-lg"
+              className="h-16 rounded-xl text-lg font-semibold"
               disabled={isPreparingPrintQr}
               onClick={() => void handlePrintReceipt()}
             >
@@ -997,7 +1246,7 @@ export default function POSPaymentPanel() {
             <Button
               type="button"
               variant="outline"
-              className="h-14 text-lg"
+              className="h-16 rounded-xl text-lg font-semibold"
               onClick={handleSendWhatsapp}
             >
               <div className="flex items-center gap-2">
@@ -1016,14 +1265,14 @@ export default function POSPaymentPanel() {
             <Button
               type="button"
               variant="outline"
-              className="h-14 text-lg"
+              className="h-16 rounded-xl text-lg font-semibold"
               onClick={() => void handleDownloadReceipt()}
             >
               {t('DOWNLOAD_RECEIPT')}
             </Button>
             <Button
               type="button"
-              className="h-14 text-lg"
+              className="h-16 rounded-xl text-xl font-bold"
               onClick={() => {
                 const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
                 try {
@@ -1039,6 +1288,13 @@ export default function POSPaymentPanel() {
               {t('CONTINUE')}
             </Button>
           </div>
+          {completedOrderData?.is_offline_order && (
+            <div className="mt-4 inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-sm font-semibold text-amber-700">
+              {isArabic
+                ? 'محفوظ أوفلاين - بانتظار المزامنة'
+                : 'Saved offline - pending sync'}
+            </div>
+          )}
         </div>
         {showWhatsappDialog && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 p-4">
@@ -1193,8 +1449,23 @@ export default function POSPaymentPanel() {
               <span className="text-lg font-bold text-mainText">
                 {t('PAYMENT')}
               </span>
+              <OfflineSyncStatusPill
+                isOnline={isOnline}
+                pendingCount={pendingCount}
+                failedCount={failedCount}
+              />
             </div>
             <div className="flex items-center gap-2">
+              {canRefund && (
+                <Button
+                  variant="outline"
+                  className="h-8 border-destructive/30 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => setIsRefundDialogOpen(true)}
+                >
+                  <RotateCcw className="me-1 h-3.5 w-3.5" />
+                  <span className="text-xs font-semibold">{t('POS_REFUND')}</span>
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -1558,6 +1829,121 @@ export default function POSPaymentPanel() {
           </div>
         </AlertDialogContentComp>
       </AlertDialogComp>
+      {isRefundDialogOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/35 p-4">
+          <div className="w-full max-w-3xl rounded-2xl border border-mainBorder bg-white p-5 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <h3 className="text-lg font-bold text-mainText">{t('POS_REFUND_TITLE')}</h3>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => {
+                  setIsRefundDialogOpen(false);
+                  setRefundSearch('');
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="mb-3">
+              <Input
+                value={refundSearch}
+                onChange={(e) => setRefundSearch(e.target.value)}
+                placeholder={t('POS_REFUND_SEARCH_PLACEHOLDER')}
+                className="h-11"
+              />
+            </div>
+            <div className="max-h-[420px] space-y-2 overflow-y-auto rounded-xl border border-mainBorder bg-gray-50/40 p-2">
+              {isLoadingRefundOrders ? (
+                <div className="py-14 text-center text-sm text-secText">{t('LOADING')}</div>
+              ) : filteredRefundOrders.length === 0 ? (
+                <div className="py-14 text-center text-sm text-secText">
+                  {t('POS_REFUND_EMPTY')}
+                </div>
+              ) : (
+                filteredRefundOrders.map((order) => {
+                  const orderId = String(order?.id || '');
+                  const isSelected = selectedRefundOrderId === orderId;
+                  const isRefunded = Boolean(order?.return_reason);
+                  const ref =
+                    order?.reference || order?.invoice_number || String(order?.id || '-');
+                  return (
+                    <button
+                      key={orderId}
+                      type="button"
+                      onClick={() => {
+                        if (isRefunded) return;
+                        setSelectedRefundOrderId(orderId);
+                      }}
+                      className={`w-full rounded-xl border px-4 py-3 text-start transition-colors ${
+                        isRefunded
+                          ? 'cursor-not-allowed border-amber-200 bg-amber-50/70'
+                          : isSelected
+                          ? 'border-destructive/60 bg-destructive/5'
+                          : 'border-mainBorder bg-white hover:border-main/30'
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-mainText">{ref}</span>
+                          {isRefunded && (
+                            <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700">
+                              {t('RETURN_PAYMENT')}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-secText">
+                          {formatRefundOrderDate(order)}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-sm">
+                        <span className="text-secText">
+                          {order?.customer?.name || t('CUSTOMER')}
+                        </span>
+                        <span className="font-bold text-mainText" dir="ltr">
+                          SR {Number(order?.total_price || 0).toFixed(2)}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsRefundDialogOpen(false);
+                  setRefundSearch('');
+                }}
+              >
+                {t('CANCEL')}
+              </Button>
+              <Button
+                type="button"
+                className="bg-destructive text-white hover:bg-destructive/90"
+                disabled={
+                  !selectedRefundOrderId ||
+                  isSubmittingRefund ||
+                  isLoadingRefundOrders ||
+                  Boolean(
+                    refundOrders.find(
+                      (item) => String(item?.id || '') === selectedRefundOrderId
+                    )?.return_reason
+                  )
+                }
+                loading={isSubmittingRefund}
+                onClick={() => void handleRefundOrder()}
+              >
+                {isSubmittingRefund ? t('POS_REFUNDING') : t('POS_REFUND_CONFIRM')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

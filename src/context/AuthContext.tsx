@@ -3,6 +3,8 @@ import Cookies from 'js-cookie';
 import { toast } from '@/components/ui/use-toast';
 import axios from 'axios';
 import { Permissions } from '@/config/roles';
+import { getOfflineOrdersByStatusesForOwner } from '@/lib/offline/db';
+import { getCurrentOfflineOwnerKey } from '@/lib/offline/session';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
@@ -11,7 +13,7 @@ interface AuthContextType {
   login: (
     data: LoginData
   ) => Promise<{ success: boolean; error: boolean; errorCode?: number }>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 interface LoginData {
@@ -100,7 +102,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      const ownerKey = getCurrentOfflineOwnerKey();
+      const pending = await getOfflineOrdersByStatusesForOwner(
+        ['pending', 'syncing', 'failed'],
+        ownerKey
+      );
+      if (pending.length > 0) {
+        const shouldContinue = window.confirm(
+          `There are ${pending.length} offline order(s) waiting for sync. Logout may delay syncing until next login. Continue logout?`
+        );
+        if (!shouldContinue) return;
+      }
+    } catch {
+      // If local DB check fails, do not block logout.
+    }
+
     Cookies.remove('accessToken');
     Cookies.remove('refreshToken');
     Cookies.remove('name');

@@ -38,15 +38,25 @@ import {
   Pencil,
   X,
   HelpCircle,
+  RotateCcw,
   Lock,
   Delete,
   Image as ImageIcon,
   Layers,
   Percent,
+  RefreshCw,
 } from 'lucide-react';
 import PinLoginScreen from '../components/PinLoginScreen';
 import SH_LOGO from '@/assets/SH_LOGO.svg';
 import Cookies from 'js-cookie';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { useOfflineOrdersSummary } from '@/hooks/useOfflineOrdersSummary';
+import OfflineSyncStatusPill from '@/components/custom/OfflineSyncStatusPill';
+import {
+  getIndexedProductByBarcode,
+  syncCatalogIndexIfDue,
+  upsertProductIndexFromApiProducts,
+} from '@/lib/offline/catalogIndex';
 
 const CATEGORY_COLOR_PALETTE = [
   { bg: '#BDEAE8', border: '#A2D7D4', activeBg: '#A6D9D5', activeBorder: '#86C6C1' },
@@ -58,6 +68,31 @@ const CATEGORY_COLOR_PALETTE = [
 ] as const;
 
 const CATEGORY_TEXT_COLOR = '#1D2735';
+const POS_LAST_SYNCED_ROWS_KEY = 'pos_last_synced_rows_v1';
+const POS_CATALOG_SYNC_ACTIVE_KEY = 'pos_catalog_sync_active_v1';
+const POS_ACTIVE_TAB_KEY = 'pos_active_tab_v1';
+const POS_TAB_LOCK_TTL_MS = 10000;
+
+type RefundOrder = {
+  id: string;
+  reference?: string;
+  invoice_number?: string;
+  total_price?: number;
+  business_date?: string;
+  created_at?: string;
+  return_reason?: string | null;
+  customer?: { name?: string };
+  branch_id?: string;
+  branch?: { id?: string };
+};
+
+type QuickProductForm = {
+  name: string;
+  sku: string;
+  price: string;
+  quantity: string;
+  category_id: string;
+};
 
 const getCategoryStyle = (category: string) => {
   if (category === 'all') {
@@ -109,6 +144,51 @@ export const IndividualInvoicesAdd: React.FC<
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
   const [isEditCustomerMode, setIsEditCustomerMode] = useState(false);
   const [editingCustomerId, setEditingCustomerId] = useState('');
+  const [isCatalogSyncing, setIsCatalogSyncing] = useState(false);
+  const [catalogSyncProgress, setCatalogSyncProgress] = useState<{
+    currentPage: number;
+    totalPages: number;
+    fetchedRows: number;
+    syncedRows: number;
+  } | null>(null);
+  const [lastSyncedRows, setLastSyncedRows] = useState<number | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const raw = window.localStorage.getItem(POS_LAST_SYNCED_ROWS_KEY);
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+  });
+  const [catalogSyncInterrupted, setCatalogSyncInterrupted] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem(POS_CATALOG_SYNC_ACTIVE_KEY) === '1';
+  });
+  const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false);
+  const [isLoadingRefundOrders, setIsLoadingRefundOrders] = useState(false);
+  const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
+  const [refundOrders, setRefundOrders] = useState<RefundOrder[]>([]);
+  const [refundSearch, setRefundSearch] = useState('');
+  const [selectedRefundOrderId, setSelectedRefundOrderId] = useState('');
+  const [isPosLockedByAnotherTab, setIsPosLockedByAnotherTab] = useState(false);
+  const [barcodeSuggestion, setBarcodeSuggestion] = useState<{
+    open: boolean;
+    barcode: string;
+  }>({ open: false, barcode: '' });
+  const [isCreateProductOpen, setIsCreateProductOpen] = useState(false);
+  const [isCreatingProduct, setIsCreatingProduct] = useState(false);
+  const [isBarcodeLookupLoading, setIsBarcodeLookupLoading] = useState(false);
+  const [barcodeLookupStatus, setBarcodeLookupStatus] = useState<
+    'idle' | 'loading' | 'success' | 'not_found' | 'error'
+  >('idle');
+  const [barcodeLookupMessage, setBarcodeLookupMessage] = useState('');
+  const [quickProductImage, setQuickProductImage] = useState<File | null>(null);
+  const [quickProductImageLookupUrl, setQuickProductImageLookupUrl] = useState('');
+  const [quickProductImagePreview, setQuickProductImagePreview] = useState('');
+  const [quickProductForm, setQuickProductForm] = useState<QuickProductForm>({
+    name: '',
+    sku: '',
+    price: '',
+    quantity: '1',
+    category_id: '',
+  });
   const [newCustomerForm, setNewCustomerForm] = useState({
     name: '',
     phone: '',
@@ -119,6 +199,7 @@ export const IndividualInvoicesAdd: React.FC<
   });
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
   const orderSchema = useSelector((state: any) => state.orderSchema);
+  const allSettings = useSelector((state: any) => state.allSettings?.value);
   const currentCashier = useSelector((state: any) => state.posCashier?.currentCashier);
   const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
   const parkedOrdersKey = `pos_parked_orders_v1_${branchId || 'default'}`;
@@ -128,7 +209,31 @@ export const IndividualInvoicesAdd: React.FC<
   const [isEditItemOpen, setIsEditItemOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const { showToast } = useToast();
+  const { isOnline } = useNetworkStatus();
+  const { pendingCount, failedCount } = useOfflineOrdersSummary();
   const queryClient = useQueryClient();
+  const canRefund = useMemo(
+    () =>
+      [
+        'orders:manage',
+        'purchasing:drafts:manage',
+        'purchasing:closed:manage',
+        'purchasing_from_po:drafts:manage',
+        'po:drafts:manage',
+        'po:posted:manage',
+        'po:approved:manage',
+        'po:approved:receive',
+      ].some((permission) =>
+        allSettings?.WhoAmI?.user?.roles
+          ?.flatMap((role: any) =>
+            Array.isArray(role?.permissions)
+              ? role.permissions.map((perm: any) => perm?.name)
+              : []
+          )
+          ?.includes(permission)
+      ),
+    [allSettings?.WhoAmI?.user?.roles]
+  );
 
   // Prefetch payment methods so they appear instantly on the payment page
   useEffect(() => {
@@ -140,6 +245,10 @@ export const IndividualInvoicesAdd: React.FC<
       },
     });
   }, [queryClient]);
+
+  useEffect(() => {
+    void syncCatalogIndexIfDue();
+  }, []);
 
   useEffect(() => {
     if (orderSchema?.discount_amount) {
@@ -170,7 +279,12 @@ export const IndividualInvoicesAdd: React.FC<
   );
 
   const scannerBufferRef = useRef('');
+  const posTabIdRef = useRef(
+    `pos-tab-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  );
   const scannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoLookupAttemptedSkuRef = useRef('');
+  const quickProductImageInputRef = useRef<HTMLInputElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const cartListRef = useRef<HTMLDivElement | null>(null);
   const prevCartIdsRef = useRef<string[]>([]);
@@ -179,8 +293,23 @@ export const IndividualInvoicesAdd: React.FC<
   const barcodeQueueRef = useRef<string[]>([]);
   const pendingCountByBarcodeRef = useRef<Map<string, number>>(new Map());
   const rawBarcodeByKeyRef = useRef<Map<string, string>>(new Map());
+  const parsedScaleBarcodeMetaRef = useRef<
+    Map<
+      string,
+      {
+        lookupCandidates: string[];
+        plu: string;
+        quantityPerScan: number | null;
+        encodedPrice: number | null;
+      }
+    >
+  >(new Map());
   const inFlightBarcodesRef = useRef<Set<string>>(new Set());
   const activeRequestsRef = useRef(0);
+  const lastEnqueuedScanRef = useRef<{ key: string; at: number }>({
+    key: '',
+    at: 0,
+  });
   const PAGE_SIZE = 50;
   const MAX_CONCURRENT_SCANS = 3;
   const SCAN_REQUEST_TIMEOUT_MS = 3000;
@@ -289,6 +418,10 @@ export const IndividualInvoicesAdd: React.FC<
       ...Array.from(map.entries()).map(([id, name]) => ({ id, name })),
     ];
   }, [products, categoriesData]);
+  const productCategoryOptions = useMemo(
+    () => categoryOptions.filter((category: any) => category.id !== 'all'),
+    [categoryOptions]
+  );
 
   // Prefetch 50 products from each category in background for instant category switching
   const MAX_CATEGORIES_TO_PREFETCH = 15;
@@ -741,6 +874,74 @@ export const IndividualInvoicesAdd: React.FC<
 
   const normalizeBarcode = (value: string) => value.trim().toLowerCase();
 
+  const parseScaleBarcodeMeta = (rawBarcode: string) => {
+    const digitsOnly = String(rawBarcode || '').replace(/\D/g, '');
+    if (!/^\d{13}$/.test(digitsOnly)) return null;
+
+    const prefix = digitsOnly.slice(0, 2);
+    const isWeightPrefix = ['20', '21', '22', '23', '24', '99'].includes(prefix);
+    const isPricePrefix = ['25', '26', '27', '28', '29'].includes(prefix);
+    if (!isWeightPrefix && !isPricePrefix) return null;
+
+    const pluRaw = digitsOnly.slice(2, 7);
+    const pluTrimmed = pluRaw.replace(/^0+/, '');
+    const lookupCandidates = Array.from(
+      new Set(
+        [pluRaw, pluTrimmed]
+          .map((value) => normalizeBarcode(value))
+          .filter(Boolean)
+      )
+    );
+    if (!lookupCandidates.length) return null;
+
+    const embeddedValue = Number(digitsOnly.slice(7, 12));
+    if (!Number.isFinite(embeddedValue) || embeddedValue <= 0) return null;
+
+    if (isWeightPrefix) {
+      const quantityPerScan = embeddedValue / 1000;
+      if (!Number.isFinite(quantityPerScan) || quantityPerScan <= 0) return null;
+      return {
+        lookupCandidates,
+        plu: pluRaw,
+        quantityPerScan,
+        encodedPrice: null,
+      };
+    }
+
+    return {
+      lookupCandidates,
+      plu: pluRaw,
+      quantityPerScan: null,
+      encodedPrice: embeddedValue / 100,
+    };
+  };
+
+  const formatScanQtyLabel = (value: number) =>
+    Number.isInteger(value)
+      ? String(value)
+      : String(Number(value.toFixed(3)));
+
+  const buildScanSuccessMessage = (
+    productName: string,
+    incrementBy: number,
+    scaleMeta?: {
+      plu: string;
+      quantityPerScan: number | null;
+      encodedPrice: number | null;
+    } | null
+  ) => {
+    const qtyLabel = formatScanQtyLabel(incrementBy);
+    if (!scaleMeta) return `${productName} x${qtyLabel}`;
+    const pluLabel = String(scaleMeta.plu || '').trim() || '-';
+    if (scaleMeta.quantityPerScan) {
+      return `${productName} | PLU ${pluLabel} | ${qtyLabel} kg`;
+    }
+    if (scaleMeta.encodedPrice) {
+      return `${productName} | PLU ${pluLabel} | Qty ${qtyLabel}`;
+    }
+    return `${productName} x${qtyLabel}`;
+  };
+
   const playScannerTone = (type: 'success' | 'error') => {
     try {
       const AudioCtx = window.AudioContext;
@@ -771,49 +972,110 @@ export const IndividualInvoicesAdd: React.FC<
   const processQueuedBarcode = useCallback(
     async (barcodeKey: string) => {
       const rawBarcode = rawBarcodeByKeyRef.current.get(barcodeKey) || barcodeKey;
+      const parsedScaleMeta = parsedScaleBarcodeMetaRef.current.get(barcodeKey);
+      const lookupCandidates = Array.from(
+        new Set([
+          normalizeBarcode(rawBarcode),
+          barcodeKey,
+          ...(parsedScaleMeta?.lookupCandidates || []),
+        ])
+      ).filter(Boolean);
       try {
-        const skuResponse = await axiosInstance.get('menu/products', {
-          timeout: SCAN_REQUEST_TIMEOUT_MS,
-          params: {
-            not_default: 1,
-            per_page: 1,
-            'filter[sku]': rawBarcode,
-          },
-        });
+        const online = typeof navigator === 'undefined' ? true : navigator.onLine;
+        let matchedProduct: any = null;
 
-        let matchedProduct = skuResponse?.data?.data?.[0];
+        if (!online) {
+          for (const candidate of lookupCandidates) {
+            matchedProduct = await getIndexedProductByBarcode(candidate);
+            if (matchedProduct) break;
+          }
+        } else {
+          for (const candidate of lookupCandidates) {
+            const skuResponse = await axiosInstance.get('menu/products', {
+              timeout: SCAN_REQUEST_TIMEOUT_MS,
+              params: {
+                not_default: 1,
+                per_page: 1,
+                'filter[sku]': candidate,
+              },
+            });
+            matchedProduct = skuResponse?.data?.data?.[0];
+            if (matchedProduct) break;
+          }
 
-        // Some stores encode printable barcode in name field.
-        if (!matchedProduct) {
-          const nameResponse = await axiosInstance.get('menu/products', {
-            timeout: SCAN_REQUEST_TIMEOUT_MS,
-            params: {
-              not_default: 1,
-              per_page: 1,
-              'filter[name]': rawBarcode,
-            },
-          });
-          matchedProduct = nameResponse?.data?.data?.[0];
+          // Some stores encode printable barcode in name field.
+          if (!matchedProduct) {
+            const nameResponse = await axiosInstance.get('menu/products', {
+              timeout: SCAN_REQUEST_TIMEOUT_MS,
+              params: {
+                not_default: 1,
+                per_page: 1,
+                'filter[name]': rawBarcode,
+              },
+            });
+            matchedProduct = nameResponse?.data?.data?.[0];
+          }
+
+          if (matchedProduct) {
+            void upsertProductIndexFromApiProducts([matchedProduct]);
+          } else {
+            for (const candidate of lookupCandidates) {
+              matchedProduct = await getIndexedProductByBarcode(candidate);
+              if (matchedProduct) break;
+            }
+          }
         }
+
         const pendingCount = pendingCountByBarcodeRef.current.get(barcodeKey) || 0;
 
         pendingCountByBarcodeRef.current.delete(barcodeKey);
         rawBarcodeByKeyRef.current.delete(barcodeKey);
+        parsedScaleBarcodeMetaRef.current.delete(barcodeKey);
 
         if (matchedProduct && pendingCount > 0) {
           const sku = String(matchedProduct?.sku || '');
           if (sku) {
             barcodeCacheRef.current.set(normalizeBarcode(sku), matchedProduct);
           }
+          for (const candidate of lookupCandidates) {
+            barcodeCacheRef.current.set(candidate, matchedProduct);
+          }
           notFoundBarcodeCacheRef.current.delete(barcodeKey);
-          addOrIncrementCardItem(matchedProduct, pendingCount);
+          for (const candidate of lookupCandidates) {
+            notFoundBarcodeCacheRef.current.delete(candidate);
+          }
+          let incrementBy = pendingCount;
+          if (parsedScaleMeta?.quantityPerScan) {
+            incrementBy = parsedScaleMeta.quantityPerScan * pendingCount;
+          } else if (
+            parsedScaleMeta?.encodedPrice &&
+            Number(matchedProduct?.price || 0) > 0
+          ) {
+            const derivedQty =
+              parsedScaleMeta.encodedPrice / Number(matchedProduct.price || 0);
+            if (Number.isFinite(derivedQty) && derivedQty > 0) {
+              incrementBy = derivedQty * pendingCount;
+            }
+          }
+          addOrIncrementCardItem(matchedProduct, incrementBy);
           setLastScanStatus('success');
-          setLastScanMessage(`${matchedProduct.name} x${pendingCount}`);
+          const successMsg = buildScanSuccessMessage(
+            String(matchedProduct?.name || '-'),
+            incrementBy,
+            parsedScaleMeta
+          );
+          setLastScanMessage(successMsg);
+          if (parsedScaleMeta) {
+            showToast({ description: successMsg, duration: 1400 });
+          }
           playScannerTone('success');
           return;
         }
 
         notFoundBarcodeCacheRef.current.set(barcodeKey, Date.now());
+        for (const candidate of lookupCandidates) {
+          notFoundBarcodeCacheRef.current.set(candidate, Date.now());
+        }
         setLastScanStatus('error');
         setLastScanMessage(rawBarcode);
         playScannerTone('error');
@@ -822,18 +1084,57 @@ export const IndividualInvoicesAdd: React.FC<
           duration: 1800,
           variant: 'destructive',
         });
+        suggestAddProductForBarcode(rawBarcode);
       } catch (error) {
+        const pendingCount = pendingCountByBarcodeRef.current.get(barcodeKey) || 0;
+        let localFallback: any = null;
+        for (const candidate of lookupCandidates) {
+          localFallback = await getIndexedProductByBarcode(candidate);
+          if (localFallback) break;
+        }
         pendingCountByBarcodeRef.current.delete(barcodeKey);
         rawBarcodeByKeyRef.current.delete(barcodeKey);
-        setLastScanStatus('error');
-        setLastScanMessage(rawBarcode);
-        playScannerTone('error');
-        showToast({
-          description: t('BARCODE_SEARCH_FAILED'),
-          duration: 1800,
-          variant: 'destructive',
-        });
+        parsedScaleBarcodeMetaRef.current.delete(barcodeKey);
+
+        if (localFallback && pendingCount > 0) {
+          let incrementBy = pendingCount;
+          if (parsedScaleMeta?.quantityPerScan) {
+            incrementBy = parsedScaleMeta.quantityPerScan * pendingCount;
+          } else if (
+            parsedScaleMeta?.encodedPrice &&
+            Number(localFallback?.price || 0) > 0
+          ) {
+            const derivedQty =
+              parsedScaleMeta.encodedPrice / Number(localFallback.price || 0);
+            if (Number.isFinite(derivedQty) && derivedQty > 0) {
+              incrementBy = derivedQty * pendingCount;
+            }
+          }
+          addOrIncrementCardItem(localFallback, incrementBy);
+          setLastScanStatus('success');
+          const successMsg = buildScanSuccessMessage(
+            String(localFallback?.name || '-'),
+            incrementBy,
+            parsedScaleMeta
+          );
+          setLastScanMessage(successMsg);
+          if (parsedScaleMeta) {
+            showToast({ description: successMsg, duration: 1400 });
+          }
+          playScannerTone('success');
+        } else {
+          setLastScanStatus('error');
+          setLastScanMessage(rawBarcode);
+          playScannerTone('error');
+          showToast({
+            description: t('BARCODE_SEARCH_FAILED'),
+            duration: 1800,
+            variant: 'destructive',
+          });
+          suggestAddProductForBarcode(rawBarcode);
+        }
       } finally {
+        parsedScaleBarcodeMetaRef.current.delete(barcodeKey);
         inFlightBarcodesRef.current.delete(barcodeKey);
         activeRequestsRef.current = Math.max(0, activeRequestsRef.current - 1);
       }
@@ -876,20 +1177,62 @@ export const IndividualInvoicesAdd: React.FC<
       setLastScanMessage(barcode);
 
       const barcodeKey = normalizeBarcode(barcode);
-      const cachedProduct = barcodeCacheRef.current.get(barcodeKey);
+      const parsedScaleMeta = parseScaleBarcodeMeta(barcode);
+      const lookupCandidates = parsedScaleMeta?.lookupCandidates || [];
+      const now = Date.now();
+      // Prevent accidental double processing of the same Enter event.
+      if (
+        lastEnqueuedScanRef.current.key === barcodeKey &&
+        now - lastEnqueuedScanRef.current.at < 80
+      ) {
+        setBarcodeInput('');
+        return;
+      }
+      lastEnqueuedScanRef.current = { key: barcodeKey, at: now };
+      const cachedProduct =
+        barcodeCacheRef.current.get(barcodeKey) ||
+        lookupCandidates
+          .map((candidate) => barcodeCacheRef.current.get(candidate))
+          .find(Boolean);
       if (cachedProduct) {
-        addOrIncrementCardItem(cachedProduct, 1);
+        let incrementBy = 1;
+        if (parsedScaleMeta?.quantityPerScan) {
+          incrementBy = parsedScaleMeta.quantityPerScan;
+        } else if (
+          parsedScaleMeta?.encodedPrice &&
+          Number(cachedProduct?.price || 0) > 0
+        ) {
+          const derivedQty =
+            parsedScaleMeta.encodedPrice / Number(cachedProduct.price || 0);
+          if (Number.isFinite(derivedQty) && derivedQty > 0) {
+            incrementBy = derivedQty;
+          }
+        }
+        addOrIncrementCardItem(cachedProduct, incrementBy);
         setLastScanStatus('success');
-        setLastScanMessage(`${cachedProduct.name} x1`);
+        const successMsg = buildScanSuccessMessage(
+          String(cachedProduct?.name || '-'),
+          incrementBy,
+          parsedScaleMeta
+        );
+        setLastScanMessage(successMsg);
+        if (parsedScaleMeta) {
+          showToast({ description: successMsg, duration: 1400 });
+        }
         playScannerTone('success');
         setBarcodeInput('');
         return;
       }
 
       const lastNotFoundAt = notFoundBarcodeCacheRef.current.get(barcodeKey);
+      const lookupRecentlyNotFound = lookupCandidates.some((candidate) => {
+        const ts = notFoundBarcodeCacheRef.current.get(candidate);
+        return Boolean(ts && Date.now() - ts < NOT_FOUND_CACHE_TTL_MS);
+      });
       if (
-        lastNotFoundAt &&
-        Date.now() - lastNotFoundAt < NOT_FOUND_CACHE_TTL_MS
+        (lastNotFoundAt &&
+          Date.now() - lastNotFoundAt < NOT_FOUND_CACHE_TTL_MS) ||
+        lookupRecentlyNotFound
       ) {
         setLastScanStatus('error');
         setLastScanMessage(barcode);
@@ -907,6 +1250,9 @@ export const IndividualInvoicesAdd: React.FC<
       pendingCountByBarcodeRef.current.set(barcodeKey, prevCount + 1);
       if (!rawBarcodeByKeyRef.current.has(barcodeKey)) {
         rawBarcodeByKeyRef.current.set(barcodeKey, barcode);
+      }
+      if (parsedScaleMeta) {
+        parsedScaleBarcodeMetaRef.current.set(barcodeKey, parsedScaleMeta);
       }
 
       const isAlreadyQueued = barcodeQueueRef.current.includes(barcodeKey);
@@ -1244,6 +1590,482 @@ export const IndividualInvoicesAdd: React.FC<
     dispatch(updateField({ field: 'tags', value: [] }));
   };
 
+  const formatSyncCount = useCallback((value: number) => {
+    const safe = Number.isFinite(value) ? Math.max(0, value) : 0;
+    return new Intl.NumberFormat(undefined).format(safe);
+  }, []);
+
+  const syncButtonToneClass = isCatalogSyncing
+    ? 'border-indigo-300 bg-indigo-50/70 text-indigo-800 hover:bg-indigo-100/70'
+    : catalogSyncInterrupted
+      ? 'border-amber-300 bg-amber-50/70 text-amber-800 hover:bg-amber-100/70'
+      : 'border-mainBorder bg-white text-mainText hover:bg-gray-50';
+
+  const syncMetaLabel = isCatalogSyncing && catalogSyncProgress
+    ? `${t('POS_SYNC_LIVE_LABEL')}: ${formatSyncCount(catalogSyncProgress.fetchedRows)} ${t('POS_SYNC_PRODUCT_UNIT')}`
+    : catalogSyncInterrupted
+      ? t('POS_SYNC_INTERRUPTED_SHORT')
+      : lastSyncedRows !== null
+        ? `${formatSyncCount(lastSyncedRows)} ${t('POS_SYNC_PRODUCT_UNIT')}`
+        : '';
+
+  function suggestAddProductForBarcode(barcode: string) {
+    const clean = String(barcode || '').trim();
+    if (!clean) return;
+    setBarcodeSuggestion({ open: true, barcode: clean });
+  }
+
+  const openCreateProductDialogFromSuggestion = useCallback(() => {
+    const clean = String(barcodeSuggestion.barcode || '').trim();
+    if (!clean) return;
+    setBarcodeLookupStatus('idle');
+    setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_HINT'));
+    setQuickProductImage(null);
+    setQuickProductImageLookupUrl('');
+    setQuickProductForm({
+      name: '',
+      sku: clean,
+      price: '',
+      quantity: '1',
+      category_id: productCategoryOptions?.[0]?.id
+        ? String(productCategoryOptions[0].id)
+        : '',
+    });
+    setBarcodeSuggestion({ open: false, barcode: '' });
+    setTimeout(() => setIsCreateProductOpen(true), 0);
+  }, [barcodeSuggestion.barcode, productCategoryOptions, t]);
+
+  const lookupBarcodeDetails = useCallback(
+    async (
+      barcodeValue?: string,
+      options?: { silent?: boolean; force?: boolean }
+    ) => {
+      const barcode = String(barcodeValue ?? quickProductForm.sku ?? '').trim();
+      if (!barcode) return;
+      const silent = Boolean(options?.silent);
+      if (isBarcodeLookupLoading) return;
+      if (silent && !options?.force && autoLookupAttemptedSkuRef.current === barcode) {
+        return;
+      }
+      autoLookupAttemptedSkuRef.current = barcode;
+      try {
+        setIsBarcodeLookupLoading(true);
+        setBarcodeLookupStatus('loading');
+        setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_LOADING'));
+
+        let resolvedName = '';
+        let resolvedImageUrl = '';
+
+        const customLookupUrl = String(
+          import.meta.env.VITE_BARCODE_LOOKUP_URL || ''
+        ).trim();
+        const customLookupKey = String(
+          import.meta.env.VITE_BARCODE_LOOKUP_KEY || ''
+        ).trim();
+
+        if (customLookupUrl) {
+          const customRes = await axiosInstance.get(customLookupUrl, {
+            timeout: 6000,
+            params: { barcode },
+            headers: customLookupKey
+              ? { 'X-API-Key': customLookupKey }
+              : undefined,
+          });
+          const payload = customRes?.data ?? {};
+          resolvedName = String(
+            payload?.name ||
+              payload?.product_name ||
+              payload?.product?.name ||
+              payload?.data?.name ||
+              payload?.data?.product_name ||
+              ''
+          ).trim();
+          resolvedImageUrl = String(
+            payload?.image ||
+              payload?.image_url ||
+              payload?.product?.image ||
+              payload?.product?.image_url ||
+              payload?.data?.image ||
+              payload?.data?.image_url ||
+              ''
+          ).trim();
+        }
+
+        if (!resolvedName || !resolvedImageUrl) {
+          const fallbackRes = await fetch(
+            `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(
+              barcode
+            )}.json`
+          );
+          if (fallbackRes.ok) {
+            const fallbackData = await fallbackRes.json();
+            resolvedName =
+              resolvedName ||
+              String(
+                fallbackData?.product?.product_name ||
+                  fallbackData?.product?.generic_name ||
+                  fallbackData?.product?.product_name_en ||
+                  ''
+              ).trim();
+            resolvedImageUrl =
+              resolvedImageUrl ||
+              String(
+                fallbackData?.product?.image_front_url ||
+                  fallbackData?.product?.image_url ||
+                  fallbackData?.product?.image_small_url ||
+                  ''
+              ).trim();
+          }
+        }
+
+        if (resolvedName || resolvedImageUrl) {
+          setQuickProductForm((prev) => ({
+            ...prev,
+            name: prev.name.trim() ? prev.name : resolvedName,
+          }));
+          if (resolvedImageUrl && !quickProductImage) {
+            setQuickProductImageLookupUrl(resolvedImageUrl);
+          }
+          setBarcodeLookupStatus('success');
+          setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_FOUND'));
+          if (!silent) {
+            showToast({
+              description: t('POS_BARCODE_LOOKUP_FOUND'),
+              duration: 1800,
+            });
+          }
+        } else {
+          if (silent) {
+            setBarcodeLookupStatus('idle');
+            setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_HINT'));
+          } else {
+            setBarcodeLookupStatus('not_found');
+            setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_NOT_FOUND'));
+          }
+          if (!silent) {
+            showToast({
+              description: t('POS_BARCODE_LOOKUP_NOT_FOUND'),
+              duration: 2000,
+              variant: 'destructive',
+            });
+          }
+        }
+      } catch {
+        if (silent) {
+          setBarcodeLookupStatus('idle');
+          setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_HINT'));
+        } else {
+          setBarcodeLookupStatus('error');
+          setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_ERROR'));
+        }
+        if (!silent) {
+          showToast({
+            description: t('POS_BARCODE_LOOKUP_ERROR'),
+            duration: 2000,
+            variant: 'destructive',
+          });
+        }
+      } finally {
+        setIsBarcodeLookupLoading(false);
+      }
+    },
+    [isBarcodeLookupLoading, quickProductForm.sku, quickProductImage, showToast, t]
+  );
+
+  const saveQuickProduct = async () => {
+    const payloadName = quickProductForm.name.trim();
+    const payloadSku = quickProductForm.sku.trim();
+    const payloadCategory = String(quickProductForm.category_id || '').trim();
+    const payloadPrice = Number(quickProductForm.price || 0);
+    const payloadQty = Number(quickProductForm.quantity || 0);
+
+    if (!payloadName || !payloadSku || !payloadCategory || !Number.isFinite(payloadPrice) || payloadPrice <= 0) {
+      showToast({
+        description: t('POS_PRODUCT_REQUIRED_FIELDS'),
+        duration: 2200,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setIsCreatingProduct(true);
+      const productPayload = {
+        name: payloadName,
+        name_localized: payloadName,
+        description: '-',
+        category_id: payloadCategory,
+        sku: payloadSku,
+        price: payloadPrice,
+        is_stock_product: true,
+        image: quickProductImage ?? quickProductImageLookupUrl ?? '',
+        costing_method: 2,
+        cost: 0,
+        pricing_method: 1,
+        selling_method: 1,
+      };
+
+      const productRes = await axiosInstance.post('menu/products', productPayload);
+      const createdProduct = productRes?.data?.data ?? productRes?.data ?? null;
+      const itemPivotId = createdProduct?.ingredients?.[0]?.pivot?.item_id;
+      const branch = Cookies.get('branch_id');
+
+      if (branch && itemPivotId && Number.isFinite(payloadQty) && payloadQty >= 0) {
+        const invRes = await axiosInstance.post('inventory/inventory-count', {
+          branch,
+          items: [{ id: itemPivotId }],
+        });
+        const inventoryId = invRes?.data?.id;
+        if (inventoryId) {
+          await axiosInstance.post(
+            `inventory/inventory-count/update_item/${inventoryId}`,
+            {
+              items: [{ id: itemPivotId, quantity: payloadQty }],
+            }
+          );
+          await axiosInstance.put(`inventory/inventory-count/${inventoryId}`, {
+            status: 2,
+            branch,
+          });
+        }
+      }
+
+      if (createdProduct) {
+        void upsertProductIndexFromApiProducts([createdProduct]);
+        addOrIncrementCardItem(createdProduct, 1);
+      }
+
+      setIsCreateProductOpen(false);
+      setQuickProductForm({
+        name: '',
+        sku: '',
+        price: '',
+        quantity: '1',
+        category_id: '',
+      });
+      setBarcodeLookupStatus('idle');
+      setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_HINT'));
+      setQuickProductImage(null);
+      setQuickProductImageLookupUrl('');
+      showToast({
+        description: t('ADDED_SUCCESSFULLY'),
+        duration: 1800,
+      });
+    } catch {
+      showToast({
+        description: t('GENERAL_ERROR'),
+        duration: 2500,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCreatingProduct(false);
+    }
+  };
+
+  const readPosTabLock = useCallback(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = window.localStorage.getItem(POS_ACTIVE_TAB_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as { tabId?: string; updatedAt?: number };
+      if (!parsed?.tabId || !Number.isFinite(parsed?.updatedAt)) return null;
+      return { tabId: String(parsed.tabId), updatedAt: Number(parsed.updatedAt) };
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const writePosTabLock = useCallback((tabId: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(
+        POS_ACTIVE_TAB_KEY,
+        JSON.stringify({ tabId, updatedAt: Date.now() })
+      );
+    } catch {
+      // ignore storage write failures
+    }
+  }, []);
+
+  const clearOwnPosTabLock = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const existing = readPosTabLock();
+      if (existing?.tabId !== posTabIdRef.current) return;
+      window.localStorage.removeItem(POS_ACTIVE_TAB_KEY);
+    } catch {
+      // ignore storage clear failures
+    }
+  }, [readPosTabLock]);
+
+  const acquirePosTabLock = useCallback(() => {
+    const existing = readPosTabLock();
+    const now = Date.now();
+    if (
+      existing &&
+      existing.tabId !== posTabIdRef.current &&
+      now - existing.updatedAt < POS_TAB_LOCK_TTL_MS
+    ) {
+      return false;
+    }
+    writePosTabLock(posTabIdRef.current);
+    return true;
+  }, [readPosTabLock, writePosTabLock]);
+
+  const syncAllProductsCatalog = async () => {
+    if (isCatalogSyncing) return;
+    if (!isOnline) {
+      showToast({
+        description: t('POS_SYNC_REQUIRES_ONLINE'),
+        duration: 2200,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setIsCatalogSyncing(true);
+      setCatalogSyncInterrupted(false);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(POS_CATALOG_SYNC_ACTIVE_KEY, '1');
+      }
+      setCatalogSyncProgress(null);
+      const result = await syncCatalogIndexIfDue(
+        true,
+        true,
+        (progress) => setCatalogSyncProgress(progress)
+      );
+      setLastSyncedRows(result.syncedRows);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(
+          POS_LAST_SYNCED_ROWS_KEY,
+          String(result.syncedRows)
+        );
+      }
+      showToast({
+        description:
+          `${t('POS_SYNC_ALL_PRODUCTS_DONE')} (${result.syncedRows})`,
+        duration: 2800,
+      });
+    } catch {
+      showToast({
+        description: t('GENERAL_ERROR'),
+        duration: 2500,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCatalogSyncing(false);
+      setCatalogSyncProgress(null);
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(POS_CATALOG_SYNC_ACTIVE_KEY);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!isCatalogSyncing || typeof window === 'undefined') return;
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+  }, [isCatalogSyncing]);
+
+  const fetchRefundableOrders = useCallback(async () => {
+    try {
+      setIsLoadingRefundOrders(true);
+      const response = await axiosInstance.get(
+        '/orders?filter[type]=1&filter[status]=4&sort=-created_at&perPage=100',
+        { timeout: 10000 }
+      );
+      const list = Array.isArray(response?.data?.data)
+        ? (response.data.data as RefundOrder[])
+        : [];
+      const currentBranchId = String(
+        orderSchema?.branch_id || Cookies.get('branch_id') || ''
+      ).trim();
+      const filtered = list
+        .filter((order) => {
+          const orderBranchId = String(
+            order?.branch_id ?? order?.branch?.id ?? ''
+          ).trim();
+          if (currentBranchId && orderBranchId && orderBranchId !== currentBranchId) {
+            return false;
+          }
+          return true;
+        })
+        .slice(0, 40);
+      setRefundOrders(filtered);
+      setSelectedRefundOrderId((prev) => {
+        if (prev && filtered.some((order) => String(order.id) === prev)) return prev;
+        return filtered[0]?.id ? String(filtered[0].id) : '';
+      });
+    } catch {
+      showToast({
+        description: t('GENERAL_ERROR'),
+        duration: 2500,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingRefundOrders(false);
+    }
+  }, [orderSchema?.branch_id, showToast, t]);
+
+  useEffect(() => {
+    if (!isRefundDialogOpen) return;
+    void fetchRefundableOrders();
+  }, [isRefundDialogOpen]);
+
+  const filteredRefundOrders = useMemo(() => {
+    const needle = refundSearch.trim().toLowerCase();
+    if (!needle) return refundOrders;
+    return refundOrders.filter((order) => {
+      const ref = String(order?.reference ?? order?.invoice_number ?? '').toLowerCase();
+      const customerName = String(order?.customer?.name ?? '').toLowerCase();
+      return ref.includes(needle) || customerName.includes(needle);
+    });
+  }, [refundOrders, refundSearch]);
+
+  const handleRefundOrder = async () => {
+    if (!selectedRefundOrderId || isSubmittingRefund) return;
+    try {
+      setIsSubmittingRefund(true);
+      await axiosInstance.put(`/orders/${selectedRefundOrderId}/refund`);
+      showToast({
+        description: t('VIEW_MODAL_RETURN_SUCCESS_DESC'),
+        duration: 2200,
+      });
+      setIsRefundDialogOpen(false);
+      setRefundSearch('');
+      setSelectedRefundOrderId('');
+    } catch {
+      showToast({
+        description: t('GENERAL_ERROR'),
+        duration: 2500,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmittingRefund(false);
+    }
+  };
+
+  const formatRefundOrderDate = (order: RefundOrder) => {
+    const raw = order?.business_date || order?.created_at;
+    if (!raw) return '-';
+    const d = new Date(raw);
+    if (Number.isNaN(d.getTime())) return '-';
+    return d.toLocaleString(undefined, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   useEffect(() => {
     if (!lastScanMessage) {
       setLastScanMessage(t('POS_READY_TO_SCAN'));
@@ -1368,29 +2190,142 @@ export const IndividualInvoicesAdd: React.FC<
     setHasMore(currentPage < lastPage);
   }, [data, page]);
 
+  useEffect(() => {
+    const refreshTabLockState = () => {
+      const acquired = acquirePosTabLock();
+      setIsPosLockedByAnotherTab(!acquired);
+    };
+
+    refreshTabLockState();
+
+    const keepAlive = window.setInterval(() => {
+      refreshTabLockState();
+    }, 2500);
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== POS_ACTIVE_TAB_KEY) return;
+      refreshTabLockState();
+    };
+
+    const onBeforeUnload = () => {
+      clearOwnPosTabLock();
+    };
+
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => {
+      window.clearInterval(keepAlive);
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      clearOwnPosTabLock();
+    };
+  }, [acquirePosTabLock, clearOwnPosTabLock]);
+
+  useEffect(() => {
+    if (!quickProductImage) {
+      setQuickProductImagePreview('');
+      return;
+    }
+    const localPreviewUrl = URL.createObjectURL(quickProductImage);
+    setQuickProductImagePreview(localPreviewUrl);
+    return () => {
+      URL.revokeObjectURL(localPreviewUrl);
+    };
+  }, [quickProductImage]);
+
+  useEffect(() => {
+    if (!isCreateProductOpen) {
+      autoLookupAttemptedSkuRef.current = '';
+      return;
+    }
+    if (!quickProductForm.sku?.trim()) return;
+    if (quickProductForm.name?.trim()) return;
+    void lookupBarcodeDetails(quickProductForm.sku, { silent: true });
+  }, [isCreateProductOpen, quickProductForm.sku, quickProductForm.name, lookupBarcodeDetails]);
+
   return (
     <>
+      {isPosLockedByAnotherTab ? (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-background/95 p-6">
+          <div className="w-full max-w-lg rounded-2xl border border-mainBorder bg-white p-6 text-center shadow-xl">
+            <h2 className="text-xl font-bold text-mainText">
+              {t('POS_TAB_LOCK_TITLE')}
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-secText">
+              {t('POS_TAB_LOCK_DESC')}
+            </p>
+            <div className="mt-5">
+              <Button
+                type="button"
+                className="h-10 rounded-lg px-5"
+                onClick={() => navigate('/zood-dashboard/individual-invoices')}
+              >
+                {t('POS_TAB_LOCK_ACTION')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {barcodeSuggestion.open ? (
+        <div className="fixed inset-0 z-[121] flex items-center justify-center bg-black/30 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-mainBorder bg-white p-5 shadow-xl">
+            <h3 className="text-base font-bold text-mainText">
+              {t('POS_BARCODE_NOT_FOUND_TITLE')}
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-secText">
+              {t('POS_BARCODE_NOT_FOUND_DESC')}
+            </p>
+            <div className="mt-3 rounded-lg border border-mainBorder bg-gray-50 px-3 py-2 text-sm font-medium text-mainText">
+              {barcodeSuggestion.barcode}
+            </div>
+            <div className="mt-5 flex items-center justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setBarcodeSuggestion({ open: false, barcode: '' })}
+              >
+                {t('CANCEL')}
+              </Button>
+              <Button type="button" onClick={openCreateProductDialogFromSuggestion}>
+                {t('POS_ADD_PRODUCT_WITH_BARCODE')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <div className="pos-container fixed inset-0 z-50 flex h-full w-full flex-col overflow-hidden bg-background md:flex-row md:flex-nowrap">
         {/* Left Side: Cart & Actions */}
         <div className="flex w-full shrink-0 flex-col border-b border-mainBorder bg-background md:h-full md:w-[300px] md:border-b-0 md:border-e lg:w-[340px] xl:w-[380px]">
-          <div className="flex shrink-0 items-center justify-between border-b border-mainBorder bg-white px-3 py-2.5 shadow-sm">
-            <div className="flex items-center gap-2">
-              <img src={SH_LOGO} alt="Logo" className="h-8 w-auto object-contain" />
-              <span className="hidden text-sm font-semibold text-mainText sm:block">
-                {t('POS')}
-              </span>
+          <div className="flex shrink-0 items-center border-b border-mainBorder bg-white px-3 py-2 shadow-sm">
+            <div className="flex h-11 w-full items-center overflow-hidden rounded-2xl border border-mainBorder bg-white shadow-sm">
+              <div className="flex h-full shrink-0 items-center gap-2 bg-gray-50 px-3">
+                <span className="text-sm font-semibold text-mainText">
+                  {t('POS')}
+                </span>
+                <img src={SH_LOGO} alt="Logo" className="h-8 w-auto object-contain" />
+              </div>
+              <span className="my-2 h-auto w-px bg-mainBorder/70" />
+              <div className="shrink-0 px-2">
+                <OfflineSyncStatusPill
+                  isOnline={isOnline}
+                  pendingCount={pendingCount}
+                  failedCount={failedCount}
+                  compact
+                />
+              </div>
+              <span className="my-2 h-auto w-px bg-mainBorder/70" />
+              <button
+                type="button"
+                disabled
+                className="flex h-full min-w-0 flex-1 items-center gap-1.5 bg-gray-100 px-3 text-sm font-medium text-gray-400 cursor-not-allowed opacity-70"
+                title={t('EMPLOYEE_LOGIN')}
+              >
+                <Lock className="h-4 w-4 shrink-0" />
+                <span className="truncate">
+                  {t('EMPLOYEE_LOGIN')}
+                </span>
+              </button>
             </div>
-            <button
-              type="button"
-              disabled
-              className="flex items-center gap-1.5 rounded-lg border border-mainBorder bg-gray-100 px-2.5 py-1.5 text-xs font-medium text-gray-400 shadow-sm cursor-not-allowed opacity-60"
-              title={t('EMPLOYEE_LOGIN')}
-            >
-              <Lock className="h-4 w-4 shrink-0" />
-              <span className="max-w-[100px] truncate">
-                {t('EMPLOYEE_LOGIN')}
-              </span>
-            </button>
           </div>
           <div className="flex flex-1 flex-col overflow-hidden p-2">
             {/* Cart Header Actions */}
@@ -1668,14 +2603,14 @@ export const IndividualInvoicesAdd: React.FC<
                   SR {subtotalAmount.toFixed(2)}
                 </span>
               </div>
-              <div className="flex items-center justify-between py-1">
+              <div className="flex items-center justify-between gap-2 py-1.5">
                 <div className="flex items-center gap-2">
                   <span className="text-secText">{t('DISCOUNT')}</span>
-                  <div className="flex h-6 w-fit items-center overflow-hidden rounded border border-mainBorder bg-white">
+                  <div className="flex h-10 w-fit items-center overflow-hidden rounded-lg border border-mainBorder bg-white shadow-sm">
                     <button
                       type="button"
                       onClick={() => setDiscountType('fixed')}
-                      className={`h-full px-2 text-[10px] font-bold transition-colors ${
+                      className={`h-full min-w-[46px] px-3 text-sm font-bold transition-colors active:scale-[0.98] ${
                         discountType === 'fixed'
                           ? 'bg-blue-600 text-white'
                           : 'text-gray-500 hover:bg-gray-50'
@@ -1687,7 +2622,7 @@ export const IndividualInvoicesAdd: React.FC<
                     <button
                       type="button"
                       onClick={() => setDiscountType('percent')}
-                      className={`h-full px-2 text-[10px] font-bold transition-colors ${
+                      className={`h-full min-w-[46px] px-3 text-sm font-bold transition-colors active:scale-[0.98] ${
                         discountType === 'percent'
                           ? 'bg-emerald-600 text-white'
                           : 'text-gray-500 hover:bg-gray-50'
@@ -1697,7 +2632,7 @@ export const IndividualInvoicesAdd: React.FC<
                     </button>
                   </div>
                 </div>
-                <div className="w-[100px]">
+                <div className="w-[118px]">
                   <Input
                     type="text"
                     inputMode="decimal"
@@ -1706,7 +2641,7 @@ export const IndividualInvoicesAdd: React.FC<
                       const val = e.target.value.replace(/[^0-9.]/g, '');
                       setDiscountValue(val);
                     }}
-                    className="!h-8 !w-full px-2 text-right"
+                    className="!h-10 !w-full rounded-lg border-mainBorder bg-white px-3 text-right text-sm font-semibold tabular-nums shadow-sm focus:ring-1 focus:ring-main/20"
                     placeholder={discountType === 'percent' ? '%' : 'SR'}
                   />
                 </div>
@@ -2029,32 +2964,58 @@ export const IndividualInvoicesAdd: React.FC<
           {/* Odoo-style Header: Compact & Clean */}
           <div className="z-10 flex w-full flex-col border-b border-mainBorder bg-white shadow-sm">
             {/* Top Row: Navigation & Search */}
-            <div className="flex items-center justify-between gap-3 px-3 py-2">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 px-3 py-2">
+              <div className="flex h-11 w-full min-w-0 items-stretch overflow-hidden rounded-2xl border border-mainBorder bg-white shadow-sm">
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsOpen(true)}
-                  className="h-8 w-8 text-secText hover:bg-destructive/10 hover:text-destructive"
-                  title={t('POS_EXIT')}
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-                <div className="hidden h-6 w-[1px] bg-gray-200 sm:block" />
-                <Button
+                  type="button"
                   variant="ghost"
                   size="icon"
                   onClick={startTour}
-                  className="h-8 w-8 text-secText hover:bg-main/10 hover:text-main"
+                  className="h-11 w-11 shrink-0 rounded-none border-0 text-secText hover:bg-main/10 hover:text-main"
                   title={t('HELP_TOUR')}
                 >
                   <HelpCircle className="h-4 w-4" />
                 </Button>
-              </div>
-
-              <div className="flex flex-1 items-center justify-end gap-3 md:max-w-xl">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsOpen(true)}
+                  className="h-11 w-11 shrink-0 rounded-none border-0 text-secText hover:bg-destructive/10 hover:text-destructive"
+                  title={t('POS_EXIT')}
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+                <span className="my-2 h-auto w-px bg-mainBorder/70" />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={`order-1 h-11 shrink-0 gap-2 rounded-none border-0 border-s-0 px-3 shadow-none ${syncButtonToneClass}`}
+                  onClick={() => void syncAllProductsCatalog()}
+                  disabled={isCatalogSyncing || !isOnline}
+                  title={
+                    isCatalogSyncing && catalogSyncProgress
+                      ? `${catalogSyncProgress.currentPage}/${catalogSyncProgress.totalPages || '?'}`
+                      : undefined
+                  }
+                >
+                  <RefreshCw
+                    className={`h-3.5 w-3.5 shrink-0 ${isCatalogSyncing ? 'animate-spin text-indigo-600' : 'text-secText'}`}
+                  />
+                  <span className="text-xs font-semibold whitespace-nowrap">
+                    {isCatalogSyncing
+                      ? t('POS_SYNC_ALL_PRODUCTS_LOADING')
+                      : t('POS_SYNC_ALL_PRODUCTS')}
+                  </span>
+                  {syncMetaLabel ? (
+                    <span className="rounded-md bg-white/80 px-1.5 py-0.5 text-[10px] font-semibold leading-none">
+                      {syncMetaLabel}
+                    </span>
+                  ) : null}
+                </Button>
+                <span className="my-2 h-auto w-px bg-mainBorder/70" />
                 {/* Search Field */}
-                <div className="relative flex-1">
+                <div className="relative order-4 min-w-0 flex-1">
                   <div className="pointer-events-none absolute left-2.5 top-2.5 flex items-center justify-center text-secText/50">
                     <Search className="h-4 w-4" />
                   </div>
@@ -2064,12 +3025,28 @@ export const IndividualInvoicesAdd: React.FC<
                     }
                     defaultValue=""
                     placeholder={t('POS_SEARCH_PLACEHOLDER')}
-                    className="h-9 w-full rounded-md border-mainBorder bg-gray-50/50 pl-9 text-sm focus:bg-white focus:ring-1 focus:ring-main/20"
+                    className="h-11 w-full rounded-none border-0 bg-white pl-9 text-sm shadow-none focus:bg-white focus:ring-0"
                   />
                 </div>
+                <span className="my-2 h-auto w-px bg-mainBorder/70" />
+
+                {canRefund && (
+                  <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="order-3 h-11 shrink-0 rounded-none border-0 border-destructive/30 bg-white px-3 text-destructive shadow-none hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => setIsRefundDialogOpen(true)}
+                  >
+                    <RotateCcw className="me-1 h-3.5 w-3.5" />
+                    <span className="text-xs font-semibold">{t('POS_REFUND')}</span>
+                  </Button>
+                  <span className="my-2 h-auto w-px bg-mainBorder/70" />
+                  </>
+                )}
 
                 {/* Barcode Field */}
-                <div className="relative w-1/3 min-w-[140px]">
+                <div className="relative order-5 w-[34%] min-w-[170px]">
                   <div className="pointer-events-none absolute left-2.5 top-2.5 flex items-center justify-center text-secText/50">
                     <ScanBarcode className="h-4 w-4" />
                   </div>
@@ -2082,11 +3059,12 @@ export const IndividualInvoicesAdd: React.FC<
                     onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
+                        e.stopPropagation();
                         enqueueBarcode();
                       }
                     }}
                     placeholder={lastScanMessage || t('SCAN')}
-                    className={`h-9 w-full rounded-md border-mainBorder pl-9 text-sm transition-all duration-300 focus:ring-1 focus:ring-main/20 ${
+                    className={`h-11 w-full rounded-none border-0 pl-9 text-sm shadow-none transition-all duration-300 focus:ring-0 ${
                       lastScanStatus === 'success'
                         ? 'border-emerald-500 bg-emerald-50/30 text-emerald-900 placeholder:text-emerald-700/50'
                         : lastScanStatus === 'error'
@@ -2098,8 +3076,11 @@ export const IndividualInvoicesAdd: React.FC<
               </div>
             </div>
 
-            {/* Categories Row - Compact */}
-            <div id="tour-categories" className="flex w-full items-center gap-1.5 overflow-x-auto whitespace-nowrap border-t border-mainBorder/50 px-3 py-1.5">
+            {/* Categories Row - Touch-first */}
+            <div
+              id="tour-categories"
+              className="flex w-full snap-x snap-mandatory items-center gap-2 overflow-x-auto whitespace-nowrap border-t border-mainBorder/50 px-3 py-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            >
               {categoryOptions.map((category: any) => {
                 const isActive = activeCategory === category.id;
                 const categoryStyle = getCategoryStyle(category.name);
@@ -2113,10 +3094,10 @@ export const IndividualInvoicesAdd: React.FC<
                       borderColor: isActive ? categoryStyle.activeBorder : categoryStyle.border,
                       color: CATEGORY_TEXT_COLOR,
                     }}
-                    className={`relative flex h-8 min-w-[80px] shrink-0 items-center justify-center rounded border px-3 text-xs font-medium transition-all duration-200 ${
+                    className={`relative flex h-11 min-w-[108px] snap-start shrink-0 items-center justify-center rounded-lg border px-3.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] ${
                       isActive
-                        ? 'font-bold shadow-sm ring-1 ring-black/5'
-                        : 'opacity-90 hover:opacity-100 hover:shadow-sm'
+                        ? 'shadow-sm ring-1 ring-black/5'
+                        : 'opacity-95 hover:opacity-100 hover:shadow-sm'
                     }`}
                   >
                     <span className="capitalize">
@@ -2124,7 +3105,7 @@ export const IndividualInvoicesAdd: React.FC<
                     </span>
                     {isActive && (
                       <span
-                        className="absolute bottom-0 left-0 right-0 h-[3px] rounded-b"
+                        className="absolute bottom-0 left-1.5 right-1.5 h-[3px] rounded-full"
                         style={{ backgroundColor: categoryStyle.activeBorder }}
                       />
                     )}
@@ -2158,6 +3139,121 @@ export const IndividualInvoicesAdd: React.FC<
           )}
         </div>
       </div>
+      {isRefundDialogOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/35 p-4">
+          <div className="w-full max-w-3xl rounded-2xl border border-mainBorder bg-white p-5 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <h3 className="text-lg font-bold text-mainText">{t('POS_REFUND_TITLE')}</h3>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => {
+                  setIsRefundDialogOpen(false);
+                  setRefundSearch('');
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="mb-3">
+              <Input
+                value={refundSearch}
+                onChange={(e) => setRefundSearch(e.target.value)}
+                placeholder={t('POS_REFUND_SEARCH_PLACEHOLDER')}
+                className="h-11"
+              />
+            </div>
+            <div className="max-h-[420px] space-y-2 overflow-y-auto rounded-xl border border-mainBorder bg-gray-50/40 p-2">
+              {isLoadingRefundOrders ? (
+                <div className="py-14 text-center text-sm text-secText">{t('LOADING')}</div>
+              ) : filteredRefundOrders.length === 0 ? (
+                <div className="py-14 text-center text-sm text-secText">
+                  {t('POS_REFUND_EMPTY')}
+                </div>
+              ) : (
+                filteredRefundOrders.map((order) => {
+                  const orderId = String(order?.id || '');
+                  const isSelected = selectedRefundOrderId === orderId;
+                  const isRefunded = Boolean(order?.return_reason);
+                  const ref =
+                    order?.reference || order?.invoice_number || String(order?.id || '-');
+                  return (
+                    <button
+                      key={orderId}
+                      type="button"
+                      onClick={() => {
+                        if (isRefunded) return;
+                        setSelectedRefundOrderId(orderId);
+                      }}
+                      className={`w-full rounded-xl border px-4 py-3 text-start transition-colors ${
+                        isRefunded
+                          ? 'cursor-not-allowed border-amber-200 bg-amber-50/70'
+                          : isSelected
+                          ? 'border-destructive/60 bg-destructive/5'
+                          : 'border-mainBorder bg-white hover:border-main/30'
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-mainText">{ref}</span>
+                          {isRefunded && (
+                            <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700">
+                              {t('RETURN_PAYMENT')}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-secText">
+                          {formatRefundOrderDate(order)}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-sm">
+                        <span className="text-secText">
+                          {order?.customer?.name || t('CUSTOMER')}
+                        </span>
+                        <span className="font-bold text-mainText" dir="ltr">
+                          SR {Number(order?.total_price || 0).toFixed(2)}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsRefundDialogOpen(false);
+                  setRefundSearch('');
+                }}
+              >
+                {t('CANCEL')}
+              </Button>
+              <Button
+                type="button"
+                className="bg-destructive text-white hover:bg-destructive/90"
+                disabled={
+                  !selectedRefundOrderId ||
+                  isSubmittingRefund ||
+                  isLoadingRefundOrders ||
+                  Boolean(
+                    refundOrders.find(
+                      (item) => String(item?.id || '') === selectedRefundOrderId
+                    )?.return_reason
+                  )
+                }
+                loading={isSubmittingRefund}
+                onClick={() => void handleRefundOrder()}
+              >
+                {isSubmittingRefund ? t('POS_REFUNDING') : t('POS_REFUND_CONFIRM')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <ConfirmBk
         isOpen={isOpen}
         setIsOpen={undefined}
@@ -2174,7 +3270,7 @@ export const IndividualInvoicesAdd: React.FC<
           </button>
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative h-[100dvh] w-[390px] max-w-[calc(100vw-48px)] overflow-y-auto bg-white"
+            className="relative h-[100dvh] w-[390px] max-w-[calc(100vw-48px)] overflow-x-hidden overflow-y-auto bg-white"
           >
             <AlertDialogTitleComp className="sr-only">
               {t('CREATE_NEW_ORDER_TAG')}
@@ -2218,6 +3314,244 @@ export const IndividualInvoicesAdd: React.FC<
                 className="h-11 w-full rounded-md text-base font-semibold"
               >
                 {isEditTagMode ? t('EDIT') : t('CREATE_NEW_ORDER_TAG')}
+              </Button>
+            </div>
+          </div>
+        </AlertDialogContentComp>
+      </AlertDialogComp>
+      <AlertDialogComp
+        open={isCreateProductOpen}
+        onOpenChange={(open) => {
+          setIsCreateProductOpen(open);
+          if (!open) {
+            setQuickProductImage(null);
+            setQuickProductImageLookupUrl('');
+            setBarcodeLookupStatus('idle');
+            setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_HINT'));
+          }
+        }}
+      >
+        <AlertDialogContentComp className="right-0 w-fit border-0 bg-transparent p-0 shadow-none">
+          <button
+            onClick={() => setIsCreateProductOpen(false)}
+            className="absolute -left-5 top-6 z-[100] flex h-10 w-10 items-center justify-center rounded-full border border-mainBorder bg-white text-mainText shadow-sm transition hover:scale-105"
+          >
+            <XIcons />
+          </button>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative h-[100dvh] w-[390px] max-w-[calc(100vw-48px)] overflow-y-auto bg-white"
+          >
+            <AlertDialogTitleComp className="sr-only">
+              {t('POS_ADD_PRODUCT_WITH_BARCODE')}
+            </AlertDialogTitleComp>
+            <AlertDialogDescriptionComp className="sr-only">
+              {t('PRODUCT_NAME')}
+            </AlertDialogDescriptionComp>
+            <div className="border-b border-mainBorder px-7 py-5">
+              <div className="mb-1.5 text-right text-sm font-medium text-secText">
+                {t('PRODUCT_IMAGE')}
+              </div>
+              <input
+                ref={quickProductImageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const selectedFile = e.target.files?.[0] ?? null;
+                  setQuickProductImage(selectedFile);
+                  if (selectedFile) {
+                    setQuickProductImageLookupUrl('');
+                  }
+                }}
+                className="hidden"
+              />
+              {(quickProductImagePreview || quickProductImageLookupUrl) ? (
+                <div className="overflow-hidden rounded-xl border border-mainBorder bg-white shadow-sm">
+                  <img
+                    src={quickProductImagePreview || quickProductImageLookupUrl}
+                    alt="product preview"
+                    className="h-40 w-full bg-gray-100 object-cover"
+                  />
+                  <div className="space-y-2 p-3">
+                    <div className="min-w-0 text-xs text-secText">
+                      <p className="truncate font-medium text-mainText">
+                        {quickProductImage?.name || t('PRODUCT_IMAGE')}
+                      </p>
+                      <p className="mt-0.5">
+                        {quickProductImage?.size ? `${(quickProductImage.size / 1024).toFixed(1)} KB` : ''}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="h-8 flex-1 rounded-md px-2.5 text-xs"
+                        onClick={() => quickProductImageInputRef.current?.click()}
+                      >
+                        {t('EDIT')}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="h-8 flex-1 rounded-md border-red-200 px-2.5 text-xs text-red-700 hover:bg-red-50"
+                        onClick={() => {
+                          setQuickProductImage(null);
+                          setQuickProductImageLookupUrl('');
+                        }}
+                      >
+                        {t('DELETE')}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => quickProductImageInputRef.current?.click()}
+                  className="flex h-28 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-mainBorder bg-gray-50/70 text-secText transition hover:border-main/40 hover:bg-main/5"
+                >
+                  <ImageIcon className="h-5 w-5 text-main/70" />
+                  <span className="text-xs font-medium">{t('UPLOAD_IMAGE')}</span>
+                </button>
+              )}
+            </div>
+            <div className="space-y-4 px-7 py-6">
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('PRODUCT_NAME')}
+                </label>
+                <Input
+                  value={quickProductForm.name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setQuickProductForm((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  className="h-11 rounded-md border-mainBorder bg-white px-3 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('BARCODE')}
+                </label>
+                <div className="flex w-full items-stretch gap-2 overflow-hidden">
+                  <Input
+                    value={quickProductForm.sku}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setQuickProductForm((prev) => ({ ...prev, sku: e.target.value }));
+                      setBarcodeLookupStatus('idle');
+                      setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_HINT'));
+                    }}
+                    className="h-11 min-w-0 flex-1 rounded-md border-mainBorder bg-white px-3 text-sm"
+                    dir="ltr"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 shrink-0 whitespace-nowrap gap-1.5 rounded-md border-main/25 bg-main/5 px-2.5 text-main hover:bg-main/10"
+                    onClick={() => void lookupBarcodeDetails(undefined, { force: true })}
+                    disabled={isBarcodeLookupLoading || !quickProductForm.sku.trim()}
+                  >
+                    <RefreshCw
+                      className={`h-4 w-4 ${isBarcodeLookupLoading ? 'animate-spin' : ''}`}
+                    />
+                    <span className="text-xs font-semibold">{t('POS_BARCODE_LOOKUP_FETCH')}</span>
+                  </Button>
+                </div>
+                <div
+                  className={`mt-2 flex items-center gap-2 rounded-md border px-2.5 py-2 text-xs ${
+                    barcodeLookupStatus === 'success'
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                      : barcodeLookupStatus === 'error' || barcodeLookupStatus === 'not_found'
+                        ? 'border-red-200 bg-red-50 text-red-800'
+                        : barcodeLookupStatus === 'loading'
+                          ? 'border-indigo-200 bg-indigo-50 text-indigo-800'
+                          : 'border-mainBorder bg-gray-50/70 text-secText'
+                  }`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                      barcodeLookupStatus === 'success'
+                        ? 'bg-emerald-500'
+                        : barcodeLookupStatus === 'error' || barcodeLookupStatus === 'not_found'
+                          ? 'bg-red-500'
+                          : barcodeLookupStatus === 'loading'
+                            ? 'animate-pulse bg-indigo-500'
+                            : 'bg-gray-400'
+                    }`}
+                  />
+                  <span className="truncate">
+                    {barcodeLookupMessage || t('POS_BARCODE_LOOKUP_HINT')}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                  {t('CATEGORY_NAME')}
+                </label>
+                <select
+                  value={quickProductForm.category_id}
+                  onChange={(e) =>
+                    setQuickProductForm((prev) => ({
+                      ...prev,
+                      category_id: e.target.value,
+                    }))
+                  }
+                  className="h-11 w-full rounded-md border border-mainBorder bg-white px-3 text-sm outline-none focus:ring-1 focus:ring-main/20"
+                >
+                  <option value="">{t('CATEGORY_NAME')}</option>
+                  {productCategoryOptions.map((category: any) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3 [&>*]:min-w-0">
+                <div>
+                  <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                    {t('PRICE')}
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={quickProductForm.price}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setQuickProductForm((prev) => ({ ...prev, price: e.target.value }))
+                    }
+                    className="h-10 w-full rounded-lg border-mainBorder bg-white px-3 text-sm tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    dir="ltr"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-right text-sm font-medium text-secText">
+                    {t('CURRENT_QUANTITY')}
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={quickProductForm.quantity}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setQuickProductForm((prev) => ({
+                        ...prev,
+                        quantity: e.target.value,
+                      }))
+                    }
+                    className="h-10 w-full rounded-lg border-mainBorder bg-white px-3 text-sm tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="sticky bottom-0 border-t border-mainBorder bg-white px-7 py-4">
+              <Button
+                type="button"
+                loading={isCreatingProduct}
+                disabled={isCreatingProduct}
+                onClick={saveQuickProduct}
+                className="h-11 w-full rounded-md text-base font-semibold"
+              >
+                {t('ADD_PRODUCT')}
               </Button>
             </div>
           </div>

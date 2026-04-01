@@ -34,6 +34,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
+const POS_PREFILL_SKU_KEY = 'pos_prefill_product_sku_v1';
+
 const formSchema = z.object({
   name: z.string().nonempty('Name is required'),
   name_localized: z.string().optional(),
@@ -94,17 +96,27 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
     }
     if (!isEditMode) {
       form.reset({});
-
-      (async () => {
-        try {
-          const skuData = await axiosInstance.post('manage/generate_sku', {
-            model: 'products',
-          });
-          form.setValue('sku', `sk-${skuData?.data?.data}`);
-        } catch (error) {
-          console.error('Error generating SKU:', error);
+      const prefilledSku =
+        typeof window !== 'undefined'
+          ? String(window.localStorage.getItem(POS_PREFILL_SKU_KEY) || '').trim()
+          : '';
+      if (prefilledSku) {
+        form.setValue('sku', prefilledSku);
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(POS_PREFILL_SKU_KEY);
         }
-      })();
+      } else {
+        (async () => {
+          try {
+            const skuData = await axiosInstance.post('manage/generate_sku', {
+              model: 'products',
+            });
+            form.setValue('sku', `sk-${skuData?.data?.data}`);
+          } catch (error) {
+            console.error('Error generating SKU:', error);
+          }
+        })();
+      }
     }
   }, [getDataById, form, isEditMode]);
 
