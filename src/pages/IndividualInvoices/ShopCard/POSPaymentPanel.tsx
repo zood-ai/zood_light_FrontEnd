@@ -27,6 +27,7 @@ import {
   buildSimplifiedTaxInvoiceHtml,
   mapApiOrderToReceiptInput,
   openAndPrintSimplifiedTaxInvoice,
+  printKitchenTicketsByCategory,
   resolveReceiptQrDataUrl,
   warmupQzTrayConnection,
   type ReceiptLineItem,
@@ -549,10 +550,23 @@ export default function POSPaymentPanel() {
       is_offline_order: mode === 'offline',
     });
 
+    const triggerKitchenPrint = async (reference?: string, businessDate?: string) => {
+      try {
+        await printKitchenTicketsByCategory({
+          items: cardItemValue,
+          reference,
+          businessDate,
+        });
+      } catch {
+        // Kitchen printing should not block checkout flow.
+      }
+    };
+
     if (!isOnline) {
       try {
         setLoading(true);
         const queuedOrder = await enqueueOfflineOrder(finalOrderSchema);
+        void triggerKitchenPrint(queuedOrder.local_id, new Date().toISOString());
         setLastSuccessItems([...cardItemValue]);
         setCompletedOrderData(buildPendingCompletedOrder(queuedOrder.local_id, 'offline'));
         setPayments(finalPayments);
@@ -600,6 +614,7 @@ export default function POSPaymentPanel() {
           error?.message === 'canceled';
         if (!isTimeoutAbort) {
           const queuedOrder = await enqueueOfflineOrder(finalOrderSchema);
+          void triggerKitchenPrint(queuedOrder.local_id, new Date().toISOString());
           setCompletedOrderData(buildPendingCompletedOrder(queuedOrder.local_id, 'offline'));
           showToast({
             description: isArabic
@@ -611,6 +626,7 @@ export default function POSPaymentPanel() {
           return;
         }
         const queuedOrder = await enqueueOfflineOrder(finalOrderSchema);
+        void triggerKitchenPrint(queuedOrder.local_id, new Date().toISOString());
         setCompletedOrderData(buildPendingCompletedOrder(queuedOrder.local_id, 'offline'));
         showToast({
           description: isArabic
@@ -629,6 +645,15 @@ export default function POSPaymentPanel() {
       const createdOrderId = createdOrderPayload?.id;
 
       if (createdOrderPayload) {
+        void triggerKitchenPrint(
+          String(
+            createdOrderPayload?.reference ||
+              createdOrderPayload?.invoice_number ||
+              createdOrderPayload?.id ||
+              ''
+          ),
+          String(createdOrderPayload?.business_date || new Date().toISOString())
+        );
         try {
           const daySalesKey = 'pos_day_sales_v1';
           const raw = window.localStorage.getItem(daySalesKey);

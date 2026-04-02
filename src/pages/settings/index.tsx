@@ -7,9 +7,17 @@ import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
 import Cookies from 'js-cookie';
 import { useTranslation } from 'react-i18next';
 import { setSettings } from '@/store/slices/allSettings';
+import { useToast } from '@/components/custom/useToastComp';
+import {
+  listQzPrinters,
+  runQzDiagnostics,
+  testPrintOnQzPrinter,
+  warmupQzTrayConnection,
+} from '@/utils/simplifiedTaxInvoiceReceipt';
 
 export default function Settings() {
   const dispatch = useDispatch();
+  const { showToast } = useToast();
   const userId = Cookies.get('userId');
   const [selectedFileName, setSelectedFileName] = useState('');
   const { data: settings } =
@@ -21,6 +29,9 @@ export default function Settings() {
     createCrudService<any>('manage/settings').useUpdate();
   const { data: whoami } = createCrudService<any>('auth/whoami').useGetAll();
   const { data: taxes } = createCrudService<any>('manage/taxes').useGetAll();
+  const { data: categoriesData } = createCrudService<any>(
+    'menu/categories?not_default=1&per_page=1000'
+  ).useGetAll();
   const { mutate: updateTax } =
     createCrudService<any>('manage/taxes').useUpdateNoDialog();
   const { mutate: updateBranch } =
@@ -53,6 +64,16 @@ export default function Settings() {
   const [updatedTaxInclusivePricing, setUpdatedTaxInclusivePricing] = useState(
     settings?.data?.tax_inclusive_pricing
   );
+  const [qzEnabled, setQzEnabled] = useState(true);
+  const [posPrinterName, setPosPrinterName] = useState('');
+  const [kitchenDefaultPrinterName, setKitchenDefaultPrinterName] = useState('');
+  const [kitchenCategoryRouting, setKitchenCategoryRouting] = useState<
+    Record<string, string>
+  >({});
+  const [availablePrinters, setAvailablePrinters] = useState<string[]>([]);
+  const [isLoadingPrinters, setIsLoadingPrinters] = useState(false);
+  const [isRunningQzDiagnostics, setIsRunningQzDiagnostics] = useState(false);
+  const [qzDiagnosticsSummary, setQzDiagnosticsSummary] = useState('');
 
   useEffect(() => {
     const holder = whoami
@@ -80,6 +101,156 @@ export default function Settings() {
 
     setUpdatedTaxInclusivePricing(settings?.data?.tax_inclusive_pricing);
   }, [settings, whoami]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const qzRaw = window.localStorage.getItem('pos_qz_enabled');
+    const posRaw = window.localStorage.getItem('pos_qz_printer_name');
+    const kitchenRaw = window.localStorage.getItem(
+      'pos_kitchen_default_printer_name'
+    );
+    const routingRaw = window.localStorage.getItem(
+      'pos_kitchen_category_routing'
+    );
+
+    setQzEnabled(qzRaw !== '0');
+    setPosPrinterName(String(posRaw || '').trim());
+    setKitchenDefaultPrinterName(String(kitchenRaw || '').trim());
+    if (routingRaw) {
+      try {
+        const parsed = JSON.parse(routingRaw) as Record<string, string>;
+        setKitchenCategoryRouting(parsed && typeof parsed === 'object' ? parsed : {});
+      } catch {
+        setKitchenCategoryRouting({});
+      }
+    }
+  }, []);
+
+  const loadQzPrinters = async () => {
+    try {
+      setIsLoadingPrinters(true);
+      await warmupQzTrayConnection();
+      const printers = await listQzPrinters();
+      setAvailablePrinters(printers);
+      showToast({
+        description: printers.length
+          ? isArabic
+            ? `تم العثور على ${printers.length} طابعة`
+            : `Found ${printers.length} printer(s).`
+          : isArabic
+            ? 'لم يتم العثور على طابعات من QZ Tray.'
+            : 'No printers returned from QZ Tray.',
+      });
+    } catch (error: any) {
+      const message = String(error?.message || '').trim();
+      const normalized = message.toLowerCase();
+      const friendlyMessage =
+        message === 'QZ_TIMEOUT_PRINTER'
+          ? isArabic
+            ? 'انتهت مهلة تحميل قائمة الطابعات. حاول مرة أخرى بعد ثواني.'
+            : 'Timed out while loading printer list. Please retry in a few seconds.'
+          : message;
+      showToast({
+        description: isArabic
+          ? `تعذر تحميل الطابعات من QZ Tray${friendlyMessage ? `: ${friendlyMessage}` : '.'}`
+          : `Could not load printers from QZ Tray${friendlyMessage ? `: ${friendlyMessage}` : '.'}`,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingPrinters(false);
+    }
+  };
+
+  const savePosPrintingSettings = () => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem('pos_qz_enabled', qzEnabled ? '1' : '0');
+    window.localStorage.setItem('pos_qz_printer_name', posPrinterName.trim());
+    window.localStorage.setItem(
+      'pos_kitchen_default_printer_name',
+      kitchenDefaultPrinterName.trim()
+    );
+    window.localStorage.setItem(
+      'pos_kitchen_category_routing',
+      JSON.stringify(kitchenCategoryRouting)
+    );
+    showToast({
+      description: isArabic
+        ? 'تم حفظ إعدادات طباعة نقطة البيع.'
+        : 'POS print settings saved.',
+    });
+  };
+
+  const runPrinterTest = async (printerName: string, type: 'customer' | 'kitchen') => {
+    const normalized = String(printerName || '').trim();
+    if (!normalized) {
+      showToast({
+        description: isArabic ? 'أدخل اسم الطابعة أولًا.' : 'Please enter a printer name first.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    try {
+      await testPrintOnQzPrinter({
+        printerName: normalized,
+        title: type === 'kitchen' ? 'KITCHEN TEST' : 'CUSTOMER TEST',
+      });
+      showToast({
+        description: isArabic ? 'تم إرسال اختبار الطباعة.' : 'Test print sent successfully.',
+      });
+    } catch (error: any) {
+      const raw = String(error?.message || 'UNKNOWN');
+      const normalized = raw.toLowerCase();
+      const friendly =
+        normalized.includes("cannot read properties of undefined (reading '0')")
+          ? 'QZ_CONNECT_INTERNAL'
+          : raw;
+      showToast({
+        description: isArabic
+          ? `فشل اختبار الطباعة: ${friendly}${friendly === 'QZ_TIMEOUT_PRINT' ? ' (تحقق من نافذة السماح في QZ Tray أو جرّب مرة ثانية بعد ثواني)' : ''}`
+          : `Test print failed: ${friendly}${friendly === 'QZ_TIMEOUT_PRINT' ? ' (Check QZ Tray permission prompt, then retry)' : ''}`,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const runQzDiagnosticsNow = async () => {
+    try {
+      setIsRunningQzDiagnostics(true);
+      const diagnostics = await runQzDiagnostics();
+      const summary = [
+        `${isArabic ? 'وجود كائن QZ' : 'QZ object'}: ${
+          diagnostics.hasQzObject ? 'OK' : 'NO'
+        }`,
+        `${isArabic ? 'الاتصال' : 'Connected'}: ${
+          diagnostics.connected ? 'OK' : 'NO'
+        } (${diagnostics.connectMs}ms)`,
+        `${isArabic ? 'الطابعة الافتراضية' : 'Default printer'}: ${
+          diagnostics.defaultPrinter || (isArabic ? 'غير موجود' : 'none')
+        } (${diagnostics.defaultMs}ms)`,
+        `${isArabic ? 'الطابعات المكتشفة' : 'Discovered printers'}: ${
+          diagnostics.discoveredPrinters.length
+        } (${diagnostics.findMs}ms)`,
+        diagnostics.notes.length
+          ? `${isArabic ? 'ملاحظات' : 'Notes'}: ${diagnostics.notes.join(' | ')}`
+          : `${isArabic ? 'ملاحظات' : 'Notes'}: -`,
+      ].join('\n');
+      setQzDiagnosticsSummary(summary);
+      showToast({
+        description: isArabic
+          ? 'اكتمل تشخيص QZ. راجع الصندوق أسفل الأزرار.'
+          : 'QZ diagnostics completed. See details below.',
+      });
+    } catch {
+      showToast({
+        description: isArabic
+          ? 'فشل تشغيل تشخيص QZ.'
+          : 'Failed to run QZ diagnostics.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRunningQzDiagnostics(false);
+    }
+  };
 
   useEffect(() => {
     if (!settings) return;
@@ -187,7 +358,8 @@ export default function Settings() {
     };
     fun();
   }, [fileBase64, updateSettings]);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.dir() === 'rtl';
 
   return (
     <>
@@ -593,6 +765,179 @@ export default function Settings() {
             >
               {t('save')}
             </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start p-4 mt-7 w-full bg-white rounded border border-gray-200 border-solid max-md:pl-5 max-md:max-w-full">
+          <div className="text-base font-semibold text-zinc-800">
+            {isArabic ? 'طابعات نقطة البيع (QZ Tray)' : 'POS Printers (QZ Tray)'}
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void loadQzPrinters()}
+              disabled={isLoadingPrinters}
+            >
+              {isLoadingPrinters
+                ? isArabic
+                  ? 'جاري تحميل الطابعات...'
+                  : 'Loading printers...'
+                : isArabic
+                  ? 'تحميل الطابعات'
+                  : 'Load Printers'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void runQzDiagnosticsNow()}
+              disabled={isRunningQzDiagnostics}
+            >
+              {isRunningQzDiagnostics
+                ? isArabic
+                  ? 'جاري التشخيص...'
+                  : 'Running diagnostics...'
+                : isArabic
+                  ? 'تشخيص QZ'
+                  : 'QZ Diagnostics'}
+            </Button>
+            <label className="flex items-center gap-2 text-sm font-medium text-zinc-700">
+              <input
+                type="checkbox"
+                checked={qzEnabled}
+                onChange={(e) => setQzEnabled(e.target.checked)}
+              />
+              {isArabic ? 'تفعيل الطباعة المباشرة عبر QZ' : 'Enable QZ direct printing'}
+            </label>
+          </div>
+          {qzDiagnosticsSummary ? (
+            <pre className="mt-3 w-full overflow-x-auto rounded-md border border-mainBorder bg-gray-50 p-3 text-xs leading-6 text-mainText">
+              {qzDiagnosticsSummary}
+            </pre>
+          ) : null}
+
+          <div className="mt-4 grid w-full gap-4 md:grid-cols-2">
+            <div>
+              <div className="mb-1 text-sm font-medium text-zinc-500">
+                {isArabic ? 'طابعة إيصال العميل' : 'Customer receipt printer'}
+              </div>
+              <select
+                value={posPrinterName}
+                onChange={(e) => setPosPrinterName(e.target.value)}
+                className="h-10 w-full rounded-md border border-mainBorder bg-white px-3 text-sm outline-none"
+              >
+                <option value="">{isArabic ? 'افتراضي النظام' : 'System default'}</option>
+                {availablePrinters.map((printer) => (
+                  <option key={printer} value={printer}>
+                    {printer}
+                  </option>
+                ))}
+              </select>
+              <Input
+                value={posPrinterName}
+                onChange={(e) => setPosPrinterName(e.target.value)}
+                placeholder={isArabic ? 'أو أدخل الاسم يدويًا' : 'Or type printer name manually'}
+                className="mt-2 h-9 w-full"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-2"
+                onClick={() => void runPrinterTest(posPrinterName, 'customer')}
+              >
+                {isArabic ? 'اختبار طابعة العميل' : 'Test Customer Printer'}
+              </Button>
+            </div>
+            <div>
+              <div className="mb-1 text-sm font-medium text-zinc-500">
+                {isArabic ? 'طابعة المطبخ الافتراضية' : 'Kitchen default printer'}
+              </div>
+              <select
+                value={kitchenDefaultPrinterName}
+                onChange={(e) => setKitchenDefaultPrinterName(e.target.value)}
+                className="h-10 w-full rounded-md border border-mainBorder bg-white px-3 text-sm outline-none"
+              >
+                <option value="">{isArabic ? 'معطل' : 'Disabled'}</option>
+                {availablePrinters.map((printer) => (
+                  <option key={printer} value={printer}>
+                    {printer}
+                  </option>
+                ))}
+              </select>
+              <Input
+                value={kitchenDefaultPrinterName}
+                onChange={(e) => setKitchenDefaultPrinterName(e.target.value)}
+                placeholder={isArabic ? 'أو أدخل الاسم يدويًا' : 'Or type printer name manually'}
+                className="mt-2 h-9 w-full"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-2"
+                onClick={() =>
+                  void runPrinterTest(kitchenDefaultPrinterName, 'kitchen')
+                }
+              >
+                {isArabic ? 'اختبار طابعة المطبخ' : 'Test Kitchen Printer'}
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-5 w-full">
+            <div className="mb-2 text-sm font-medium text-zinc-500">
+              {isArabic
+                ? 'توجيه فئات المطبخ (الفئة - الطابعة)'
+                : 'Kitchen category routing (Category - Printer)'}
+            </div>
+            <div className="max-h-[260px] overflow-y-auto rounded-md border border-mainBorder">
+              {(categoriesData?.data || []).map((category: any) => {
+                const categoryId = String(category?.id || '');
+                const categoryName = String(category?.name || categoryId);
+                return (
+                  <div
+                    key={categoryId}
+                    className="grid grid-cols-12 items-center gap-2 border-b border-mainBorder/50 p-2 last:border-b-0"
+                  >
+                    <div className="col-span-6 text-sm font-medium text-mainText">
+                      {categoryName}
+                    </div>
+                    <div className="col-span-6">
+                      <select
+                        value={kitchenCategoryRouting[categoryId] || ''}
+                        onChange={(e) => {
+                          const nextPrinter = e.target.value;
+                          setKitchenCategoryRouting((prev) => {
+                            const next = { ...prev };
+                            if (!nextPrinter) {
+                              delete next[categoryId];
+                            } else {
+                              next[categoryId] = nextPrinter;
+                            }
+                            return next;
+                          });
+                        }}
+                        className="h-9 w-full rounded-md border border-mainBorder bg-white px-2 text-xs outline-none"
+                      >
+                        <option value="">
+                          {isArabic ? 'استخدم طابعة المطبخ الافتراضية' : 'Use kitchen default'}
+                        </option>
+                        {availablePrinters.map((printer) => (
+                          <option key={printer} value={printer}>
+                            {printer}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <Button type="button" onClick={savePosPrintingSettings}>
+              {isArabic ? 'حفظ إعدادات طباعة نقطة البيع' : 'Save POS Print Settings'}
+            </Button>
           </div>
         </div>
 

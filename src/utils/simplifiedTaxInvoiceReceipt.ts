@@ -46,15 +46,41 @@ export type SimplifiedTaxInvoiceReceiptInput = {
   qrCodeDataUrl: string;
 };
 
-const QZ_TRAY_SCRIPT_URL = 'https://cdn.jsdelivr.net/npm/qz-tray@2.2.4/qz-tray.js';
+const QZ_TRAY_SCRIPT_URL = 'https://cdn.jsdelivr.net/npm/qz-tray@2.2.5/qz-tray.js';
 const POS_QZ_ENABLED_KEY = 'pos_qz_enabled';
 const POS_QZ_PRINTER_NAME_KEY = 'pos_qz_printer_name';
+const POS_KITCHEN_DEFAULT_PRINTER_NAME_KEY = 'pos_kitchen_default_printer_name';
+const POS_KITCHEN_CATEGORY_ROUTING_KEY = 'pos_kitchen_category_routing';
 let qzScriptLoadingPromise: Promise<any> | null = null;
 let isQzSecurityConfigured = false;
 let cachedQzPrinterName = '';
-const QZ_CONNECT_TIMEOUT_MS = 4500;
-const QZ_QUERY_TIMEOUT_MS = 4500;
-const QZ_PRINT_TIMEOUT_MS = 7000;
+let qzConnectPromise: Promise<void> | null = null;
+const QZ_CONNECT_TIMEOUT_MS = 12000;
+const QZ_QUERY_TIMEOUT_MS = 20000;
+const QZ_PRINT_TIMEOUT_MS = 20000;
+
+export type KitchenTicketItem = {
+  id?: string | number;
+  name?: string;
+  qty?: number;
+  quantity?: number;
+  note?: string;
+  category_id?: string | number;
+  category_name?: string;
+  category?: { id?: string | number; name?: string };
+};
+
+export type QzDiagnosticsResult = {
+  hasQzObject: boolean;
+  connected: boolean;
+  defaultPrinter: string;
+  discoveredPrinters: string[];
+  loadMs: number;
+  connectMs: number;
+  defaultMs: number;
+  findMs: number;
+  notes: string[];
+};
 
 export function escapeHtml(value: unknown): string {
   return String(value || '')
@@ -492,13 +518,7 @@ async function printWithQzTray(
   );
   configureQzTraySecurity(qz);
 
-  if (!qz.websocket?.isActive?.()) {
-    await withTimeout(
-      qz.websocket.connect({ retries: 1, delay: 0 }),
-      QZ_CONNECT_TIMEOUT_MS,
-      'QZ_TIMEOUT_CONNECT'
-    );
-  }
+  await ensureQzConnected(qz);
 
   const preferredPrinter =
     options?.qzPrinterName ||
@@ -552,13 +572,7 @@ export async function warmupQzTrayConnection(): Promise<void> {
   );
   configureQzTraySecurity(qz);
 
-  if (!qz.websocket?.isActive?.()) {
-    await withTimeout(
-      qz.websocket.connect({ retries: 1, delay: 0 }),
-      QZ_CONNECT_TIMEOUT_MS,
-      'QZ_TIMEOUT_CONNECT'
-    );
-  }
+  await ensureQzConnected(qz);
 
   const configuredPrinter =
     typeof window !== 'undefined'
@@ -569,18 +583,445 @@ export async function warmupQzTrayConnection(): Promise<void> {
     return;
   }
 
-  const defaultPrinter = await resolveDefaultQzPrinter(qz);
-  if (defaultPrinter) {
-    cachedQzPrinterName = defaultPrinter;
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(POS_QZ_PRINTER_NAME_KEY, defaultPrinter);
+  try {
+    const defaultPrinter = await resolveDefaultQzPrinter(qz);
+    if (defaultPrinter) {
+      cachedQzPrinterName = defaultPrinter;
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(POS_QZ_PRINTER_NAME_KEY, defaultPrinter);
+      }
     }
+  } catch {
+    // Do not fail warmup if printer discovery is slow/unavailable.
   }
+}
+
+export async function listQzPrinters(): Promise<string[]> {
+  const qz = await withTimeout(
+    ensureQzTrayClient(),
+    QZ_CONNECT_TIMEOUT_MS,
+    'QZ_TIMEOUT_LOAD'
+  );
+  configureQzTraySecurity(qz);
+  await ensureQzConnected(qz);
+
+  const discovered = new Set<string>();
+
+  try {
+    const result = await withTimeout(
+      qz.printers.find(),
+      QZ_QUERY_TIMEOUT_MS,
+      'QZ_TIMEOUT_PRINTER'
+    );
+    if (Array.isArray(result)) {
+      result.forEach((name) => {
+        const normalized = String(name || '').trim();
+        if (normalized) discovered.add(normalized);
+      });
+    } else {
+      const single = String(result || '').trim();
+      if (single) discovered.add(single);
+    }
+  } catch {
+    // ignore and continue with details/default fallbacks
+  }
+
+  try {
+    const details = await withTimeout(
+      qz.printers.details(),
+      QZ_QUERY_TIMEOUT_MS,
+      'QZ_TIMEOUT_PRINTER'
+    );
+    const list = Array.isArray(details) ? details : [details];
+    list.forEach((entry: any) => {
+      const candidate =
+        String(entry?.name || entry?.printerName || entry?.deviceName || '').trim();
+      if (candidate) discovered.add(candidate);
+    });
+  } catch {
+    // optional API on some environments
+  }
+
+  try {
+    const defaultPrinter = await resolveDefaultQzPrinter(qz);
+    if (defaultPrinter) discovered.add(defaultPrinter);
+  } catch {
+    // ignore
+  }
+
+  return Array.from(discovered);
+}
+
+function isQzAlreadyConnectedError(error: any): boolean {
+  const raw = String(error?.message || error || '').toLowerCase();
+  return (
+    raw.includes('open connection with qz tray already exists') ||
+    raw.includes('already exists')
+  );
+}
+
+function isQzTimeoutConnectError(error: any): boolean {
+  const raw = String(error?.message || error || '');
+  return raw.includes('QZ_TIMEOUT_CONNECT');
+}
+
+function isQzTimeoutPrintError(error: any): boolean {
+  const raw = String(error?.message || error || '');
+  return raw.includes('QZ_TIMEOUT_PRINT');
+}
+
+async function waitForQzActiveSocket(
+  qz: any,
+  options?: { totalMs?: number; stepMs?: number }
+): Promise<boolean> {
+  const totalMs = Math.max(0, Number(options?.totalMs || 2500));
+  const stepMs = Math.max(100, Number(options?.stepMs || 250));
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < totalMs) {
+    if (qz.websocket?.isActive?.()) return true;
+    await new Promise<void>((resolve) => window.setTimeout(resolve, stepMs));
+  }
+  return Boolean(qz.websocket?.isActive?.());
+}
+
+async function ensureQzConnected(qz: any): Promise<void> {
+  if (qz.websocket?.isActive?.()) return;
+  if (qzConnectPromise) {
+    await qzConnectPromise;
+    return;
+  }
+
+  qzConnectPromise = (async () => {
+    if (!qz?.websocket?.connect) {
+      throw new Error('QZ_WEBSOCKET_UNAVAILABLE');
+    }
+
+    const attempts = 3;
+
+    let lastError: any = null;
+    for (let index = 0; index < attempts; index += 1) {
+      try {
+        if (qz.websocket?.isActive?.()) return;
+        if (index > 0) {
+          try {
+            await withTimeout(
+              Promise.resolve(qz.websocket?.disconnect?.()),
+              2000,
+              'QZ_TIMEOUT_DISCONNECT'
+            );
+          } catch {
+            // best effort cleanup before retrying another connection strategy
+          }
+        }
+        await withTimeout(
+          qz.websocket.connect(),
+          QZ_CONNECT_TIMEOUT_MS,
+          'QZ_TIMEOUT_CONNECT'
+        );
+        if (qz.websocket?.isActive?.()) return;
+      } catch (error) {
+        if (isQzAlreadyConnectedError(error)) return;
+        if (isQzTimeoutConnectError(error)) {
+          const becameActive = await waitForQzActiveSocket(qz, {
+            totalMs: 3000,
+            stepMs: 250,
+          });
+          if (becameActive) return;
+        }
+        lastError = error;
+      }
+    }
+
+    throw lastError || new Error('QZ_TIMEOUT_CONNECT');
+  })();
+
+  try {
+    await qzConnectPromise;
+  } finally {
+    qzConnectPromise = null;
+  }
+}
+
+export function getKitchenCategoryRoutingFromStorage(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+  const raw = String(
+    window.localStorage.getItem(POS_KITCHEN_CATEGORY_ROUTING_KEY) || ''
+  ).trim();
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (!parsed || typeof parsed !== 'object') return {};
+    const normalized: Record<string, string> = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      const k = String(key || '').trim().toLowerCase();
+      const v = String(value || '').trim();
+      if (!k || !v) continue;
+      normalized[k] = v;
+    }
+    return normalized;
+  } catch {
+    return {};
+  }
+}
+
+function resolveKitchenPrinterForItem(
+  item: KitchenTicketItem,
+  routing: Record<string, string>,
+  defaultPrinterName: string
+): string {
+  const rawCategoryId =
+    item?.category_id ??
+    item?.category?.id ??
+    '';
+  const rawCategoryName =
+    item?.category_name ??
+    item?.category?.name ??
+    '';
+  const categoryId = String(rawCategoryId || '').trim().toLowerCase();
+  const categoryName = String(rawCategoryName || '').trim().toLowerCase();
+
+  return (
+    routing[categoryId] ||
+    routing[categoryName] ||
+    defaultPrinterName
+  );
+}
+
+function buildKitchenTicketRawText(options: {
+  reference: string;
+  businessDate: string;
+  printerLabel: string;
+  items: KitchenTicketItem[];
+}): string {
+  const lines: string[] = [];
+  lines.push('\x1B\x40');
+  lines.push('*** KITCHEN ORDER ***');
+  lines.push(`Printer: ${options.printerLabel}`);
+  lines.push(`Ref: ${options.reference || '-'}`);
+  lines.push(`Time: ${new Date(options.businessDate).toLocaleString()}`);
+  lines.push('------------------------------');
+  for (const item of options.items) {
+    const qty = Number(item?.qty ?? item?.quantity ?? 0);
+    const qtyLabel = Number.isFinite(qty) && qty > 0 ? qty : 1;
+    const name = String(item?.name || '-');
+    lines.push(`${qtyLabel} x ${name}`);
+    const note = String(item?.note || '').trim();
+    if (note) lines.push(`  Note: ${note}`);
+  }
+  lines.push('------------------------------');
+  lines.push('\n\n\n');
+  lines.push('\x1D\x56\x41\x03');
+  return lines.join('\n');
+}
+
+export async function printKitchenTicketsByCategory(options: {
+  items: KitchenTicketItem[];
+  reference?: string;
+  businessDate?: string;
+  suppressToastOnError?: boolean;
+}): Promise<{ printedCount: number; groupedPrinters: string[] }> {
+  const enabled =
+    typeof window !== 'undefined'
+      ? window.localStorage.getItem(POS_QZ_ENABLED_KEY) !== '0'
+      : true;
+  if (!enabled) return { printedCount: 0, groupedPrinters: [] };
+
+  const routing = getKitchenCategoryRoutingFromStorage();
+  const defaultPrinterName =
+    typeof window !== 'undefined'
+      ? String(
+          window.localStorage.getItem(POS_KITCHEN_DEFAULT_PRINTER_NAME_KEY) || ''
+        ).trim()
+      : '';
+  if (!defaultPrinterName && Object.keys(routing).length === 0) {
+    return { printedCount: 0, groupedPrinters: [] };
+  }
+
+  const grouped = new Map<string, KitchenTicketItem[]>();
+  for (const item of options.items || []) {
+    const printerName = resolveKitchenPrinterForItem(item, routing, defaultPrinterName);
+    if (!printerName) continue;
+    const current = grouped.get(printerName) || [];
+    current.push(item);
+    grouped.set(printerName, current);
+  }
+
+  if (grouped.size === 0) return { printedCount: 0, groupedPrinters: [] };
+
+  const qz = await withTimeout(
+    ensureQzTrayClient(),
+    QZ_CONNECT_TIMEOUT_MS,
+    'QZ_TIMEOUT_LOAD'
+  );
+  configureQzTraySecurity(qz);
+  await ensureQzConnected(qz);
+
+  let printedCount = 0;
+  const printers = Array.from(grouped.keys());
+  for (const printerName of printers) {
+    const rawText = buildKitchenTicketRawText({
+      reference: String(options.reference || ''),
+      businessDate: String(options.businessDate || new Date().toISOString()),
+      printerLabel: printerName,
+      items: grouped.get(printerName) || [],
+    });
+
+    const config = qz.configs.create(printerName);
+    await withTimeout(
+      qz.print(config, [{ type: 'raw', format: 'plain', data: rawText }]),
+      QZ_PRINT_TIMEOUT_MS,
+      'QZ_TIMEOUT_PRINT'
+    );
+    printedCount += 1;
+  }
+
+  return { printedCount, groupedPrinters: printers };
+}
+
+export async function testPrintOnQzPrinter(options: {
+  printerName: string;
+  title?: string;
+}): Promise<void> {
+  const printerName = String(options.printerName || '').trim();
+  if (!printerName) {
+    throw new Error('QZ_NO_PRINTER_NAME');
+  }
+
+  const qz = await withTimeout(
+    ensureQzTrayClient(),
+    QZ_CONNECT_TIMEOUT_MS,
+    'QZ_TIMEOUT_LOAD'
+  );
+  configureQzTraySecurity(qz);
+  await ensureQzConnected(qz);
+
+  const config = qz.configs.create(printerName);
+  const now = new Date().toLocaleString();
+
+  // First try RAW for thermal-compatible printers.
+  const rawPayload = [
+    '\x1B\x40',
+    String(options.title || 'QZ TEST'),
+    `Printer: ${printerName}`,
+    `Time: ${now}`,
+    '------------------------------',
+    'QZ direct print test succeeded.',
+    '\n\n',
+  ].join('\n');
+
+  try {
+    await withTimeout(
+      qz.print(config, [{ type: 'raw', format: 'plain', data: rawPayload }]),
+      QZ_PRINT_TIMEOUT_MS,
+      'QZ_TIMEOUT_PRINT'
+    );
+    return;
+  } catch (error) {
+    // For office/laser printers RAW may stall; fallback to HTML test page.
+    const htmlFallback = `
+      <div style="font-family:Arial,sans-serif;padding:12px;">
+        <h3 style="margin:0 0 8px 0;">${escapeHtml(String(options.title || 'QZ TEST'))}</h3>
+        <div>Printer: ${escapeHtml(printerName)}</div>
+        <div>Time: ${escapeHtml(now)}</div>
+        <hr />
+        <div>QZ direct print test succeeded.</div>
+      </div>
+    `;
+    if (!isQzTimeoutPrintError(error)) {
+      throw error;
+    }
+    await withTimeout(
+      qz.print(config, [{ type: 'html', format: 'plain', data: htmlFallback }]),
+      QZ_PRINT_TIMEOUT_MS,
+      'QZ_TIMEOUT_PRINT'
+    );
+  }
+}
+
+export async function runQzDiagnostics(): Promise<QzDiagnosticsResult> {
+  const notes: string[] = [];
+  const result: QzDiagnosticsResult = {
+    hasQzObject: false,
+    connected: false,
+    defaultPrinter: '',
+    discoveredPrinters: [],
+    loadMs: 0,
+    connectMs: 0,
+    defaultMs: 0,
+    findMs: 0,
+    notes,
+  };
+
+  const loadStart = Date.now();
+  try {
+    const qz = await withTimeout(
+      ensureQzTrayClient(),
+      5000,
+      'QZ_TIMEOUT_LOAD'
+    );
+    result.loadMs = Date.now() - loadStart;
+    result.hasQzObject = Boolean(qz);
+
+    const connectStart = Date.now();
+    try {
+      await ensureQzConnected(qz);
+      result.connected = true;
+    } catch (error: any) {
+      notes.push(`connect: ${String(error?.message || error || 'unknown')}`);
+    } finally {
+      result.connectMs = Date.now() - connectStart;
+    }
+
+    const defaultStart = Date.now();
+    try {
+      result.defaultPrinter = await resolveDefaultQzPrinter(qz);
+      if (!result.defaultPrinter) {
+        notes.push('default: empty');
+      }
+    } catch (error: any) {
+      notes.push(`default: ${String(error?.message || error || 'unknown')}`);
+    } finally {
+      result.defaultMs = Date.now() - defaultStart;
+    }
+
+    const findStart = Date.now();
+    try {
+      const rawFind = await withTimeout(
+        qz.printers.find(),
+        QZ_QUERY_TIMEOUT_MS,
+        'QZ_TIMEOUT_FIND'
+      );
+      if (Array.isArray(rawFind)) {
+        result.discoveredPrinters = rawFind
+          .map((item) => String(item || '').trim())
+          .filter(Boolean);
+      } else {
+        const single = String(rawFind || '').trim();
+        result.discoveredPrinters = single ? [single] : [];
+      }
+      if (!result.discoveredPrinters.length) {
+        notes.push('find: empty list');
+      }
+    } catch (error: any) {
+      notes.push(`find: ${String(error?.message || error || 'unknown')}`);
+    } finally {
+      result.findMs = Date.now() - findStart;
+    }
+  } catch (error: any) {
+    result.loadMs = Date.now() - loadStart;
+    notes.push(`load: ${String(error?.message || error || 'unknown')}`);
+  }
+
+  return result;
 }
 
 function notifyQzPrintIssue(error: any): void {
   const raw = String(error?.message || error || '');
   const normalized = raw.toLowerCase();
+  const isArabicUi =
+    typeof document !== 'undefined' &&
+    (document?.documentElement?.dir === 'rtl' ||
+      document?.documentElement?.lang?.toLowerCase().startsWith('ar'));
   const hasNoPrinter =
     raw.includes('QZ_NO_PRINTER') ||
     normalized.includes('default qz printer') ||
@@ -590,10 +1031,16 @@ function notifyQzPrintIssue(error: any): void {
     normalized.includes('timeout') ||
     normalized.includes('timed out');
   const description = hasNoPrinter
-    ? 'QZ Tray is connected, but no printer is configured. Fallback to browser print.'
+    ? isArabicUi
+      ? 'QZ Tray متصل، لكن لا توجد طابعة مهيأة. سيتم الرجوع لطباعة المتصفح.'
+      : 'QZ Tray is connected, but no printer is configured. Fallback to browser print.'
     : hasTimeout
-    ? 'QZ Tray did not respond in time. Fallback to browser print.'
-    : 'Direct QZ print failed. Fallback to browser print.';
+    ? isArabicUi
+      ? 'QZ Tray لم يستجب في الوقت المحدد. سيتم الرجوع لطباعة المتصفح.'
+      : 'QZ Tray did not respond in time. Fallback to browser print.'
+    : isArabicUi
+      ? 'فشلت الطباعة المباشرة عبر QZ. سيتم الرجوع لطباعة المتصفح.'
+      : 'Direct QZ print failed. Fallback to browser print.';
 
   toast({
     description,
@@ -664,10 +1111,15 @@ function configureQzTraySecurity(qz: any): void {
     return;
   }
 
-  // Development-friendly defaults: if signed certificates are not configured yet,
-  // fallback print path still exists and QZ errors are handled by caller.
-  qz.security.setCertificatePromise(() => Promise.resolve(''));
-  qz.security.setSignaturePromise(() => () => Promise.resolve(''));
+  // Development-friendly unsigned flow (matches QZ sample behavior).
+  // This should show a manageable "allow" prompt in QZ instead of hard failures.
+  qz.security.setCertificatePromise((resolve: (cert?: string) => void) => resolve());
+  if (typeof qz.security.setSignatureAlgorithm === 'function') {
+    qz.security.setSignatureAlgorithm('SHA512');
+  }
+  qz.security.setSignaturePromise(() => {
+    return (resolve: (signature?: string) => void) => resolve();
+  });
   isQzSecurityConfigured = true;
 }
 
@@ -677,9 +1129,14 @@ function openAndPrintWithBrowser(
 ) {
   const printWindow = window.open('', '_blank', 'width=420,height=720');
   if (!printWindow) {
+    const isArabicUi =
+      typeof document !== 'undefined' &&
+      (document?.documentElement?.dir === 'rtl' ||
+        document?.documentElement?.lang?.toLowerCase().startsWith('ar'));
     toast({
-      description:
-        'Browser blocked the print window. Please allow pop-ups for this site.',
+      description: isArabicUi
+        ? 'المتصفح منع نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة لهذا الموقع.'
+        : 'Browser blocked the print window. Please allow pop-ups for this site.',
       duration: 3000,
       variant: 'destructive',
     });
