@@ -702,6 +702,16 @@ export const IndividualInvoicesAdd: React.FC<
             ? {
                 ...cartItem,
                 qty: Number(cartItem.qty || 0) + incrementBy,
+                category_id:
+                  cartItem.category_id ??
+                  product?.category_id ??
+                  product?.category?.id ??
+                  '',
+                category_name:
+                  cartItem.category_name ??
+                  product?.category_name ??
+                  product?.category?.name ??
+                  '',
                 stock_quantity:
                   resolvedStock !== undefined && resolvedStock !== null
                     ? resolvedStock
@@ -725,6 +735,14 @@ export const IndividualInvoicesAdd: React.FC<
             discount_value: 0,
             discount_type: 'fixed',
             discount_amount: 0,
+            category_id:
+              product?.category_id ??
+              product?.category?.id ??
+              '',
+            category_name:
+              product?.category_name ??
+              product?.category?.name ??
+              '',
             ...(resolvedStock !== undefined && resolvedStock !== null
               ? { stock_quantity: resolvedStock }
               : {}),
