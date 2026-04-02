@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setCardItem } from '@/store/slices/cardItems';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import CurrencyAmount from '../CurrencyAmount';
 
 export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
   const cardItemValue = useSelector((state: any) => state.cardItems.value);
@@ -54,7 +55,7 @@ export const ShopCardTable: React.FC<ShopCardTableProps> = () => {
                 </td>
                 <td className="py-7 w-1/3">
                   <div className="flex justify-center">
-                    SR {Number(item.price) * Number(item.qty)}
+                    <CurrencyAmount value={Number(item.price) * Number(item.qty)} />
                   </div>
                 </td>
                 <td>

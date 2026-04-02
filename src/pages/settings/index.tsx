@@ -496,7 +496,7 @@ export default function Settings() {
                 }));
               }}
               defaultValue={
-                updateAll?.receipt_header?.includes('Dot')
+                updateAll?.receipt_header?.includes('Zood')
                   ? 'Welcome'
                   : updateAll?.receipt_header
               }

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { currencyFormated } from '../utils/currencyFormated';
 import { useQueries } from '@tanstack/react-query';
 import axiosInstance from '@/api/interceptors';
+import CurrencyAmount from './custom/CurrencyAmount';
 type PeriodFilter = 'day' | 'week' | 'month';
 
 function DashSalesCard({
@@ -71,28 +72,22 @@ function DashSalesCard({
     {
       filter: 'day' as PeriodFilter,
       label: t('DAY'),
-      value: currencyFormated(
-        Number(activeFilter === 'day' ? activeFilterTotal : fetchedTotals.day)
-      ),
+      value: Number(activeFilter === 'day' ? activeFilterTotal : fetchedTotals.day),
       isLoading: activeFilter === 'day' ? false : missingLoadingState.day,
       skeletonChars: getSkeletonChars(activeFormattedTotal.length),
     },
     {
       filter: 'week' as PeriodFilter,
       label: t('WEEK'),
-      value: currencyFormated(
-        Number(activeFilter === 'week' ? activeFilterTotal : fetchedTotals.week)
-      ),
+      value: Number(activeFilter === 'week' ? activeFilterTotal : fetchedTotals.week),
       isLoading: activeFilter === 'week' ? false : missingLoadingState.week,
       skeletonChars: getSkeletonChars(activeFormattedTotal.length),
     },
     {
       filter: 'month' as PeriodFilter,
       label: t('MONTH'),
-      value: currencyFormated(
-        Number(
-          activeFilter === 'month' ? activeFilterTotal : fetchedTotals.month
-        )
+      value: Number(
+        activeFilter === 'month' ? activeFilterTotal : fetchedTotals.month
       ),
       isLoading: activeFilter === 'month' ? false : missingLoadingState.month,
       skeletonChars: getSkeletonChars(activeFormattedTotal.length),
@@ -103,13 +98,13 @@ function DashSalesCard({
         {
           filter: 'range',
           label: customRangeLabel || 'Selected Range',
-          value: currencyFormated(Number(totalRevent)),
+          value: Number(totalRevent),
           isLoading: false,
           skeletonChars: getSkeletonChars(activeFormattedTotal.length),
         },
       ]
     : defaultPeriodTotals;
-  const newTotalRevent = currencyFormated(Number(totalRevent));
+  const newTotalRevent = Number(totalRevent);
   return (
     <>
       <div className={`flex flex-col rounded-none `}>
@@ -145,8 +140,7 @@ function DashSalesCard({
                   isRtl ? 'text-left' : 'text-right'
                 }`}
               >
-                {/* SR {totalRevent?.toFixed(2)} */}
-                SR {newTotalRevent}
+                <CurrencyAmount value={newTotalRevent} />
               </div>
             </div>
           </div>
@@ -173,7 +167,9 @@ function DashSalesCard({
                       style={{ width: `${period.skeletonChars}ch` }}
                     />
                   ) : (
-                    <div className="font-semibold">SR {period.value}</div>
+                    <div className="font-semibold">
+                      <CurrencyAmount value={period.value} />
+                    </div>
                   )}
                 </div>
                 <div className="object-contain mt-5 w-full aspect-[333.33] bg-slate-200 " />

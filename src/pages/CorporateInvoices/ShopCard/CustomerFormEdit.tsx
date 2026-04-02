@@ -195,13 +195,13 @@ const CustomerFormEdit = () => {
                   value={currencyFormated(item?.pivot?.unit_price || 0)}
                   // value={item?.pivot?.unit_price || 0}
                   label={t('PRICE')}
-                  iconSrcLeft="SR"
+                  iconSrcLeft="﷼"
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                 />
                 <IconInput
                   label={t('TOTAL')}
                   inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
-                  iconSrcLeft="SR"
+                  iconSrcLeft="﷼"
                   // value={item?.pivot?.unit_price * item?.pivot?.quantity || 0}
                   value={currencyFormated(
                     item?.pivot?.unit_price * item?.pivot?.quantity || 0

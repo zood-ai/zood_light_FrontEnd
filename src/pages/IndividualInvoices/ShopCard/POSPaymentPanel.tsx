@@ -19,16 +19,20 @@ import {
 } from '@/components/ui/alert-dialog2';
 import XIcons from '@/components/Icons/XIcons';
 import { Input } from '@/components/ui/input';
-import { Plus, Pencil, X, HelpCircle, LogOut, Trash2, RotateCcw } from 'lucide-react';
+import { Plus, Pencil, X, HelpCircle, Keyboard, LogOut, Trash2, RotateCcw } from 'lucide-react';
 import SH_LOGO from '@/assets/SH_LOGO.svg';
 import Cookies from 'js-cookie';
 import {
   buildReceiptCompanyContext,
   buildSimplifiedTaxInvoiceHtml,
+  mapApiOrderToReceiptInput,
   openAndPrintSimplifiedTaxInvoice,
   resolveReceiptQrDataUrl,
+  warmupQzTrayConnection,
   type ReceiptLineItem,
 } from '@/utils/simplifiedTaxInvoiceReceipt';
+import { formatNumber } from '@/utils/numberFormat';
+import CurrencyAmount from '@/components/custom/CurrencyAmount';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useOfflineOrdersSummary } from '@/hooks/useOfflineOrdersSummary';
 import { enqueueOfflineOrder, syncPendingOrders } from '@/lib/offline/outbox';
@@ -68,6 +72,8 @@ export default function POSPaymentPanel() {
   const [draftValue, setDraftValue] = useState('0');
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const submitOrderInFlightRef = useRef(false);
+  const paidAmountPulseRef = useRef<HTMLDivElement | null>(null);
+  const paidAmountAnimationRef = useRef<Animation | null>(null);
   const [lastSuccessItems, setLastSuccessItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [completedOrderData, setCompletedOrderData] = useState<any>(null);
@@ -75,6 +81,7 @@ export default function POSPaymentPanel() {
   const [isPreparingPrintQr, setIsPreparingPrintQr] = useState(false);
   const [autoPrintTriggered, setAutoPrintTriggered] = useState(false);
   const [showWhatsappDialog, setShowWhatsappDialog] = useState(false);
+  const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const [whatsappPhoneInput, setWhatsappPhoneInput] = useState('');
   const [isCreateCustomerOpen, setIsCreateCustomerOpen] = useState(false);
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
@@ -83,6 +90,7 @@ export default function POSPaymentPanel() {
   const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false);
   const [isLoadingRefundOrders, setIsLoadingRefundOrders] = useState(false);
   const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
+  const [isPrintingRefund, setIsPrintingRefund] = useState(false);
   const [refundOrders, setRefundOrders] = useState<RefundOrder[]>([]);
   const [refundSearch, setRefundSearch] = useState('');
   const [selectedRefundOrderId, setSelectedRefundOrderId] = useState('');
@@ -222,6 +230,10 @@ export default function POSPaymentPanel() {
     dispatch(updateField({ field: 'tax_exclusive_discount_amount', value: totals.tax }));
     dispatch(updateField({ field: 'total_price', value: totals.total }));
   }, [dispatch, totals.subtotal, totals.tax, totals.total]);
+
+  useEffect(() => {
+    void warmupQzTrayConnection().catch(() => {});
+  }, []);
 
   useEffect(() => {
     const firstBranchId = branchesData?.data?.[0]?.id;
@@ -677,6 +689,132 @@ export default function POSPaymentPanel() {
     }
   };
 
+  const handleContinueAfterCompletion = useCallback(() => {
+    const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
+    try {
+      window.localStorage.removeItem(`pos_current_cart_v1_${branchId || 'default'}`);
+    } catch {
+      // ignore
+    }
+    dispatch(setCardItem([]));
+    dispatch(resetOrder());
+    navigate('/zood-dashboard/individual-invoices/add');
+  }, [dispatch, navigate, orderSchema?.branch_id]);
+
+  useEffect(() => {
+    const isTypingTarget = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      if (target.isContentEditable) return true;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+        return true;
+      }
+      return Boolean(target.closest('[contenteditable="true"]'));
+    };
+
+    const handlePaymentShortcuts = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      const isTyping = isTypingTarget(event.target);
+
+      if (!event.ctrlKey && !event.altKey && !event.metaKey && event.key === 'F1') {
+        event.preventDefault();
+        setIsShortcutsHelpOpen(true);
+        return;
+      }
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        if (showWhatsappDialog) {
+          setShowWhatsappDialog(false);
+          return;
+        }
+        if (isCreateCustomerOpen) {
+          setIsCreateCustomerOpen(false);
+          return;
+        }
+        if (isRefundDialogOpen) {
+          setIsRefundDialogOpen(false);
+          return;
+        }
+        if (completedOrderData) {
+          handleContinueAfterCompletion();
+          return;
+        }
+        navigate('/zood-dashboard/individual-invoices/add');
+        return;
+      }
+
+      const canConfirmPayment =
+        !completedOrderData &&
+        !isCreateCustomerOpen &&
+        !isRefundDialogOpen &&
+        !showWhatsappDialog &&
+        !isTyping;
+
+      if (event.ctrlKey && !event.altKey && !event.metaKey && event.key === 'Enter') {
+        if (!canConfirmPayment) return;
+        event.preventDefault();
+        void submitOrder();
+        return;
+      }
+
+      if (!event.ctrlKey && !event.altKey && !event.metaKey && canConfirmPayment) {
+        if (event.key === 'F7') {
+          event.preventDefault();
+          addQuickAmount(10);
+          return;
+        }
+        if (event.key === 'F8') {
+          event.preventDefault();
+          addQuickAmount(20);
+          return;
+        }
+        if (event.key === 'F9') {
+          event.preventDefault();
+          addQuickAmount(50);
+          return;
+        }
+        if (event.key === 'Backspace' || event.key.toLowerCase() === 'x') {
+          event.preventDefault();
+          backspaceAmount();
+          return;
+        }
+        if (event.key === 'Delete' || event.key.toLowerCase() === 'c') {
+          event.preventDefault();
+          setDraftValue('0');
+          upsertActivePayment(0);
+          return;
+        }
+        if (/^[0-9]$/.test(event.key) || event.key === '.') {
+          event.preventDefault();
+          appendDigit(event.key);
+          return;
+        }
+      }
+
+      if (event.ctrlKey || event.altKey || event.metaKey || isTyping) return;
+
+      if (event.key === 'F4' && canConfirmPayment) {
+        event.preventDefault();
+        void submitOrder();
+      }
+    };
+
+    window.addEventListener('keydown', handlePaymentShortcuts);
+    return () => window.removeEventListener('keydown', handlePaymentShortcuts);
+  }, [
+    addQuickAmount,
+    appendDigit,
+    backspaceAmount,
+    completedOrderData,
+    handleContinueAfterCompletion,
+    isCreateCustomerOpen,
+    isRefundDialogOpen,
+    navigate,
+    showWhatsappDialog,
+    submitOrder,
+    upsertActivePayment,
+  ]);
+
   const normalizeWhatsappPhone = (rawPhone: string) => {
     let digits = rawPhone.replace(/[^\d]/g, '');
     if (!digits) return '';
@@ -845,6 +983,35 @@ export default function POSPaymentPanel() {
     return () => clearTimeout(timer);
   }, [completedOrderData, autoPrintTriggered, isPreparingPrintQr]);
 
+  useEffect(() => {
+    const amountEl = paidAmountPulseRef.current;
+    if (!completedOrderData || !amountEl || typeof amountEl.animate !== 'function') {
+      return;
+    }
+
+    paidAmountAnimationRef.current?.cancel();
+    const animation = amountEl.animate(
+      [
+        { transform: 'scale(0.985)' },
+        { transform: 'scale(1.02)' },
+        { transform: 'scale(0.985)' },
+      ],
+      {
+        duration: 1600,
+        iterations: Infinity,
+        easing: 'ease-in-out',
+      }
+    );
+    paidAmountAnimationRef.current = animation;
+
+    return () => {
+      animation.cancel();
+      if (paidAmountAnimationRef.current === animation) {
+        paidAmountAnimationRef.current = null;
+      }
+    };
+  }, [completedOrderData]);
+
   const handleSendWhatsapp = () => {
     if (!completedOrderData) return;
     const rawPhone =
@@ -869,7 +1036,7 @@ export default function POSPaymentPanel() {
     const message = encodeURIComponent(
       isArabic
         ? `رقم الفاتورة: ${invoiceNumber}\nالإجمالي: ${totalValue} ر.س\nشكرا لزيارتكم`
-        : `Invoice: ${invoiceNumber}\nTotal: SR ${totalValue}\nThank you`
+        : `Invoice: ${invoiceNumber}\nTotal: ﷼ ${totalValue}\nThank you`
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   };
@@ -897,7 +1064,7 @@ export default function POSPaymentPanel() {
     const message = encodeURIComponent(
       isArabic
         ? `رقم الفاتورة: ${invoiceNumber}\nالإجمالي: ${totalValue} ر.س\nشكرا لزيارتكم`
-        : `Invoice: ${invoiceNumber}\nTotal: SR ${totalValue}\nThank you`
+        : `Invoice: ${invoiceNumber}\nTotal: ﷼ ${totalValue}\nThank you`
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
     setShowWhatsappDialog(false);
@@ -922,10 +1089,144 @@ export default function POSPaymentPanel() {
     URL.revokeObjectURL(url);
   };
 
-  const formattedPaid = Number(totalPaid || 0).toFixed(2).split('.');
-  const paidInteger = formattedPaid[0];
-  const paidDecimal = formattedPaid[1];
+  const groupedPaid = formatNumber(totalPaid, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const [paidInteger, paidDecimal = '00'] = groupedPaid.split('.');
   const canSubmitWhatsapp = isValidWhatsappPhone(whatsappPhoneInput);
+
+  const shortcutsHelpModal = isShortcutsHelpOpen ? (
+    <div
+      className="fixed inset-0 z-[95] flex items-center justify-center bg-black/40 p-4"
+      onClick={() => setIsShortcutsHelpOpen(false)}
+    >
+      <div
+        className="w-full max-w-3xl rounded-2xl border border-mainBorder bg-white p-5 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-mainText">
+            {isRtl ? 'اختصارات لوحة المفاتيح' : 'Keyboard Shortcuts'}
+          </h3>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-9 px-3"
+            onClick={() => setIsShortcutsHelpOpen(false)}
+          >
+            {t('CLOSE')}
+          </Button>
+        </div>
+        <div className="grid gap-3 text-sm text-mainText md:grid-cols-2">
+          <div className="rounded-lg border border-mainBorder bg-gray-50 p-3">
+            <div className="mb-2 text-xs font-bold text-secText">
+              {isRtl ? 'شاشة البيع' : 'POS Sales Screen'}
+            </div>
+            <div className="space-y-1.5">
+              <div><span className="font-semibold">F1</span> - {isRtl ? 'عرض الاختصارات' : 'Open shortcuts help'}</div>
+              <div><span className="font-semibold">Ctrl + F</span> - {isRtl ? 'تركيز البحث' : 'Focus product search'}</div>
+              <div><span className="font-semibold">Ctrl + E</span> - {isRtl ? 'فتح تعديل الصنف المحدد' : 'Open selected item edit'}</div>
+              <div><span className="font-semibold">Enter / F2</span> - {isRtl ? 'الذهاب للدفع' : 'Proceed to payment'}</div>
+              <div><span className="font-semibold">+</span> - {isRtl ? 'زيادة الكمية' : 'Increase selected item qty'}</div>
+              <div><span className="font-semibold">-</span> - {isRtl ? 'تقليل الكمية' : 'Decrease selected item qty'}</div>
+              <div><span className="font-semibold">Delete</span> - {isRtl ? 'حذف العنصر المحدد' : 'Delete selected cart item'}</div>
+              <div><span className="font-semibold">Ctrl + 1 / 2 / 3</span> - {isRtl ? 'اختيار كمية / سعر / خصم أثناء تعديل الصنف' : 'Select qty / price / discount in item edit'}</div>
+              <div><span className="font-semibold">0-9 / . / Backspace / Delete</span> - {isRtl ? 'إدخال الأرقام في شاشة تعديل الصنف' : 'Numeric edit input in item edit mode'}</div>
+              <div><span className="font-semibold">F7 / F8 / F9</span> - {isRtl ? '+10 / +20 / +50 في تعديل الصنف' : '+10 / +20 / +50 in item edit'}</div>
+              <div><span className="font-semibold">C / X</span> - {isRtl ? 'مسح كامل / حذف رقم واحد' : 'Clear all / delete one digit'}</div>
+              <div><span className="font-semibold">Esc</span> - {isRtl ? 'إلغاء تعديل الصنف' : 'Cancel item edit (no save)'}</div>
+            </div>
+          </div>
+          <div className="rounded-lg border border-mainBorder bg-gray-50 p-3">
+            <div className="mb-2 text-xs font-bold text-secText">
+              {isRtl ? 'شاشة الدفع' : 'Payment Screen'}
+            </div>
+            <div className="space-y-1.5">
+              <div><span className="font-semibold">F1</span> - {isRtl ? 'عرض الاختصارات' : 'Open shortcuts help'}</div>
+              <div><span className="font-semibold">Ctrl + Enter / F4</span> - {isRtl ? 'تأكيد الدفع' : 'Confirm payment'}</div>
+              <div><span className="font-semibold">0-9 / . / Backspace / Delete</span> - {isRtl ? 'إدخال مبلغ الدفع' : 'Payment numpad input'}</div>
+              <div><span className="font-semibold">F7 / F8 / F9</span> - {isRtl ? '+10 / +20 / +50 في الدفع' : '+10 / +20 / +50 in payment'}</div>
+              <div><span className="font-semibold">C / X</span> - {isRtl ? 'مسح كامل / حذف رقم واحد' : 'Clear all / delete one digit'}</div>
+              <div><span className="font-semibold">Esc</span> - {isRtl ? 'رجوع أو إغلاق النافذة' : 'Back or close modal'}</div>
+            </div>
+          </div>
+          <div className="rounded-lg border border-mainBorder bg-gray-50 p-3 md:col-span-2">
+            <div className="mb-2 text-xs font-bold text-secText">
+              {isRtl ? 'بعد اكتمال الدفع' : 'After Payment Complete'}
+            </div>
+            <div className="grid gap-1.5 md:grid-cols-2">
+              <div><span className="font-semibold">Enter</span> - {isRtl ? 'متابعة' : 'Continue'}</div>
+              <div><span className="font-semibold">Esc</span> - {isRtl ? 'متابعة' : 'Continue'}</div>
+              <div><span className="font-semibold">Ctrl + P</span> - {isRtl ? 'طباعة' : 'Print receipt'}</div>
+              <div><span className="font-semibold">Ctrl + D</span> - {isRtl ? 'تنزيل الإيصال' : 'Download receipt'}</div>
+              <div><span className="font-semibold">Ctrl + M</span> - {isRtl ? 'إرسال واتساب' : 'Send WhatsApp'}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  useEffect(() => {
+    if (!completedOrderData) return;
+
+    const isTypingTarget = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      if (target.isContentEditable) return true;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+        return true;
+      }
+      return Boolean(target.closest('[contenteditable="true"]'));
+    };
+
+    const handleCompletedScreenShortcuts = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      const isTyping = isTypingTarget(event.target);
+      const keyLower = event.key.toLowerCase();
+      const code = event.code;
+
+      if (!event.ctrlKey && !event.altKey && !event.metaKey && event.key === 'Enter' && !isTyping) {
+        event.preventDefault();
+        handleContinueAfterCompletion();
+        return;
+      }
+
+      if (!event.ctrlKey || event.altKey || event.metaKey || isTyping) return;
+
+      const isPrintShortcut = keyLower === 'p' || code === 'KeyP';
+      if (isPrintShortcut) {
+        event.preventDefault();
+        if (!isPreparingPrintQr) {
+          void handlePrintReceipt();
+        }
+        return;
+      }
+
+      const isDownloadShortcut = keyLower === 'd' || code === 'KeyD';
+      if (isDownloadShortcut) {
+        event.preventDefault();
+        void handleDownloadReceipt();
+        return;
+      }
+
+      const isWhatsappShortcut = keyLower === 'm' || code === 'KeyM';
+      if (isWhatsappShortcut) {
+        event.preventDefault();
+        handleSendWhatsapp();
+      }
+    };
+
+    window.addEventListener('keydown', handleCompletedScreenShortcuts);
+    return () => window.removeEventListener('keydown', handleCompletedScreenShortcuts);
+  }, [
+    completedOrderData,
+    handleContinueAfterCompletion,
+    handleDownloadReceipt,
+    handlePrintReceipt,
+    handleSendWhatsapp,
+    isPreparingPrintQr,
+  ]);
 
   const saveCustomer = async () => {
     const payloadName = newCustomerForm.name.trim();
@@ -1128,6 +1429,71 @@ export default function POSPaymentPanel() {
     }
   };
 
+  const handlePrintSelectedRefund = async () => {
+    if (!selectedRefundOrderId || isPrintingRefund) return;
+    try {
+      setIsPrintingRefund(true);
+      const response = await axiosInstance.get(
+        `/orders?filter[id]=${selectedRefundOrderId}`,
+        { timeout: 10000 }
+      );
+      const orderData =
+        response?.data?.data?.[0] ??
+        refundOrders.find((order) => String(order?.id || '') === selectedRefundOrderId);
+      if (!orderData) {
+        showToast({
+          description: t('GENERAL_ERROR'),
+          duration: 2200,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      let invoiceIsoDate = new Date().toISOString();
+      try {
+        if (orderData?.business_date) {
+          invoiceIsoDate = new Date(orderData.business_date).toISOString();
+        }
+      } catch {
+        // keep default
+      }
+
+      const sellerName = String(
+        allSettings?.settings?.data?.business_name ||
+          allSettings?.WhoAmI?.business?.name ||
+          'Store'
+      );
+      const vatNumber = String(
+        allSettings?.settings?.data?.business_tax_number ||
+          allSettings?.WhoAmI?.business?.tax_registration_number ||
+          ''
+      );
+      const totalStr = Number(orderData?.total_price ?? 0).toFixed(2);
+      const taxStr = Number(orderData?.total_taxes ?? 0).toFixed(2);
+      const qrDataUrl = await resolveReceiptQrDataUrl({
+        qrcodeRaw: String(orderData?.qrcode || ''),
+        sellerName,
+        vatNumber,
+        invoiceIsoDate,
+        totalAmount: totalStr,
+        taxAmount: taxStr,
+      });
+
+      const ctx = buildReceiptCompanyContext(allSettings, settingsData);
+      const input = mapApiOrderToReceiptInput(orderData, ctx, isArabic, qrDataUrl);
+      const html = buildSimplifiedTaxInvoiceHtml(input);
+      openAndPrintSimplifiedTaxInvoice(html);
+    } catch {
+      showToast({
+        description: t('GENERAL_ERROR'),
+        duration: 2500,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsPrintingRefund(false);
+    }
+  };
+
   const formatRefundOrderDate = (order: RefundOrder) => {
     const raw = order?.business_date || order?.created_at;
     if (!raw) return '-';
@@ -1229,7 +1595,10 @@ export default function POSPaymentPanel() {
       >
         <div className="w-full max-w-[980px] text-center">
           <h2 className="text-4xl font-bold text-[#0F172A]">{t('AMOUNT_PAID')}</h2>
-          <div className="mt-8 text-[170px] font-bold leading-none tracking-tight text-[#0B132F]">
+          <div
+            ref={paidAmountPulseRef}
+            className="pointer-events-none mt-8 text-[96px] font-bold leading-none tracking-tight text-[#0B132F] will-change-transform sm:text-[130px] lg:text-[170px]"
+          >
             {paidInteger}
             <span className="text-[#7E8393]">.{paidDecimal}</span>
           </div>
@@ -1273,17 +1642,7 @@ export default function POSPaymentPanel() {
             <Button
               type="button"
               className="h-16 rounded-xl text-xl font-bold"
-              onClick={() => {
-                const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
-                try {
-                  window.localStorage.removeItem(`pos_current_cart_v1_${branchId || 'default'}`);
-                } catch {
-                  // ignore
-                }
-                dispatch(setCardItem([]));
-                dispatch(resetOrder());
-                navigate('/zood-dashboard/individual-invoices/add');
-              }}
+              onClick={handleContinueAfterCompletion}
             >
               {t('CONTINUE')}
             </Button>
@@ -1342,6 +1701,7 @@ export default function POSPaymentPanel() {
             </div>
           </div>
         )}
+        {shortcutsHelpModal}
       </div>
     );
   }
@@ -1380,24 +1740,28 @@ export default function POSPaymentPanel() {
                   <div className="flex-1">
                     <div className="font-medium text-mainText">{item.name}</div>
                     <div className="text-xs text-secText">
-                      {item.qty} x {Number(item.price || 0).toFixed(2)}
+                      {item.qty} x {formatNumber(item.price || 0)}
                       {Number(item.discount_amount) > 0 && (
                         <span className="mx-1 rounded bg-emerald-50 px-1 text-[10px] font-bold text-emerald-600">
-                          -{Number(item.discount_amount).toFixed(2)}
+                          -{formatNumber(item.discount_amount)}
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-0.5">
                     <div className="font-bold text-mainText">
-                      SR {(
-                        (Number(item.price || 0) * Number(item.qty || 0)) - 
-                        (Number(item.discount_amount || 0) * Number(item.qty || 0))
-                      ).toFixed(2)}
+                      <CurrencyAmount
+                        value={
+                          Number(item.price || 0) * Number(item.qty || 0) -
+                          Number(item.discount_amount || 0) * Number(item.qty || 0)
+                        }
+                      />
                     </div>
                     {Number(item.discount_amount) > 0 && (
                       <div className="text-[10px] text-secText line-through decoration-red-400">
-                        SR {(Number(item.price || 0) * Number(item.qty || 0)).toFixed(2)}
+                        <CurrencyAmount
+                          value={Number(item.price || 0) * Number(item.qty || 0)}
+                        />
                       </div>
                     )}
                   </div>
@@ -1412,19 +1776,27 @@ export default function POSPaymentPanel() {
             <div className="mb-4 space-y-1.5 px-1">
               <div className="flex justify-between text-sm text-gray-500 font-medium">
                 <span>{t('SUBTOTAL')}</span>
-                <span>{totals.subtotal.toFixed(2)}</span>
+                <span>
+                  <CurrencyAmount value={totals.subtotal} />
+                </span>
               </div>
               <div className="flex justify-between text-sm text-gray-500 font-medium">
                 <span>{t('DISCOUNT')}</span>
-                <span>{Number(orderSchema?.discount_amount || 0).toFixed(2)}</span>
+                <span>
+                  <CurrencyAmount value={orderSchema?.discount_amount || 0} />
+                </span>
               </div>
               <div className="flex justify-between text-sm text-gray-500 font-medium">
                 <span>{t('TAX')}</span>
-                <span>{totals.tax.toFixed(2)}</span>
+                <span>
+                  <CurrencyAmount value={totals.tax} />
+                </span>
               </div>
               <div className="flex justify-between text-lg font-bold text-mainText pt-2 border-t border-dashed border-gray-200">
                 <span>{t('TOTAL')}</span>
-                <span>{totals.total.toFixed(2)}</span>
+                <span>
+                  <CurrencyAmount value={totals.total} />
+                </span>
               </div>
             </div>
 
@@ -1484,6 +1856,15 @@ export default function POSPaymentPanel() {
                 title={t('HELP_TOUR')}
               >
                 <HelpCircle className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsShortcutsHelpOpen(true)}
+                className="h-8 w-8 text-secText hover:bg-main/10 hover:text-main"
+                title="F1"
+              >
+                <Keyboard className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -1641,7 +2022,7 @@ export default function POSPaymentPanel() {
                   <div className="flex shrink-0 flex-col items-center justify-center p-6 text-center">
                     <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{t('TOTAL')}</div>
                     <div className="text-[5rem] font-bold text-[#5D5FEF] leading-none tracking-tighter">
-                      {totals.total.toFixed(2)}
+                      {formatNumber(totals.total)}
                     </div>
                   </div>
 
@@ -1651,17 +2032,17 @@ export default function POSPaymentPanel() {
                         {/* Paid */}
                         <div className="flex flex-col items-center justify-center p-3">
                           <span className="text-[10px] font-bold text-emerald-600 uppercase mb-1">{t('PAID')}</span>
-                          <span className="text-base font-bold text-emerald-600" dir="ltr">{totalPaid.toFixed(2)}</span>
+                          <span className="text-base font-bold text-emerald-600" dir="ltr">{formatNumber(totalPaid)}</span>
                         </div>
                         {/* Remaining */}
                         <div className="flex flex-col items-center justify-center p-3">
                           <span className="text-[10px] font-bold text-red-500 uppercase mb-1">{t('REMAINING')}</span>
-                          <span className="text-base font-bold text-red-500" dir="ltr">{remaining.toFixed(2)}</span>
+                          <span className="text-base font-bold text-red-500" dir="ltr">{formatNumber(remaining)}</span>
                         </div>
                         {/* Change */}
                         <div className="flex flex-col items-center justify-center p-3">
                           <span className="text-[10px] font-bold text-blue-600 uppercase mb-1">{t('CHANGE')}</span>
-                          <span className="text-base font-bold text-blue-600" dir="ltr">{change.toFixed(2)}</span>
+                          <span className="text-base font-bold text-blue-600" dir="ltr">{formatNumber(change)}</span>
                         </div>
                     </div>
                   </div>
@@ -1673,7 +2054,7 @@ export default function POSPaymentPanel() {
                           <div key={i} className="flex shrink-0 items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-3 shadow-sm">
                               <span className="font-semibold text-gray-700">{p.name}</span>
                               <div className="flex items-center gap-2">
-                                <span className="font-bold text-gray-900" dir="ltr">{Number(p.amount).toFixed(2)}</span>
+                                <span className="font-bold text-gray-900" dir="ltr">{formatNumber(p.amount)}</span>
                                 <button 
                                   onClick={(e) => {
                                       e.stopPropagation();
@@ -1903,7 +2284,7 @@ export default function POSPaymentPanel() {
                           {order?.customer?.name || t('CUSTOMER')}
                         </span>
                         <span className="font-bold text-mainText" dir="ltr">
-                          SR {Number(order?.total_price || 0).toFixed(2)}
+                          <CurrencyAmount value={order?.total_price || 0} />
                         </span>
                       </div>
                     </button>
@@ -1921,6 +2302,20 @@ export default function POSPaymentPanel() {
                 }}
               >
                 {t('CANCEL')}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={
+                  !selectedRefundOrderId ||
+                  isPrintingRefund ||
+                  isLoadingRefundOrders ||
+                  isSubmittingRefund
+                }
+                loading={isPrintingRefund}
+                onClick={() => void handlePrintSelectedRefund()}
+              >
+                {isPrintingRefund ? t('LOADING') : t('PRINT')}
               </Button>
               <Button
                 type="button"
@@ -1944,6 +2339,7 @@ export default function POSPaymentPanel() {
           </div>
         </div>
       )}
+      {shortcutsHelpModal}
     </div>
   );
 }

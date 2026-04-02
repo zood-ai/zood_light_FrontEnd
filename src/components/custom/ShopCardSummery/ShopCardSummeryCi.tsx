@@ -20,6 +20,7 @@ import axios from 'axios';
 import axiosInstance from '@/api/interceptors';
 import { paymentmethod } from '@/constant/constant';
 import { useTranslation } from 'react-i18next';
+import CurrencyAmount from '../CurrencyAmount';
 
 export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
   payment,
@@ -251,12 +252,11 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                   <div className="flex flex-col w-full text-sm font-medium text-right whitespace-nowrap max-md:mt-10">
                     <div className="flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {(
+                        <CurrencyAmount value={(
                           fetchedData?.subtotal_price ??
                           Math.floor(subTotal * 100) / 100
-                        ).toFixed(2)}
+                        )} />
                       </div>
-                      <div className="self-start text-zinc-500">SR</div>
                     </div>
                     <IconInput
                       className="flex-grow mt-4"
@@ -275,7 +275,7 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                       }
                       inputClassName={'w-full flex-grow '}
                       // label="ضريبة القيمة المضافة"
-                      iconSrcLeft={'SR'}
+                      iconSrcLeft={'﷼'}
                       value={Number(
                         Number(
                           params.id
@@ -288,14 +288,13 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
                     {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {Number(
+                        <CurrencyAmount value={Number(
                           (
                             fetchedData?.total_taxes ??
                             Math.floor(Number(taxAmount) * 100) / 100
                           )?.toFixed(2)
-                        )}
+                        )} />
                       </div>
-                      <div className="text-zinc-500">SR</div>
                     </div>
                   </div>
                 </div>
@@ -315,9 +314,9 @@ export const ShopCardSummeryCi: React.FC<ShopCardSummeryProps> = ({
             <div className=" flex gap-5 justify-between self-stretch mt-3 px-2 w-full text-sm text-right text-zinc-800 max-md:max-w-full">
               <div className="font-medium">{t('TOTAL_AMOUNT')}</div>
               <div className="font-bold">
-                SR{' '}
-                {fetchedData?.total_price?.toFixed(2) ??
-                  totalAmountIncludeAndExclude?.toFixed(2)}
+                <CurrencyAmount
+                  value={fetchedData?.total_price ?? totalAmountIncludeAndExclude}
+                />
               </div>
             </div>
             <>

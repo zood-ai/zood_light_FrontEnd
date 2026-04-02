@@ -364,13 +364,13 @@ const CustomerFormEdit = () => {
                       handleItemChange(index, 'unit_price', rawValue);
                     }}
                     label={t('PRICE')}
-                    iconSrcLeft="SR"
+                    iconSrcLeft="﷼"
                     inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
                   />
                   <IconInput
                     label={t('TOTAL')}
                     inputClassName="w-[151px] max-w-[151px] min-w-[80px]"
-                    iconSrcLeft="SR"
+                    iconSrcLeft="﷼"
                     value={item.unit_price * item.quantity || 0}
                     disabled
                   />

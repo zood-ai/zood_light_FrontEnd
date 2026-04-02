@@ -38,6 +38,7 @@ import {
   Pencil,
   X,
   HelpCircle,
+  Keyboard,
   RotateCcw,
   Lock,
   Delete,
@@ -57,6 +58,16 @@ import {
   syncCatalogIndexIfDue,
   upsertProductIndexFromApiProducts,
 } from '@/lib/offline/catalogIndex';
+import {
+  buildReceiptCompanyContext,
+  buildSimplifiedTaxInvoiceHtml,
+  mapApiOrderToReceiptInput,
+  openAndPrintSimplifiedTaxInvoice,
+  resolveReceiptQrDataUrl,
+  warmupQzTrayConnection,
+} from '@/utils/simplifiedTaxInvoiceReceipt';
+import { formatNumber } from '@/utils/numberFormat';
+import CurrencyAmount from '@/components/custom/CurrencyAmount';
 
 const CATEGORY_COLOR_PALETTE = [
   { bg: '#BDEAE8', border: '#A2D7D4', activeBg: '#A6D9D5', activeBorder: '#86C6C1' },
@@ -116,7 +127,8 @@ const getCategoryStyle = (category: string) => {
 export const IndividualInvoicesAdd: React.FC<
   IndividualInvoicesAddProps
 > = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.dir() === 'rtl';
   const [isOpen, setIsOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -164,6 +176,7 @@ export const IndividualInvoicesAdd: React.FC<
   const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false);
   const [isLoadingRefundOrders, setIsLoadingRefundOrders] = useState(false);
   const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
+  const [isPrintingRefund, setIsPrintingRefund] = useState(false);
   const [refundOrders, setRefundOrders] = useState<RefundOrder[]>([]);
   const [refundSearch, setRefundSearch] = useState('');
   const [selectedRefundOrderId, setSelectedRefundOrderId] = useState('');
@@ -172,6 +185,7 @@ export const IndividualInvoicesAdd: React.FC<
     open: boolean;
     barcode: string;
   }>({ open: false, barcode: '' });
+  const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const [isCreateProductOpen, setIsCreateProductOpen] = useState(false);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [isBarcodeLookupLoading, setIsBarcodeLookupLoading] = useState(false);
@@ -247,6 +261,10 @@ export const IndividualInvoicesAdd: React.FC<
   }, [queryClient]);
 
   useEffect(() => {
+    void warmupQzTrayConnection().catch(() => {});
+  }, []);
+
+  useEffect(() => {
     void syncCatalogIndexIfDue();
   }, []);
 
@@ -293,6 +311,8 @@ export const IndividualInvoicesAdd: React.FC<
   const barcodeQueueRef = useRef<string[]>([]);
   const pendingCountByBarcodeRef = useRef<Map<string, number>>(new Map());
   const rawBarcodeByKeyRef = useRef<Map<string, string>>(new Map());
+  const productSearchInputRef = useRef<HTMLInputElement | null>(null);
+  const barcodeInputRef = useRef<HTMLInputElement | null>(null);
   const parsedScaleBarcodeMetaRef = useRef<
     Map<
       string,
@@ -2052,6 +2072,73 @@ export const IndividualInvoicesAdd: React.FC<
     }
   };
 
+  const handlePrintSelectedRefund = async () => {
+    if (!selectedRefundOrderId || isPrintingRefund) return;
+    try {
+      setIsPrintingRefund(true);
+      const response = await axiosInstance.get(
+        `/orders?filter[id]=${selectedRefundOrderId}`,
+        { timeout: 10000 }
+      );
+      const orderData =
+        response?.data?.data?.[0] ??
+        refundOrders.find((order) => String(order?.id || '') === selectedRefundOrderId);
+      if (!orderData) {
+        showToast({
+          description: t('GENERAL_ERROR'),
+          duration: 2200,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      let invoiceIsoDate = new Date().toISOString();
+      try {
+        if (orderData?.business_date) {
+          invoiceIsoDate = new Date(orderData.business_date).toISOString();
+        }
+      } catch {
+        // keep default
+      }
+
+      const sellerName = String(
+        allSettings?.settings?.data?.business_name ||
+          allSettings?.WhoAmI?.business?.name ||
+          'Store'
+      );
+      const vatNumber = String(
+        allSettings?.settings?.data?.business_tax_number ||
+          allSettings?.WhoAmI?.business?.tax_registration_number ||
+          ''
+      );
+      const totalStr = Number(orderData?.total_price ?? 0).toFixed(2);
+      const taxStr = Number(orderData?.total_taxes ?? 0).toFixed(2);
+      const qrDataUrl = await resolveReceiptQrDataUrl({
+        qrcodeRaw: String(orderData?.qrcode || ''),
+        sellerName,
+        vatNumber,
+        invoiceIsoDate,
+        totalAmount: totalStr,
+        taxAmount: taxStr,
+      });
+
+      const isArabic =
+        i18n.resolvedLanguage?.startsWith('ar') || i18n.language?.startsWith('ar');
+      const ctx = buildReceiptCompanyContext(allSettings, settingsData);
+      const input = mapApiOrderToReceiptInput(orderData, ctx, isArabic, qrDataUrl);
+      const html = buildSimplifiedTaxInvoiceHtml(input);
+      openAndPrintSimplifiedTaxInvoice(html);
+    } catch {
+      showToast({
+        description: t('GENERAL_ERROR'),
+        duration: 2500,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsPrintingRefund(false);
+    }
+  };
+
   const formatRefundOrderDate = (order: RefundOrder) => {
     const raw = order?.business_date || order?.created_at;
     if (!raw) return '-';
@@ -2085,16 +2172,27 @@ export const IndividualInvoicesAdd: React.FC<
 
       if (newItemElement) {
         newItemElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        setSelectedCartItemId(lastNewId);
       } else {
         cartListRef.current.scrollTo({
           top: cartListRef.current.scrollHeight,
           behavior: 'smooth',
         });
+        setSelectedCartItemId(lastNewId);
       }
     }
 
+    if (currentIds.length === 0) {
+      setSelectedCartItemId(null);
+    } else if (
+      selectedCartItemId &&
+      !currentIds.includes(String(selectedCartItemId))
+    ) {
+      setSelectedCartItemId(currentIds[currentIds.length - 1]);
+    }
+
     prevCartIdsRef.current = currentIds;
-  }, [cardItemValue]);
+  }, [cardItemValue, selectedCartItemId]);
 
   useEffect(() => {
     products.forEach((product: any) => {
@@ -2114,6 +2212,7 @@ export const IndividualInvoicesAdd: React.FC<
     };
 
     const handleGlobalScanner = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
       if (event.ctrlKey || event.altKey || event.metaKey) return;
 
       if (event.key === 'Enter') {
@@ -2148,6 +2247,213 @@ export const IndividualInvoicesAdd: React.FC<
       }
     };
   }, [enqueueBarcode]);
+
+  useEffect(() => {
+    const canFocusBarcode =
+      !isEditItemOpen &&
+      !isOpen &&
+      !isCreateTagOpen &&
+      !isCreateProductOpen &&
+      !isCreateCustomerOpen &&
+      !isRefundDialogOpen &&
+      !barcodeSuggestion.open &&
+      !isLocked;
+
+    if (!canFocusBarcode) return;
+
+    const focusTimer = window.setTimeout(() => {
+      barcodeInputRef.current?.focus();
+      barcodeInputRef.current?.select();
+    }, 40);
+
+    return () => window.clearTimeout(focusTimer);
+  }, [
+    barcodeSuggestion.open,
+    isCreateCustomerOpen,
+    isCreateProductOpen,
+    isCreateTagOpen,
+    isEditItemOpen,
+    isLocked,
+    isOpen,
+    isRefundDialogOpen,
+  ]);
+
+  useEffect(() => {
+    const isTypingTarget = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      if (target.isContentEditable) return true;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+        return true;
+      }
+      return Boolean(target.closest('[contenteditable="true"]'));
+    };
+
+    const handlePosShortcut = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      const keyLower = event.key.toLowerCase();
+      const isTyping = isTypingTarget(event.target);
+
+      if (!event.ctrlKey && !event.altKey && !event.metaKey && event.key === 'F1') {
+        event.preventDefault();
+        setIsShortcutsHelpOpen(true);
+        return;
+      }
+
+      if (event.ctrlKey && !event.altKey && !event.metaKey && keyLower === 'f') {
+        event.preventDefault();
+        productSearchInputRef.current?.focus();
+        productSearchInputRef.current?.select();
+        return;
+      }
+
+      if (
+        event.ctrlKey &&
+        !event.altKey &&
+        !event.metaKey &&
+        keyLower === 'e' &&
+        !isEditItemOpen &&
+        !isTyping
+      ) {
+        event.preventDefault();
+        const activeItem =
+          selectedCartItemId
+            ? cardItemValue.find((item: any) => String(item.id) === String(selectedCartItemId))
+            : cardItemValue[cardItemValue.length - 1];
+        if (activeItem) {
+          openEditItemModal(activeItem);
+        }
+        return;
+      }
+
+      if (isEditItemOpen && event.key === 'Escape') {
+        event.preventDefault();
+        setIsEditItemOpen(false);
+        setEditingItem(null);
+        return;
+      }
+
+      if (isEditItemOpen && editingItem && !isTyping) {
+        if (event.ctrlKey && !event.altKey && !event.metaKey) {
+          if (event.key === '1') {
+            event.preventDefault();
+            setActiveField('qty');
+            return;
+          }
+          if (event.key === '2') {
+            event.preventDefault();
+            setActiveField('price');
+            return;
+          }
+          if (event.key === '3') {
+            event.preventDefault();
+            setActiveField('discount_value');
+            return;
+          }
+        }
+
+        if (event.key === 'F7') {
+          event.preventDefault();
+          handleNumpadInput('+10');
+          return;
+        }
+        if (event.key === 'F8') {
+          event.preventDefault();
+          handleNumpadInput('+20');
+          return;
+        }
+        if (event.key === 'F9') {
+          event.preventDefault();
+          handleNumpadInput('+50');
+          return;
+        }
+
+        if (keyLower === 'c') {
+          event.preventDefault();
+          handleNumpadInput('clear');
+          return;
+        }
+        if (keyLower === 'x') {
+          event.preventDefault();
+          handleNumpadInput('backspace');
+          return;
+        }
+
+        if (event.key === 'Backspace') {
+          event.preventDefault();
+          handleNumpadInput('backspace');
+          return;
+        }
+
+        if (event.key === 'Delete') {
+          event.preventDefault();
+          handleNumpadInput('clear');
+          return;
+        }
+
+        if (/^[0-9]$/.test(event.key) || event.key === '.') {
+          event.preventDefault();
+          handleNumpadInput(event.key);
+          return;
+        }
+      }
+
+      if (event.ctrlKey || event.altKey || event.metaKey) return;
+
+      const canProceedToPayment = event.key === 'F2' || (event.key === 'Enter' && !isTyping);
+      if (canProceedToPayment) {
+        event.preventDefault();
+        if (isEditItemOpen && editingItem) {
+          handleSaveEditItem();
+          return;
+        }
+        if (cardItemValue.length === 0) return;
+        navigate('shop-card');
+        return;
+      }
+
+      if (isTyping || isEditItemOpen) return;
+
+      const activeCartItemId =
+        selectedCartItemId && cardItemValue.some((item: any) => String(item.id) === String(selectedCartItemId))
+          ? String(selectedCartItemId)
+          : cardItemValue.length > 0
+            ? String(cardItemValue[cardItemValue.length - 1].id)
+            : null;
+
+      if (!activeCartItemId) return;
+
+      if (event.key === 'Delete') {
+        event.preventDefault();
+        removeCartItem(activeCartItemId);
+        return;
+      }
+
+      if (event.key === '+' || event.key === '=') {
+        event.preventDefault();
+        adjustCartItemQty(activeCartItemId, 1);
+        return;
+      }
+
+      if (event.key === '-') {
+        event.preventDefault();
+        adjustCartItemQty(activeCartItemId, -1);
+      }
+    };
+
+    window.addEventListener('keydown', handlePosShortcut);
+    return () => window.removeEventListener('keydown', handlePosShortcut);
+  }, [
+    adjustCartItemQty,
+    cardItemValue,
+    editingItem,
+    handleNumpadInput,
+    handleSaveEditItem,
+    isEditItemOpen,
+    navigate,
+    removeCartItem,
+    setActiveField,
+    selectedCartItemId,
+  ]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -2482,7 +2788,9 @@ export const IndividualInvoicesAdd: React.FC<
                     <div className="truncate text-mainText">
                       <span className="font-semibold">{orderLabel}</span>
                       <span className="mx-1 text-secText">-</span>
-                      <span>SR {Number(order.total || 0).toFixed(2)}</span>
+                      <span>
+                        <CurrencyAmount value={order.total || 0} />
+                      </span>
                     </div>
                     <div className="flex items-center gap-1">
                       <button
@@ -2541,11 +2849,11 @@ export const IndividualInvoicesAdd: React.FC<
                         </span>
                         <span className="text-secText/60">x</span>
                         <span className="font-semibold text-main">
-                          SR {Number(item.price || 0).toFixed(2)}
+                          <CurrencyAmount value={item.price || 0} />
                         </span>
                         {item.discount_amount > 0 && (
                           <span className="rounded bg-emerald-50 px-1 font-semibold text-emerald-600">
-                             -{Number(item.discount_amount).toFixed(2)}
+                             -{formatNumber(item.discount_amount)}
                           </span>
                         )}
                       </div>
@@ -2553,14 +2861,18 @@ export const IndividualInvoicesAdd: React.FC<
 
                     <div className="text-right flex flex-col items-end shrink-0 ms-2">
                        <div className="text-sm font-bold text-mainText">
-                          SR {(
-                            (Number(item.price || 0) * Number(item.qty || 0)) - 
-                            (Number(item.discount_amount || 0) * Number(item.qty || 0))
-                          ).toFixed(2)}
+                          <CurrencyAmount
+                            value={
+                              Number(item.price || 0) * Number(item.qty || 0) -
+                              Number(item.discount_amount || 0) * Number(item.qty || 0)
+                            }
+                          />
                        </div>
                        {item.discount_amount > 0 && (
                          <div className="text-[10px] text-secText line-through decoration-red-400 decoration-1">
-                           SR {(Number(item.price || 0) * Number(item.qty || 0)).toFixed(2)}
+                          <CurrencyAmount
+                            value={Number(item.price || 0) * Number(item.qty || 0)}
+                          />
                          </div>
                        )}
                     </div>
@@ -2600,7 +2912,7 @@ export const IndividualInvoicesAdd: React.FC<
               <div className="flex items-center justify-between py-1">
                 <span className="text-secText">{t('SUBTOTAL')}</span>
                 <span className="font-medium">
-                  SR {subtotalAmount.toFixed(2)}
+                  <CurrencyAmount value={subtotalAmount} />
                 </span>
               </div>
               <div className="flex items-center justify-between gap-2 py-1.5">
@@ -2616,7 +2928,7 @@ export const IndividualInvoicesAdd: React.FC<
                           : 'text-gray-500 hover:bg-gray-50'
                       }`}
                     >
-                      SR
+                      ﷼
                     </button>
                     <div className="h-full w-[1px] bg-mainBorder" />
                     <button
@@ -2642,7 +2954,7 @@ export const IndividualInvoicesAdd: React.FC<
                       setDiscountValue(val);
                     }}
                     className="!h-10 !w-full rounded-lg border-mainBorder bg-white px-3 text-right text-sm font-semibold tabular-nums shadow-sm focus:ring-1 focus:ring-main/20"
-                    placeholder={discountType === 'percent' ? '%' : 'SR'}
+                    placeholder={discountType === 'percent' ? '%' : '﷼'}
                   />
                 </div>
               </div>
@@ -2650,12 +2962,16 @@ export const IndividualInvoicesAdd: React.FC<
                 <span className="text-secText">
                   {t('TAX')} {vatRate}%
                 </span>
-                <span className="font-medium">SR {vatAmount.toFixed(2)}</span>
+                <span className="font-medium">
+                  <CurrencyAmount value={vatAmount} />
+                </span>
               </div>
               <div className="my-1 border-t border-mainBorder/50" />
               <div className="flex items-center justify-between py-1">
                 <span className="font-semibold">{t('TOTAL_AMOUNT')}</span>
-                <span className="font-bold">SR {grandTotal.toFixed(2)}</span>
+                <span className="font-bold">
+                  <CurrencyAmount value={grandTotal} />
+                </span>
               </div>
             </div>
             <Button
@@ -2664,13 +2980,14 @@ export const IndividualInvoicesAdd: React.FC<
               onClick={() => {
                 if (isEditItemOpen && editingItem) {
                   handleSaveEditItem();
+                  return;
                 }
                 navigate('shop-card');
               }}
-              disabled={cardItemValue.length === 0}
+              disabled={!isEditItemOpen && cardItemValue.length === 0}
               className="mt-2 h-12 w-full text-base font-semibold"
             >
-              {t('POS_PROCEED_PAYMENT')}
+              {isEditItemOpen ? t('RETURN') : t('POS_PROCEED_PAYMENT')}
             </Button>
           </div>
         </div>
@@ -2724,10 +3041,10 @@ export const IndividualInvoicesAdd: React.FC<
                                   ? '0'
                                   : editingItem.price
                               )
-                            : Number(editingItem?.price ?? 0).toFixed(2)}
+                            : formatNumber(editingItem?.price ?? 0)}
                         </span>
                         <span className="text-sm font-bold opacity-60 shrink-0">
-                          {t('SAR', 'SR')}
+                          {t('SAR', '﷼')}
                         </span>
                       </div>
                     </button>
@@ -2749,7 +3066,7 @@ export const IndividualInvoicesAdd: React.FC<
                           {editingItem?.discount_value || 0}
                         </span>
                         <span className="text-sm font-bold opacity-60">
-                          {editingItem?.discount_type === 'percent' ? '%' : t('SAR', 'SR')}
+                          {editingItem?.discount_type === 'percent' ? '%' : t('SAR', '﷼')}
                         </span>
                       </div>
                     </button>
@@ -2767,7 +3084,7 @@ export const IndividualInvoicesAdd: React.FC<
                              : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
                          }`}
                        >
-                         {t('SAR', 'SR')}
+                         {t('SAR', '﷼')}
                        </button>
                        <button
                          type="button"
@@ -2846,16 +3163,19 @@ export const IndividualInvoicesAdd: React.FC<
                       >
                         {t('UNIT_PRICE')}:{' '}
                         <span className="font-bold text-main">
-                          SR{' '}
-                          {editingItem?._activeField === 'price'
-                            ? String(
-                                editingItem?.price === '' ||
-                                  editingItem?.price === null ||
-                                  editingItem?.price === undefined
-                                  ? '0'
-                                  : editingItem.price
-                              )
-                            : Number(editingItem?.price ?? 0).toFixed(2)}
+                          <CurrencyAmount
+                            value={
+                              editingItem?._activeField === 'price'
+                                ? String(
+                                    editingItem?.price === '' ||
+                                      editingItem?.price === null ||
+                                      editingItem?.price === undefined
+                                      ? '0'
+                                      : editingItem.price
+                                  )
+                                : editingItem?.price ?? 0
+                            }
+                          />
                         </span>
                       </div>
                       {(() => {
@@ -2910,14 +3230,21 @@ export const IndividualInvoicesAdd: React.FC<
                       
                       <div className="flex flex-col items-center w-full">
                          <div className="text-4xl font-bold text-[#5D5FEF] tracking-tight">
-                           SR {(
-                             (Number(editingItem?.price || 0) * Number(editingItem?.qty || 0)) - 
-                             (Number(editingItem?.discount_amount || 0) * Number(editingItem?.qty || 0))
-                           ).toFixed(2)}
+                           <CurrencyAmount
+                             value={
+                               Number(editingItem?.price || 0) *
+                                 Number(editingItem?.qty || 0) -
+                               Number(editingItem?.discount_amount || 0) *
+                                 Number(editingItem?.qty || 0)
+                             }
+                           />
                          </div>
                          {Number(editingItem?.discount_amount) > 0 && (
                             <div className="mt-2 rounded-lg bg-emerald-50 px-3 py-1 text-sm font-bold text-emerald-600 border border-emerald-100">
-                              {t('SAVING')} {Number(editingItem.discount_amount * editingItem.qty).toFixed(2)} SR
+                              {t('SAVING')}{' '}
+                              <CurrencyAmount
+                                value={editingItem.discount_amount * editingItem.qty}
+                              />
                             </div>
                          )}
                       </div>
@@ -2926,24 +3253,15 @@ export const IndividualInvoicesAdd: React.FC<
 
                 {/* Actions */}
                 <div className="grid grid-cols-12 gap-3">
-                   <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        removeCartItem(editingItem?.id);
-                        setIsEditItemOpen(false);
-                      }}
-                      className="col-span-4 h-[70px] rounded-xl border-red-100 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-200 font-bold text-lg bg-white"
-                    >
-                      <Trash2 className="mr-2 h-6 w-6" />
-                      {t('DELETE')}
-                    </Button>
                     <Button
                       type="button"
-                      onClick={handleSaveEditItem}
-                      className="col-span-8 h-[70px] rounded-xl bg-[#5D5FEF] text-2xl font-bold text-white shadow-lg shadow-indigo-200 hover:bg-[#4B4DDB] active:scale-[0.98]"
+                      onClick={() => {
+                        handleSaveEditItem();
+                        navigate('shop-card');
+                      }}
+                      className="col-span-12 min-h-[70px] rounded-xl bg-[#5D5FEF] px-4 py-3 text-center text-base font-bold leading-tight whitespace-normal text-white shadow-lg shadow-indigo-200 hover:bg-[#4B4DDB] active:scale-[0.98] sm:text-lg"
                     >
-                      {t('SAVE')}
+                      {t('SAVE_AND_PROCEED_PAYMENT')}
                     </Button>
                 </div>
               </div>
@@ -2953,7 +3271,13 @@ export const IndividualInvoicesAdd: React.FC<
             {/* Close Button Absolute - Left Side */}
              <button
               type="button"
-              onClick={() => setIsEditItemOpen(false)}
+              onClick={() => {
+                if (editingItem) {
+                  handleSaveEditItem();
+                  return;
+                }
+                setIsEditItemOpen(false);
+              }}
               className="absolute top-6 left-6 rounded-full bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors shadow-sm ring-1 ring-gray-100 z-10"
             >
               <X className="h-6 w-6" />
@@ -2975,6 +3299,16 @@ export const IndividualInvoicesAdd: React.FC<
                   title={t('HELP_TOUR')}
                 >
                   <HelpCircle className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsShortcutsHelpOpen(true)}
+                  className="h-11 w-11 shrink-0 rounded-none border-0 text-secText hover:bg-main/10 hover:text-main"
+                  title="F1"
+                >
+                  <Keyboard className="h-4 w-4" />
                 </Button>
                 <Button
                   type="button"
@@ -3020,6 +3354,7 @@ export const IndividualInvoicesAdd: React.FC<
                     <Search className="h-4 w-4" />
                   </div>
                   <Input
+                    ref={productSearchInputRef}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setSearchInput(e.target.value)
                     }
@@ -3051,6 +3386,7 @@ export const IndividualInvoicesAdd: React.FC<
                     <ScanBarcode className="h-4 w-4" />
                   </div>
                   <Input
+                    ref={barcodeInputRef}
                     autoFocus
                     value={barcodeInput}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -3213,7 +3549,7 @@ export const IndividualInvoicesAdd: React.FC<
                           {order?.customer?.name || t('CUSTOMER')}
                         </span>
                         <span className="font-bold text-mainText" dir="ltr">
-                          SR {Number(order?.total_price || 0).toFixed(2)}
+                          <CurrencyAmount value={order?.total_price || 0} />
                         </span>
                       </div>
                     </button>
@@ -3234,6 +3570,20 @@ export const IndividualInvoicesAdd: React.FC<
               </Button>
               <Button
                 type="button"
+                variant="outline"
+                disabled={
+                  !selectedRefundOrderId ||
+                  isPrintingRefund ||
+                  isLoadingRefundOrders ||
+                  isSubmittingRefund
+                }
+                loading={isPrintingRefund}
+                onClick={() => void handlePrintSelectedRefund()}
+              >
+                {isPrintingRefund ? t('LOADING') : t('PRINT')}
+              </Button>
+              <Button
+                type="button"
                 className="bg-destructive text-white hover:bg-destructive/90"
                 disabled={
                   !selectedRefundOrderId ||
@@ -3250,6 +3600,77 @@ export const IndividualInvoicesAdd: React.FC<
               >
                 {isSubmittingRefund ? t('POS_REFUNDING') : t('POS_REFUND_CONFIRM')}
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isShortcutsHelpOpen && (
+        <div
+          className="fixed inset-0 z-[95] flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setIsShortcutsHelpOpen(false)}
+        >
+          <div
+            className="w-full max-w-3xl rounded-2xl border border-mainBorder bg-white p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-mainText">
+                {isRtl ? 'اختصارات لوحة المفاتيح' : 'Keyboard Shortcuts'}
+              </h3>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 px-3"
+                onClick={() => setIsShortcutsHelpOpen(false)}
+              >
+                {t('CLOSE')}
+              </Button>
+            </div>
+            <div className="grid gap-3 text-sm text-mainText md:grid-cols-2">
+              <div className="rounded-lg border border-mainBorder bg-gray-50 p-3">
+                <div className="mb-2 text-xs font-bold text-secText">
+                  {isRtl ? 'شاشة البيع' : 'POS Sales Screen'}
+                </div>
+                <div className="space-y-1.5">
+                  <div><span className="font-semibold">F1</span> - {isRtl ? 'عرض الاختصارات' : 'Open shortcuts help'}</div>
+                  <div><span className="font-semibold">Ctrl + F</span> - {isRtl ? 'تركيز البحث' : 'Focus product search'}</div>
+                  <div><span className="font-semibold">Ctrl + E</span> - {isRtl ? 'فتح تعديل الصنف المحدد' : 'Open selected item edit'}</div>
+                  <div><span className="font-semibold">Enter / F2</span> - {isRtl ? 'الذهاب للدفع' : 'Proceed to payment'}</div>
+                  <div><span className="font-semibold">+</span> - {isRtl ? 'زيادة الكمية' : 'Increase selected item qty'}</div>
+                  <div><span className="font-semibold">-</span> - {isRtl ? 'تقليل الكمية' : 'Decrease selected item qty'}</div>
+                  <div><span className="font-semibold">Delete</span> - {isRtl ? 'حذف العنصر المحدد' : 'Delete selected cart item'}</div>
+                  <div><span className="font-semibold">Ctrl + 1 / 2 / 3</span> - {isRtl ? 'اختيار كمية / سعر / خصم أثناء تعديل الصنف' : 'Select qty / price / discount in item edit'}</div>
+                  <div><span className="font-semibold">0-9 / . / Backspace / Delete</span> - {isRtl ? 'إدخال الأرقام في شاشة تعديل الصنف' : 'Numeric edit input in item edit mode'}</div>
+                  <div><span className="font-semibold">F7 / F8 / F9</span> - {isRtl ? '+10 / +20 / +50 في تعديل الصنف' : '+10 / +20 / +50 in item edit'}</div>
+                  <div><span className="font-semibold">C / X</span> - {isRtl ? 'مسح كامل / حذف رقم واحد' : 'Clear all / delete one digit'}</div>
+                  <div><span className="font-semibold">Esc</span> - {isRtl ? 'إلغاء تعديل الصنف' : 'Cancel item edit (no save)'}</div>
+                </div>
+              </div>
+              <div className="rounded-lg border border-mainBorder bg-gray-50 p-3">
+                <div className="mb-2 text-xs font-bold text-secText">
+                  {isRtl ? 'شاشة الدفع' : 'Payment Screen'}
+                </div>
+                <div className="space-y-1.5">
+                  <div><span className="font-semibold">F1</span> - {isRtl ? 'عرض الاختصارات' : 'Open shortcuts help'}</div>
+                  <div><span className="font-semibold">Ctrl + Enter / F4</span> - {isRtl ? 'تأكيد الدفع' : 'Confirm payment'}</div>
+                  <div><span className="font-semibold">0-9 / . / Backspace / Delete</span> - {isRtl ? 'إدخال مبلغ الدفع' : 'Payment numpad input'}</div>
+                  <div><span className="font-semibold">F7 / F8 / F9</span> - {isRtl ? '+10 / +20 / +50 في الدفع' : '+10 / +20 / +50 in payment'}</div>
+                  <div><span className="font-semibold">C / X</span> - {isRtl ? 'مسح كامل / حذف رقم واحد' : 'Clear all / delete one digit'}</div>
+                  <div><span className="font-semibold">Esc</span> - {isRtl ? 'رجوع أو إغلاق النافذة' : 'Back or close modal'}</div>
+                </div>
+              </div>
+              <div className="rounded-lg border border-mainBorder bg-gray-50 p-3 md:col-span-2">
+                <div className="mb-2 text-xs font-bold text-secText">
+                  {isRtl ? 'بعد اكتمال الدفع' : 'After Payment Complete'}
+                </div>
+                <div className="grid gap-1.5 md:grid-cols-2">
+                  <div><span className="font-semibold">Enter</span> - {isRtl ? 'متابعة' : 'Continue'}</div>
+                  <div><span className="font-semibold">Esc</span> - {isRtl ? 'متابعة' : 'Continue'}</div>
+                  <div><span className="font-semibold">Ctrl + P</span> - {isRtl ? 'طباعة' : 'Print receipt'}</div>
+                  <div><span className="font-semibold">Ctrl + D</span> - {isRtl ? 'تنزيل الإيصال' : 'Download receipt'}</div>
+                  <div><span className="font-semibold">Ctrl + M</span> - {isRtl ? 'إرسال واتساب' : 'Send WhatsApp'}</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

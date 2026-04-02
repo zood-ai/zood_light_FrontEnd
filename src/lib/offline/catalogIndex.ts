@@ -13,6 +13,9 @@ const getLastCatalogSyncKey = (ownerKey: string, branchKey: string) =>
 const getFullSyncCheckpointKey = (ownerKey: string, branchKey: string) =>
   `catalog_full_sync_checkpoint::${ownerKey}::${branchKey}`;
 const MIN_SYNC_INTERVAL_MS = 1000 * 60 * 15;
+const CATALOG_PAGE_TIMEOUT_MS = 25000;
+const CATALOG_PAGE_PER_PAGE_STEPS = [2000, 1000, 500, 500] as const;
+const CATALOG_PAGE_MAX_RETRIES = CATALOG_PAGE_PER_PAGE_STEPS.length;
 export type CatalogSyncResult = {
   fetchedRows: number;
   syncedRows: number;
@@ -46,6 +49,16 @@ const normalizeSku = (value: string) => value.trim().toLowerCase();
 const toSafeNumber = (value: any, fallback = 0) => {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : fallback;
+};
+
+const isRetryableCatalogError = (error: any) => {
+  const status = Number(error?.response?.status || 0);
+  const code = String(error?.code || '');
+  const isTimeout =
+    code === 'ECONNABORTED' ||
+    code === 'ERR_NETWORK' ||
+    String(error?.message || '').toLowerCase().includes('timeout');
+  return isTimeout || !status || status >= 500;
 };
 
 const mapApiProductToIndexRecord = (product: any): ProductIndexRecord | null => {
@@ -164,7 +177,6 @@ export async function syncCatalogIndexIfDue(
   }
 
   let page = 1;
-  const perPage = 500;
   let fetchedRows = 0;
   let syncedRows = 0;
   let pages = 0;
@@ -197,27 +209,59 @@ export async function syncCatalogIndexIfDue(
 
   while (hasMore) {
     let response;
-    try {
-      response = await axiosInstance.get('menu/products', {
-        params: {
-          not_default: 1,
-          per_page: perPage,
-          page,
-          sort: '-updated_at',
-          ...(!fullResync && lastSyncAt ? { updated_since: lastSyncAt } : {}),
-        },
-      });
-    } catch (error) {
-      if ((!lastSyncAt && !fullResync) || !isFirstRequest) throw error;
-      // Fallback for backends that do not support incremental params.
-      response = await axiosInstance.get('menu/products', {
-        params: {
-          not_default: 1,
-          per_page: perPage,
-          page,
-          sort: '-updated_at',
-        },
-      });
+    let lastError: any = null;
+    for (let attempt = 0; attempt < CATALOG_PAGE_MAX_RETRIES; attempt += 1) {
+      const perPage =
+        CATALOG_PAGE_PER_PAGE_STEPS[
+          Math.min(attempt, CATALOG_PAGE_PER_PAGE_STEPS.length - 1)
+        ];
+      try {
+        response = await axiosInstance.get('menu/products', {
+          timeout: CATALOG_PAGE_TIMEOUT_MS,
+          params: {
+            not_default: 1,
+            per_page: perPage,
+            page,
+            sort: '-updated_at',
+            ...(!fullResync && lastSyncAt ? { updated_since: lastSyncAt } : {}),
+          },
+        });
+        break;
+      } catch (error) {
+        lastError = error;
+        const canTryIncrementalFallback =
+          Boolean(lastSyncAt) && !fullResync && isFirstRequest;
+        if (canTryIncrementalFallback) {
+          try {
+            // Fallback for backends that do not support incremental params.
+            response = await axiosInstance.get('menu/products', {
+              timeout: CATALOG_PAGE_TIMEOUT_MS,
+              params: {
+                not_default: 1,
+                per_page: perPage,
+                page,
+                sort: '-updated_at',
+              },
+            });
+            break;
+          } catch (fallbackError) {
+            lastError = fallbackError;
+          }
+        }
+
+        const shouldRetry =
+          attempt < CATALOG_PAGE_MAX_RETRIES - 1 &&
+          isRetryableCatalogError(lastError);
+        if (!shouldRetry) {
+          throw lastError;
+        }
+        const backoffMs = 450 * (attempt + 1);
+        await new Promise<void>((resolve) => setTimeout(resolve, backoffMs));
+      }
+    }
+
+    if (!response) {
+      throw lastError ?? new Error('Catalog sync page fetch failed');
     }
 
     const pageItems = Array.isArray(response?.data?.data) ? response.data.data : [];

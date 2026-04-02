@@ -5,6 +5,10 @@
 
 import QRCode from 'qrcode';
 import { Buffer } from 'buffer';
+import { toast } from '@/components/ui/use-toast';
+
+const RECEIPT_RIYAL_ICON =
+  '<span class="receipt-riyal" aria-hidden="true">﷼</span>';
 
 export type ReceiptPaymentLine = { name: string; amount: number };
 
@@ -41,6 +45,16 @@ export type SimplifiedTaxInvoiceReceiptInput = {
   changeAmount: number;
   qrCodeDataUrl: string;
 };
+
+const QZ_TRAY_SCRIPT_URL = 'https://cdn.jsdelivr.net/npm/qz-tray@2.2.4/qz-tray.js';
+const POS_QZ_ENABLED_KEY = 'pos_qz_enabled';
+const POS_QZ_PRINTER_NAME_KEY = 'pos_qz_printer_name';
+let qzScriptLoadingPromise: Promise<any> | null = null;
+let isQzSecurityConfigured = false;
+let cachedQzPrinterName = '';
+const QZ_CONNECT_TIMEOUT_MS = 4500;
+const QZ_QUERY_TIMEOUT_MS = 4500;
+const QZ_PRINT_TIMEOUT_MS = 7000;
 
 export function escapeHtml(value: unknown): string {
   return String(value || '')
@@ -195,7 +209,7 @@ function buildItemsHtml(items: ReceiptLineItem[]): string {
             </div>
             <div class="item-total">
                ${hasDiscount ? `<span style="text-decoration:line-through; font-size:10px; color:#999; margin-right:4px; display:block;">${(unitPrice * qty).toFixed(2)}</span>` : ''}
-               SR ${lineTotal.toFixed(2)}
+               ${RECEIPT_RIYAL_ICON} ${lineTotal.toFixed(2)}
             </div>
           </div>
         `;
@@ -239,7 +253,7 @@ export function buildSimplifiedTaxInvoiceHtml(
       (p) => `
           <div class="line">
             <span>${escapeHtml(p.name || (input.isArabic ? 'دفعة' : 'Payment'))}</span>
-            <span>SR ${Number(p.amount || 0).toFixed(2)}</span>
+            <span>${RECEIPT_RIYAL_ICON} ${Number(p.amount || 0).toFixed(2)}</span>
           </div>
         `
     )
@@ -330,6 +344,11 @@ export function buildSimplifiedTaxInvoiceHtml(
               font-size: 12px;
               font-weight: 700;
             }
+            .receipt-riyal {
+              display: inline-block;
+              font-size: 0.95em;
+              line-height: 1;
+            }
             .totals .line { font-size: 13px; }
             .grand {
               display: flex;
@@ -399,17 +418,17 @@ export function buildSimplifiedTaxInvoiceHtml(
 
             <hr class="divider" />
             <div class="totals">
-              <div class="line"><span>${labels.subtotal}</span><span>SR ${subtotalValue}</span></div>
-              <div class="line"><span>${labels.discount}</span><span>SR ${discountValue}</span></div>
-              <div class="line"><span>${labels.tax}</span><span>SR ${taxValue}</span></div>
-              <div class="grand"><span>${labels.total}</span><span>SR ${totalValue}</span></div>
+              <div class="line"><span>${labels.subtotal}</span><span>${RECEIPT_RIYAL_ICON} ${subtotalValue}</span></div>
+              <div class="line"><span>${labels.discount}</span><span>${RECEIPT_RIYAL_ICON} ${discountValue}</span></div>
+              <div class="line"><span>${labels.tax}</span><span>${RECEIPT_RIYAL_ICON} ${taxValue}</span></div>
+              <div class="grand"><span>${labels.total}</span><span>${RECEIPT_RIYAL_ICON} ${totalValue}</span></div>
             </div>
 
             <hr class="divider" />
             <div class="section-title">${labels.payments}</div>
-            ${paymentsHtml || `<div class="line"><span>${labels.paid}</span><span>SR ${paidValue}</span></div>`}
-            <div class="line"><span>${labels.amountPaid}</span><span>SR ${paidValue}</span></div>
-            <div class="line"><span>${labels.change}</span><span>SR ${changeValue}</span></div>
+            ${paymentsHtml || `<div class="line"><span>${labels.paid}</span><span>${RECEIPT_RIYAL_ICON} ${paidValue}</span></div>`}
+            <div class="line"><span>${labels.amountPaid}</span><span>${RECEIPT_RIYAL_ICON} ${paidValue}</span></div>
+            <div class="line"><span>${labels.change}</span><span>${RECEIPT_RIYAL_ICON} ${changeValue}</span></div>
             ${
               backendQr
                 ? `<div class="qr-wrap">
@@ -435,13 +454,253 @@ export function buildSimplifiedTaxInvoiceHtml(
 
 export function openAndPrintSimplifiedTaxInvoice(
   html: string,
-  options?: { onAfterPrint?: () => void }
+  options?: {
+    onAfterPrint?: () => void;
+    preferQzTray?: boolean;
+    qzPrinterName?: string;
+  }
 ): void {
+  const useQzTray =
+    options?.preferQzTray ??
+    (typeof window !== 'undefined'
+      ? window.localStorage.getItem(POS_QZ_ENABLED_KEY) !== '0'
+      : true);
+
+  if (useQzTray) {
+    void printWithQzTray(html, options)
+      .then(() => {
+        options?.onAfterPrint?.();
+      })
+      .catch((error) => {
+        notifyQzPrintIssue(error);
+        openAndPrintWithBrowser(html, options);
+      });
+    return;
+  }
+
+  openAndPrintWithBrowser(html, options);
+}
+
+async function printWithQzTray(
+  html: string,
+  options?: { qzPrinterName?: string }
+): Promise<void> {
+  const qz = await withTimeout(
+    ensureQzTrayClient(),
+    QZ_CONNECT_TIMEOUT_MS,
+    'QZ_TIMEOUT_LOAD'
+  );
+  configureQzTraySecurity(qz);
+
+  if (!qz.websocket?.isActive?.()) {
+    await withTimeout(
+      qz.websocket.connect({ retries: 1, delay: 0 }),
+      QZ_CONNECT_TIMEOUT_MS,
+      'QZ_TIMEOUT_CONNECT'
+    );
+  }
+
+  const preferredPrinter =
+    options?.qzPrinterName ||
+    cachedQzPrinterName ||
+    (typeof window !== 'undefined'
+      ? window.localStorage.getItem(POS_QZ_PRINTER_NAME_KEY) || ''
+      : '');
+  const printer = preferredPrinter.trim() || (await resolveDefaultQzPrinter(qz));
+  if (!printer) {
+    throw new Error('QZ_NO_PRINTER');
+  }
+  cachedQzPrinterName = printer;
+  if (typeof window !== 'undefined' && !window.localStorage.getItem(POS_QZ_PRINTER_NAME_KEY)) {
+    window.localStorage.setItem(POS_QZ_PRINTER_NAME_KEY, printer);
+  }
+
+  const config = qz.configs.create(printer);
+  await withTimeout(
+    qz.print(config, [
+      {
+        type: 'html',
+        format: 'plain',
+        data: html,
+      },
+    ]),
+    QZ_PRINT_TIMEOUT_MS,
+    'QZ_TIMEOUT_PRINT'
+  );
+}
+
+async function resolveDefaultQzPrinter(qz: any): Promise<string> {
+  const printer = await withTimeout(
+    qz.printers.getDefault(),
+    QZ_QUERY_TIMEOUT_MS,
+    'QZ_TIMEOUT_PRINTER'
+  );
+  return String(printer || '').trim();
+}
+
+export async function warmupQzTrayConnection(): Promise<void> {
+  const enabled =
+    typeof window !== 'undefined'
+      ? window.localStorage.getItem(POS_QZ_ENABLED_KEY) !== '0'
+      : true;
+  if (!enabled) return;
+
+  const qz = await withTimeout(
+    ensureQzTrayClient(),
+    QZ_CONNECT_TIMEOUT_MS,
+    'QZ_TIMEOUT_LOAD'
+  );
+  configureQzTraySecurity(qz);
+
+  if (!qz.websocket?.isActive?.()) {
+    await withTimeout(
+      qz.websocket.connect({ retries: 1, delay: 0 }),
+      QZ_CONNECT_TIMEOUT_MS,
+      'QZ_TIMEOUT_CONNECT'
+    );
+  }
+
+  const configuredPrinter =
+    typeof window !== 'undefined'
+      ? String(window.localStorage.getItem(POS_QZ_PRINTER_NAME_KEY) || '').trim()
+      : '';
+  if (configuredPrinter) {
+    cachedQzPrinterName = configuredPrinter;
+    return;
+  }
+
+  const defaultPrinter = await resolveDefaultQzPrinter(qz);
+  if (defaultPrinter) {
+    cachedQzPrinterName = defaultPrinter;
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(POS_QZ_PRINTER_NAME_KEY, defaultPrinter);
+    }
+  }
+}
+
+function notifyQzPrintIssue(error: any): void {
+  const raw = String(error?.message || error || '');
+  const normalized = raw.toLowerCase();
+  const hasNoPrinter =
+    raw.includes('QZ_NO_PRINTER') ||
+    normalized.includes('default qz printer') ||
+    normalized.includes('no printer');
+  const hasTimeout =
+    raw.includes('QZ_TIMEOUT_') ||
+    normalized.includes('timeout') ||
+    normalized.includes('timed out');
+  const description = hasNoPrinter
+    ? 'QZ Tray is connected, but no printer is configured. Fallback to browser print.'
+    : hasTimeout
+    ? 'QZ Tray did not respond in time. Fallback to browser print.'
+    : 'Direct QZ print failed. Fallback to browser print.';
+
+  toast({
+    description,
+    duration: 2600,
+    variant: 'destructive',
+  });
+}
+
+function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  timeoutCode: string
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      reject(new Error(timeoutCode));
+    }, timeoutMs);
+
+    promise
+      .then((value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      });
+  });
+}
+
+async function ensureQzTrayClient(): Promise<any> {
+  if (typeof window === 'undefined') {
+    throw new Error('QZ Tray is only available in browser');
+  }
+  const existingQz = (window as any).qz;
+  if (existingQz) return existingQz;
+
+  if (!qzScriptLoadingPromise) {
+    qzScriptLoadingPromise = new Promise((resolve, reject) => {
+      const currentQz = (window as any).qz;
+      if (currentQz) {
+        resolve(currentQz);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = QZ_TRAY_SCRIPT_URL;
+      script.async = true;
+      script.onload = () => {
+        const loadedQz = (window as any).qz;
+        if (!loadedQz) {
+          reject(new Error('QZ Tray script loaded without qz client'));
+          return;
+        }
+        resolve(loadedQz);
+      };
+      script.onerror = () => reject(new Error('Failed to load QZ Tray script'));
+      document.head.appendChild(script);
+    });
+  }
+
+  return qzScriptLoadingPromise;
+}
+
+function configureQzTraySecurity(qz: any): void {
+  if (isQzSecurityConfigured) return;
+  if (!qz?.security?.setCertificatePromise || !qz?.security?.setSignaturePromise) {
+    return;
+  }
+
+  // Development-friendly defaults: if signed certificates are not configured yet,
+  // fallback print path still exists and QZ errors are handled by caller.
+  qz.security.setCertificatePromise(() => Promise.resolve(''));
+  qz.security.setSignaturePromise(() => () => Promise.resolve(''));
+  isQzSecurityConfigured = true;
+}
+
+function openAndPrintWithBrowser(
+  html: string,
+  options?: { onAfterPrint?: () => void }
+) {
   const printWindow = window.open('', '_blank', 'width=420,height=720');
-  if (!printWindow) return;
+  if (!printWindow) {
+    toast({
+      description:
+        'Browser blocked the print window. Please allow pop-ups for this site.',
+      duration: 3000,
+      variant: 'destructive',
+    });
+    return;
+  }
 
   printWindow.document.write(html);
   printWindow.document.close();
+
+  // Ensure icon fonts/classes (including icon-saudi_riyal) are available in print window.
+  const styleLinks = Array.from(
+    document.querySelectorAll('link[rel="stylesheet"][href]')
+  ) as HTMLLinkElement[];
+  styleLinks.forEach((link) => {
+    const href = link.href;
+    if (!href) return;
+    const cloned = printWindow.document.createElement('link');
+    cloned.rel = 'stylesheet';
+    cloned.href = href;
+    printWindow.document.head.appendChild(cloned);
+  });
 
   const runPrint = () => {
     printWindow.focus();

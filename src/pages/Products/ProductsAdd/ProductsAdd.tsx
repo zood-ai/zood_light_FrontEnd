@@ -419,7 +419,7 @@ export const ProductsAdd: React.FC<ProductsAddProps> = () => {
                               {...field}
                               inputClassName="w-full"
                               label={t('PRICE')}
-                              iconSrcLeft={'SR'}
+                              iconSrcLeft={'﷼'}
                             />
                           </FormControl>
                           <FormMessage />

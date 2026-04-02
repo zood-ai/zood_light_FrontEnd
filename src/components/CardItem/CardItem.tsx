@@ -4,6 +4,7 @@ import './CardItem.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCardItem } from '@/store/slices/cardItems';
 import imagePLaceHolder from '/icons/imagePLaceHolder.svg';
+import CurrencyAmount from '@/components/custom/CurrencyAmount';
 
 const CATEGORY_COLOR_PALETTE = [
   { bg: '#BDEAE8', border: '#A2D7D4', activeBg: '#A6D9D5', activeBorder: '#86C6C1' },
@@ -167,7 +168,7 @@ export const CardItem: React.FC<CardItemProps> = ({ index, item }) => {
             </div>
           </div>
           <div className="text-xs font-bold text-main">
-            SR {Number(item?.price || 0).toFixed(2)}
+            <CurrencyAmount value={item?.price || 0} />
           </div>
         </div>
       </div>

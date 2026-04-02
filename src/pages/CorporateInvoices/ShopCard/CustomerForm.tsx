@@ -373,14 +373,14 @@ const CustomerForm = () => {
                     handleItemChange(index, 'unit_price', rawValue);
                   }}
                   label={t('PRICE')}
-                  iconSrcLeft="SR"
+                  iconSrcLeft="﷼"
                   inputClassName="flex-wrap md:w-[151px] sm:max-w-[151px] min-w-[80px]"
                 />
 
                 <IconInput
                   label={t('TOTAL')}
                   inputClassName="flex-wrap md:w-[151px] sm:max-w-[151px] min-w-[80px]"
-                  iconSrcLeft="SR"
+                  iconSrcLeft="﷼"
                   value={currencyFormated(item.unit_price * item.quantity || 0)}
                   disabled
                 />

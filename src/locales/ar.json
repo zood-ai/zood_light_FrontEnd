@@ -546,6 +546,7 @@
   "POS_EXIT": "خروج من الكاشير",
   "POS_CART_EMPTY": "السلة فارغة",
   "POS_PROCEED_PAYMENT": "متابعة الدفع",
+  "SAVE_AND_PROCEED_PAYMENT": "حفظ ومتابعة الدفع",
   "PAYMENT_SUMMARY": "ملخص الدفع",
   "TOUR_PAYMENT_SUMMARY_DESC": "هنا يظهر إجمالي المبلغ والمتبقي.",
   "TOUR_PAYMENT_CUSTOMER_DESC": "يمكنك تغيير العميل من هنا إذا لزم الأمر.",

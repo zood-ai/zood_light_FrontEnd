@@ -20,6 +20,7 @@ import {
   openAndPrintSimplifiedTaxInvoice,
   resolveReceiptQrDataUrl,
 } from '@/utils/simplifiedTaxInvoiceReceipt';
+import CurrencyAmount from '@/components/custom/CurrencyAmount';
 import { Pointer, Printer, Receipt, RotateCcw } from 'lucide-react';
 import dayjs from 'dayjs';
 
@@ -170,7 +171,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const receiptHeaderRaw = allSettings.settings?.data?.receipt_header;
   const receiptHeaderNormalized =
     normalizeReceiptBannerHeader(receiptHeaderRaw);
-  const receiptHeaderHasDot = String(receiptHeaderRaw ?? '').includes('Dot');
+  const receiptHeaderHasZood = String(receiptHeaderRaw ?? '').includes('Zood');
   const branchStreetName = safeParseBranchStreetName(
     allSettings.WhoAmI?.user?.branches[0]?.registered_address
   );
@@ -520,7 +521,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                       )}
                     </section>
 
-                    {(receiptHeaderHasDot || receiptHeaderNormalized) && (
+                    {(receiptHeaderHasZood || receiptHeaderNormalized) && (
                       <div
                         className="invoice-a4-preamble mt-4 rounded-lg border border-dashed border-border bg-muted/10 px-3 py-2"
                         dir={isArabic ? 'rtl' : 'ltr'}
@@ -529,7 +530,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           {t('receipt_header')}
                         </p>
                         <p className="mt-2 text-sm leading-relaxed text-foreground">
-                          {receiptHeaderHasDot
+                          {receiptHeaderHasZood
                             ? t('VIEW_MODAL_RECEIPT_WELCOME')
                             : receiptHeaderNormalized}
                         </p>
@@ -652,7 +653,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
                           <span>{t('SUBTOTAL')}</span>
                           <span className="tabular-nums text-foreground">
-                            SR {currencyFormated(Data?.data?.subtotal_price)}
+                            <CurrencyAmount value={Data?.data?.subtotal_price} />
                           </span>
                         </div>
                       ) : null}
@@ -660,7 +661,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
                           <span>{t('DISCOUNT')}</span>
                           <span className="tabular-nums text-foreground">
-                            SR {currencyFormated(Data?.data?.discount_amount)}
+                            <CurrencyAmount value={Data?.data?.discount_amount} />
                           </span>
                         </div>
                       ) : null}
@@ -668,13 +669,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
                           <span>{t('VIEW_MODAL_TOTAL_EXCL_VAT_AMOUNT')}</span>
                           <span className="tabular-nums text-foreground">
-                            SR{' '}
-                            {currencyFormated(
-                              Data?.data?.items?.reduce(
+                            <CurrencyAmount
+                              value={Data?.data?.items?.reduce(
                                 (sum, item) => sum + item?.pivot?.total_cost,
                                 0
-                              )
-                            )}
+                              )}
+                            />
                           </span>
                         </div>
                       ) : null}
@@ -682,10 +682,9 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
                           <span>{t('VIEW_MODAL_VAT_15_TOTAL')}</span>
                           <span className="tabular-nums text-foreground">
-                            SR{' '}
-                            {currencyFormated(
-                              Data.data.tax_exclusive_discount_amount
-                            )}
+                            <CurrencyAmount
+                              value={Data.data.tax_exclusive_discount_amount}
+                            />
                           </span>
                         </div>
                       ) : null}
@@ -693,10 +692,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
                           <span>{t('VIEW_MODAL_VAT_15_TOTAL')}</span>
                           <span className="tabular-nums text-foreground">
-                            SR{' '}
-                            {currencyFormated(
-                              parseFloat(Data.data.paid_tax || 0)
-                            )}
+                            <CurrencyAmount value={parseFloat(Data.data.paid_tax || 0)} />
                           </span>
                         </div>
                       ) : null}
@@ -705,7 +701,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="flex justify-between gap-4 border-b-2 border-border bg-muted/25 px-4 py-3 text-base font-semibold text-foreground">
                           <span>{t('TOTAL_AMOUNT')}</span>
                           <span className="tabular-nums">
-                            SR {currencyFormated(Data?.data?.total_price)}
+                            <CurrencyAmount value={Data?.data?.total_price} />
                           </span>
                         </div>
                       ) : null}
@@ -713,14 +709,15 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
                           <span>{t('VIEW_MODAL_TOTAL_INCL_VAT')}</span>
                           <span className="tabular-nums text-foreground">
-                            SR{' '}
-                            {currencyFormated(
-                              parseFloat(Data.data.paid_tax || 0) +
+                            <CurrencyAmount
+                              value={
+                                parseFloat(Data.data.paid_tax || 0) +
                                 Data?.data?.items?.reduce(
                                   (sum, item) => sum + item?.pivot?.total_cost,
                                   0
                                 )
-                            )}
+                              }
+                            />
                           </span>
                         </div>
                       ) : null}
@@ -733,7 +730,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                           >
                             <span>{e?.payment_method?.name}</span>
                             <span className="tabular-nums text-foreground">
-                              SR {currencyFormated(e?.amount)}
+                              <CurrencyAmount value={e?.amount} />
                             </span>
                           </div>
                         );
@@ -742,13 +739,12 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
                           <span>{t('AMOUNT_PAID')}</span>
                           <span className="tabular-nums text-foreground">
-                            SR{' '}
-                            {currencyFormated(
-                              Data?.data?.payments.reduce(
+                            <CurrencyAmount
+                              value={Data?.data?.payments.reduce(
                                 (sum, item) => sum + item?.amount,
                                 0
-                              )
-                            )}
+                              )}
+                            />
                           </span>
                         </div>
                       ) : null}
@@ -763,18 +759,14 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="flex justify-between gap-4 border-b border-border/60 px-4 py-2.5 text-muted-foreground">
                           <span>{t('VIEW_MODAL_TOTAL_REMAINING')}</span>
                           <span className="tabular-nums text-foreground">
-                            SR{' '}
-                            {(Data?.data?.payments?.reduce(
-                              (sum, item) => sum + item?.amount,
-                              0
-                            ) > Data?.data?.total_price
-                              ? currencyFormated(
-                                  Data?.data?.payments?.reduce(
-                                    (sum, item) => sum + item?.amount,
-                                    0
-                                  ) - Data?.data?.total_price
-                                )
-                              : Number(0).toFixed(2)) || 0}
+                            <CurrencyAmount
+                              value={
+                                Data?.data?.payments?.reduce(
+                                  (sum, item) => sum + item?.amount,
+                                  0
+                                ) - Data?.data?.total_price
+                              }
+                            />
                           </span>
                         </div>
                       ) : null}
@@ -788,19 +780,20 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         <div className="flex justify-between gap-4 px-4 py-2.5 text-muted-foreground">
                           <span>{t('VIEW_MODAL_TOTAL_DUE')}</span>
                           <span className="tabular-nums text-foreground">
-                            SR{' '}
-                            {((Data?.data?.payments?.reduce(
-                              (sum, item) => sum + item.amount,
-                              0
-                            ) || 0) <= Data.data.total_price
-                              ? currencyFormated(
-                                  Data.data.total_price -
+                            <CurrencyAmount
+                              value={
+                                (Data?.data?.payments?.reduce(
+                                  (sum, item) => sum + item.amount,
+                                  0
+                                ) || 0) <= Data.data.total_price
+                                  ? Data.data.total_price -
                                     Data?.data?.payments?.reduce(
                                       (sum, item) => sum + item.amount,
                                       0
                                     )
-                                )
-                              : 0) || 0}
+                                  : 0
+                              }
+                            />
                           </span>
                         </div>
                       ) : null}

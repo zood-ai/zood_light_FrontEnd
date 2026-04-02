@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import axiosInstance from '@/api/interceptors';
 import Cookies from 'js-cookie';
 import { useTranslation } from 'react-i18next';
+import CurrencyAmount from '../CurrencyAmount';
 
 const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
   const { t } = useTranslation();
@@ -169,12 +170,11 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                   <div className="flex flex-col w-full text-sm font-medium text-right whitespace-nowrap max-md:mt-10">
                     <div className="flex gap-5 justify-between px-3 py-2 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {(
+                        <CurrencyAmount value={(
                           fetchedData?.subtotal_price ??
                           (Math.floor(subTotal * 100) / 100 || 0)
-                        ).toFixed(2)}
+                        )} />
                       </div>
-                      <div className="self-start text-zinc-500">SR</div>
                     </div>
                     <IconInput
                       className="mt-4"
@@ -188,7 +188,7 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                       type="number"
                       inputClassName={'w-full   '}
                       // label="ضريبة القيمة المضافة"
-                      iconSrcLeft={'SR'}
+                      iconSrcLeft={'﷼'}
                       value={
                         orderId
                           ? Number(
@@ -201,12 +201,11 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                     {/* </IconInput> */}
                     <div className="flex gap-5 justify-between items-start px-3 py-2 mt-4 bg-white rounded border border-solid border-zinc-300">
                       <div className="text-zinc-800">
-                        {(
+                        <CurrencyAmount value={(
                           fetchedData?.total_taxes ??
                           (Math.floor(taxAmount * 100) / 100 || 0)
-                        ).toFixed(2)}
+                        )} />
                       </div>
-                      <div className="text-zinc-500">SR</div>
                     </div>
                   </div>
                 </div>
@@ -226,11 +225,12 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
             <div className="flex-grow flex justify-between self-stretch mt-3 max-md:pl-4 pl-2 w-full text-sm text-right  text-zinc-800 max-md:mr-2.5 max-md:max-w-full">
               <div className="font-medium">{t('TOTAL_AMOUNT')}</div>
               <div className="font-bold">
-                SR{' '}
-                {(
-                  fetchedData?.total_price?.toFixed(2) ??
-                  (Math.floor(totalAmountIncludeAndExclude * 100) / 100 || 0)
-                ).toFixed(2)}
+                <CurrencyAmount
+                  value={
+                    fetchedData?.total_price ??
+                    (Math.floor(totalAmountIncludeAndExclude * 100) / 100 || 0)
+                  }
+                />
               </div>
             </div>
           </div>
@@ -249,7 +249,7 @@ const ShopCardSummeryPQ: React.FC<ShopCardSummeryProps> = () => {
                 {t('REMAINING_AMOUNT')}
               </div>
               <div className="self-start ms-md mt-3 text-sm font-medium text-right text-zinc-500 max-md:mr-2.5">
-                SR {(totalAmountIncludeAndExclude || 0).toFixed(2)}
+                <CurrencyAmount value={totalAmountIncludeAndExclude || 0} />
               </div>
             </>
           ) : null}

@@ -620,7 +620,7 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                       }}
                       label={t('PRICE')}
                       inputClassName="flex-grow"
-                      iconSrcLeft={'SR'}
+                      iconSrcLeft={'﷼'}
                     />
                   </div>
                   {items.length > 1 && (

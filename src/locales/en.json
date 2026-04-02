@@ -542,6 +542,7 @@
   "POS_EXIT": "Exit POS",
   "POS_CART_EMPTY": "Cart is empty",
   "POS_PROCEED_PAYMENT": "Proceed to Payment",
+  "SAVE_AND_PROCEED_PAYMENT": "Save and proceed to payment",
   "PAYMENT_SUMMARY": "Payment Summary",
   "TOUR_PAYMENT_SUMMARY_DESC": "Here shows the total amount and remaining balance.",
   "TOUR_PAYMENT_CUSTOMER_DESC": "You can change the customer here if needed.",
