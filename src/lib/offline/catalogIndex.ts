@@ -1,5 +1,6 @@
 import axiosInstance from '@/api/interceptors';
 import {
+  countProductIndexByOwnerBranch,
   getProductIndexBySku,
   getSyncMeta,
   putProductIndexRecords,
@@ -128,6 +129,13 @@ export async function getIndexedProductByBarcode(barcode: string) {
     stock_quantity: record.stock_quantity,
     available_quantity: record.stock_quantity,
   };
+}
+
+export async function getLocalCatalogProductCount(): Promise<number> {
+  if (typeof window === 'undefined') return 0;
+  const ownerKey = getCurrentOfflineOwnerKey();
+  const branchKey = getCurrentBranchKey();
+  return countProductIndexByOwnerBranch(ownerKey, branchKey);
 }
 
 export async function syncCatalogIndexIfDue(

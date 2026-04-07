@@ -55,6 +55,7 @@ import { useOfflineOrdersSummary } from '@/hooks/useOfflineOrdersSummary';
 import OfflineSyncStatusPill from '@/components/custom/OfflineSyncStatusPill';
 import {
   getIndexedProductByBarcode,
+  getLocalCatalogProductCount,
   syncCatalogIndexIfDue,
   upsertProductIndexFromApiProducts,
 } from '@/lib/offline/catalogIndex';
@@ -87,6 +88,9 @@ const CATEGORY_COLOR_PALETTE = [
 const CATEGORY_TEXT_COLOR = '#1D2735';
 const POS_LAST_SYNCED_ROWS_KEY = 'pos_last_synced_rows_v1';
 const POS_CATALOG_SYNC_ACTIVE_KEY = 'pos_catalog_sync_active_v1';
+const posAutoCatalogWarmSessionKey = (branchKey: string) =>
+  `pos_auto_catalog_warm_v1_${branchKey || 'default'}`;
+const POS_BARCODE_NAME_FALLBACK_KEY = 'pos_barcode_name_fallback_enabled_v1';
 const POS_ACTIVE_TAB_KEY = 'pos_active_tab_v1';
 const POS_TAB_LOCK_TTL_MS = 10000;
 
@@ -179,6 +183,11 @@ export const IndividualInvoicesAdd: React.FC<
     if (typeof window === 'undefined') return false;
     return window.localStorage.getItem(POS_CATALOG_SYNC_ACTIVE_KEY) === '1';
   });
+  const [localCatalogCount, setLocalCatalogCount] = useState<number | null>(null);
+  const [barcodeNameFallbackEnabled, setBarcodeNameFallbackEnabled] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem(POS_BARCODE_NAME_FALLBACK_KEY) === '1';
+  });
   const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false);
   const [isLoadingRefundOrders, setIsLoadingRefundOrders] = useState(false);
   const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
@@ -265,6 +274,24 @@ export const IndividualInvoicesAdd: React.FC<
     [allSettings?.WhoAmI?.user?.roles]
   );
 
+  const refreshLocalCatalogCount = useCallback(async () => {
+    try {
+      const n = await getLocalCatalogProductCount();
+      setLocalCatalogCount(n);
+    } catch {
+      setLocalCatalogCount(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshLocalCatalogCount();
+  }, [branchId, refreshLocalCatalogCount]);
+
+  useEffect(() => {
+    if (isCatalogSyncing) return;
+    void refreshLocalCatalogCount();
+  }, [isCatalogSyncing, refreshLocalCatalogCount]);
+
   // Prefetch payment methods so they appear instantly on the payment page
   useEffect(() => {
     queryClient.prefetchQuery({
@@ -348,7 +375,7 @@ export const IndividualInvoicesAdd: React.FC<
   });
   const PAGE_SIZE = 50;
   const MAX_CONCURRENT_SCANS = 3;
-  const SCAN_REQUEST_TIMEOUT_MS = 3000;
+  const SCAN_REQUEST_TIMEOUT_MS = 1500;
   const NOT_FOUND_CACHE_TTL_MS = 15000;
   const store = useStore<any>();
   const navigate = useNavigate();
@@ -1039,43 +1066,71 @@ export const IndividualInvoicesAdd: React.FC<
         let matchedProduct: any = null;
 
         if (!online) {
-          for (const candidate of lookupCandidates) {
-            matchedProduct = await getIndexedProductByBarcode(candidate);
-            if (matchedProduct) break;
-          }
+          const indexedRows = await Promise.all(
+            lookupCandidates.map((candidate) =>
+              getIndexedProductByBarcode(candidate)
+            )
+          );
+          matchedProduct = indexedRows.find(Boolean) || null;
         } else {
-          for (const candidate of lookupCandidates) {
-            const skuResponse = await axiosInstance.get('menu/products', {
-              timeout: SCAN_REQUEST_TIMEOUT_MS,
-              params: {
-                not_default: 1,
-                per_page: 1,
-                'filter[sku]': candidate,
-              },
-            });
-            matchedProduct = skuResponse?.data?.data?.[0];
-            if (matchedProduct) break;
-          }
+          const indexedLookup = () =>
+            Promise.all(
+              lookupCandidates.map((candidate) =>
+                getIndexedProductByBarcode(candidate)
+              )
+            ).then((rows) => rows.find(Boolean) || null);
 
-          // Some stores encode printable barcode in name field.
-          if (!matchedProduct) {
-            const nameResponse = await axiosInstance.get('menu/products', {
-              timeout: SCAN_REQUEST_TIMEOUT_MS,
-              params: {
-                not_default: 1,
-                per_page: 1,
-                'filter[name]': rawBarcode,
-              },
-            });
-            matchedProduct = nameResponse?.data?.data?.[0];
-          }
+          const skuLookup = () =>
+            Promise.all(
+              lookupCandidates.map(async (candidate) => {
+                try {
+                  const skuResponse = await axiosInstance.get('menu/products', {
+                    timeout: SCAN_REQUEST_TIMEOUT_MS,
+                    params: {
+                      not_default: 1,
+                      per_page: 1,
+                      'filter[sku]': candidate,
+                    },
+                  });
+                  return skuResponse?.data?.data?.[0] || null;
+                } catch {
+                  return null;
+                }
+              })
+            ).then((rows) => rows.find(Boolean) || null);
 
-          if (matchedProduct) {
-            void upsertProductIndexFromApiProducts([matchedProduct]);
+          // Local-first (Odoo-like): if the product is in IndexedDB, skip HTTP entirely.
+          const indexedMatch = await indexedLookup();
+          if (indexedMatch) {
+            matchedProduct = indexedMatch;
           } else {
-            for (const candidate of lookupCandidates) {
-              matchedProduct = await getIndexedProductByBarcode(candidate);
-              if (matchedProduct) break;
+            const apiSkuMatch = await skuLookup();
+            if (apiSkuMatch) {
+              matchedProduct = apiSkuMatch;
+              void upsertProductIndexFromApiProducts([apiSkuMatch]);
+            } else {
+              const allowNameFallback =
+                typeof window !== 'undefined' &&
+                window.localStorage.getItem(POS_BARCODE_NAME_FALLBACK_KEY) === '1';
+              if (allowNameFallback) {
+                try {
+                  const nameResponse = await axiosInstance.get('menu/products', {
+                    timeout: SCAN_REQUEST_TIMEOUT_MS,
+                    params: {
+                      not_default: 1,
+                      per_page: 1,
+                      'filter[name]': rawBarcode,
+                    },
+                  });
+                  const nameHit = nameResponse?.data?.data?.[0];
+                  if (nameHit) {
+                    matchedProduct = nameHit;
+                    void upsertProductIndexFromApiProducts([nameHit]);
+                  }
+                } catch {
+                  matchedProduct = null;
+                }
+              }
             }
           }
         }
@@ -1142,10 +1197,12 @@ export const IndividualInvoicesAdd: React.FC<
       } catch (error) {
         const pendingCount = pendingCountByBarcodeRef.current.get(barcodeKey) || 0;
         let localFallback: any = null;
-        for (const candidate of lookupCandidates) {
-          localFallback = await getIndexedProductByBarcode(candidate);
-          if (localFallback) break;
-        }
+        const fallbackRows = await Promise.all(
+          lookupCandidates.map((candidate) =>
+            getIndexedProductByBarcode(candidate)
+          )
+        );
+        localFallback = fallbackRows.find(Boolean) || null;
         pendingCountByBarcodeRef.current.delete(barcodeKey);
         rawBarcodeByKeyRef.current.delete(barcodeKey);
         parsedScaleBarcodeMetaRef.current.delete(barcodeKey);
@@ -2015,6 +2072,48 @@ export const IndividualInvoicesAdd: React.FC<
       }
     }
   };
+
+  // Once per tab session + branch: pull catalog into IndexedDB so barcode scans resolve locally first.
+  useEffect(() => {
+    if (!isOnline || !branchId) return;
+    if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') return;
+    const warmKey = posAutoCatalogWarmSessionKey(String(branchId));
+    if (sessionStorage.getItem(warmKey)) return;
+    sessionStorage.setItem(warmKey, '1');
+
+    let cancelled = false;
+    const run = async () => {
+      try {
+        setIsCatalogSyncing(true);
+        setCatalogSyncInterrupted(false);
+        window.localStorage.setItem(POS_CATALOG_SYNC_ACTIVE_KEY, '1');
+        setCatalogSyncProgress(null);
+        const result = await syncCatalogIndexIfDue(true, false, (progress) => {
+          if (!cancelled) setCatalogSyncProgress(progress);
+        });
+        if (!cancelled) {
+          setLastSyncedRows(result.syncedRows);
+          window.localStorage.setItem(
+            POS_LAST_SYNCED_ROWS_KEY,
+            String(result.syncedRows)
+          );
+        }
+      } catch {
+        if (!cancelled) setCatalogSyncInterrupted(true);
+      } finally {
+        if (!cancelled) {
+          setIsCatalogSyncing(false);
+          setCatalogSyncProgress(null);
+        }
+        window.localStorage.removeItem(POS_CATALOG_SYNC_ACTIVE_KEY);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [branchId, isOnline]);
 
   useEffect(() => {
     if (!isCatalogSyncing || typeof window === 'undefined') return;
@@ -3452,6 +3551,47 @@ export const IndividualInvoicesAdd: React.FC<
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-mainBorder/40 bg-gray-50/60 px-3 py-1.5">
+              <span
+                className={`inline-flex max-w-[min(100%,28rem)] items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-tight ${
+                  isCatalogSyncing
+                    ? 'bg-indigo-100 text-indigo-900'
+                    : localCatalogCount !== null && localCatalogCount > 0
+                      ? 'bg-emerald-100 text-emerald-900'
+                      : 'bg-amber-100 text-amber-950'
+                }`}
+              >
+                {isCatalogSyncing
+                  ? t('POS_CATALOG_LOADING_SHORT')
+                  : localCatalogCount !== null && localCatalogCount > 0
+                    ? t('POS_CATALOG_READY_COUNT', {
+                        count: localCatalogCount,
+                      })
+                    : t('POS_CATALOG_EMPTY_HINT')}
+              </span>
+              <label
+                className="flex cursor-pointer select-none items-center gap-1.5 text-[11px] text-mainText"
+                title={t('POS_BARCODE_NAME_FALLBACK_HINT')}
+              >
+                <input
+                  type="checkbox"
+                  className="h-3.5 w-3.5 rounded border-mainBorder text-main accent-main"
+                  checked={barcodeNameFallbackEnabled}
+                  onChange={(e) => {
+                    const on = e.target.checked;
+                    setBarcodeNameFallbackEnabled(on);
+                    if (typeof window !== 'undefined') {
+                      window.localStorage.setItem(
+                        POS_BARCODE_NAME_FALLBACK_KEY,
+                        on ? '1' : '0'
+                      );
+                    }
+                  }}
+                />
+                <span className="whitespace-nowrap">{t('POS_BARCODE_NAME_FALLBACK')}</span>
+              </label>
             </div>
 
             {/* Categories Row - Touch-first */}

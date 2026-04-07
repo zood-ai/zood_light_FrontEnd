@@ -247,6 +247,19 @@ export async function getProductIndexBySku(
   });
 }
 
+/** Count indexed products for the current owner+branch (local POS catalog size). */
+export async function countProductIndexByOwnerBranch(
+  ownerKey: string,
+  branchKey: string
+): Promise<number> {
+  if (!ownerKey || !branchKey) return 0;
+  return withStore(PRODUCT_INDEX_STORE, 'readonly', async (store) => {
+    const index = store.index('by_owner_branch');
+    const range = IDBKeyRange.only([ownerKey, branchKey]);
+    return promisifyRequest<number>(index.count(range));
+  });
+}
+
 export async function pruneSyncedOfflineOrdersForOwner(
   ownerKey: string,
   maxKeep = 500
