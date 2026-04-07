@@ -68,6 +68,12 @@ import {
 } from '@/utils/simplifiedTaxInvoiceReceipt';
 import { formatNumber } from '@/utils/numberFormat';
 import CurrencyAmount from '@/components/custom/CurrencyAmount';
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
+import { isRefundOrderInDateRange } from '@/utils/ordersBusinessDateQuery';
+
+const { RangePicker } = DatePicker;
 
 const CATEGORY_COLOR_PALETTE = [
   { bg: '#BDEAE8', border: '#A2D7D4', activeBg: '#A6D9D5', activeBorder: '#86C6C1' },
@@ -177,8 +183,12 @@ export const IndividualInvoicesAdd: React.FC<
   const [isLoadingRefundOrders, setIsLoadingRefundOrders] = useState(false);
   const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
   const [isPrintingRefund, setIsPrintingRefund] = useState(false);
-  const [refundOrders, setRefundOrders] = useState<RefundOrder[]>([]);
+  const [refundOrdersRaw, setRefundOrdersRaw] = useState<RefundOrder[]>([]);
   const [refundSearch, setRefundSearch] = useState('');
+  const [refundDateRange, setRefundDateRange] = useState<[Dayjs, Dayjs]>(() => [
+    dayjs(),
+    dayjs(),
+  ]);
   const [selectedRefundOrderId, setSelectedRefundOrderId] = useState('');
   const [isPosLockedByAnotherTab, setIsPosLockedByAnotherTab] = useState(false);
   const [barcodeSuggestion, setBarcodeSuggestion] = useState<{
@@ -216,6 +226,8 @@ export const IndividualInvoicesAdd: React.FC<
   const allSettings = useSelector((state: any) => state.allSettings?.value);
   const currentCashier = useSelector((state: any) => state.posCashier?.currentCashier);
   const branchId = orderSchema?.branch_id || Cookies.get('branch_id') || '';
+  const refundBranchIdRef = useRef('');
+  refundBranchIdRef.current = String(branchId || '').trim();
   const parkedOrdersKey = `pos_parked_orders_v1_${branchId || 'default'}`;
   const currentCartKey = `pos_current_cart_v1_${branchId || 'default'}`;
   const selectedCustomerId = orderSchema?.customer_id;
@@ -223,6 +235,10 @@ export const IndividualInvoicesAdd: React.FC<
   const [isEditItemOpen, setIsEditItemOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const { showToast } = useToast();
+  const showToastRef = useRef(showToast);
+  showToastRef.current = showToast;
+  const tRef = useRef(t);
+  tRef.current = t;
   const { isOnline } = useNetworkStatus();
   const { pendingCount, failedCount } = useOfflineOrdersSummary();
   const queryClient = useQueryClient();
@@ -2022,40 +2038,48 @@ export const IndividualInvoicesAdd: React.FC<
       const list = Array.isArray(response?.data?.data)
         ? (response.data.data as RefundOrder[])
         : [];
-      const currentBranchId = String(
-        orderSchema?.branch_id || Cookies.get('branch_id') || ''
-      ).trim();
-      const filtered = list
-        .filter((order) => {
-          const orderBranchId = String(
-            order?.branch_id ?? order?.branch?.id ?? ''
-          ).trim();
-          if (currentBranchId && orderBranchId && orderBranchId !== currentBranchId) {
-            return false;
-          }
-          return true;
-        })
-        .slice(0, 40);
-      setRefundOrders(filtered);
-      setSelectedRefundOrderId((prev) => {
-        if (prev && filtered.some((order) => String(order.id) === prev)) return prev;
-        return filtered[0]?.id ? String(filtered[0].id) : '';
+      const currentBranchId = refundBranchIdRef.current;
+      const branchFiltered = list.filter((order) => {
+        const orderBranchId = String(
+          order?.branch_id ?? order?.branch?.id ?? ''
+        ).trim();
+        if (currentBranchId && orderBranchId && orderBranchId !== currentBranchId) {
+          return false;
+        }
+        return true;
       });
+      setRefundOrdersRaw(branchFiltered);
     } catch {
-      showToast({
-        description: t('GENERAL_ERROR'),
+      showToastRef.current({
+        description: tRef.current('GENERAL_ERROR'),
         duration: 2500,
         variant: 'destructive',
       });
     } finally {
       setIsLoadingRefundOrders(false);
     }
-  }, [orderSchema?.branch_id, showToast, t]);
+  }, []);
+
+  const refundOrders = useMemo(
+    () =>
+      refundOrdersRaw
+        .filter((order) => isRefundOrderInDateRange(order, refundDateRange))
+        .slice(0, 40),
+    [refundOrdersRaw, refundDateRange]
+  );
 
   useEffect(() => {
     if (!isRefundDialogOpen) return;
     void fetchRefundableOrders();
-  }, [isRefundDialogOpen]);
+  }, [isRefundDialogOpen, branchId, fetchRefundableOrders]);
+
+  useEffect(() => {
+    if (!isRefundDialogOpen) return;
+    setSelectedRefundOrderId((prev) => {
+      if (prev && refundOrders.some((order) => String(order.id) === prev)) return prev;
+      return refundOrders[0]?.id ? String(refundOrders[0].id) : '';
+    });
+  }, [refundOrders, isRefundDialogOpen]);
 
   const filteredRefundOrders = useMemo(() => {
     const needle = refundSearch.trim().toLowerCase();
@@ -3511,13 +3535,33 @@ export const IndividualInvoicesAdd: React.FC<
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <div className="mb-3">
-              <Input
-                value={refundSearch}
-                onChange={(e) => setRefundSearch(e.target.value)}
-                placeholder={t('POS_REFUND_SEARCH_PLACEHOLDER')}
-                className="h-11"
-              />
+            <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="min-w-0 flex-1">
+                <label className="mb-1.5 block text-sm font-medium text-secText">
+                  {t('POS_REFUND_DATE_RANGE')}
+                </label>
+                <RangePicker
+                  value={refundDateRange}
+                  onChange={(dates) => {
+                    if (dates?.[0] && dates?.[1]) {
+                      setRefundDateRange([dates[0], dates[1]]);
+                    }
+                  }}
+                  className="h-11 w-full min-w-0 border-mainBorder"
+                  placeholder={[t('START_DATE'), t('END_DATE')]}
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <label className="mb-1.5 block text-sm font-medium text-secText opacity-0 select-none">
+                  {'\u00a0'}
+                </label>
+                <Input
+                  value={refundSearch}
+                  onChange={(e) => setRefundSearch(e.target.value)}
+                  placeholder={t('POS_REFUND_SEARCH_PLACEHOLDER')}
+                  className="h-11"
+                />
+              </div>
             </div>
             <div className="max-h-[420px] space-y-2 overflow-y-auto rounded-xl border border-mainBorder bg-gray-50/40 p-2">
               {isLoadingRefundOrders ? (

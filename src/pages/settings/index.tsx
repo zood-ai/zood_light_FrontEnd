@@ -74,6 +74,11 @@ export default function Settings() {
   const [isLoadingPrinters, setIsLoadingPrinters] = useState(false);
   const [isRunningQzDiagnostics, setIsRunningQzDiagnostics] = useState(false);
   const [qzDiagnosticsSummary, setQzDiagnosticsSummary] = useState('');
+  const [qzSigningEnabled, setQzSigningEnabled] = useState(true);
+  const [qzSigningCertUrl, setQzSigningCertUrl] = useState('');
+  const [qzSigningSignUrl, setQzSigningSignUrl] = useState('');
+  const [qzSigningCertPem, setQzSigningCertPem] = useState('');
+  const [qzSigningPrivateKeyPem, setQzSigningPrivateKeyPem] = useState('');
 
   useEffect(() => {
     const holder = whoami
@@ -112,10 +117,22 @@ export default function Settings() {
     const routingRaw = window.localStorage.getItem(
       'pos_kitchen_category_routing'
     );
+    const qzSigningEnabledRaw = window.localStorage.getItem('pos_qz_signing_enabled');
+    const qzSigningCertUrlRaw = window.localStorage.getItem('pos_qz_signing_cert_url');
+    const qzSigningSignUrlRaw = window.localStorage.getItem('pos_qz_signing_sign_url');
+    const qzSigningCertPemRaw = window.localStorage.getItem('pos_qz_signing_cert_pem');
+    const qzSigningPrivateKeyRaw = window.localStorage.getItem(
+      'pos_qz_signing_private_key_pem'
+    );
 
     setQzEnabled(qzRaw !== '0');
     setPosPrinterName(String(posRaw || '').trim());
     setKitchenDefaultPrinterName(String(kitchenRaw || '').trim());
+    setQzSigningEnabled(qzSigningEnabledRaw !== '0');
+    setQzSigningCertUrl(String(qzSigningCertUrlRaw || '').trim());
+    setQzSigningSignUrl(String(qzSigningSignUrlRaw || '').trim());
+    setQzSigningCertPem(String(qzSigningCertPemRaw || '').trim());
+    setQzSigningPrivateKeyPem(String(qzSigningPrivateKeyRaw || '').trim());
     if (routingRaw) {
       try {
         const parsed = JSON.parse(routingRaw) as Record<string, string>;
@@ -172,6 +189,14 @@ export default function Settings() {
     window.localStorage.setItem(
       'pos_kitchen_category_routing',
       JSON.stringify(kitchenCategoryRouting)
+    );
+    window.localStorage.setItem('pos_qz_signing_enabled', qzSigningEnabled ? '1' : '0');
+    window.localStorage.setItem('pos_qz_signing_cert_url', qzSigningCertUrl.trim());
+    window.localStorage.setItem('pos_qz_signing_sign_url', qzSigningSignUrl.trim());
+    window.localStorage.setItem('pos_qz_signing_cert_pem', qzSigningCertPem.trim());
+    window.localStorage.setItem(
+      'pos_qz_signing_private_key_pem',
+      qzSigningPrivateKeyPem.trim()
     );
     showToast({
       description: isArabic
@@ -230,6 +255,13 @@ export default function Settings() {
         `${isArabic ? 'الطابعات المكتشفة' : 'Discovered printers'}: ${
           diagnostics.discoveredPrinters.length
         } (${diagnostics.findMs}ms)`,
+        `${isArabic ? 'وضع التوقيع' : 'Signed mode'}: ${
+          diagnostics.signedModeEnabled
+            ? diagnostics.signedModeReady
+              ? 'ON (READY)'
+              : 'ON (INCOMPLETE)'
+            : 'OFF'
+        }`,
         diagnostics.notes.length
           ? `${isArabic ? 'ملاحظات' : 'Notes'}: ${diagnostics.notes.join(' | ')}`
           : `${isArabic ? 'ملاحظات' : 'Notes'}: -`,
@@ -880,6 +912,91 @@ export default function Settings() {
               >
                 {isArabic ? 'اختبار طابعة المطبخ' : 'Test Kitchen Printer'}
               </Button>
+            </div>
+          </div>
+
+          <div className="mt-5 grid w-full gap-4 rounded-md border border-mainBorder p-3 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-zinc-700">
+                <input
+                  type="checkbox"
+                  checked={qzSigningEnabled}
+                  onChange={(e) => setQzSigningEnabled(e.target.checked)}
+                />
+                {isArabic
+                  ? 'تفعيل QZ Signed Messages (بدون نافذة سماح متكررة)'
+                  : 'Enable QZ Signed Messages (no repeated trust prompts)'}
+              </label>
+            </div>
+            <div>
+              <div className="mb-1 text-sm font-medium text-zinc-500">
+                {isArabic ? 'رابط الشهادة (Certificate URL)' : 'Certificate URL'}
+              </div>
+              <Input
+                value={qzSigningCertUrl}
+                onChange={(e) => setQzSigningCertUrl(e.target.value)}
+                placeholder={
+                  isArabic
+                    ? 'مثال: /qz/certificate'
+                    : 'Example: /qz/certificate'
+                }
+                className="h-9 w-full"
+              />
+            </div>
+            <div>
+              <div className="mb-1 text-sm font-medium text-zinc-500">
+                {isArabic ? 'رابط التوقيع (Signature URL)' : 'Signature URL'}
+              </div>
+              <Input
+                value={qzSigningSignUrl}
+                onChange={(e) => setQzSigningSignUrl(e.target.value)}
+                placeholder={isArabic ? 'مثال: /qz/sign' : 'Example: /qz/sign'}
+                className="h-9 w-full"
+              />
+              <div className="mt-1 text-xs text-zinc-500">
+                {isArabic
+                  ? 'اختياري. النظام يستخدم توقيعًا مدمجًا تلقائيًا إذا كان فارغًا.'
+                  : 'Optional. System auto-uses built-in signing when empty.'}
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <div className="mb-1 text-sm font-medium text-zinc-500">
+                {isArabic
+                  ? 'أو الصق الشهادة مباشرة (PEM) بدل الرابط'
+                  : 'Or paste PEM certificate directly instead of URL'}
+              </div>
+              <textarea
+                value={qzSigningCertPem}
+                onChange={(e) => setQzSigningCertPem(e.target.value)}
+                placeholder={
+                  isArabic
+                    ? '-----BEGIN CERTIFICATE----- ...'
+                    : '-----BEGIN CERTIFICATE----- ...'
+                }
+                className="min-h-[90px] w-full rounded-md border border-mainBorder bg-white px-3 py-2 text-xs outline-none"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <div className="mb-1 text-sm font-medium text-zinc-500">
+                {isArabic
+                  ? 'مفتاح خاص للتوقيع المحلي (PEM) - داخل الفرونت'
+                  : 'Local signing private key (PEM) - frontend only'}
+              </div>
+              <textarea
+                value={qzSigningPrivateKeyPem}
+                onChange={(e) => setQzSigningPrivateKeyPem(e.target.value)}
+                placeholder={
+                  isArabic
+                    ? '-----BEGIN PRIVATE KEY----- ...'
+                    : '-----BEGIN PRIVATE KEY----- ...'
+                }
+                className="min-h-[120px] w-full rounded-md border border-mainBorder bg-white px-3 py-2 text-xs outline-none"
+              />
+              <div className="mt-1 text-xs text-amber-600">
+                {isArabic
+                  ? 'ملاحظة: يمكن تركه فارغًا، النظام سيتعرف تلقائيًا على المفتاح المدمج.'
+                  : 'Note: you can leave it empty; system will auto-use built-in key.'}
+              </div>
             </div>
           </div>
 

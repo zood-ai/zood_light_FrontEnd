@@ -6,6 +6,7 @@
 import QRCode from 'qrcode';
 import { Buffer } from 'buffer';
 import { toast } from '@/components/ui/use-toast';
+import { getToken } from '@/utils/auth';
 
 const RECEIPT_RIYAL_ICON =
   '<span class="receipt-riyal" aria-hidden="true">﷼</span>';
@@ -51,8 +52,102 @@ const POS_QZ_ENABLED_KEY = 'pos_qz_enabled';
 const POS_QZ_PRINTER_NAME_KEY = 'pos_qz_printer_name';
 const POS_KITCHEN_DEFAULT_PRINTER_NAME_KEY = 'pos_kitchen_default_printer_name';
 const POS_KITCHEN_CATEGORY_ROUTING_KEY = 'pos_kitchen_category_routing';
+const POS_QZ_SIGNING_ENABLED_KEY = 'pos_qz_signing_enabled';
+const POS_QZ_SIGNING_CERT_URL_KEY = 'pos_qz_signing_cert_url';
+const POS_QZ_SIGNING_SIGN_URL_KEY = 'pos_qz_signing_sign_url';
+const POS_QZ_SIGNING_CERT_PEM_KEY = 'pos_qz_signing_cert_pem';
+const POS_QZ_SIGNING_PRIVATE_KEY_PEM_KEY = 'pos_qz_signing_private_key_pem';
+const BUILTIN_QZ_SIGNING_CERT_PEM = `-----BEGIN CERTIFICATE-----
+MIIE9TCCAt2gAwIBAgIQNzkyMDI0MTIyMDE5MDI0NDANBgkqhkiG9w0BAQsFADCB
+mDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk5ZMRswGQYDVQQKDBJRWiBJbmR1c3Ry
+aWVzLCBMTEMxGzAZBgNVBAsMElFaIEluZHVzdHJpZXMsIExMQzEZMBcGA1UEAwwQ
+cXppbmR1c3RyaWVzLmNvbTEnMCUGCSqGSIb3DQEJARYYc3VwcG9ydEBxemluZHVz
+dHJpZXMuY29tMB4XDTI0MTIyMDE5MDI0NFoXDTI5MTIyMDE4NTMxOVowga4xFjAU
+BgNVBAYMDVVuaXRlZCBTdGF0ZXMxCzAJBgNVBAgMAk5ZMRIwEAYDVQQHDAlDYW5h
+c3RvdGExGzAZBgNVBAoMElFaIEluZHVzdHJpZXMsIExMQzEbMBkGA1UECwwSUVog
+SW5kdXN0cmllcywgTExDMRswGQYDVQQDDBJRWiBJbmR1c3RyaWVzLCBMTEMxHDAa
+BgkqhkiG9w0BCQEMDXN1cHBvcnRAcXouaW8wggEiMA0GCSqGSIb3DQEBAQUAA4IB
+DwAwggEKAoIBAQC+j6ewVhtLHbY3uBNgqNB5DSz+QX9Pz5Dm46bI9vt/Q1Q6BL8I
+dhaxT2PA1AY0fqQgkzlSrwqNCjWZcrNZRw/e54FGM8zf3azbHrQif6d7Wo1JK5oN
+kI3jdB54YVwHIAt6i3BcLIvyOHsPnrKjlpROz72Kx1kK5g0gLDuH5RYVM9KFK+HR
+fBc3JSfeg8nUkTqYJVzlT5AGRWPXeDWloqQqSyuB1t8DihNBReWyJHQ7a4yerLOI
+J6N0jAlLDx9yt9UznAxnoO+7tKBfxCbNJerGfePMOwRKq0gx+r8M/FTrAoj+yc+T
+SOYtuY/VZ79HCTP/vLgm1pGyrta1we24fVezAgMBAAGjIzAhMB8GA1UdIwQYMBaA
+FJCmULeE1LnqX/IFhBN4ReipdVRcMA0GCSqGSIb3DQEBCwUAA4ICAQAMvfp931Zt
+PgfqGXSrsM+GAVBxcRVm14MyldWfRr+MVaFZ6cH7c+fSs8hUt2qNPwHrnpK9eev5
+MPUL27hjfiTPwv1ojLJ180aMO0ZAfPfnKeLO8uTzY7GiPQeGK7Qh39kX9XxEOidG
+rMwfllZ6jJReS0ZGaX8LUXhh9RHGSYJhxgyUV7clB/dJch8Bbcd+DOxwc1POUHx1
+wWExKkoWzHCCYNvqxLC9p1eO2Elz9J9ynDjXtCBl7lssnoSUKtahBCKgN5tYmZZK
+NErKPQpbYk5yTEK1gybxhup8i2sGEJXZ9HRJLAl0UxB+eCu1ExWv7eGbcbIZJbeh
+bwRf03fatsqzCQbGboLWtMQfcxHrEu+5MdZwOFx8i+c0c2WYad2MkkzGYHBVHPtY
+o+PR61uIwJC2mNkPpX94CIFxSHyZumttyVKF4AhIPm9IMGTHaIr5M39zesQpVc7N
+VIgxmMuePBrLyh6vKvuqD7W3S2HWA/8IUX703tdhoXhv5lNo1j0oywSrrUkCvUvJ
+FjPS8+VUtVZNl7SVetQTexdcUwoADj6c1UwL9QWItskJ5Myesco3ZY0O+3QbgCuQ
+SRqN5D0qdaLNMdEwh1YekUp4i1jm0jzPzia+WvJrW1k1ZafV6ep+YkMBkC1SFYFw
+1Mdy+fYGyXlSn/Mvou//SSb0fUMIpXE9NA==
+-----END CERTIFICATE-----
+--START INTERMEDIATE CERT--
+-----BEGIN CERTIFICATE-----
+MIIFEjCCA/qgAwIBAgICEAAwDQYJKoZIhvcNAQELBQAwgawxCzAJBgNVBAYTAlVT
+MQswCQYDVQQIDAJOWTESMBAGA1UEBwwJQ2FuYXN0b3RhMRswGQYDVQQKDBJRWiBJ
+bmR1c3RyaWVzLCBMTEMxGzAZBgNVBAsMElFaIEluZHVzdHJpZXMsIExMQzEZMBcG
+A1UEAwwQcXppbmR1c3RyaWVzLmNvbTEnMCUGCSqGSIb3DQEJARYYc3VwcG9ydEBx
+emluZHVzdHJpZXMuY29tMB4XDTE1MDMwMjAwNTAxOFoXDTM1MDMwMjAwNTAxOFow
+gZgxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJOWTEbMBkGA1UECgwSUVogSW5kdXN0
+cmllcywgTExDMRswGQYDVQQLDBJRWiBJbmR1c3RyaWVzLCBMTEMxGTAXBgNVBAMM
+EHF6aW5kdXN0cmllcy5jb20xJzAlBgkqhkiG9w0BCQEWGHN1cHBvcnRAcXppbmR1
+c3RyaWVzLmNvbTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBANTDgNLU
+iohl/rQoZ2bTMHVEk1mA020LYhgfWjO0+GsLlbg5SvWVFWkv4ZgffuVRXLHrwz1H
+YpMyo+Zh8ksJF9ssJWCwQGO5ciM6dmoryyB0VZHGY1blewdMuxieXP7Kr6XD3GRM
+GAhEwTxjUzI3ksuRunX4IcnRXKYkg5pjs4nLEhXtIZWDLiXPUsyUAEq1U1qdL1AH
+EtdK/L3zLATnhPB6ZiM+HzNG4aAPynSA38fpeeZ4R0tINMpFThwNgGUsxYKsP9kh
+0gxGl8YHL6ZzC7BC8FXIB/0Wteng0+XLAVto56Pyxt7BdxtNVuVNNXgkCi9tMqVX
+xOk3oIvODDt0UoQUZ/umUuoMuOLekYUpZVk4utCqXXlB4mVfS5/zWB6nVxFX8Io1
+9FOiDLTwZVtBmzmeikzb6o1QLp9F2TAvlf8+DIGDOo0DpPQUtOUyLPCh5hBaDGFE
+ZhE56qPCBiQIc4T2klWX/80C5NZnd/tJNxjyUyk7bjdDzhzT10CGRAsqxAnsjvMD
+2KcMf3oXN4PNgyfpbfq2ipxJ1u777Gpbzyf0xoKwH9FYigmqfRH2N2pEdiYawKrX
+6pyXzGM4cvQ5X1Yxf2x/+xdTLdVaLnZgwrdqwFYmDejGAldXlYDl3jbBHVM1v+uY
+5ItGTjk+3vLrxmvGy5XFVG+8fF/xaVfo5TW5AgMBAAGjUDBOMB0GA1UdDgQWBBSQ
+plC3hNS56l/yBYQTeEXoqXVUXDAfBgNVHSMEGDAWgBQDRcZNwPqOqQvagw9BpW0S
+BkOpXjAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQAJIO8SiNr9jpLQ
+eUsFUmbueoxyI5L+P5eV92ceVOJ2tAlBA13vzF1NWlpSlrMmQcVUE/K4D01qtr0k
+gDs6LUHvj2XXLpyEogitbBgipkQpwCTJVfC9bWYBwEotC7Y8mVjjEV7uXAT71GKT
+x8XlB9maf+BTZGgyoulA5pTYJ++7s/xX9gzSWCa+eXGcjguBtYYXaAjjAqFGRAvu
+pz1yrDWcA6H94HeErJKUXBakS0Jm/V33JDuVXY+aZ8EQi2kV82aZbNdXll/R6iGw
+2ur4rDErnHsiphBgZB71C5FD4cdfSONTsYxmPmyUb5T+KLUouxZ9B0Wh28ucc1Lp
+rbO7BnjW
+-----END CERTIFICATE-----`;
+const BUILTIN_QZ_SIGNING_PRIVATE_KEY_PEM = `-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC0z9FeMynsC8+u
+dvX+LciZxnh5uRj4C9S6tNeeAlIGCfQYk0zUcNFCoCkTknNQd/YEiawDLNbxBqut
+bMDZ1aarys1a0lYmUeVLCIqvzBkPJTSQsCopQQ9V8WuT252zzNzs68dVGNdCJd5J
+NRQykpwexmnjPPv0mvj7i8XgG379TyW6P+WWV5okeUkXJ9eJS2ouDYdR2SM9BoVW
++FgxDu6BmXhozW5EfsnajFp7HL8kQClI0QOc79yuKl3492rH6bzFsFn2lfwWy9ic
+7cP8EpCTeFp1tFaD+vxBhPZkeTQ1HKx6hQ5zeHIB5ySJJZ7af2W8r4eTGYzbdRW2
+4DDHCPhZAgMBAAECggEATvofR3gtrY8TLe+ET3wMDS8l3HU/NMlmKA9pxvjYfw7F
+8h4VBw4oOWPfzU7A07syWJUR72kckbcKMfw42G18GbnBrRQG0UIgV3/ppBQQNg9Y
+QILSR6bFXhLPnIvm/GxVa58pOEBbdec4it2Gbvie/MpJ4hn3K8atTqKk0djwxQ+b
+QNBWtVgTkyIqMpUTFDi5ECiVXaGWZ5AOVK2TzlLRNQ5Y7US8lmGxVWzt0GONjXSE
+iO/eBk8A7wI3zknMx5o1uZa/hFCPQH33uKeuqU5rmphi3zS0BY7iGY9EoKu/o+BO
+HPwLQJ3wCDA3O9APZ3gmmbHFPMFPr/mVGeAeGP/BAQKBgQDaPELRriUaanWrZpgT
+VnKKrRSqPED3anAVgmDfzTQwuR/3oD506F3AMBzloAo3y9BXmDfe8qLn6kgdZQKy
+SFNLz888at96oi+2mEKPpvssqiwE6F3OtEM6yv4DP9KJHaHmXaWv+/sjwjzpFNjs
+wGThBxFvrTWRJqBYsM1XNJJ2EQKBgQDUGbTSwHKqRCYWhQ1GPCZKE98l5UtMKvUb
+hyWWOXoyoeYbJEMfG1ynX4JeXIkl6YtBjYCqszv9PjHa1rowTZaAPJ0V70zyhTcF
+t581ii9LpiejIGrELHvJnW87QmjjStkjwGIqgKLp7Qe6CDjHI9HP1NM0uav/IQLW
+pB6wyEz1yQKBgQCuxPut+Ax2rzM05KB9PAnWzO1zt3U/rtm8IAF8uVVGf7r+EDJ0
+ZXJO6zj5G8WTEYHz5E86GI4ltBW0lKQoKouqdu27sMrv5trXG/CSImOcTVubQot9
+chc1CkOKTp5IeJajafO6j817wZ4N+0gNsbYYEBUCnm/7ojdfT5ficpOoQQKBgQDB
+PgKPmaNfGeQR1Ht5qEfCakR/RF/ML79Nq15FdmytQPBjfjBhYQ6Tt+MRkgGqtxOX
+UBMQc2iOnGHT3puYcrhScec1GufidhjhbqDxqMrag7HNYDWmMlk+IeA7/4+Mtp8L
+gbZuvvCvbLQDfIYueaYpUuBzQ08/jZYGdVU4/+WOcQKBgAGUN0kIB6EM1K/iZ0TN
+jlt8P5UEV3ZCyATWFiGZRhhE2WAh8gv1jx4J26pcUs1n8sd2a1h6ZuBSqsyIlNSp
+xtKsm3bqQFDHRrPcsBX4nanrw9DzkpH1k/I3WMSdGqkDAR3DtL7yXTJXJo2Sbrp5
+EjzSn7DcDE1tL2En/tSVXeUY
+-----END PRIVATE KEY-----`;
 let qzScriptLoadingPromise: Promise<any> | null = null;
 let isQzSecurityConfigured = false;
+let qzSecurityConfigFingerprint = '';
 let cachedQzPrinterName = '';
 let qzConnectPromise: Promise<void> | null = null;
 const QZ_CONNECT_TIMEOUT_MS = 12000;
@@ -79,7 +174,17 @@ export type QzDiagnosticsResult = {
   connectMs: number;
   defaultMs: number;
   findMs: number;
+  signedModeEnabled: boolean;
+  signedModeReady: boolean;
   notes: string[];
+};
+
+type QzSigningConfig = {
+  enabled: boolean;
+  certUrl: string;
+  signUrl: string;
+  certPem: string;
+  privateKeyPem: string;
 };
 
 export function escapeHtml(value: unknown): string {
@@ -228,14 +333,16 @@ function buildItemsHtml(items: ReceiptLineItem[]): string {
       const hasDiscount = discountAmt > 0;
       return `
           <div class="item-row">
-            <div class="item-name">${name}</div>
-            <div class="item-meta">
-               ${qty} x ${unitPrice.toFixed(2)}
-               ${hasDiscount ? `<br/><span style="font-size:10px; color:black;">(Discount: -${(discountAmt * qty).toFixed(2)})</span>` : ''}
+            <div class="item-main">
+              <div class="item-name">${name}</div>
+              <div class="item-meta">
+                ${qty} x ${unitPrice.toFixed(2)}
+                ${hasDiscount ? `<br/><span style="font-size:10px; color:black;">(Discount: -${(discountAmt * qty).toFixed(2)})</span>` : ''}
+              </div>
             </div>
             <div class="item-total">
-               ${hasDiscount ? `<span style="text-decoration:line-through; font-size:10px; color:#999; margin-right:4px; display:block;">${(unitPrice * qty).toFixed(2)}</span>` : ''}
-               ${RECEIPT_RIYAL_ICON} ${lineTotal.toFixed(2)}
+              ${hasDiscount ? `<span style="text-decoration:line-through; font-size:10px; color:#999; margin-inline-end:4px; display:block;">${(unitPrice * qty).toFixed(2)}</span>` : ''}
+              ${RECEIPT_RIYAL_ICON} ${lineTotal.toFixed(2)}
             </div>
           </div>
         `;
@@ -351,8 +458,17 @@ export function buildSimplifiedTaxInvoiceHtml(
               margin-bottom: 4px;
             }
             .item-row {
+              display: flex;
+              flex-direction: row;
+              justify-content: space-between;
+              align-items: flex-start;
+              gap: 10px;
               border-bottom: 1px dotted #e5e7eb;
               padding: 6px 0;
+            }
+            .item-main {
+              flex: 1 1 auto;
+              min-width: 0;
             }
             .item-name {
               font-size: 12px;
@@ -365,10 +481,12 @@ export function buildSimplifiedTaxInvoiceHtml(
               color: #6b7280;
             }
             .item-total {
-              margin-top: 2px;
-              text-align: right;
+              flex: 0 0 auto;
+              margin-top: 0;
+              text-align: end;
               font-size: 12px;
               font-weight: 700;
+              white-space: nowrap;
             }
             .receipt-riyal {
               display: inline-block;
@@ -939,6 +1057,7 @@ export async function testPrintOnQzPrinter(options: {
 }
 
 export async function runQzDiagnostics(): Promise<QzDiagnosticsResult> {
+  const signingConfig = getQzSigningConfigFromStorage();
   const notes: string[] = [];
   const result: QzDiagnosticsResult = {
     hasQzObject: false,
@@ -949,6 +1068,8 @@ export async function runQzDiagnostics(): Promise<QzDiagnosticsResult> {
     connectMs: 0,
     defaultMs: 0,
     findMs: 0,
+    signedModeEnabled: signingConfig.enabled,
+    signedModeReady: hasReadySignedModeConfig(signingConfig),
     notes,
   };
 
@@ -1106,21 +1227,221 @@ async function ensureQzTrayClient(): Promise<any> {
 }
 
 function configureQzTraySecurity(qz: any): void {
-  if (isQzSecurityConfigured) return;
   if (!qz?.security?.setCertificatePromise || !qz?.security?.setSignaturePromise) {
     return;
   }
 
-  // Development-friendly unsigned flow (matches QZ sample behavior).
-  // This should show a manageable "allow" prompt in QZ instead of hard failures.
-  qz.security.setCertificatePromise((resolve: (cert?: string) => void) => resolve());
+  const signingConfig = getQzSigningConfigFromStorage();
+  const signedModeReady = hasReadySignedModeConfig(signingConfig);
+  const nextFingerprint = JSON.stringify({
+    enabled: signingConfig.enabled,
+    certUrl: signingConfig.certUrl,
+    signUrl: signingConfig.signUrl,
+    hasPem: Boolean(signingConfig.certPem),
+    hasPrivateKey: Boolean(signingConfig.privateKeyPem),
+  });
+  if (isQzSecurityConfigured && qzSecurityConfigFingerprint === nextFingerprint) return;
+
+  if (signedModeReady) {
+    qz.security.setCertificatePromise(
+      async (resolve: (cert?: string) => void, reject: (error: Error) => void) => {
+        try {
+          const cert = await resolveCertificatePem(signingConfig);
+          if (!cert) throw new Error('QZ_SIGN_CERT_EMPTY');
+          resolve(cert);
+        } catch (error: any) {
+          reject(new Error(String(error?.message || error || 'QZ_SIGN_CERT_FAILED')));
+        }
+      }
+    );
+  } else {
+    // Development-friendly unsigned flow (matches QZ sample behavior).
+    qz.security.setCertificatePromise((resolve: (cert?: string) => void) => resolve());
+  }
+
   if (typeof qz.security.setSignatureAlgorithm === 'function') {
     qz.security.setSignatureAlgorithm('SHA512');
   }
-  qz.security.setSignaturePromise(() => {
-    return (resolve: (signature?: string) => void) => resolve();
-  });
+  if (signedModeReady) {
+    qz.security.setSignaturePromise((toSign: string) => {
+      return async (
+        resolve: (signature?: string) => void,
+        reject: (error: Error) => void
+      ) => {
+        try {
+          const signature = await resolveQzSignature(signingConfig, toSign);
+          if (!signature) throw new Error('QZ_SIGN_SIGNATURE_EMPTY');
+          resolve(signature);
+        } catch (error: any) {
+          reject(
+            new Error(String(error?.message || error || 'QZ_SIGN_SIGNATURE_FAILED'))
+          );
+        }
+      };
+    });
+  } else {
+    qz.security.setSignaturePromise(() => {
+      return (resolve: (signature?: string) => void) => resolve();
+    });
+  }
+
   isQzSecurityConfigured = true;
+  qzSecurityConfigFingerprint = nextFingerprint;
+}
+
+function getQzSigningConfigFromStorage(): QzSigningConfig {
+  if (typeof window === 'undefined') {
+    return { enabled: false, certUrl: '', signUrl: '', certPem: '', privateKeyPem: '' };
+  }
+  return {
+    enabled: window.localStorage.getItem(POS_QZ_SIGNING_ENABLED_KEY) !== '0',
+    certUrl: String(window.localStorage.getItem(POS_QZ_SIGNING_CERT_URL_KEY) || '').trim(),
+    signUrl: String(window.localStorage.getItem(POS_QZ_SIGNING_SIGN_URL_KEY) || '').trim(),
+    certPem:
+      String(window.localStorage.getItem(POS_QZ_SIGNING_CERT_PEM_KEY) || '').trim() ||
+      BUILTIN_QZ_SIGNING_CERT_PEM,
+    privateKeyPem: String(
+      window.localStorage.getItem(POS_QZ_SIGNING_PRIVATE_KEY_PEM_KEY) || ''
+    ).trim() || BUILTIN_QZ_SIGNING_PRIVATE_KEY_PEM,
+  };
+}
+
+function hasReadySignedModeConfig(config: QzSigningConfig): boolean {
+  if (!config.enabled) return false;
+  const hasCertificate = Boolean(config.certPem || config.certUrl);
+  const hasServerSign = Boolean(config.signUrl);
+  const hasLocalSign = Boolean(config.privateKeyPem);
+  return hasCertificate && (hasServerSign || hasLocalSign);
+}
+
+async function resolveCertificatePem(config: QzSigningConfig): Promise<string> {
+  if (config.certPem) return config.certPem;
+  const certResponse = await requestQzSigningEndpoint(config.certUrl, {
+    method: 'GET',
+  });
+  const certificate = extractValueFromEndpointResponse(certResponse, [
+    'certificate',
+    'cert',
+    'data',
+    'result',
+  ]);
+  return String(certificate || '').trim();
+}
+
+async function resolveQzSignature(
+  config: QzSigningConfig,
+  toSign: string
+): Promise<string> {
+  if (!config.signUrl && config.privateKeyPem) {
+    return signQzPayloadInBrowser(config.privateKeyPem, toSign);
+  }
+  const signResponse = await requestQzSigningEndpoint(config.signUrl, {
+    method: 'POST',
+    body: JSON.stringify({ request: toSign }),
+  });
+  const signature = extractValueFromEndpointResponse(signResponse, [
+    'signature',
+    'signed',
+    'data',
+    'result',
+  ]);
+  return String(signature || '').trim();
+}
+
+async function signQzPayloadInBrowser(
+  privateKeyPem: string,
+  payload: string
+): Promise<string> {
+  if (typeof window === 'undefined' || !window.crypto?.subtle) {
+    throw new Error('QZ_SIGN_WEBCRYPTO_UNAVAILABLE');
+  }
+  const keyData = pemToArrayBuffer(privateKeyPem);
+  const cryptoKey = await window.crypto.subtle.importKey(
+    'pkcs8',
+    keyData,
+    {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: 'SHA-512',
+    },
+    false,
+    ['sign']
+  );
+  const encoded = new TextEncoder().encode(payload);
+  const signature = await window.crypto.subtle.sign(
+    { name: 'RSASSA-PKCS1-v1_5' },
+    cryptoKey,
+    encoded
+  );
+  return arrayBufferToBase64(signature);
+}
+
+function pemToArrayBuffer(pem: string): ArrayBuffer {
+  const normalized = String(pem || '')
+    .replace(/-----BEGIN [^-]+-----/g, '')
+    .replace(/-----END [^-]+-----/g, '')
+    .replace(/\s+/g, '');
+  if (!normalized) throw new Error('QZ_SIGN_PRIVATE_KEY_EMPTY');
+  const binary = atob(normalized);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+async function requestQzSigningEndpoint(
+  url: string,
+  options: { method: 'GET' | 'POST'; body?: string }
+): Promise<any> {
+  const token = getToken();
+  const response = await withTimeout(
+    fetch(url, {
+      method: options.method,
+      headers: {
+        Accept: 'application/json, text/plain, */*',
+        ...(options.method === 'POST' ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: options.body,
+    }),
+    10000,
+    'QZ_SIGN_HTTP_TIMEOUT'
+  );
+  if (!response.ok) {
+    throw new Error(`QZ_SIGN_HTTP_${response.status}`);
+  }
+  const contentType = String(response.headers.get('content-type') || '').toLowerCase();
+  if (contentType.includes('application/json')) {
+    return response.json();
+  }
+  return response.text();
+}
+
+function extractValueFromEndpointResponse(payload: any, keys: string[]): string {
+  if (typeof payload === 'string') return payload;
+  if (payload == null) return '';
+  if (typeof payload !== 'object') return String(payload);
+  for (const key of keys) {
+    const value = (payload as Record<string, unknown>)[key];
+    if (value == null) continue;
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object') {
+      const nested = extractValueFromEndpointResponse(value, keys);
+      if (nested) return nested;
+    } else {
+      return String(value);
+    }
+  }
+  return '';
 }
 
 function openAndPrintWithBrowser(

@@ -77,13 +77,24 @@ export const Products: React.FC<ProductsProps> = () => {
     setSearchedData(allData);
   }, [allData]);
 
-  const filterProductsByBarcode = (products: any[] = [], keyword: string) => {
-    const normalizedLower = keyword.toLowerCase();
+  const mergeProductsById = (a: any[] = [], b: any[] = []) => {
+    const map = new Map<string | number, any>();
+    for (const item of a) {
+      if (item?.id != null) map.set(item.id, item);
+    }
+    for (const item of b) {
+      if (item?.id != null) map.set(item.id, item);
+    }
+    return [...map.values()];
+  };
+
+  const filterProductsLocal = (products: any[] = [], keyword: string) => {
+    const k = keyword.toLowerCase();
     return products.filter((item: any) => {
-      const skuMatch = String(item?.sku || '')
-        .toLowerCase()
-        .includes(normalizedLower);
-      return skuMatch;
+      const name = String(item?.name || '').toLowerCase();
+      const nameLoc = String(item?.name_localized || '').toLowerCase();
+      const sku = String(item?.sku || '').toLowerCase();
+      return name.includes(k) || nameLoc.includes(k) || sku.includes(k);
     });
   };
 
@@ -120,25 +131,44 @@ export const Products: React.FC<ProductsProps> = () => {
       }
 
       const encodedSearchTerm = encodeURIComponent(normalizedSearchTerm);
-      const searchUrl = searchParams.get('category_id')
-        ? `menu/products?not_default=1&sort=-created_at&filter[sku]=${encodedSearchTerm}&filter[category_id]=${searchParams.get('category_id')}${date}`
-        : `menu/products?not_default=1&sort=-created_at&filter[sku]=${encodedSearchTerm}${date}`;
-      setAllUrl(searchUrl);
+      const categoryId = searchParams.get('category_id');
+      const base =
+        categoryId != null
+          ? `menu/products?not_default=1&sort=-created_at&filter[category_id]=${categoryId}${date}`
+          : `menu/products?not_default=1&sort=-created_at${date}`;
+      const nameUrl = `${base}&filter[name]=${encodedSearchTerm}`;
+      const skuUrl = `${base}&filter[sku]=${encodedSearchTerm}`;
+      setAllUrl(nameUrl);
 
       try {
-        const res = await axiosInstance.get(`/${searchUrl}`);
-        const filteredServerData = filterProductsByBarcode(
-          res?.data?.data || [],
-          normalizedSearchTerm
+        const [nameSettled, skuSettled] = await Promise.allSettled([
+          axiosInstance.get(`/${nameUrl}`),
+          axiosInstance.get(`/${skuUrl}`),
+        ]);
+        const namePayload =
+          nameSettled.status === 'fulfilled'
+            ? nameSettled.value.data
+            : { data: [], meta: {} };
+        const skuPayload =
+          skuSettled.status === 'fulfilled'
+            ? skuSettled.value.data
+            : { data: [], meta: {} };
+        const merged = mergeProductsById(
+          namePayload?.data || [],
+          skuPayload?.data || []
         );
-        setSearchedData({ ...res.data, data: filteredServerData });
+        const basePayload =
+          (namePayload?.data?.length ?? 0) > 0 ? namePayload : skuPayload;
+        setSearchedData({
+          ...basePayload,
+          data: merged,
+          meta: namePayload?.meta || skuPayload?.meta || {},
+        });
       } catch {
-        // Fallback local filtering in case API search params change.
-        const holder = filterProductsByBarcode(
+        const holder = filterProductsLocal(
           allData?.data || [],
           normalizedSearchTerm
         );
-
         setSearchedData({ ...allData, data: holder });
       }
     }, 300), // 300ms debounce delay
@@ -181,7 +211,7 @@ export const Products: React.FC<ProductsProps> = () => {
           actionText={'ADD_PRODUCT'}
           loading={isLoading}
           handleSearch={handleSearch}
-          searchPlaceholder={t('SCAN_BARCODE_PLACEHOLDER')}
+          searchPlaceholder={t('PRODUCTS_SEARCH_PLACEHOLDER')}
         />
       </div>
     </>
