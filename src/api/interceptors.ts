@@ -37,6 +37,26 @@ const getReadableError = (error: any) => {
   if (status === 422) {
     title = 'بيانات غير صحيحة';
     if (data?.errors) {
+      for (const key of ['sku', 'barcode'] as const) {
+        const list = data.errors[key];
+        const first = Array.isArray(list) ? list[0] : '';
+        if (!first) continue;
+        const s = String(first);
+        const low = s.toLowerCase();
+        if (
+          /مستخدم|مكرر|موجود|مسجل|تسجيل|بالفعل/i.test(s) ||
+          low.includes('taken') ||
+          low.includes('unique') ||
+          low.includes('already') ||
+          low.includes('exists') ||
+          low.includes('duplicate')
+        ) {
+          title = 'تنبيه';
+          description =
+            'الباركود مستخدم بالفعل لمنتج آخر، يرجى تغييره.';
+          return { title, description };
+        }
+      }
       // Get the first error message from the errors object
       const firstErrorKey = Object.keys(data.errors)[0];
       const firstError = data.errors[firstErrorKey]?.[0];
@@ -171,7 +191,14 @@ axiosInstance.interceptors.response.use(
       // remove all 404 errors like (customer not found - rout not found - etc)
       // skip toast for verify-pin - handled by PinLoginScreen
       const isVerifyPin = (error.config?.url as string)?.includes('verify-pin');
-      if (error.response?.status !== 404 && !isVerifyPin) {
+      const skipGlobalErrorToast = Boolean(
+        (error.config as { skipGlobalErrorToast?: boolean })?.skipGlobalErrorToast
+      );
+      if (
+        error.response?.status !== 404 &&
+        !isVerifyPin &&
+        !skipGlobalErrorToast
+      ) {
         const { title, description } = getReadableError(error);
         showToast(title, description);
       }

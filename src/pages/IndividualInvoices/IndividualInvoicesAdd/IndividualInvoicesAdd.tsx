@@ -11,6 +11,7 @@ import { resetOrder, updateField } from '@/store/slices/orderSchema';
 import { CardGridSkeleton } from '@/components/CardItem/components/CardGridSkeleton';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/api/interceptors';
+import type { AxiosError } from 'axios';
 import { Input } from '@/components/ui/input';
 import { setCardItem } from '@/store/slices/cardItems';
 import { useToast } from '@/components/custom/useToastComp';
@@ -93,6 +94,65 @@ const posAutoCatalogWarmSessionKey = (branchKey: string) =>
 const POS_BARCODE_NAME_FALLBACK_KEY = 'pos_barcode_name_fallback_enabled_v1';
 const POS_ACTIVE_TAB_KEY = 'pos_active_tab_v1';
 const POS_TAB_LOCK_TTL_MS = 10000;
+
+type CreateProductErrorBody = {
+  message?: string;
+  errors?: Record<string, string[]>;
+};
+
+function resolveQuickProductCreateError(
+  error: unknown,
+  t: (key: string) => string
+): { kind: 'duplicate' | 'other'; message: string } {
+  const err = error as AxiosError<CreateProductErrorBody>;
+  const status = err.response?.status;
+  const data = err.response?.data;
+  const raw = String(data?.message ?? '');
+
+  if (status === 500 && raw.includes('Duplicate entry')) {
+    if (raw.toLowerCase().includes('sku') || raw.toLowerCase().includes('barcode')) {
+      return { kind: 'duplicate', message: t('POS_BARCODE_ALREADY_REGISTERED') };
+    }
+  }
+
+  if (status === 422 && data?.errors) {
+    for (const key of ['sku', 'barcode'] as const) {
+      const list = data.errors[key];
+      const first = Array.isArray(list) ? list[0] : '';
+      if (!first) continue;
+      const s = String(first);
+      const low = s.toLowerCase();
+      if (
+        /مستخدم|مكرر|موجود|مسجل|تسجيل|بالفعل/i.test(s) ||
+        low.includes('taken') ||
+        low.includes('unique') ||
+        low.includes('already') ||
+        low.includes('exists') ||
+        low.includes('duplicate')
+      ) {
+        return { kind: 'duplicate', message: t('POS_BARCODE_ALREADY_REGISTERED') };
+      }
+    }
+    const firstKey = Object.keys(data.errors)[0];
+    const msg = data.errors[firstKey]?.[0];
+    if (msg) return { kind: 'other', message: String(msg) };
+  }
+
+  if (status === 422 && raw) {
+    const low = raw.toLowerCase();
+    if (
+      low.includes('sku') ||
+      low.includes('barcode') ||
+      low.includes('taken') ||
+      low.includes('unique')
+    ) {
+      return { kind: 'duplicate', message: t('POS_BARCODE_ALREADY_REGISTERED') };
+    }
+    return { kind: 'other', message: raw };
+  }
+
+  return { kind: 'other', message: t('GENERAL_ERROR') };
+}
 
 type RefundOrder = {
   id: string;
@@ -206,6 +266,14 @@ export const IndividualInvoicesAdd: React.FC<
   }>({ open: false, barcode: '' });
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const [isCreateProductOpen, setIsCreateProductOpen] = useState(false);
+  const [quickProductMode, setQuickProductMode] = useState<'create' | 'edit'>(
+    'create'
+  );
+  const [quickProductEditingId, setQuickProductEditingId] = useState<
+    string | null
+  >(null);
+  const [isLoadingQuickProductForEdit, setIsLoadingQuickProductForEdit] =
+    useState(false);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [isBarcodeLookupLoading, setIsBarcodeLookupLoading] = useState(false);
   const [barcodeLookupStatus, setBarcodeLookupStatus] = useState<
@@ -914,6 +982,27 @@ export const IndividualInvoicesAdd: React.FC<
     dispatch(setCardItem(updatedItems));
     setIsEditItemOpen(false);
     setEditingItem(null);
+  };
+
+  const openEditCatalogProductFromCartLine = () => {
+    if (!editingItem?.id) return;
+    const productId = String(editingItem.id);
+    handleSaveEditItem();
+    setIsLoadingQuickProductForEdit(true);
+    setQuickProductMode('edit');
+    setQuickProductEditingId(productId);
+    setBarcodeLookupStatus('idle');
+    setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_HINT'));
+    setQuickProductImage(null);
+    setQuickProductImageLookupUrl('');
+    setQuickProductForm({
+      name: '',
+      sku: '',
+      price: '',
+      quantity: '1',
+      category_id: '',
+    });
+    setIsCreateProductOpen(true);
   };
 
   const updateEditingItem = (field: string, value: any) => {
@@ -1729,6 +1818,8 @@ export const IndividualInvoicesAdd: React.FC<
   const openCreateProductDialogFromSuggestion = useCallback(() => {
     const clean = String(barcodeSuggestion.barcode || '').trim();
     if (!clean) return;
+    setQuickProductMode('create');
+    setQuickProductEditingId(null);
     setBarcodeLookupStatus('idle');
     setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_HINT'));
     setQuickProductImage(null);
@@ -1745,6 +1836,25 @@ export const IndividualInvoicesAdd: React.FC<
     setBarcodeSuggestion({ open: false, barcode: '' });
     setTimeout(() => setIsCreateProductOpen(true), 0);
   }, [barcodeSuggestion.barcode, productCategoryOptions, t]);
+
+  const openQuickAddProductDialog = useCallback(() => {
+    setQuickProductMode('create');
+    setQuickProductEditingId(null);
+    setBarcodeLookupStatus('idle');
+    setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_HINT'));
+    setQuickProductImage(null);
+    setQuickProductImageLookupUrl('');
+    setQuickProductForm({
+      name: '',
+      sku: '',
+      price: '',
+      quantity: '1',
+      category_id: productCategoryOptions?.[0]?.id
+        ? String(productCategoryOptions[0].id)
+        : '',
+    });
+    setIsCreateProductOpen(true);
+  }, [productCategoryOptions, t]);
 
   const lookupBarcodeDetails = useCallback(
     async (
@@ -1889,6 +1999,8 @@ export const IndividualInvoicesAdd: React.FC<
     const payloadCategory = String(quickProductForm.category_id || '').trim();
     const payloadPrice = Number(quickProductForm.price || 0);
     const payloadQty = Number(quickProductForm.quantity || 0);
+    const isEditMode =
+      quickProductMode === 'edit' && String(quickProductEditingId || '').trim();
 
     if (!payloadName || !payloadSku || !payloadCategory || !Number.isFinite(payloadPrice) || payloadPrice <= 0) {
       showToast({
@@ -1916,9 +2028,31 @@ export const IndividualInvoicesAdd: React.FC<
         selling_method: 1,
       };
 
-      const productRes = await axiosInstance.post('menu/products', productPayload);
-      const createdProduct = productRes?.data?.data ?? productRes?.data ?? null;
-      const itemPivotId = createdProduct?.ingredients?.[0]?.pivot?.item_id;
+      const skipToast = {
+        skipGlobalErrorToast: true,
+      } as { skipGlobalErrorToast?: boolean };
+
+      let savedProduct: any = null;
+
+      if (isEditMode) {
+        const productRes = await axiosInstance.put(
+          `menu/products/${quickProductEditingId}`,
+          productPayload,
+          skipToast as Parameters<typeof axiosInstance.put>[2]
+        );
+        savedProduct = productRes?.data?.data ?? productRes?.data ?? null;
+      } else {
+        const productRes = await axiosInstance.post(
+          'menu/products',
+          productPayload,
+          { skipGlobalErrorToast: true } as Parameters<typeof axiosInstance.post>[2] & {
+            skipGlobalErrorToast?: boolean;
+          }
+        );
+        savedProduct = productRes?.data?.data ?? productRes?.data ?? null;
+      }
+
+      const itemPivotId = savedProduct?.ingredients?.[0]?.pivot?.item_id;
       const branch = Cookies.get('branch_id');
 
       if (branch && itemPivotId && Number.isFinite(payloadQty) && payloadQty >= 0) {
@@ -1941,12 +2075,39 @@ export const IndividualInvoicesAdd: React.FC<
         }
       }
 
-      if (createdProduct) {
-        void upsertProductIndexFromApiProducts([createdProduct]);
-        addOrIncrementCardItem(createdProduct, 1);
+      if (savedProduct) {
+        void upsertProductIndexFromApiProducts([savedProduct]);
+        if (isEditMode) {
+          const pid = String(savedProduct.id ?? quickProductEditingId);
+          const latestCardItems = store.getState()?.cardItems?.value || [];
+          const nextItems = latestCardItems.map((line: any) =>
+            String(line.id) === pid
+              ? {
+                  ...line,
+                  name: savedProduct.name ?? line.name,
+                  image:
+                    savedProduct.image ||
+                    savedProduct.images ||
+                    line.image ||
+                    '',
+                  price: Number(savedProduct.price ?? line.price ?? 0),
+                  stock_quantity:
+                    savedProduct.quantity ??
+                    savedProduct.stock_quantity ??
+                    savedProduct.available_quantity ??
+                    line.stock_quantity,
+                }
+              : line
+          );
+          dispatch(setCardItem(nextItems));
+        } else {
+          addOrIncrementCardItem(savedProduct, 1);
+        }
       }
 
       setIsCreateProductOpen(false);
+      setQuickProductMode('create');
+      setQuickProductEditingId(null);
       setQuickProductForm({
         name: '',
         sku: '',
@@ -1959,13 +2120,24 @@ export const IndividualInvoicesAdd: React.FC<
       setQuickProductImage(null);
       setQuickProductImageLookupUrl('');
       showToast({
-        description: t('ADDED_SUCCESSFULLY'),
+        description: isEditMode ? t('UPDATED_SUCCESSFULLY') : t('ADDED_SUCCESSFULLY'),
         duration: 1800,
       });
-    } catch {
+    } catch (error) {
+      const err = error as AxiosError<CreateProductErrorBody>;
+      const failedUrl = String(err.config?.url || '');
+      const isProductMenuRequest = failedUrl.includes('menu/products');
+
+      const resolved = resolveQuickProductCreateError(error, t);
+
+      if (isProductMenuRequest) {
+        setBarcodeLookupStatus('error');
+        setBarcodeLookupMessage(resolved.message);
+      }
+
       showToast({
-        description: t('GENERAL_ERROR'),
-        duration: 2500,
+        description: resolved.message,
+        duration: resolved.kind === 'duplicate' ? 4500 : 3200,
         variant: 'destructive',
       });
     } finally {
@@ -2681,14 +2853,93 @@ export const IndividualInvoicesAdd: React.FC<
   }, [quickProductImage]);
 
   useEffect(() => {
-    if (!isCreateProductOpen) {
-      autoLookupAttemptedSkuRef.current = '';
+    if (!isCreateProductOpen || quickProductMode === 'edit') {
+      if (!isCreateProductOpen) {
+        autoLookupAttemptedSkuRef.current = '';
+      }
       return;
     }
     if (!quickProductForm.sku?.trim()) return;
     if (quickProductForm.name?.trim()) return;
     void lookupBarcodeDetails(quickProductForm.sku, { silent: true });
-  }, [isCreateProductOpen, quickProductForm.sku, quickProductForm.name, lookupBarcodeDetails]);
+  }, [
+    isCreateProductOpen,
+    quickProductMode,
+    quickProductForm.sku,
+    quickProductForm.name,
+    lookupBarcodeDetails,
+  ]);
+
+  useEffect(() => {
+    if (!isCreateProductOpen || quickProductMode !== 'edit' || !quickProductEditingId) {
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setIsLoadingQuickProductForEdit(true);
+      try {
+        const res = await axiosInstance.get(
+          `menu/products/${quickProductEditingId}`
+        );
+        if (cancelled) return;
+        const p = res?.data?.data ?? res?.data;
+        if (!p) {
+          showToast({
+            description: t('GENERAL_ERROR'),
+            variant: 'destructive',
+            duration: 2500,
+          });
+          setIsCreateProductOpen(false);
+          setQuickProductMode('create');
+          setQuickProductEditingId(null);
+          return;
+        }
+        const qtyRaw =
+          p.quantity ??
+          p.stock_quantity ??
+          p.available_quantity ??
+          0;
+        setQuickProductForm({
+          name: String(p.name || ''),
+          sku: String(p.sku || ''),
+          price:
+            p.price !== undefined && p.price !== null
+              ? String(p.price)
+              : '',
+          quantity: String(
+            Number.isFinite(Number(qtyRaw)) ? Number(qtyRaw) : 0
+          ),
+          category_id: String(
+            p.category_id ?? p.category?.id ?? ''
+          ),
+        });
+        const img =
+          String(p.image || p.images || '').trim() || '';
+        setQuickProductImageLookupUrl(img);
+        setQuickProductImage(null);
+        setBarcodeLookupStatus('idle');
+        setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_HINT'));
+      } catch {
+        if (!cancelled) {
+          showToast({
+            description: t('GENERAL_ERROR'),
+            variant: 'destructive',
+            duration: 2500,
+          });
+          setIsCreateProductOpen(false);
+          setQuickProductMode('create');
+          setQuickProductEditingId(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingQuickProductForEdit(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isCreateProductOpen, quickProductMode, quickProductEditingId, t]);
 
   return (
     <>
@@ -3319,6 +3570,22 @@ export const IndividualInvoicesAdd: React.FC<
                           />
                         </span>
                       </div>
+                      {editingItem?.id ? (
+                        <div className="mt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="h-10 w-full gap-2 border-main/30 text-main hover:bg-main/5"
+                            title={t('POS_EDIT_PRODUCT_CATALOG_HINT')}
+                            onClick={openEditCatalogProductFromCartLine}
+                          >
+                            <Pencil className="h-4 w-4 shrink-0" />
+                            <span className="text-sm font-semibold">
+                              {t('POS_EDIT_PRODUCT_CATALOG')}
+                            </span>
+                          </Button>
+                        </div>
+                      ) : null}
                       {(() => {
                         const raw = editingItem?.stock_quantity;
                         if (
@@ -3504,6 +3771,18 @@ export const IndividualInvoicesAdd: React.FC<
                     className="h-11 w-full rounded-none border-0 bg-white pl-9 text-sm shadow-none focus:bg-white focus:ring-0"
                   />
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 shrink-0 gap-1.5 rounded-none border-0 border-s border-mainBorder/80 bg-main/5 px-3 shadow-none hover:bg-main/10"
+                  onClick={openQuickAddProductDialog}
+                  title={t('POS_NEW_PRODUCT')}
+                >
+                  <Plus className="h-4 w-4 shrink-0 text-main" />
+                  <span className="text-xs font-semibold whitespace-nowrap text-main">
+                    {t('POS_NEW_PRODUCT')}
+                  </span>
+                </Button>
                 <span className="my-2 h-auto w-px bg-mainBorder/70" />
 
                 {canRefund && (
@@ -3951,6 +4230,9 @@ export const IndividualInvoicesAdd: React.FC<
             setQuickProductImageLookupUrl('');
             setBarcodeLookupStatus('idle');
             setBarcodeLookupMessage(t('POS_BARCODE_LOOKUP_HINT'));
+            setQuickProductMode('create');
+            setQuickProductEditingId(null);
+            setIsLoadingQuickProductForEdit(false);
           }
         }}
       >
@@ -3965,8 +4247,18 @@ export const IndividualInvoicesAdd: React.FC<
             onClick={(e) => e.stopPropagation()}
             className="relative h-[100dvh] w-[390px] max-w-[calc(100vw-48px)] overflow-y-auto bg-white"
           >
+            {isLoadingQuickProductForEdit ? (
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-white/85 backdrop-blur-[1px]">
+                <RefreshCw className="h-8 w-8 animate-spin text-main" />
+                <span className="text-sm font-semibold text-mainText">
+                  {t('POS_BARCODE_LOOKUP_LOADING')}
+                </span>
+              </div>
+            ) : null}
             <AlertDialogTitleComp className="sr-only">
-              {t('POS_ADD_PRODUCT_WITH_BARCODE')}
+              {quickProductMode === 'edit'
+                ? t('POS_EDIT_PRODUCT_CATALOG')
+                : t('POS_ADD_PRODUCT_WITH_BARCODE')}
             </AlertDialogTitleComp>
             <AlertDialogDescriptionComp className="sr-only">
               {t('PRODUCT_NAME')}
@@ -4170,11 +4462,11 @@ export const IndividualInvoicesAdd: React.FC<
               <Button
                 type="button"
                 loading={isCreatingProduct}
-                disabled={isCreatingProduct}
+                disabled={isCreatingProduct || isLoadingQuickProductForEdit}
                 onClick={saveQuickProduct}
                 className="h-11 w-full rounded-md text-base font-semibold"
               >
-                {t('ADD_PRODUCT')}
+                {t(quickProductMode === 'edit' ? 'UPDATE_PRODUCT' : 'ADD_PRODUCT')}
               </Button>
             </div>
           </div>
