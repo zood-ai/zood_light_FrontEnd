@@ -218,14 +218,14 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
         });
 
         // Update items with pricing
-        await axiosInstance.post(
-          `inventory/purchasing/update_purchasing_item/${params.objId}`,
-          items.map((item) => ({
-            id: item.item ?? item.id ?? (defaultProduct?.data?.[0]?.id || ''),
-            quantity: item.qty,
-            total_cost: Number(item.price) * Number(item.qty),
-          }))
-        );
+        // await axiosInstance.post(
+        //   `inventory/purchasing/update_purchasing_item/${params.objId}`,
+        //   items.map((item) => ({
+        //     id: item.item ?? item.id ?? (defaultProduct?.data?.[0]?.id || ''),
+        //     quantity: item.qty,
+        //     total_cost: Number(item.price) * Number(item.qty),
+        //   }))
+        // );
       } else {
         const { data: defaultProduct } = await axiosInstance.get(
           'inventory/items?filter[name]=sku-zood-20001'
@@ -259,14 +259,14 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
             Number(invoice.invoice_number) ||
             Math.floor(Math.random() * 100000),
         });
-        await axiosInstance.post(
-          `inventory/purchasing/update_purchasing_item/${data?.data?.id}`,
-          items.map((item) => ({
-            id: item.item ?? item.id ?? (defaultProduct?.data?.[0]?.id || ''),
-            quantity: item.qty,
-            total_cost: Number(item.price) * Number(item.qty),
-          }))
-        );
+        // await axiosInstance.post(
+        //   `inventory/purchasing/update_purchasing_item/${data?.data?.id}`,
+        //   items.map((item) => ({
+        //     id: item.item ?? item.id ?? (defaultProduct?.data?.[0]?.id || ''),
+        //     quantity: item.qty,
+        //     total_cost: Number(item.price) * Number(item.qty),
+        //   }))
+        // );
         await handleConfirmation(data?.data?.id);
       }
       openDialog(isEditMode ? 'updated' : 'added');
@@ -468,36 +468,55 @@ export const PurchaseInvoicesAdd: React.FC<PurchaseInvoicesAddProps> = () => {
                           value={currentItem.id}
                           label={t('PRODUCT_NAME')}
                           ref={myInputRef}
+                          overlayKey={
+                            currentItem.name === 'sku-zood-20001'
+                              ? `free-${index}`
+                              : currentItem.id
+                                ? `sel-${currentItem.id}`
+                                : `empty-${index}`
+                          }
                           onValueChange={(value) => {
-                            if (!value) return;
+                            if (value === '') {
+                              setItems((prev) => {
+                                const next = [...prev];
+                                next[index] = {
+                                  ...next[index],
+                                  id: '',
+                                  item: '',
+                                  name: '',
+                                };
+                                return next;
+                              });
+                              return;
+                            }
 
-                            // myInputRef.current.value = '';
-                            handleItemChange(
-                              index,
-                              'item',
-                              getAllPro?.data.find((item) => item.id === value)
-                                ?.item_id
+                            const product = getAllPro?.data?.find(
+                              (item) => item.id === value
                             );
-                            handleItemChange(index, 'priceDisabled', true);
-                            handleItemChange(
-                              index,
-                              'name',
-                              getAllPro?.data.find((item) => item.id === value)
-                                ?.name
-                            );
-                            handleItemChange(index, 'id', value);
-                            handleItemChange(
-                              index,
-                              'total',
-                              getAllPro?.data.find((item) => item.id === value)
-                                ?.price
-                            );
-                            handleItemChange(
-                              index,
-                              'price',
-                              getAllPro?.data.find((item) => item.id === value)
-                                ?.price
-                            );
+                            if (!product) return;
+
+                            setItems((prev) => {
+                              const next = [...prev];
+                              const row = next[index];
+                              next[index] = {
+                                ...row,
+                                item: product.item_id,
+                                id: value,
+                                name: product.name,
+                                kitchen_notes: '',
+                                priceDisabled: true,
+                                price: product.price,
+                                total: product.price,
+                              };
+                              return next;
+                            });
+
+                            requestAnimationFrame(() => {
+                              const el = myInputRef.current as
+                                | HTMLInputElement
+                                | null;
+                              if (el) el.value = '';
+                            });
                           }}
                           onInputFieldChange={(value) => {
                             handleItemChange(index, 'kitchen_notes', value);

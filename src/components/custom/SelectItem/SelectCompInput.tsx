@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './SelectItem.css';
 import {
   Select,
@@ -7,10 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import useDirection from '@/hooks/useDirection';
-import { useParams } from 'react-router-dom';
 import CustomSearchInbox from '../CustomSearchInbox';
-import { set } from 'zod';
 
 interface SelectCompProps {
   options: { value: string; label: string }[];
@@ -36,33 +33,21 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
       TextDisabled = false,
       disabled = false,
       cantChoose = false,
+      overlayKey,
       ...props
     },
     ref
   ) => {
-    const [isInputActive, setIsInputActive] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [dropDownValue, setDropDownValue] = useState(value);
-    const isRtl = useDirection();
-    const params = useParams();
-
-    const handleInputFocus = () => {
-      setIsInputActive(true);
-      // onValueChange('');
-      // setInputValue('');
-    };
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
+      const next = e.target.value;
 
       onValueChange('');
       setDropDownValue('');
-      setInputValue(value);
+      setInputValue(next);
+      onInputFieldChange?.(next);
     };
-
-    useEffect(() => {
-      onInputFieldChange(inputValue);
-      onValueChange('');
-    }, [inputValue]);
 
     useEffect(() => {
       setDropDownValue(value);
@@ -82,7 +67,7 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
           onValueChange={(value) => {
             onValueChange(value);
             setDropDownValue(value);
-            // setInputValue('');
+            setInputValue('');
           }}
           placeholder={inputValue == '' && placeholder}
           label={label}
@@ -114,13 +99,12 @@ export const SelectCompInput = React.forwardRef<HTMLInputElement, any>(
         {/* Transparent Input Overlay */}
         {!disabled ? (
           <input
+            key={overlayKey ?? `dd-${String(value ?? '')}`}
             ref={ref}
             type="text"
             disabled={cantType || cantDoAnything}
             defaultValue={directValue ? directValue : inputValue}
-            onFocus={handleInputFocus}
             onChange={handleInputChange}
-            // placeholder={placeholder}
             className="absolute translate-y-3 inset-0 w-[80%] h-full bg-transparent border-none focus:outline-none ps-4 z-[10]"
           />
         ) : (
