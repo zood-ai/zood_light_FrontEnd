@@ -1,24 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-export function useIsZatcaConnected(columns: any) {
-  const is_connected_to_zatca = useSelector(
+export function useZatcaConnection() {
+  const value = useSelector(
     (state: any) => state?.allSettings?.value?.WhoAmI?.is_connected_to_zatca
   );
+  return value === 1 || value === true;
+}
 
-  const [individualInvoicesColumns, setIndividualInvoicesColumns] =
-    useState<any>(columns);
+export function useIsZatcaConnected(columns: any) {
+  const isConnectedToZatca = useZatcaConnection();
+  const [filteredColumns, setFilteredColumns] = useState<any>(columns);
+
   useEffect(() => {
-    const filteredColumns = columns.filter((col: any) => {
-      if (col.accessorKey === 'zatca_report_status' && !is_connected_to_zatca) {
+    const next = columns.filter((col: any) => {
+      if (col.accessorKey === 'zatca_report_status' && !isConnectedToZatca) {
         return false;
-      } else {
-        return true;
       }
+      return true;
     });
-    setIndividualInvoicesColumns(filteredColumns);
-  }, [columns, is_connected_to_zatca]);
+    setFilteredColumns(next);
+  }, [columns, isConnectedToZatca]);
 
-  columns = individualInvoicesColumns;
-  return { columns };
+  return { columns: filteredColumns, isConnectedToZatca };
 }

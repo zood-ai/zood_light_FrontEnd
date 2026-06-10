@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ViewModalProps } from './ViewModal.types';
 import { useReactToPrint } from 'react-to-print';
 import './ViewModal.css';
@@ -22,6 +22,8 @@ import {
 } from '@/utils/simplifiedTaxInvoiceReceipt';
 import CurrencyAmount from '@/components/custom/CurrencyAmount';
 import { Pointer, Printer, Receipt, RotateCcw } from 'lucide-react';
+import { StatusBadge } from '@/components/custom/StatusBadge';
+import { useZatcaConnection } from '@/hooks/use-is-zatca-connected';
 import dayjs from 'dayjs';
 
 /** Must match `title` prop from DetailsModal routes (used for layout + i18n). */
@@ -116,9 +118,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
   const [isConnectedLoading, setIsConnectedLoading] = useState(false);
-  const isConnectedToZatca = useSelector(
-    (state: any) => state?.allSettings?.value?.WhoAmI?.is_connected_to_zatca
-  );
+  const isConnectedToZatca = useZatcaConnection();
   const customerInfo = { data: data?.customer };
   const supplierInfo = { data: data?.get_supplier };
   const { pathname } = useLocation();
@@ -126,6 +126,11 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
   const [zatcaStatus, setZatcaStatus] = useState<string | undefined>(
     data?.zatca_report_status
   );
+
+  useEffect(() => {
+    setZatcaStatus(data?.zatca_report_status);
+  }, [data?.id, data?.zatca_report_status]);
+
   const Another = !Corporate;
   const customerRaw = data?.customer as
     | {
@@ -283,6 +288,7 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
     try {
       setIsConnectedLoading(true);
       const res = await axiosInstance.post(`zatca/orders/${data?.id}/report`);
+      setZatcaStatus('PASS');
       toast({
         title: t('REPORT'),
         description: res.data.message || t('VIEW_MODAL_ZATCA_SENT'),
@@ -294,7 +300,6 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
     } finally {
       setIsConnectedLoading(false);
       queryClient.invalidateQueries({ queryKey: ['/orders'] });
-      dispatch(toggleActionView(false));
     }
   };
 
@@ -894,25 +899,35 @@ export const ViewModal: React.FC<ViewModalProps> = ({ title }) => {
                         {t('RECEIPT_POS_STYLE')}
                       </button>
                     )}
-                    {Another &&
-                      zatcaStatus !== 'PASS' &&
-                      Boolean(isConnectedToZatca) && (
-                        <Button
-                          block
-                          type="primary"
-                          disabled={isConnectedLoading}
-                          className="button-send-zatca flex h-11 items-center justify-center gap-2 rounded-lg border-0 px-4 text-sm font-semibold shadow-sm transition-all duration-200 ease-out hover:scale-[1.01] hover:shadow-md active:scale-[0.99]"
-                          onClick={() => {
-                            handleSendToZatca();
-                          }}
-                        >
-                          <Pointer
-                            size={16}
-                            className="pointer-icon-animation shrink-0"
-                          />
-                          <span>{t('SEND_TO_ZATCA')}</span>
-                        </Button>
-                      )}
+                    {Another && isConnectedToZatca && (
+                      <>
+                        <style>{animationStyles}</style>
+                        {zatcaStatus === 'PASS' ? (
+                          <div className="flex h-11 w-full items-center justify-center">
+                            <StatusBadge
+                              status="reported"
+                              text={t('REPORTED')}
+                            />
+                          </div>
+                        ) : (
+                          <Button
+                            block
+                            type="primary"
+                            disabled={isConnectedLoading}
+                            className="button-send-zatca flex h-11 items-center justify-center gap-2 rounded-lg border-0 px-4 text-sm font-semibold shadow-sm transition-all duration-200 ease-out hover:scale-[1.01] hover:shadow-md active:scale-[0.99]"
+                            onClick={() => {
+                              handleSendToZatca();
+                            }}
+                          >
+                            <Pointer
+                              size={16}
+                              className="pointer-icon-animation shrink-0"
+                            />
+                            <span>{t('SEND_TO_ZATCA')}</span>
+                          </Button>
+                        )}
+                      </>
+                    )}
                     {Another && showReturn && (
                       <button
                         disabled={loading}

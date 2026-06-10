@@ -19,6 +19,10 @@ import {
 import { use } from 'i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useIsZatcaConnected } from '@/hooks/use-is-zatca-connected';
+import { useQueryClient } from '@tanstack/react-query';
+import axiosInstance from '@/api/interceptors';
+import { toast } from '@/components/ui/use-toast';
+import { Pointer } from 'lucide-react';
 
 export const useDataTableColumns = () => {
   const { t } = useTranslation();
@@ -28,6 +32,43 @@ export const useDataTableColumns = () => {
   const { useRemove } = crudService;
   const { mutate: remove } = useRemove();
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const [isConnectedLoading, setIsConnectedLoading] = useState(false);
+
+  const animationStyles = `
+    @keyframes buttonPulse {
+      0% { box-shadow: 0 0 0 0 rgba(89, 81, 200, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(89, 81, 200, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(89, 81, 200, 0); }
+    }
+    @keyframes pointerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    .button-send-zatca { animation: buttonPulse 2s infinite; }
+    .pointer-icon-animation {
+      animation: pointerPulse 1.5s ease-in-out infinite;
+      display: inline-block;
+    }
+  `;
+
+  const handleSendToZatca = async ({ id }: { id: string }) => {
+    try {
+      setIsConnectedLoading(true);
+      const res = await axiosInstance.post(`zatca/orders/${id}/report`);
+      toast({
+        title: t('REPORTED'),
+        description: res.data.message || t('VIEW_MODAL_ZATCA_SENT'),
+        duration: 3000,
+        variant: 'default',
+      });
+    } catch (err) {
+      console.error('Zatca Error: ', err);
+    } finally {
+      setIsConnectedLoading(false);
+      queryClient.invalidateQueries({ queryKey: ['/orders'] });
+    }
+  };
   let columns: ColumnDef<Task>[] = [
     {
       accessorKey: 'reference',
@@ -141,20 +182,29 @@ export const useDataTableColumns = () => {
         <DataTableColumnHeader
           remove={true}
           column={column}
-          title={'Zatca Reporting'}
+          title={t('ZATCA_REPORTING')}
         />
       ),
       cell: ({ row }) => {
         return (
-          <div className="flex space-x-2 w-[180px] md:w-auto">
-            {/* {row.getValue('zatca_report_status') === 'pending' ||
-              (row.getValue('zatca_report_status') === null && (
-                <StatusBadge status="pending" text={'click to clearance'} />
-              ))} */}
-            {/* {row.getValue('zatca_report_status') === 'PASS' && ( */}
-            <StatusBadge status="reported" text={t('REPORTED')} />
-            {/* )} */}
-            {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+          <div className="flex justify-center space-x-2 w-[180px] md:w-auto">
+            <style>{animationStyles}</style>
+            {row.getValue('zatca_report_status') === 'PASS' ? (
+              <StatusBadge status="reported" text={t('REPORTED')} />
+            ) : (
+              <Button
+                type="button"
+                disabled={isConnectedLoading}
+                className="px-2.5 py-1 gap-2 text-white bg-[#5951C8] rounded-lg border border-[#5951C8] border-solid max-md:px-5 hover:text-white transition-all duration-200 ease-out hover:scale-105 active:scale-95 cursor-pointer hover:shadow-md hover:shadow-[#5951C8]/30 button-send-zatca"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSendToZatca({ id: row.original.id });
+                }}
+              >
+                <span>{t('SEND_TO_ZATCA')}</span>
+                <Pointer size={15} className="pointer-icon-animation" />
+              </Button>
+            )}
           </div>
         );
       },

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import createCrudService from '@/api/services/crudService';
 import { useDispatch, useSelector } from 'react-redux';
-import { addPayment, resetOrder, updateField } from '@/store/slices/orderSchema';
+import { addPayment, addTax, resetOrder, updateField } from '@/store/slices/orderSchema';
 import CustomSearchInbox from '@/components/custom/CustomSearchInbox';
 import { Button } from '@/components/custom/button';
 import { useNavigate } from 'react-router-dom';
@@ -247,7 +247,20 @@ export default function POSPaymentPanel() {
     dispatch(updateField({ field: 'subtotal_price', value: totals.subtotal }));
     dispatch(updateField({ field: 'tax_exclusive_discount_amount', value: totals.tax }));
     dispatch(updateField({ field: 'total_price', value: totals.total }));
-  }, [dispatch, totals.subtotal, totals.tax, totals.total]);
+
+    const firstTax = taxesData?.data?.[0];
+    if (firstTax?.id) {
+      dispatch(
+        addTax([
+          {
+            id: firstTax.id,
+            rate: Number(firstTax.rate || 0),
+            amount: totals.tax,
+          },
+        ])
+      );
+    }
+  }, [dispatch, totals.subtotal, totals.tax, totals.total, taxesData?.data]);
 
   useEffect(() => {
     void warmupQzTrayConnection().catch(() => {});
@@ -539,10 +552,20 @@ export default function POSPaymentPanel() {
         ? crypto.randomUUID()
         : `client-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);
 
+    const firstTax = taxesData?.data?.[0];
     const finalOrderSchema = {
       ...orderSchema,
       payments: paymentsPayload,
       client_order_id: clientOrderId,
+      taxes: firstTax?.id
+        ? [
+            {
+              id: firstTax.id,
+              rate: Number(firstTax.rate || 0),
+              amount: totals.tax,
+            },
+          ]
+        : orderSchema.taxes,
     };
 
     const buildPendingCompletedOrder = (
