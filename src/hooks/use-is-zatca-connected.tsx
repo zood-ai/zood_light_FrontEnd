@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 export function useZatcaConnection() {
@@ -10,17 +10,17 @@ export function useZatcaConnection() {
 
 export function useIsZatcaConnected(columns: any) {
   const isConnectedToZatca = useZatcaConnection();
-  const [filteredColumns, setFilteredColumns] = useState<any>(columns);
 
-  useEffect(() => {
-    const next = columns.filter((col: any) => {
-      if (col.accessorKey === 'zatca_report_status' && !isConnectedToZatca) {
-        return false;
-      }
-      return true;
-    });
-    setFilteredColumns(next);
-  }, [columns, isConnectedToZatca]);
+  const filteredColumns = useMemo(
+    () =>
+      columns.filter((col: any) => {
+        if (col.accessorKey === 'zatca_report_status' && !isConnectedToZatca) {
+          return false;
+        }
+        return true;
+      }),
+    [columns, isConnectedToZatca]
+  );
 
   return { columns: filteredColumns, isConnectedToZatca };
 }

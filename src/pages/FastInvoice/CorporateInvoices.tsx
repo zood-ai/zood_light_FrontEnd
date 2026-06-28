@@ -20,6 +20,10 @@ import { resetCard } from '@/store/slices/cardItems';
 import { resetOrder } from '@/store/slices/orderSchema';
 import { toggleActionView } from '@/store/slices/toggleAction';
 
+const fastInvoiceService = createCrudService<any>(
+  'orders?filter[type]=2&filter[status]=4'
+);
+
 export const CorporateInvoices: React.FC<CorporateInvoicesProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -27,6 +31,7 @@ export const CorporateInvoices: React.FC<CorporateInvoicesProps> = () => {
   const [selectedTableRow, setSelectedRow] = useState({});
   const [modalType, setModalType] = useState('Add');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleCreateTask = () => {
     // setSelectedRow({});
     setModalType('Add');
@@ -59,19 +64,17 @@ export const CorporateInvoices: React.FC<CorporateInvoicesProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allService = createCrudService<any>(
-    'orders?filter[type]=2&filter[status]=4'
-  );
   const [allUrl, setAllUrl] = useState('orders?filter[type]=2&filter[status]=4');
-  const { useGetAll } = allService;
+  const { useGetAll } = fastInvoiceService;
   const { data: allData, isLoading } = useGetAll();
 
-  const dispatch = useDispatch();
   useEffect(() => {
     dispatch(resetCard());
     dispatch(resetOrder());
   }, [dispatch]);
-  const toggleActionData = useSelector((state: any) => state?.toggleAction);
+  const toggleActionData = useSelector(
+    (state: any) => state?.toggleAction?.value
+  );
   const [searchedData, setSearchedData] = useState({});
   useEffect(() => {
     setSearchedData(allData);
@@ -90,7 +93,7 @@ export const CorporateInvoices: React.FC<CorporateInvoicesProps> = () => {
       />
       <DetailsModal
         initialData={selectedTableRow}
-        isOpen={toggleActionData.value}
+        isOpen={toggleActionData}
         onClose={handleCloseModal}
       />
       <ConfirmDelModal

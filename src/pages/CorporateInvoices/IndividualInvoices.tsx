@@ -21,6 +21,10 @@ import { resetCard } from '@/store/slices/cardItems';
 import { toggleActionView } from '@/store/slices/toggleAction';
 import axiosInstance from '@/api/interceptors';
 
+const corporateInvoicesService = createCrudService<any>(
+  'orders?filter[type]=2&filter[status]=4'
+);
+
 export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const [isAddEditModalOpen, setIsAddEditOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -62,10 +66,7 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
   const { i18n, t } = useTranslation();
   const isRtl = useDirection();
   const { columns } = useDataTableColumns();
-  const allService = createCrudService<any>(
-    'orders?filter[type]=2&filter[status]=4'
-  );
-  const { useGetAll } = allService;
+  const { useGetAll } = corporateInvoicesService;
   const { data: allData, isLoading } = useGetAll();
   const [searchedData, setSearchedData] = useState({});
   const [allUrl, setAllUrl] = useState(
@@ -80,7 +81,9 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
     dispatch(resetCard());
     dispatch(resetOrder());
   }, [dispatch]);
-  const toggleActionData = useSelector((state: any) => state?.toggleAction);
+  const toggleActionData = useSelector(
+    (state: any) => state?.toggleAction?.value
+  );
 
   const debounce = (func: Function, delay: number) => {
     let timer: NodeJS.Timeout;
@@ -155,7 +158,7 @@ export const IndividualInvoices: React.FC<IndividualInvoicesProps> = () => {
       />
       <DetailsModal
         initialData={selectedTableRow}
-        isOpen={toggleActionData.value}
+        isOpen={toggleActionData}
         onClose={handleCloseModal}
       />
       <ConfirmDelModal
